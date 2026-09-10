@@ -1,0 +1,6 @@
+{
+  "name": "nexora",
+  "description": "A minimal, aesthetic workspace for creating, scheduling, and managing everything in one place.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #071C1A;
+}
+
+body {
+  background-color: #071C1A;
+  color: #E8E9D8;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+.serif,
+.font-serif-display {
+  font-family: 'Georgia', 'Cormorant Garamond', Garamond, serif;
+}
+
+.font-sans-body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tracking-widest-plus {
+  letter-spacing: 0.25em;
+}
+
+.gradient-bg {
+  background: radial-gradient(circle at 70% 30%, #0D2D2A 0%, #071C1A 100%);
+}
+
+.thin-border {
+  border-color: rgba(169, 191, 165, 0.2);
+}
+
+/* Sophisticated Dark SVG noise filter grain */
+.grain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.035;
+  pointer-events: none;
+  background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+/* Custom scrollbar for dark aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #071C1A;
+}
+::-webkit-scrollbar-thumb {
+  background: #143832;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1D4C44;
+}
