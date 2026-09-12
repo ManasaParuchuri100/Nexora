@@ -8,17 +8,19 @@ import {
   StatMetric, 
   GeneratedAsset, 
   SocialAccount, 
+  ScheduledPost,
   SystemNotification 
 } from '../types';
 
-import {
-  INITIAL_METRICS,
-  INITIAL_LEADS,
-  INITIAL_TRENDING_TOPICS,
-  INITIAL_CAMPAIGNS,
-  INITIAL_GENERATED_ASSETS,
-  INITIAL_SOCIAL_ACCOUNTS,
-  INITIAL_NOTIFICATIONS
+import { 
+  INITIAL_METRICS, 
+  INITIAL_LEADS, 
+  INITIAL_TRENDING_TOPICS, 
+  INITIAL_CAMPAIGNS, 
+  INITIAL_GENERATED_ASSETS, 
+  INITIAL_SOCIAL_ACCOUNTS, 
+  INITIAL_SCHEDULED_POSTS,
+  INITIAL_NOTIFICATIONS 
 } from '../data/mockData';
 
 import AppSidebar from './app/AppSidebar';
@@ -50,6 +52,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
   const [assets, setAssets] = useState<GeneratedAsset[]>(INITIAL_GENERATED_ASSETS);
   const [accounts, setAccounts] = useState<SocialAccount[]>(INITIAL_SOCIAL_ACCOUNTS);
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(INITIAL_SCHEDULED_POSTS);
   const [notifications, setNotifications] = useState<SystemNotification[]>(INITIAL_NOTIFICATIONS);
 
   // Interactive Modals State
@@ -122,6 +125,20 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
   const handleAddAsset = (newAsset: GeneratedAsset) => {
     setAssets([newAsset, ...assets]);
     showToast('Asset Saved', `"${newAsset.title}" added to your creative archive.`);
+  };
+
+  const handleAddScheduledPost = (newPost: ScheduledPost) => {
+    setScheduledPosts(prev => [newPost, ...prev]);
+    showToast('Broadcast Scheduled', `Queued for release across ${newPost.platforms.join(', ')} at ${newPost.scheduledTime}.`);
+  };
+
+  const handleDeleteScheduledPost = (id: string) => {
+    setScheduledPosts(prev => prev.filter(p => p.id !== id));
+    showToast('Broadcast Removed', 'The scheduled broadcast has been canceled and removed from the queue.');
+  };
+
+  const handleUpdateScheduledPost = (updated: ScheduledPost) => {
+    setScheduledPosts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
   return (
@@ -198,8 +215,12 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
             <SocialHubView
               activeSubCategory={activeSubCategory}
               accounts={accounts}
+              scheduledPosts={scheduledPosts}
               onNavigateSub={(sub) => handleSelectNav('social-hub', sub)}
               onSchedulePostSuccess={() => showToast('Post Queued', 'Your broadcast has been added to the release schedule.')}
+              onAddScheduledPost={handleAddScheduledPost}
+              onDeleteScheduledPost={handleDeleteScheduledPost}
+              onUpdateScheduledPost={handleUpdateScheduledPost}
             />
           )}
 
@@ -233,6 +254,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
         onAddLead={handleAddLead}
         onAddCampaign={handleAddCampaign}
         onNotify={showToast}
+        onAddScheduledPost={handleAddScheduledPost}
       />
 
       {/* Command Palette (Quick Search ⌘K) */}

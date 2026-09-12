@@ -5,6 +5,7 @@ import {
   Campaign, 
   GeneratedAsset, 
   SocialAccount, 
+  ScheduledPost,
   SystemNotification 
 } from '../types';
 import { SAMPLE_BLUEPRINT, generateBlueprintFromForm } from './campaignBlueprintGenerator';
@@ -850,6 +851,148 @@ export const INITIAL_SOCIAL_ACCOUNTS: SocialAccount[] = [
     followers: '19.2K',
     engagement: '3.6%',
     lastSync: '2h ago'
+  }
+];
+
+export const INITIAL_SCHEDULED_POSTS: ScheduledPost[] = [
+  {
+    id: 'post-1',
+    title: 'Why software should speak in hairlines, not badges',
+    content: 'We spent two years analyzing how high-growth founders structure their workspaces. Simplicity is not an aesthetic luxury — it is an operating system for deep conviction.',
+    platforms: ['LinkedIn', 'Substack'],
+    scheduledTime: 'Today, 4:00 PM',
+    status: 'Queued',
+    tags: ['#design', '#ux', '#craft'],
+    mediaCount: 1,
+    mediaAttachments: [
+      {
+        id: 'med-1',
+        name: 'hairline-design-principles.jpg',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&auto=format&fit=crop&q=80',
+        size: '1.2 MB'
+      }
+    ],
+    author: 'Elena Rostova',
+    createdAt: '2026-09-12'
+  },
+  {
+    id: 'post-2',
+    title: 'Thread: 10 architectural principles for high-output design studios',
+    content: '1. Kill unnecessary real-time notifications.\n2. Restrict container palettes to single-digit contrast shifts.\n3. Make typography do the organizational work.\n4. Design for calm conviction over transient excitement.',
+    platforms: ['X (Twitter)', 'LinkedIn', 'Substack'],
+    scheduledTime: 'Tomorrow, 9:30 AM',
+    status: 'Approved',
+    tags: ['#architecture', '#systems', '#productivity'],
+    mediaCount: 3,
+    mediaAttachments: [
+      {
+        id: 'med-2a',
+        name: 'architectural-spec-1.jpg',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80',
+        size: '2.4 MB'
+      },
+      {
+        id: 'med-2b',
+        name: 'minimalist-grid-blueprint.jpg',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
+        size: '1.9 MB'
+      },
+      {
+        id: 'med-2c',
+        name: 'contrast-ratio-chart.png',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
+        size: '880 KB'
+      }
+    ],
+    author: 'Kaelen Vance',
+    createdAt: '2026-09-12'
+  },
+  {
+    id: 'post-3',
+    title: 'The Quiet Horizon Vol. 14: Restoring Creative Autonomy',
+    content: 'An exploration of calm interfaces and digital sovereignty. Why modern executive tools must cease begging for user attention and prioritize quiet precision.',
+    platforms: ['Substack'],
+    scheduledTime: 'Thursday, 11:00 AM',
+    status: 'Draft Review',
+    tags: ['#newsletter', '#leadership'],
+    mediaCount: 1,
+    mediaAttachments: [
+      {
+        id: 'med-3',
+        name: 'quiet-horizon-vol14-cover.pdf',
+        type: 'document',
+        url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&auto=format&fit=crop&q=80',
+        size: '3.1 MB'
+      }
+    ],
+    author: 'Kaelen Vance',
+    createdAt: '2026-09-11'
+  },
+  {
+    id: 'post-4',
+    title: 'Kyoto atelier photo essay & minimal physical workspace gallery',
+    content: 'Behind the scenes at our Kyoto studio. Natural wood, linen dividers, and monochrome displays configured for sustained uninterrupted concentration.',
+    platforms: ['Instagram', 'LinkedIn'],
+    scheduledTime: 'Friday, 2:15 PM',
+    status: 'Queued',
+    tags: ['#workspace', '#studio', '#kyoto'],
+    mediaCount: 2,
+    mediaAttachments: [
+      {
+        id: 'med-4a',
+        name: 'kyoto-desk-setup.jpg',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&auto=format&fit=crop&q=80',
+        size: '2.8 MB'
+      },
+      {
+        id: 'med-4b',
+        name: 'monochrome-workspace.jpg',
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&auto=format&fit=crop&q=80',
+        size: '3.4 MB'
+      }
+    ],
+    author: 'Julian Montgomery',
+    createdAt: '2026-09-10'
+  },
+  {
+    id: 'post-5',
+    title: 'Deep dive into deterministic client qualification models',
+    content: 'How our algorithmic scoring engine qualifies $15k+ enterprise proposals in under 120ms without manual triage delay or bloated spreadsheets.',
+    platforms: ['LinkedIn', 'X (Twitter)'],
+    scheduledTime: 'Saturday, 10:00 AM',
+    status: 'Scheduled',
+    tags: ['#enterprise', '#automation', '#data'],
+    mediaCount: 0,
+    mediaAttachments: [],
+    author: 'Nexora Core',
+    createdAt: '2026-09-09'
+  },
+  {
+    id: 'post-6',
+    title: 'Release note: Automated lead qualifier engine v2.4 rollout',
+    content: 'Version 2.4 introduces cryptographic sandbox keys for prospect verification and cross-border timezone schedule optimization.',
+    platforms: ['X (Twitter)', 'LinkedIn'],
+    scheduledTime: 'Next Monday, 8:45 AM',
+    status: 'Draft Review',
+    tags: ['#changelog', '#product'],
+    mediaCount: 1,
+    mediaAttachments: [
+      {
+        id: 'med-6',
+        name: 'v2.4-benchmark-report.pdf',
+        type: 'document',
+        url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
+        size: '1.4 MB'
+      }
+    ],
+    author: 'Elena Rostova',
+    createdAt: '2026-09-08'
   }
 ];
 

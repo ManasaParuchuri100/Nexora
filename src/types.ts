@@ -234,6 +234,28 @@ export interface SocialAccount {
   lastSync: string;
 }
 
+export interface MediaAttachment {
+  id: string;
+  name: string;
+  type: 'image' | 'video' | 'document';
+  url: string;
+  size?: string;
+}
+
+export interface ScheduledPost {
+  id: string;
+  title: string;
+  content: string;
+  platforms: string[]; // Destination platforms to upload to
+  scheduledTime: string;
+  status: 'Queued' | 'Scheduled' | 'Approved' | 'Draft Review' | 'Dispatched';
+  tags?: string[];
+  mediaCount?: number;
+  mediaAttachments?: MediaAttachment[];
+  author?: string;
+  createdAt?: string;
+}
+
 export interface AssistantMessage {
   id: string;
   sender: 'user' | 'assistant';

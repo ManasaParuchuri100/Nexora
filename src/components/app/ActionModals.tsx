@@ -12,7 +12,8 @@ import {
   Building,
   TrendingUp
 } from 'lucide-react';
-import { Lead, Campaign } from '../../types';
+import { Lead, Campaign, ScheduledPost, MediaAttachment } from '../../types';
+import MediaAttachmentPicker from './MediaAttachmentPicker';
 
 interface ActionModalsProps {
   activeModal: 'campaign' | 'content' | 'lead' | 'schedule' | 'lead-details' | null;
@@ -21,6 +22,7 @@ interface ActionModalsProps {
   onAddLead: (lead: Lead) => void;
   onAddCampaign: (campaign: Campaign) => void;
   onNotify: (title: string, desc: string) => void;
+  onAddScheduledPost?: (post: ScheduledPost) => void;
 }
 
 export default function ActionModals({
@@ -29,7 +31,8 @@ export default function ActionModals({
   onClose,
   onAddLead,
   onAddCampaign,
-  onNotify
+  onNotify,
+  onAddScheduledPost
 }: ActionModalsProps) {
   // Lead form
   const [leadName, setLeadName] = useState('');
@@ -47,10 +50,20 @@ export default function ActionModals({
   const [contentPrompt, setContentPrompt] = useState('');
   const [contentType, setContentType] = useState('Social Broadcast');
 
-  // Schedule form
-  const [schedulePlatform, setSchedulePlatform] = useState('LinkedIn');
-  const [scheduleTime, setScheduleTime] = useState('Tomorrow at 9:00 AM');
+  // Schedule form with Multi-Platform selection
+  const [schedulePlatforms, setSchedulePlatforms] = useState<string[]>(['LinkedIn', 'X (Twitter)']);
+  const [scheduleTitle, setScheduleTitle] = useState('');
+  const [scheduleTime, setScheduleTime] = useState('Tomorrow, 9:00 AM');
   const [scheduleText, setScheduleText] = useState('');
+  const [scheduleAttachments, setScheduleAttachments] = useState<MediaAttachment[]>([]);
+
+  const toggleModalSchedulePlatform = (platform: string) => {
+    setSchedulePlatforms(prev => 
+      prev.includes(platform)
+        ? prev.filter(p => p !== platform)
+        : [...prev, platform]
+    );
+  };
 
   if (!activeModal) return null;
 
@@ -108,14 +121,35 @@ export default function ActionModals({
 
   const handleSchedulePostSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onNotify('Broadcast Scheduled', `Queued for distribution to ${schedulePlatform} at ${scheduleTime}.`);
+    if (schedulePlatforms.length === 0) return;
+    if (!scheduleText.trim()) return;
+
+    const newPost: ScheduledPost = {
+      id: `post-${Date.now()}`,
+      title: scheduleTitle.trim() || scheduleText.slice(0, 50) || 'Scheduled Broadcast',
+      content: scheduleText.trim(),
+      platforms: [...schedulePlatforms],
+      scheduledTime: scheduleTime.trim() || 'Tomorrow, 9:00 AM',
+      status: 'Queued',
+      tags: ['#broadcast'],
+      mediaCount: scheduleAttachments.length,
+      mediaAttachments: [...scheduleAttachments],
+      author: 'You',
+      createdAt: 'Just now'
+    };
+
+    onAddScheduledPost?.(newPost);
+    onNotify('Broadcast Scheduled', `Queued for distribution to ${schedulePlatforms.join(', ')} at ${newPost.scheduledTime}.`);
+    setScheduleText('');
+    setScheduleTitle('');
+    setScheduleAttachments([]);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="relative w-full max-w-lg bg-[#071C1A] border border-[rgba(169,191,165,0.25)] p-6 sm:p-8 shadow-2xl animate-scaleUp text-[#E8E9D8]"
+        className="relative w-full max-w-lg bg-[#071C1A] border border-[rgba(169,191,165,0.25)] p-6 sm:p-8 shadow-2xl animate-scaleUp text-[#E8E9D8] max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Close Button */}
@@ -364,21 +398,70 @@ export default function ActionModals({
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
+              {/* Multi-Platform Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] font-medium">
+                    Destination Platforms ({schedulePlatforms.length} selected)
+                  </label>
+                  <div className="flex items-center space-x-2 text-[10px] font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setSchedulePlatforms(['LinkedIn', 'X (Twitter)', 'Substack', 'Instagram', 'Threads'])}
+                      className="text-[#A9BFA5] hover:text-[#E8E9D8] underline cursor-pointer"
+                    >
+                      Select All
+                    </button>
+                    <span className="text-[#A9BFA5]/30">·</span>
+                    <button
+                      type="button"
+                      onClick={() => setSchedulePlatforms([])}
+                      className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {['LinkedIn', 'X (Twitter)', 'Substack', 'Instagram', 'Threads'].map(p => {
+                    const isSelected = schedulePlatforms.includes(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => toggleModalSchedulePlatform(p)}
+                        className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1.5 font-mono ${
+                          isSelected 
+                            ? 'text-[#E8E9D8] border-[#A9BFA5] bg-[#0D2D2A]' 
+                            : 'text-[#A9BFA5]/60 border-[rgba(169,191,165,0.2)] hover:text-[#E8E9D8]'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
+                        <span>{p}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {schedulePlatforms.length === 0 && (
+                  <p className="text-[10px] text-amber-400 mt-1 font-mono">
+                    Select at least one destination platform.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
-                    Destination Platform
+                    Broadcast Topic / Title
                   </label>
-                  <select
-                    value={schedulePlatform}
-                    onChange={(e) => setSchedulePlatform(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
-                  >
-                    <option value="LinkedIn">LinkedIn</option>
-                    <option value="X (Twitter)">X (Twitter)</option>
-                    <option value="Substack">Substack</option>
-                    <option value="Instagram">Instagram</option>
-                  </select>
+                  <input
+                    type="text"
+                    placeholder="e.g., Atelier Architecture Insights"
+                    value={scheduleTitle}
+                    onChange={(e) => setScheduleTitle(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                  />
                 </div>
 
                 <div>
@@ -407,6 +490,17 @@ export default function ActionModals({
                   className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] p-3 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] resize-none font-light"
                 />
               </div>
+
+              {/* Media Attachment Picker */}
+              <div className="pt-2 border-t border-[rgba(169,191,165,0.15)]">
+                <MediaAttachmentPicker
+                  attachments={scheduleAttachments}
+                  onChange={setScheduleAttachments}
+                  compact={true}
+                  label="Attach Media Assets (Optional)"
+                  helperText="Attach images, slides, or documents to be released with this broadcast."
+                />
+              </div>
             </div>
 
             <div className="pt-4 border-t border-[rgba(169,191,165,0.15)] flex items-center justify-end space-x-3">
@@ -419,7 +513,8 @@ export default function ActionModals({
               </button>
               <button
                 type="submit"
-                className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer"
+                disabled={schedulePlatforms.length === 0 || !scheduleText.trim()}
+                className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer disabled:opacity-40"
               >
                 Schedule Release
               </button>
