@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 const HOURS = ['2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM'];
 const DAYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -20,7 +22,14 @@ const ACTIVITY_MATRIX: number[][] = [
   [2, 3, 0, 4, 2, 3, 0, 3, 2, 0, 4, 3, 2],
 ];
 
-export default function ActivityHeatmap() {
+interface ActivityHeatmapProps {
+  onClose?: () => void;
+}
+
+export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const [hoveredCell, setHoveredCell] = useState<{
     hour: string;
     day: number;
@@ -29,6 +38,20 @@ export default function ActivityHeatmap() {
 
   // Return color style for activity block in Nexora palette
   const getCellColor = (val: number) => {
+    if (isLight) {
+      switch (val) {
+        case 1:
+          return 'bg-[#9FC2B0] border border-[#7FA894]';
+        case 2:
+          return 'bg-[#3A6B58] border border-[#2B5545] text-white';
+        case 3:
+          return 'bg-[#0284C7] border border-[#0369A1] text-white';
+        case 4:
+          return 'bg-[#1D4ED8] border border-[#1E40AF] text-white';
+        default:
+          return 'bg-[#E5ECE3] border border-[rgba(20,50,40,0.12)]';
+      }
+    }
     switch (val) {
       case 1:
         return 'bg-[#A9BFA5]/30 border border-[#A9BFA5]/20';
@@ -47,16 +70,28 @@ export default function ActivityHeatmap() {
     <div className="border border-[rgba(169,191,165,0.2)] bg-[#071C1A] p-5 flex flex-col justify-between h-full relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8] tracking-tight">
-          Activity
-        </h3>
+        <div className="flex items-center space-x-2">
+          <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8] tracking-tight">
+            Activity
+          </h3>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              title="Hide activity graph"
+              className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-[rgba(169,191,165,0.1)] p-1 rounded transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
         <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/70">
           <span>Less</span>
-          <span className="w-2 h-2 rounded-[1px] bg-[#08221F] border border-[rgba(169,191,165,0.1)]" />
-          <span className="w-2 h-2 rounded-[1px] bg-[#A9BFA5]/30" />
-          <span className="w-2 h-2 rounded-[1px] bg-[#A9BFA5]" />
-          <span className="w-2 h-2 rounded-[1px] bg-[#38BDF8]" />
-          <span className="w-2 h-2 rounded-[1px] bg-[#3B82F6]" />
+          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#E5ECE3] border border-[rgba(20,50,40,0.15)]' : 'bg-[#08221F] border border-[rgba(169,191,165,0.1)]'}`} />
+          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#9FC2B0]' : 'bg-[#A9BFA5]/30'}`} />
+          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#3A6B58]' : 'bg-[#A9BFA5]'}`} />
+          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#0284C7]' : 'bg-[#38BDF8]'}`} />
+          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#1D4ED8]' : 'bg-[#3B82F6]'}`} />
           <span>More</span>
         </div>
       </div>

@@ -33,6 +33,7 @@ import LeadsView from './app/LeadsView';
 import AssistantView from './app/AssistantView';
 import ActionModals from './app/ActionModals';
 import CommandPalette from './app/CommandPalette';
+import SettingsModal from './app/SettingsModal';
 
 interface NexoraAppProps {
   initialMode: 'login' | 'signup';
@@ -59,6 +60,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
   const [activeModal, setActiveModal] = useState<'campaign' | 'content' | 'lead' | 'schedule' | 'lead-details' | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Toast Notification
   const [toastMessage, setToastMessage] = useState<{ title: string; desc: string } | null>(null);
@@ -161,6 +163,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
         onLogout={onReturnToLanding}
         isOpenMobile={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {/* Main Workspace Frame (offset by sidebar width on desktop: md:pl-60) */}
@@ -174,6 +177,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
           onLogout={onReturnToLanding}
           onOpenQuickSearch={() => setIsSearchOpen(true)}
           onSelectNav={handleSelectNav}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
         {/* Dynamic Main Workspace Content */}
@@ -263,6 +267,13 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
         onClose={() => setIsSearchOpen(false)}
         onSelectNav={handleSelectNav}
         onTriggerQuickAction={handleTriggerQuickAction}
+      />
+
+      {/* Workspace Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onNotify={showToast}
       />
 
       {/* Floating System Toast */}

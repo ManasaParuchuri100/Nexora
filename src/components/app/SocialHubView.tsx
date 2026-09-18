@@ -26,7 +26,9 @@ import {
   AlertCircle,
   Tag,
   Film,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Copy,
+  ArrowLeft
 } from 'lucide-react';
 import { SocialAccount, SubCategory, ScheduledPost, MediaAttachment } from '../../types';
 import { INITIAL_SCHEDULED_POSTS } from '../../data/mockData';
@@ -110,8 +112,8 @@ export default function SocialHubView({
   const [isScheduled, setIsScheduled] = useState(false);
   const [aiAttachments, setAiAttachments] = useState<MediaAttachment[]>([]);
 
-  // Manual Scheduling Composer state
-  const [isComposerOpen, setIsComposerOpen] = useState(true);
+  // Manual Scheduling state (Dual View: Queue vs Composer to avoid clumsy endless scroll)
+  const [schedulingView, setSchedulingView] = useState<'queue' | 'composer'>('queue');
   const [manualPlatforms, setManualPlatforms] = useState<string[]>(['LinkedIn', 'X (Twitter)']);
   const [manualTitle, setManualTitle] = useState('');
   const [manualContent, setManualContent] = useState('');
@@ -210,12 +212,29 @@ export default function SocialHubView({
     setFormSuccess(true);
     setTimeout(() => setFormSuccess(false), 3500);
 
-    // Reset fields
+    // Reset fields & transition to queue view
     setManualTitle('');
     setManualContent('');
     setManualAttachments([]);
     setQueuePage(1);
+    setSchedulingView('queue');
     onSchedulePostSuccess();
+  };
+
+  // Populate composer from existing queued item
+  const handleLoadPostIntoComposer = (post: ScheduledPost) => {
+    setManualTitle(post.title || '');
+    setManualContent(post.content || '');
+    if (post.platforms && post.platforms.length > 0) {
+      setManualPlatforms([...post.platforms]);
+    }
+    if (post.tags && post.tags.length > 0) {
+      setManualTags(post.tags.join(' '));
+    }
+    if (post.mediaAttachments && post.mediaAttachments.length > 0) {
+      setManualAttachments([...post.mediaAttachments]);
+    }
+    setSchedulingView('composer');
   };
 
   // Remove post
@@ -573,80 +592,392 @@ export default function SocialHubView({
 
       {/* 3. Manual Scheduling Tab */}
       {currentTab === 'manual-scheduling' && (
-        <div className="space-y-8">
-          {/* Top Metric Strip & Quick Action */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
-              <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/70 block font-mono">
-                Total Queue Slots
+        <div className="space-y-6 animate-fadeIn">
+          {/* Top Bar with Mode Switcher */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(169,191,165,0.15)]">
+            <div>
+              <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] block">
+                SOCIAL HUB // MULTI-NETWORK DISPATCH
               </span>
-              <p className="text-2xl font-light text-[#E8E9D8] mt-1 serif">
-                {queue.length} Broadcasts
+              <h2 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8] mt-0.5">
+                {schedulingView === 'queue' ? 'Broadcast Queue' : 'Compose Broadcast'}
+              </h2>
+              <p className="text-xs text-[#A9BFA5]/70 font-light mt-1">
+                {schedulingView === 'queue'
+                  ? 'Monitor upcoming dispatches, manage publication timing, and inspect live payload feeds.'
+                  : 'Configure destination networks, format message copy, and calibrate release slots.'}
               </p>
-              <span className="text-[10px] text-[#A9BFA5]/60 mt-0.5 block font-mono">
-                {queue.filter(q => q.status === 'Queued').length} pending dispatch
-              </span>
             </div>
 
-            <div className="p-4 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
-              <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/70 block font-mono">
-                Active Destination Networks
-              </span>
-              <p className="text-2xl font-light text-[#E8E9D8] mt-1 serif">
-                {accounts.length} Platforms
-              </p>
-              <span className="text-[10px] text-emerald-400 mt-0.5 block font-mono flex items-center space-x-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>All channels synced</span>
-              </span>
-            </div>
-
-            <div className="p-4 border border-[rgba(169,191,165,0.2)] bg-[#071C1A] flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/70 block font-mono">
-                  Upcoming Window
-                </span>
-                <p className="text-sm font-medium text-[#E8E9D8] mt-1 truncate">
-                  {queue[0]?.scheduledTime || 'No scheduled release'}
-                </p>
-              </div>
+            {/* Segmented Mode Selector */}
+            <div className="inline-flex p-1 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] self-start sm:self-auto shrink-0">
               <button
                 type="button"
-                onClick={() => setIsComposerOpen(prev => !prev)}
-                className="mt-2 text-xs uppercase tracking-wider text-[#A9BFA5] hover:text-[#E8E9D8] flex items-center space-x-1.5 font-mono cursor-pointer"
+                onClick={() => setSchedulingView('queue')}
+                className={`px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider rounded-[1px] transition-all cursor-pointer flex items-center space-x-2 ${
+                  schedulingView === 'queue'
+                    ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold shadow-sm'
+                    : 'text-[#A9BFA5]/70 hover:text-[#E8E9D8]'
+                }`}
               >
-                <span>{isComposerOpen ? 'Collapse Composer' : '+ Add New Dispatch'}</span>
-                {isComposerOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                <Clock className="w-3.5 h-3.5" />
+                <span>Queue ({queue.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSchedulingView('composer')}
+                className={`px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider rounded-[1px] transition-all cursor-pointer flex items-center space-x-2 ${
+                  schedulingView === 'composer'
+                    ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold shadow-sm'
+                    : 'text-[#A9BFA5]/70 hover:text-[#E8E9D8]'
+                }`}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Broadcast</span>
               </button>
             </div>
           </div>
 
-          {/* Form Banner: Add New Stuff for Scheduling */}
-          {isComposerOpen && (
-            <form onSubmit={handleCreateScheduledPost} className="border border-[rgba(169,191,165,0.25)] p-6 sm:p-8 bg-[#071C1A] space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between border-b border-[rgba(169,191,165,0.15)] pb-4 gap-2">
-                <div>
-                  <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] block">
-                    MANUAL SCHEDULING COMPOSER
+          {/* Form success banner */}
+          {formSuccess && (
+            <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between rounded-[2px] animate-fadeIn font-mono">
+              <div className="flex items-center space-x-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Broadcast successfully scheduled and queued for multi-network dispatch!</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormSuccess(false)}
+                className="text-emerald-400 hover:text-white text-[11px] underline cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* VIEW A: QUEUE SCHEDULE */}
+          {schedulingView === 'queue' && (
+            <div className="space-y-6">
+              {/* Compact 4-Card Status Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
+                  <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 block font-mono">
+                    Total Queue
                   </span>
-                  <h2 className="serif text-2xl font-light text-[#E8E9D8] mt-0.5">
-                    Compose & Schedule New Broadcast
-                  </h2>
+                  <p className="text-xl font-light text-[#E8E9D8] mt-0.5 serif">
+                    {queue.length} Releases
+                  </p>
                 </div>
-                <span className="text-[11px] text-[#A9BFA5]/70 font-mono">
-                  Multi-network distribution orchestrator
+
+                <div className="p-3.5 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
+                  <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 block font-mono">
+                    Pending Dispatch
+                  </span>
+                  <p className="text-xl font-light text-amber-300 mt-0.5 serif">
+                    {queue.filter(q => q.status === 'Queued' || q.status === 'Scheduled').length} Slots
+                  </p>
+                </div>
+
+                <div className="p-3.5 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
+                  <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 block font-mono">
+                    Active Networks
+                  </span>
+                  <p className="text-xl font-light text-emerald-300 mt-0.5 serif">
+                    {accounts.length} Platforms
+                  </p>
+                </div>
+
+                <div className="p-3.5 border border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
+                  <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 block font-mono">
+                    Next Release
+                  </span>
+                  <p className="text-xs font-medium text-[#E8E9D8] mt-1.5 truncate">
+                    {queue[0]?.scheduledTime || 'None scheduled'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Queue Controls & Filters */}
+              <div className="border border-[rgba(169,191,165,0.2)] p-5 bg-[#071C1A] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(169,191,165,0.15)]">
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-xs uppercase tracking-widest text-[#E8E9D8] font-medium">
+                      Scheduled Broadcasts
+                    </h3>
+                    <span className="text-[10px] text-[#A9BFA5] font-mono px-2 py-0.5 border border-[rgba(169,191,165,0.2)] rounded-[1px]">
+                      {filteredQueue.length} of {queue.length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Filter Toolbar */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-xs">
+                  <div className="md:col-span-6 relative">
+                    <Search className="w-3.5 h-3.5 text-[#A9BFA5]/50 absolute left-3 top-2.5 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => { setSearchQuery(e.target.value); setQueuePage(1); }}
+                      placeholder="Search title, copy, platform, or tags..."
+                      className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] pl-9 pr-8 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs placeholder-[#A9BFA5]/30 font-light"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-2 text-[#A9BFA5]/60 hover:text-[#E8E9D8]"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-3 flex items-center space-x-2">
+                    <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 shrink-0 font-mono">Platform:</span>
+                    <select
+                      value={platformFilter}
+                      onChange={(e) => { setPlatformFilter(e.target.value); setQueuePage(1); }}
+                      className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs"
+                    >
+                      <option value="all">All Platforms</option>
+                      <option value="LinkedIn">LinkedIn</option>
+                      <option value="X (Twitter)">X (Twitter)</option>
+                      <option value="Substack">Substack</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="Threads">Threads</option>
+                      <option value="Meta">Meta / Facebook</option>
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-3 flex items-center space-x-2">
+                    <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 shrink-0 font-mono">Status:</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => { setStatusFilter(e.target.value); setQueuePage(1); }}
+                      className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="Queued">Queued</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Draft Review">Draft Review</option>
+                      <option value="Scheduled">Scheduled</option>
+                      <option value="Dispatched">Dispatched</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Queue Items List */}
+                <div className="divide-y divide-[rgba(169,191,165,0.15)] pt-2">
+                  {paginatedQueue.length > 0 ? (
+                    paginatedQueue.map((item) => {
+                      const isExpanded = expandedPostIds.includes(item.id);
+                      return (
+                        <div 
+                          key={item.id} 
+                          className="py-4 hover:bg-[#0D2D2A]/20 transition-colors px-2 rounded-[2px] space-y-2.5"
+                        >
+                          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            {/* Time & Title info */}
+                            <div className="flex items-start space-x-3.5 min-w-0">
+                              <div className="flex items-center space-x-1.5 text-xs font-mono text-[#A9BFA5] w-38 shrink-0 mt-0.5">
+                                <Clock className="w-3.5 h-3.5 text-[#A9BFA5]/70 shrink-0" />
+                                <span>{item.scheduledTime}</span>
+                              </div>
+
+                              <div className="min-w-0 space-y-1">
+                                <h4 className="text-xs sm:text-sm text-[#E8E9D8] font-medium leading-snug">
+                                  {item.title}
+                                </h4>
+
+                                {/* Destination platforms */}
+                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                  {item.platforms.map((plat) => (
+                                    <span 
+                                      key={plat}
+                                      className="inline-flex items-center space-x-1 text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] rounded-[2px]"
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#A9BFA5]" />
+                                      <span>{plat}</span>
+                                    </span>
+                                  ))}
+
+                                  {item.mediaAttachments && item.mediaAttachments.length > 0 ? (
+                                    <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] rounded-[2px]">
+                                      <div className="flex items-center -space-x-1">
+                                        {item.mediaAttachments.slice(0, 3).map((med, idx) => (
+                                          <div 
+                                            key={med.id || idx} 
+                                            className="w-4 h-4 rounded-[1px] overflow-hidden bg-[#071C1A] border border-[rgba(169,191,165,0.3)] shrink-0"
+                                            title={`${med.name} (${med.type})`}
+                                          >
+                                            {med.type === 'image' && med.url ? (
+                                              <img src={med.url} alt={med.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                                            ) : med.type === 'video' ? (
+                                              <Film className="w-2.5 h-2.5 text-amber-300 m-auto mt-0.5" />
+                                            ) : (
+                                              <FileText className="w-2.5 h-2.5 text-[#A9BFA5] m-auto mt-0.5" />
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <span className="text-[10px] text-[#A9BFA5]/80 font-mono">
+                                        {item.mediaAttachments.length} asset{item.mediaAttachments.length > 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                  ) : item.mediaCount && item.mediaCount > 0 ? (
+                                    <span className="text-[10px] text-[#A9BFA5]/60 font-mono px-1.5 py-0.5 border border-[rgba(169,191,165,0.15)] rounded-[2px]">
+                                      {item.mediaCount} media
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Status & Actions */}
+                            <div className="flex items-center space-x-2.5 self-end lg:self-center shrink-0">
+                              <span className={`text-[10px] uppercase tracking-widest font-mono px-2.5 py-1 border rounded-[2px] ${
+                                item.status === 'Dispatched'
+                                  ? 'border-cyan-500/40 text-cyan-300 bg-cyan-950/20'
+                                  : item.status === 'Approved'
+                                  ? 'border-emerald-500/40 text-emerald-300 bg-emerald-950/20'
+                                  : item.status === 'Draft Review'
+                                  ? 'border-sky-500/40 text-sky-300 bg-sky-950/20'
+                                  : 'border-[rgba(169,191,165,0.3)] text-[#A9BFA5] bg-[#061816]'
+                              }`}>
+                                {item.status}
+                              </span>
+
+                              <div className="flex items-center space-x-1 pl-2 border-l border-[rgba(169,191,165,0.15)]">
+                                <button
+                                  type="button"
+                                  onClick={() => setInspectingPost(item)}
+                                  title="Inspect full dispatch payload"
+                                  className="p-1.5 text-[#A9BFA5]/70 hover:text-[#E8E9D8] hover:bg-[#061816] rounded-[2px] transition-colors cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleLoadPostIntoComposer(item)}
+                                  title="Duplicate or Edit in Composer"
+                                  className="p-1.5 text-[#A9BFA5]/70 hover:text-[#E8E9D8] hover:bg-[#061816] rounded-[2px] transition-colors cursor-pointer"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+
+                                {item.status !== 'Dispatched' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDispatchNow(item)}
+                                    title="Dispatch immediately"
+                                    className="p-1.5 text-[#A9BFA5]/70 hover:text-emerald-300 hover:bg-[#061816] rounded-[2px] transition-colors cursor-pointer"
+                                  >
+                                    <Send className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePost(item.id)}
+                                  title="Cancel & remove from queue"
+                                  className="p-1.5 text-[#A9BFA5]/50 hover:text-red-400 hover:bg-red-950/20 rounded-[2px] transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Content preview accordion */}
+                          {item.content && (
+                            <div className="pl-0 lg:pl-42 text-xs font-light text-[#A9BFA5]/80">
+                              <p className={isExpanded ? 'whitespace-pre-line leading-relaxed text-[#E8E9D8]' : 'line-clamp-2 leading-relaxed'}>
+                                {item.content}
+                              </p>
+                              {item.content.length > 120 && (
+                                <button
+                                  type="button"
+                                  onClick={() => toggleExpandContent(item.id)}
+                                  className="text-[10px] text-[#A9BFA5] hover:text-[#E8E9D8] font-mono mt-1 underline cursor-pointer"
+                                >
+                                  {isExpanded ? 'Show less' : 'Read full draft...'}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="py-12 text-center text-xs text-[#A9BFA5]/60 font-light space-y-3">
+                      <p>No scheduled broadcasts matching your active filter criteria.</p>
+                      <div className="flex items-center justify-center space-x-3">
+                        {(searchQuery || platformFilter !== 'all' || statusFilter !== 'all') && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setPlatformFilter('all');
+                              setStatusFilter('all');
+                            }}
+                            className="text-xs text-[#E8E9D8] underline font-mono cursor-pointer"
+                          >
+                            Reset filters
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setSchedulingView('composer')}
+                          className="text-xs uppercase font-mono tracking-wider px-3.5 py-1.5 bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px] cursor-pointer hover:bg-white"
+                        >
+                          + Compose New Broadcast
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pagination */}
+                {filteredQueue.length > 0 && (
+                  <div className="mt-4 -mx-5 -mb-5">
+                    <Pagination
+                      currentPage={queuePage}
+                      totalItems={filteredQueue.length}
+                      pageSize={queuePageSize}
+                      onPageChange={setQueuePage}
+                      onPageSizeChange={(newSize) => { setQueuePageSize(newSize); setQueuePage(1); }}
+                      pageSizeOptions={[4, 8, 12]}
+                      showPageSize={true}
+                      itemName="broadcasts"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW B: COMPOSER */}
+          {schedulingView === 'composer' && (
+            <form onSubmit={handleCreateScheduledPost} className="space-y-6">
+              {/* Back Link & Info */}
+              <div className="flex items-center justify-between pb-2">
+                <button
+                  type="button"
+                  onClick={() => setSchedulingView('queue')}
+                  className="text-xs text-[#A9BFA5] hover:text-[#E8E9D8] flex items-center space-x-1.5 font-mono cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Return to Broadcast Queue</span>
+                </button>
+
+                <span className="text-[11px] text-[#A9BFA5]/60 font-mono">
+                  {manualPlatforms.length} platform{manualPlatforms.length > 1 ? 's' : ''} targeted
                 </span>
               </div>
 
-              {/* Success alert */}
-              {formSuccess && (
-                <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center space-x-2 rounded-[2px] animate-fadeIn font-mono">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Broadcast successfully added to the release schedule across {manualPlatforms.join(', ')}!</span>
-                </div>
-              )}
-
-              {/* Error alert */}
+              {/* Error Alert */}
               {formError && (
                 <div className="p-3 bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs flex items-center space-x-2 rounded-[2px] animate-fadeIn font-mono">
                   <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
@@ -654,526 +985,300 @@ export default function SocialHubView({
                 </div>
               )}
 
-              {/* 1. Destination Platforms Multi-Selection */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
-                      Destination Platforms (Choose all platforms to upload to)
-                    </label>
-                    <p className="text-[11px] text-[#A9BFA5]/70 font-light">
-                      Select every network this broadcast should publish to.
-                    </p>
+              {/* 2-Column Split */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Column: Platforms, Title, Content, Media (7 cols) */}
+                <div className="lg:col-span-7 space-y-6">
+                  {/* Destination Platforms */}
+                  <div className="border border-[rgba(169,191,165,0.2)] p-5 bg-[#071C1A] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+                          1. Target Networks
+                        </label>
+                        <p className="text-[11px] text-[#A9BFA5]/70 font-light">
+                          Select the destination channels for this broadcast.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2.5 text-xs font-mono">
+                        <button
+                          type="button"
+                          onClick={selectAllManualPlatforms}
+                          className="text-[#A9BFA5] hover:text-[#E8E9D8] underline cursor-pointer text-[11px]"
+                        >
+                          All
+                        </button>
+                        <span className="text-[#A9BFA5]/30">|</span>
+                        <button
+                          type="button"
+                          onClick={clearAllManualPlatforms}
+                          className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] underline cursor-pointer text-[11px]"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Compact platform selector grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {PLATFORM_OPTIONS.map(plat => {
+                        const isSelected = manualPlatforms.includes(plat.id);
+                        return (
+                          <button
+                            key={plat.id}
+                            type="button"
+                            onClick={() => toggleManualPlatform(plat.id)}
+                            className={`p-2.5 border text-left rounded-[2px] transition-all cursor-pointer flex items-center justify-between ${
+                              isSelected
+                                ? 'bg-[#0D2D2A] border-[#A9BFA5] text-[#E8E9D8]'
+                                : 'bg-[#061816] border-[rgba(169,191,165,0.18)] text-[#A9BFA5]/60 hover:border-[rgba(169,191,165,0.35)] hover:text-[#A9BFA5]'
+                            }`}
+                          >
+                            <div className="min-w-0 pr-1.5">
+                              <span className="text-xs font-medium block truncate">{plat.label}</span>
+                              <span className="text-[10px] font-mono text-[#A9BFA5]/60 block truncate">{plat.handle}</span>
+                            </div>
+                            <div className={`w-3.5 h-3.5 rounded-[1px] border flex items-center justify-center shrink-0 ${
+                              isSelected 
+                                ? 'bg-[#A9BFA5] border-[#A9BFA5] text-[#071C1A]' 
+                                : 'border-[rgba(169,191,165,0.3)]'
+                            }`}>
+                              {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 text-xs font-mono">
-                    <button
-                      type="button"
-                      onClick={selectAllManualPlatforms}
-                      className="text-[#A9BFA5] hover:text-[#E8E9D8] underline cursor-pointer"
-                    >
-                      Select All
-                    </button>
-                    <span className="text-[#A9BFA5]/30">|</span>
-                    <button
-                      type="button"
-                      onClick={clearAllManualPlatforms}
-                      className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] underline cursor-pointer"
-                    >
-                      Clear
-                    </button>
+                  {/* Headline & Body Copy */}
+                  <div className="border border-[rgba(169,191,165,0.2)] p-5 bg-[#071C1A] space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+                        2. Headline / Hook
+                      </label>
+                      <input
+                        type="text"
+                        value={manualTitle}
+                        onChange={(e) => setManualTitle(e.target.value)}
+                        placeholder="e.g. Why studio software requires architectural restraint..."
+                        className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-xs px-3 py-2.5 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] placeholder-[#A9BFA5]/30 font-light"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+                          3. Message Copy
+                        </label>
+                        <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/70">
+                          <span>{manualContent.length} chars</span>
+                          <span>·</span>
+                          <span>{manualContent.split(/\s+/).filter(Boolean).length} words</span>
+                          {manualPlatforms.includes('X (Twitter)') && (
+                            <span className={manualContent.length > 280 ? 'text-amber-400 font-bold' : 'text-[#A9BFA5]/50'}>
+                              · (X: 280)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <textarea
+                        rows={5}
+                        value={manualContent}
+                        onChange={(e) => setManualContent(e.target.value)}
+                        placeholder="Draft the message copy or insert a template..."
+                        className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-xs p-3 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] placeholder-[#A9BFA5]/30 leading-relaxed font-light resize-y"
+                      />
+
+                      {/* Quick copy template chips */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 font-mono">
+                          Templates:
+                        </span>
+                        {COPY_TEMPLATES.map((tpl, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => applyCopyTemplate(tpl)}
+                            className="text-[10px] font-mono px-2 py-0.5 border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5] text-[#A9BFA5] hover:text-[#E8E9D8] rounded-[1px] transition-colors cursor-pointer"
+                          >
+                            + {tpl.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Media Attachments */}
+                  <div className="border border-[rgba(169,191,165,0.2)] p-5 bg-[#071C1A]">
+                    <MediaAttachmentPicker
+                      attachments={manualAttachments}
+                      onChange={setManualAttachments}
+                      compact={true}
+                      label="4. Media Attachments (Optional)"
+                      helperText="Attach images, slides, or documents to be released with this broadcast."
+                    />
                   </div>
                 </div>
 
-                {/* Multi-platform selector grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
-                  {PLATFORM_OPTIONS.map(plat => {
-                    const isSelected = manualPlatforms.includes(plat.id);
-                    return (
-                      <button
-                        key={plat.id}
-                        type="button"
-                        onClick={() => toggleManualPlatform(plat.id)}
-                        className={`p-3 border text-left rounded-[2px] transition-all cursor-pointer flex items-start justify-between ${
-                          isSelected
-                            ? 'bg-[#0D2D2A] border-[#A9BFA5] text-[#E8E9D8] shadow-sm'
-                            : 'bg-[#061816] border-[rgba(169,191,165,0.18)] text-[#A9BFA5]/60 hover:border-[rgba(169,191,165,0.35)] hover:text-[#A9BFA5]'
-                        }`}
-                      >
-                        <div className="space-y-0.5 pr-2">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="text-xs font-medium">{plat.label}</span>
-                          </div>
-                          <p className="text-[10px] font-mono text-[#A9BFA5]/70">{plat.handle}</p>
-                          <p className="text-[10px] text-[#A9BFA5]/50 font-light truncate">{plat.desc}</p>
+                {/* Right Column: Timing, Priority, Live Preview, Submit (5 cols) */}
+                <div className="lg:col-span-5 space-y-6">
+                  {/* Timing & Priority */}
+                  <div className="border border-[rgba(169,191,165,0.2)] p-5 bg-[#071C1A] space-y-4">
+                    <div className="space-y-2">
+                      <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+                        Dispatch Window
+                      </label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {TIMING_PRESETS.map(preset => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setManualTimingPreset(preset)}
+                            className={`text-[11px] px-2.5 py-1 border rounded-[1px] transition-colors font-mono cursor-pointer ${
+                              manualTimingPreset === preset
+                                ? 'border-[#A9BFA5] bg-[#0D2D2A] text-[#E8E9D8]'
+                                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/60 hover:text-[#A9BFA5]'
+                            }`}
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+
+                      {manualTimingPreset === 'Custom Date & Time' && (
+                        <div className="grid grid-cols-2 gap-2 pt-2">
+                          <input
+                            type="date"
+                            value={manualDate}
+                            onChange={(e) => setManualDate(e.target.value)}
+                            className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-2.5 py-1.5 rounded-[1px] focus:outline-none focus:border-[#A9BFA5]"
+                          />
+                          <input
+                            type="time"
+                            value={manualTime}
+                            onChange={(e) => setManualTime(e.target.value)}
+                            className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-2.5 py-1.5 rounded-[1px] focus:outline-none focus:border-[#A9BFA5]"
+                          />
                         </div>
+                      )}
+                    </div>
 
-                        <div className={`w-4 h-4 rounded-[1px] border flex items-center justify-center shrink-0 mt-0.5 ${
-                          isSelected 
-                            ? 'bg-[#A9BFA5] border-[#A9BFA5] text-[#071C1A]' 
-                            : 'border-[rgba(169,191,165,0.3)]'
-                        }`}>
-                          {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[rgba(169,191,165,0.15)]">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-mono">
+                          Status
+                        </label>
+                        <select
+                          value={manualStatus}
+                          onChange={(e) => setManualStatus(e.target.value as ScheduledPost['status'])}
+                          className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-2 py-1.5 rounded-[1px] focus:outline-none focus:border-[#A9BFA5]"
+                        >
+                          <option value="Queued">Queued</option>
+                          <option value="Approved">Approved</option>
+                          <option value="Draft Review">Draft Review</option>
+                          <option value="Scheduled">Scheduled</option>
+                        </select>
+                      </div>
 
-                <div className="flex items-center justify-between text-[11px] font-mono pt-1">
-                  <span className={manualPlatforms.length === 0 ? 'text-amber-400' : 'text-[#A9BFA5]'}>
-                    {manualPlatforms.length === 0 
-                      ? '⚠ No destination platforms selected. Select at least 1 platform above.' 
-                      : `✓ ${manualPlatforms.length} platform${manualPlatforms.length > 1 ? 's' : ''} targeted: ${manualPlatforms.join(', ')}`}
-                  </span>
-                  <span className="text-[#A9BFA5]/50">
-                    Synchronized simultaneously on release
-                  </span>
-                </div>
-              </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-mono">
+                          Tags
+                        </label>
+                        <input
+                          type="text"
+                          value={manualTags}
+                          onChange={(e) => setManualTags(e.target.value)}
+                          placeholder="#broadcast #design"
+                          className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-2 py-1.5 rounded-[1px] focus:outline-none focus:border-[#A9BFA5] font-mono text-[11px]"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-              {/* 2. Broadcast Title / Topic */}
-              <div className="space-y-1.5">
-                <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
-                  Broadcast Headline / Hook
-                </label>
-                <input
-                  type="text"
-                  value={manualTitle}
-                  onChange={(e) => setManualTitle(e.target.value)}
-                  placeholder="e.g., Why software should speak in hairlines, not badges"
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-xs px-3 py-2.5 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] placeholder-[#A9BFA5]/30 font-light"
-                />
-              </div>
-
-              {/* 3. Post Content / Message Body */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
-                    Message Copy & Formatted Content
-                  </label>
-                  <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/70">
-                    <span>{manualContent.length} chars</span>
-                    <span>·</span>
-                    <span>{manualContent.split(/\s+/).filter(Boolean).length} words</span>
-                    {manualPlatforms.includes('X (Twitter)') && (
-                      <span className={manualContent.length > 280 ? 'text-amber-400 font-bold' : 'text-[#A9BFA5]/50'}>
-                        · (X: 280 max)
+                  {/* Live Dispatch Preview Card */}
+                  <div className="border border-[rgba(169,191,165,0.25)] p-4 bg-[#061816] space-y-3">
+                    <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-2">
+                      <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5] font-mono">
+                        Live Preview Card
                       </span>
-                    )}
-                  </div>
-                </div>
-
-                <textarea
-                  rows={4}
-                  value={manualContent}
-                  onChange={(e) => setManualContent(e.target.value)}
-                  placeholder="Draft your announcement, thesis, or product release update. All chosen platforms will format and dispatch this payload..."
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-xs p-3 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] placeholder-[#A9BFA5]/30 leading-relaxed font-light resize-y"
-                />
-
-                {/* Quick copy template injectors */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 font-mono">
-                    Quick Insert:
-                  </span>
-                  {COPY_TEMPLATES.map((tpl, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => applyCopyTemplate(tpl)}
-                      className="text-[10px] font-mono px-2.5 py-1 border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5] text-[#A9BFA5] hover:text-[#E8E9D8] rounded-[2px] transition-colors cursor-pointer"
-                    >
-                      + {tpl.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Timing & Release Slot */}
-              <div className="space-y-2.5 pt-2 border-t border-[rgba(169,191,165,0.15)]">
-                <label className="block text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
-                  Dispatch Schedule Timing
-                </label>
-
-                {/* Preset Chips */}
-                <div className="flex flex-wrap gap-2">
-                  {TIMING_PRESETS.map(preset => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => setManualTimingPreset(preset)}
-                      className={`text-xs px-3 py-1.5 border rounded-[2px] transition-colors font-mono cursor-pointer ${
-                        manualTimingPreset === preset
-                          ? 'border-[#A9BFA5] bg-[#0D2D2A] text-[#E8E9D8]'
-                          : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/60 hover:text-[#A9BFA5]'
-                      }`}
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Custom Date & Time Picker */}
-                {manualTimingPreset === 'Custom Date & Time' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] animate-fadeIn">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-mono">
-                        Release Date
-                      </label>
-                      <input
-                        type="date"
-                        value={manualDate}
-                        onChange={(e) => setManualDate(e.target.value)}
-                        className="w-full bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-3 py-1.5 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
-                      />
+                      <span className="text-[10px] font-mono text-emerald-400">
+                        {manualTimingPreset === 'Custom Date & Time' ? `${manualDate} ${manualTime}` : manualTimingPreset}
+                      </span>
                     </div>
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-mono">
-                        Release Time (Local)
-                      </label>
-                      <input
-                        type="time"
-                        value={manualTime}
-                        onChange={(e) => setManualTime(e.target.value)}
-                        className="w-full bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-3 py-1.5 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
-                      />
+
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-1">
+                        {manualPlatforms.length > 0 ? (
+                          manualPlatforms.map(p => (
+                            <span key={p} className="text-[9px] font-mono uppercase px-1.5 py-0.5 bg-[#071C1A] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8]">
+                              {p}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-amber-400 font-mono">Select at least 1 platform</span>
+                        )}
+                      </div>
+
+                      <h4 className="text-xs font-medium text-[#E8E9D8]">
+                        {manualTitle || 'Untitled Broadcast'}
+                      </h4>
+
+                      <p className="text-xs text-[#A9BFA5]/80 font-light line-clamp-3 leading-relaxed">
+                        {manualContent || 'Message content will render here in real time...'}
+                      </p>
+
+                      {/* Attachments preview snippet */}
+                      {manualAttachments.length > 0 && (
+                        <div className="flex items-center space-x-2 pt-1">
+                          <span className="text-[10px] text-[#A9BFA5]/60 font-mono">
+                            {manualAttachments.length} media asset{manualAttachments.length > 1 ? 's' : ''} attached
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* 5. Metadata & Queue Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[rgba(169,191,165,0.15)]">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-medium font-mono">
-                    Tracking Tags
-                  </label>
-                  <input
-                    type="text"
-                    value={manualTags}
-                    onChange={(e) => setManualTags(e.target.value)}
-                    placeholder="#nexora #design #updates"
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] font-mono text-[11px]"
-                  />
-                </div>
+                  {/* Submission Buttons */}
+                  <div className="space-y-2">
+                    <button
+                      type="submit"
+                      disabled={manualPlatforms.length === 0 || !manualContent.trim()}
+                      className="w-full bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
+                    >
+                      <CalendarIcon className="w-3.5 h-3.5" />
+                      <span>Queue Broadcast ({manualPlatforms.length} Channels)</span>
+                    </button>
 
-                <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1 font-medium font-mono">
-                    Queue Priority / Status
-                  </label>
-                  <select
-                    value={manualStatus}
-                    onChange={(e) => setManualStatus(e.target.value as ScheduledPost['status'])}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
-                  >
-                    <option value="Queued">Queued (Ready to dispatch)</option>
-                    <option value="Approved">Approved (Executive sign-off)</option>
-                    <option value="Draft Review">Draft Review (Internal triage)</option>
-                    <option value="Scheduled">Scheduled (Calibrated window)</option>
-                  </select>
-                </div>
-              </div>
+                    <div className="flex items-center justify-between text-xs font-mono pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setManualTitle('');
+                          setManualContent('');
+                          setManualAttachments([]);
+                          setFormError(null);
+                        }}
+                        className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] cursor-pointer text-[11px]"
+                      >
+                        Reset Form
+                      </button>
 
-              {/* 6. Media Attachments */}
-              <div className="pt-2 border-t border-[rgba(169,191,165,0.15)]">
-                <MediaAttachmentPicker
-                  attachments={manualAttachments}
-                  onChange={setManualAttachments}
-                  label="Attach Media (Images, Carousels, Documents & Video)"
-                  helperText="Upload files or select curated high-res studio assets. Attachments will be orchestrated and distributed with this scheduled broadcast."
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[rgba(169,191,165,0.15)]">
-                <div className="text-[11px] text-[#A9BFA5]/60 font-mono">
-                  Payload will target: <span className="text-[#E8E9D8] font-medium">{manualPlatforms.length > 0 ? manualPlatforms.join(', ') : 'None selected'}</span>
-                </div>
-
-                <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setManualTitle('');
-                      setManualContent('');
-                      setFormError(null);
-                    }}
-                    className="px-4 py-2.5 text-xs uppercase tracking-widest text-[#A9BFA5]/70 hover:text-[#E8E9D8] transition-colors cursor-pointer font-mono"
-                  >
-                    Clear Form
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={manualPlatforms.length === 0 || !manualContent.trim()}
-                    className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center space-x-2 disabled:opacity-40"
-                  >
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    <span>Add Broadcast to Schedule ({manualPlatforms.length})</span>
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => setSchedulingView('queue')}
+                        className="text-[#A9BFA5] hover:text-[#E8E9D8] cursor-pointer text-[11px] underline"
+                      >
+                        Cancel & View Queue
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>
           )}
-
-          {/* Upcoming Queue Schedule Section */}
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 bg-[#071C1A] space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-[rgba(169,191,165,0.15)] gap-4">
-              <div>
-                <div className="flex items-center space-x-3">
-                  <h3 className="text-xs uppercase tracking-widest text-[#E8E9D8] font-medium">
-                    Upcoming Queue Schedule
-                  </h3>
-                  <span className="text-[10px] text-[#A9BFA5] font-mono px-2 py-0.5 border border-[rgba(169,191,165,0.2)] rounded-[1px]">
-                    {filteredQueue.length} slots active
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#A9BFA5]/70 font-light mt-0.5">
-                  Synchronized dispatches queued for external multi-network release.
-                </p>
-              </div>
-
-              {!isComposerOpen && (
-                <button
-                  type="button"
-                  onClick={() => setIsComposerOpen(true)}
-                  className="text-xs uppercase tracking-widest text-[#E8E9D8] bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] hover:border-[#E8E9D8] px-4 py-2 transition-colors cursor-pointer flex items-center space-x-1.5 self-start md:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>New Schedule Item</span>
-                </button>
-              )}
-            </div>
-
-            {/* Filter & Search Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-xs">
-              <div className="md:col-span-5 relative">
-                <Search className="w-3.5 h-3.5 text-[#A9BFA5]/50 absolute left-3 top-2.5 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setQueuePage(1); }}
-                  placeholder="Filter schedule by title, platform, copy, or tag..."
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] pl-9 pr-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs placeholder-[#A9BFA5]/30 font-light"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-2 text-[#A9BFA5]/60 hover:text-[#E8E9D8]"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              <div className="md:col-span-4 flex items-center space-x-2">
-                <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 shrink-0 font-mono">Platform:</span>
-                <select
-                  value={platformFilter}
-                  onChange={(e) => { setPlatformFilter(e.target.value); setQueuePage(1); }}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs"
-                >
-                  <option value="all">All Platforms</option>
-                  <option value="LinkedIn">LinkedIn</option>
-                  <option value="X (Twitter)">X (Twitter)</option>
-                  <option value="Substack">Substack</option>
-                  <option value="Instagram">Instagram</option>
-                  <option value="Threads">Threads</option>
-                  <option value="Meta">Meta / Facebook</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-3 flex items-center space-x-2">
-                <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 shrink-0 font-mono">Status:</span>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => { setStatusFilter(e.target.value); setQueuePage(1); }}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] text-xs"
-                >
-                  <option value="all">All Statuses</option>
-                  <option value="Queued">Queued</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Draft Review">Draft Review</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Dispatched">Dispatched</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Queue Item Rows */}
-            <div className="divide-y divide-[rgba(169,191,165,0.15)]">
-              {paginatedQueue.length > 0 ? (
-                paginatedQueue.map((item) => {
-                  const isExpanded = expandedPostIds.includes(item.id);
-                  return (
-                    <div 
-                      key={item.id} 
-                      className="py-4.5 hover:bg-[#0D2D2A]/20 transition-colors px-3 rounded-[2px] space-y-2.5"
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                        {/* Time & Title info */}
-                        <div className="flex items-start space-x-4 min-w-0">
-                          <div className="flex items-center space-x-1.5 text-xs font-mono text-[#A9BFA5] w-40 shrink-0 mt-0.5">
-                            <Clock className="w-3.5 h-3.5 text-[#A9BFA5]/70 shrink-0" />
-                            <span>{item.scheduledTime}</span>
-                          </div>
-
-                          <div className="min-w-0 space-y-1">
-                            <h4 className="text-xs sm:text-sm text-[#E8E9D8] font-medium leading-snug">
-                              {item.title}
-                            </h4>
-
-                            {/* Destination platforms - clearly showing all platforms chosen! */}
-                            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                              <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5]/50 font-mono mr-1">
-                                Uploading to:
-                              </span>
-                              {item.platforms.map((plat) => (
-                                <span 
-                                  key={plat}
-                                  className="inline-flex items-center space-x-1 text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] rounded-[2px]"
-                                >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#A9BFA5]" />
-                                  <span>{plat}</span>
-                                </span>
-                              ))}
-
-                              {item.mediaAttachments && item.mediaAttachments.length > 0 ? (
-                                <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] rounded-[2px]">
-                                  <div className="flex items-center -space-x-1">
-                                    {item.mediaAttachments.slice(0, 3).map((med, idx) => (
-                                      <div 
-                                        key={med.id || idx} 
-                                        className="w-4 h-4 rounded-[1px] overflow-hidden bg-[#071C1A] border border-[rgba(169,191,165,0.3)] shrink-0"
-                                        title={`${med.name} (${med.type})`}
-                                      >
-                                        {med.type === 'image' && med.url ? (
-                                          <img src={med.url} alt={med.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-                                        ) : med.type === 'video' ? (
-                                          <Film className="w-2.5 h-2.5 text-amber-300 m-auto mt-0.5" />
-                                        ) : (
-                                          <FileText className="w-2.5 h-2.5 text-[#A9BFA5] m-auto mt-0.5" />
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <span className="text-[10px] text-[#A9BFA5]/80 font-mono">
-                                    {item.mediaAttachments.length} asset{item.mediaAttachments.length > 1 ? 's' : ''}
-                                  </span>
-                                </div>
-                              ) : item.mediaCount && item.mediaCount > 0 ? (
-                                <span className="text-[10px] text-[#A9BFA5]/60 font-mono px-1.5 py-0.5 border border-[rgba(169,191,165,0.15)] rounded-[2px]">
-                                  {item.mediaCount} media asset{item.mediaCount > 1 ? 's' : ''}
-                                </span>
-                              ) : null}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Status & Actions */}
-                        <div className="flex items-center space-x-2.5 self-end lg:self-center shrink-0">
-                          <span className={`text-[10px] uppercase tracking-widest font-mono px-2.5 py-1 border rounded-[2px] ${
-                            item.status === 'Dispatched'
-                              ? 'border-cyan-500/40 text-cyan-300 bg-cyan-950/20'
-                              : item.status === 'Approved'
-                              ? 'border-emerald-500/40 text-emerald-300 bg-emerald-950/20'
-                              : item.status === 'Draft Review'
-                              ? 'border-sky-500/40 text-sky-300 bg-sky-950/20'
-                              : 'border-[rgba(169,191,165,0.3)] text-[#A9BFA5] bg-[#061816]'
-                          }`}>
-                            {item.status}
-                          </span>
-
-                          <div className="flex items-center space-x-1 pl-2 border-l border-[rgba(169,191,165,0.15)]">
-                            <button
-                              type="button"
-                              onClick={() => setInspectingPost(item)}
-                              title="Inspect full dispatch payload"
-                              className="p-1.5 text-[#A9BFA5]/70 hover:text-[#E8E9D8] hover:bg-[#061816] rounded-[2px] transition-colors cursor-pointer"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-
-                            {item.status !== 'Dispatched' && (
-                              <button
-                                type="button"
-                                onClick={() => handleDispatchNow(item)}
-                                title="Dispatch immediately to all target platforms"
-                                className="p-1.5 text-[#A9BFA5]/70 hover:text-emerald-300 hover:bg-[#061816] rounded-[2px] transition-colors cursor-pointer"
-                              >
-                                <Send className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeletePost(item.id)}
-                              title="Cancel & remove from queue"
-                              className="p-1.5 text-[#A9BFA5]/50 hover:text-red-400 hover:bg-red-950/20 rounded-[2px] transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Content preview accordion */}
-                      {item.content && (
-                        <div className="pl-0 lg:pl-44 text-xs font-light text-[#A9BFA5]/80">
-                          <p className={isExpanded ? 'whitespace-pre-line leading-relaxed text-[#E8E9D8]' : 'line-clamp-2 leading-relaxed'}>
-                            {item.content}
-                          </p>
-                          {item.content.length > 120 && (
-                            <button
-                              type="button"
-                              onClick={() => toggleExpandContent(item.id)}
-                              className="text-[10px] text-[#A9BFA5] hover:text-[#E8E9D8] font-mono mt-1 underline cursor-pointer"
-                            >
-                              {isExpanded ? 'Show less' : 'Read full draft...'}
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-12 text-center text-xs text-[#A9BFA5]/60 font-light space-y-2">
-                  <p>No scheduled broadcasts matching your active filter criteria.</p>
-                  {(searchQuery || platformFilter !== 'all' || statusFilter !== 'all') && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery('');
-                        setPlatformFilter('all');
-                        setStatusFilter('all');
-                      }}
-                      className="text-xs text-[#E8E9D8] underline font-mono cursor-pointer"
-                    >
-                      Reset active filters
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Pagination for Queue */}
-            {filteredQueue.length > 0 && (
-              <div className="mt-4 -mx-6 -mb-6">
-                <Pagination
-                  currentPage={queuePage}
-                  totalItems={filteredQueue.length}
-                  pageSize={queuePageSize}
-                  onPageChange={setQueuePage}
-                  onPageSizeChange={(newSize) => { setQueuePageSize(newSize); setQueuePage(1); }}
-                  pageSizeOptions={[4, 8, 12]}
-                  showPageSize={true}
-                  itemName="broadcasts"
-                />
-              </div>
-            )}
-          </div>
         </div>
       )}
 

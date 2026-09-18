@@ -20,6 +20,7 @@ import {
   CalendarRange,
   Clock3
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import { Campaign, CampaignBlueprint, SubCategory } from '../../types';
 import CampaignCreationFlow from './CampaignCreationFlow';
 import CampaignBlueprintView from './CampaignBlueprintView';
@@ -71,6 +72,9 @@ export default function CampaignsView({
   onUpdateCampaign,
   onNavigateToModule
 }: CampaignsViewProps) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   // Navigation mode within Campaigns: 'landing' | 'create' | 'blueprint'
   const [viewMode, setViewMode] = useState<'landing' | 'create' | 'blueprint'>('landing');
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
@@ -399,7 +403,7 @@ export default function CampaignsView({
       </section>
 
       {/* 2. Top Filter and Search Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(169,191,165,0.15)] text-xs">
+      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.15)]'} text-xs`}>
         <div className="flex items-center space-x-5 uppercase tracking-widest font-mono text-[11px] overflow-x-auto pb-1 sm:pb-0">
           {(['All', 'Active', 'Planning', 'Draft', 'Completed'] as const).map(tab => {
             const count = tab === 'All' 
@@ -414,13 +418,19 @@ export default function CampaignsView({
                 onClick={() => setStatusFilter(tab)}
                 className={`pb-1 border-b transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-1.5 ${
                   isSelected 
-                    ? 'text-[#E8E9D8] border-[#A9BFA5] font-medium' 
-                    : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
+                    ? isLight 
+                      ? 'text-[#122420] border-[#143630] font-semibold' 
+                      : 'text-[#E8E9D8] border-[#A9BFA5] font-medium' 
+                    : isLight 
+                      ? 'text-[#3E6A5E] border-transparent hover:text-[#122420]' 
+                      : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
                 }`}
               >
                 <span>{tab}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                  isSelected ? 'bg-[#0D2D2A] text-[#A9BFA5]' : 'text-[#A9BFA5]/40'
+                  isSelected 
+                    ? isLight ? 'bg-[#143630] text-white font-medium' : 'bg-[#0D2D2A] text-[#A9BFA5]' 
+                    : isLight ? 'bg-[#EDF3EA] text-[#3E6A5E]' : 'text-[#A9BFA5]/40'
                 }`}>
                   {count}
                 </span>
@@ -435,14 +445,18 @@ export default function CampaignsView({
             placeholder="Search campaigns, objectives, owner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#071C1A] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] text-xs px-3 py-1.5 pl-8 pr-7 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] placeholder-[#A9BFA5]/40 font-light w-full sm:w-72"
+            className={`${
+              isLight 
+                ? 'bg-white border-[#D0DDD0] text-[#122420] placeholder-[#668877] focus:border-[#244B40]' 
+                : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)] text-[#E8E9D8] placeholder-[#A9BFA5]/40 focus:border-[#A9BFA5]'
+            } text-xs px-3 py-1.5 pl-8 pr-7 rounded-[2px] border focus:outline-none font-light w-full sm:w-72 transition-colors`}
           />
-          <Search className="w-3.5 h-3.5 text-[#A9BFA5]/50 absolute left-2.5 top-2.5 pointer-events-none" />
+          <Search className={`w-3.5 h-3.5 absolute left-2.5 top-2.5 pointer-events-none ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]/50'}`} />
           {search && (
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="absolute right-2 top-2 text-[#A9BFA5]/50 hover:text-[#E8E9D8] cursor-pointer"
+              className={`absolute right-2 top-2 hover:opacity-100 cursor-pointer ${isLight ? 'text-[#3E6A5E] hover:text-[#122420]' : 'text-[#A9BFA5]/50 hover:text-[#E8E9D8]'}`}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -450,108 +464,157 @@ export default function CampaignsView({
         </div>
       </div>
 
-      {/* 3. Timeline & Progress Filter Toolbar */}
-      <div className="space-y-4 bg-[#061816]/70 border border-[rgba(169,191,165,0.18)] p-4 rounded-[2px]">
-        {/* Row A: Timeline Filter Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center flex-wrap gap-2">
-            <div className="flex items-center space-x-1.5 text-[11px] font-mono uppercase tracking-wider text-[#A9BFA5] mr-1 shrink-0">
-              <CalendarRange className="w-3.5 h-3.5 text-[#A9BFA5]" />
-              <span>Timeline:</span>
+      {/* 3. Streamlined Filter & Controls Toolbar */}
+      <div className={`space-y-3.5 ${isLight ? 'bg-white border-[#E2ECE0]' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'} p-3.5 sm:p-4 rounded-[2px] border transition-colors shadow-sm`}>
+        {/* Main Controls Row */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs">
+          {/* Left: Filter Selectors */}
+          <div className="flex items-center flex-wrap gap-2.5">
+            {/* Timeline Filter Select */}
+            <div className="flex items-center space-x-1.5">
+              <CalendarRange className={`w-3.5 h-3.5 ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}`} />
+              <select
+                value={timelineFilter}
+                onChange={(e) => {
+                  const val = e.target.value as TimelineFilterOption;
+                  setTimelineFilter(val);
+                  if (val === 'Custom') {
+                    setIsCustomDateOpen(true);
+                  } else {
+                    setIsCustomDateOpen(false);
+                  }
+                }}
+                className={`${
+                  isLight
+                    ? 'bg-[#F8F9F5] text-[#122420] border-[#D0DDD0] focus:border-[#244B40]'
+                    : 'bg-[#071C1A] text-[#E8E9D8] border-[rgba(169,191,165,0.25)] focus:border-[#A9BFA5]'
+                } text-xs font-mono px-2.5 py-1.5 rounded-[2px] border focus:outline-none cursor-pointer transition-colors`}
+              >
+                <option value="All">Timeline: All</option>
+                <option value="Active">Active Now</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Concluded">Concluded</option>
+                <option value="Q2">Q2 2026 (Apr–Jun)</option>
+                <option value="Q3">Q3 2026 (Jul–Sep)</option>
+                <option value="Custom">Custom Date Range...</option>
+              </select>
             </div>
 
-            {(
-              [
-                { id: 'All', label: 'All Timelines' },
-                { id: 'Active', label: 'Active Now' },
-                { id: 'Upcoming', label: 'Upcoming' },
-                { id: 'Concluded', label: 'Concluded' },
-                { id: 'Q2', label: 'Q2 2026' },
-                { id: 'Q3', label: 'Q3 2026' },
-              ] as const
-            ).map((opt) => {
-              const isSelected = timelineFilter === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => {
-                    setTimelineFilter(opt.id);
-                    if (isCustomDateOpen) setIsCustomDateOpen(false);
-                  }}
-                  className={`px-2.5 py-1 text-[11px] font-mono rounded-[2px] border transition-colors cursor-pointer whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-medium shadow-sm'
-                      : 'bg-[#071C1A] text-[#A9BFA5]/70 border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]/50 hover:text-[#E8E9D8]'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
+            {/* Progress Filter Select */}
+            <div className="flex items-center space-x-1.5">
+              <Activity className={`w-3.5 h-3.5 ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}`} />
+              <select
+                value={progressFilter}
+                onChange={(e) => setProgressFilter(e.target.value as ProgressFilterOption)}
+                className={`${
+                  isLight
+                    ? 'bg-[#F8F9F5] text-[#122420] border-[#D0DDD0] focus:border-[#244B40]'
+                    : 'bg-[#071C1A] text-[#E8E9D8] border-[rgba(169,191,165,0.25)] focus:border-[#A9BFA5]'
+                } text-xs font-mono px-2.5 py-1.5 rounded-[2px] border focus:outline-none cursor-pointer transition-colors`}
+              >
+                <option value="All">Progress: All</option>
+                <option value="NotStarted">0% (Draft)</option>
+                <option value="Early">1–25% (Early Stage)</option>
+                <option value="InProgress">26–74% (In Flight)</option>
+                <option value="Advanced">75–99% (Advanced)</option>
+                <option value="Completed">100% (Completed)</option>
+              </select>
+            </div>
 
-            {/* Custom Dates Trigger */}
-            <button
-              type="button"
-              onClick={() => {
-                if (timelineFilter !== 'Custom') {
-                  setTimelineFilter('Custom');
-                  setIsCustomDateOpen(true);
-                } else {
-                  setIsCustomDateOpen(!isCustomDateOpen);
-                }
-              }}
-              className={`px-2.5 py-1 text-[11px] font-mono rounded-[2px] border transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-1.5 ${
-                timelineFilter === 'Custom'
-                  ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-medium'
-                  : 'bg-[#071C1A] text-[#A9BFA5]/70 border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]/50 hover:text-[#E8E9D8]'
-              }`}
-            >
-              <Calendar className="w-3 h-3 text-[#A9BFA5]" />
-              <span>
-                {timelineFilter === 'Custom' 
-                  ? `${customStartDate} → ${customEndDate}`
-                  : 'Custom Dates...'}
-              </span>
-            </button>
+            {/* Minimum Progress Threshold */}
+            <div className="flex items-center space-x-1.5">
+              <SlidersHorizontal className={`w-3.5 h-3.5 ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}`} />
+              <select
+                value={minProgress}
+                onChange={(e) => setMinProgress(Number(e.target.value))}
+                className={`${
+                  isLight
+                    ? 'bg-[#F8F9F5] text-[#122420] border-[#D0DDD0] focus:border-[#244B40]'
+                    : 'bg-[#071C1A] text-[#E8E9D8] border-[rgba(169,191,165,0.25)] focus:border-[#A9BFA5]'
+                } text-xs font-mono px-2.5 py-1.5 rounded-[2px] border focus:outline-none cursor-pointer transition-colors`}
+              >
+                <option value={0}>Min Progress: Any</option>
+                <option value={25}>Min Progress: ≥25%</option>
+                <option value={50}>Min Progress: ≥50%</option>
+                <option value={75}>Min Progress: ≥75%</option>
+              </select>
+            </div>
+
+            {/* Reset All Quick Action */}
+            {isAnyFilterActive && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className={`text-[11px] font-mono flex items-center space-x-1 px-2.5 py-1.5 rounded-[2px] border transition-colors cursor-pointer ${
+                  isLight 
+                    ? 'text-[#244B40] hover:text-[#122420] border-[#D0DDD0] hover:bg-[#EDF3EA]' 
+                    : 'text-[#A9BFA5] hover:text-white border-[rgba(169,191,165,0.3)] hover:bg-[#0D2D2A]'
+                }`}
+                title="Reset all filters to default"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Filters</span>
+              </button>
+            )}
           </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="flex items-center space-x-3 text-[10px] font-mono text-[#A9BFA5]/70 shrink-0">
-            <span>Avg Progress: <strong className="text-[#E8E9D8]">{stats.avgProgress}%</strong></span>
-            <span>•</span>
-            <span>Active: <strong className="text-emerald-400">{stats.active}</strong></span>
-            <span>•</span>
-            <span>Upcoming: <strong className="text-sky-400">{stats.upcoming}</strong></span>
-            <span>•</span>
-            <span>Concluded: <strong className="text-[#A9BFA5]">{stats.concluded}</strong></span>
+          {/* Right: Sort & Live Count */}
+          <div className="flex items-center flex-wrap gap-3 shrink-0">
+            {/* Sort Select */}
+            <div className="flex items-center space-x-1.5">
+              <ArrowUpDown className={`w-3.5 h-3.5 ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}`} />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className={`${
+                  isLight
+                    ? 'bg-[#F8F9F5] text-[#122420] border-[#D0DDD0] focus:border-[#244B40]'
+                    : 'bg-[#071C1A] text-[#E8E9D8] border-[rgba(169,191,165,0.25)] focus:border-[#A9BFA5]'
+                } text-xs font-mono px-2.5 py-1.5 rounded-[2px] border focus:outline-none cursor-pointer transition-colors`}
+              >
+                <option value="Default">Sort: Default Order</option>
+                <option value="ProgressDesc">Sort: Progress High → Low</option>
+                <option value="ProgressAsc">Sort: Progress Low → High</option>
+                <option value="StartNewest">Sort: Start Date (Newest)</option>
+                <option value="StartOldest">Sort: Start Date (Oldest)</option>
+                <option value="EndingSoonest">Sort: Ending Soonest</option>
+                <option value="NameAsc">Sort: Campaign Name (A–Z)</option>
+              </select>
+            </div>
+
+            {/* Campaign Counters */}
+            <div className={`text-[11px] font-mono px-2.5 py-1 rounded-[2px] border ${
+              isLight 
+                ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#244B40]' 
+                : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)] text-[#A9BFA5]'
+            }`}>
+              Showing <strong className={isLight ? 'text-[#122420]' : 'text-white'}>{filteredCampaigns.length}</strong> of {campaigns.length}
+            </div>
           </div>
         </div>
 
         {/* Expandable Custom Date Range Drawer */}
         {(timelineFilter === 'Custom' || isCustomDateOpen) && (
-          <div className="p-3.5 bg-[#071C1A] border border-[rgba(169,191,165,0.25)] rounded-[2px] space-y-3 animate-fadeIn">
+          <div className={`p-3.5 ${isLight ? 'bg-[#F8F9F5] border-[#D0DDD0]' : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)]'} border rounded-[2px] space-y-3 animate-fadeIn`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center flex-wrap gap-4 text-xs font-mono">
                 <div className="flex items-center space-x-2">
-                  <span className="text-[#A9BFA5]/80 text-[11px] uppercase">From:</span>
+                  <span className={`${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'} text-[11px] uppercase`}>From:</span>
                   <input
                     type="date"
                     value={pendingStartDate}
                     onChange={(e) => setPendingStartDate(e.target.value)}
-                    style={{ colorScheme: 'dark' }}
-                    className="bg-[#061816] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-xs px-2.5 py-1 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] font-mono cursor-pointer"
+                    className={`${isLight ? 'bg-white border-[#D0DDD0] text-[#122420]' : 'bg-[#061816] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'} text-xs px-2.5 py-1 rounded-[2px] border focus:outline-none font-mono cursor-pointer`}
                   />
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="text-[#A9BFA5]/80 text-[11px] uppercase">To:</span>
+                  <span className={`${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'} text-[11px] uppercase`}>To:</span>
                   <input
                     type="date"
                     value={pendingEndDate}
                     onChange={(e) => setPendingEndDate(e.target.value)}
-                    style={{ colorScheme: 'dark' }}
-                    className="bg-[#061816] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-xs px-2.5 py-1 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] font-mono cursor-pointer"
+                    className={`${isLight ? 'bg-white border-[#D0DDD0] text-[#122420]' : 'bg-[#061816] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'} text-xs px-2.5 py-1 rounded-[2px] border focus:outline-none font-mono cursor-pointer`}
                   />
                 </div>
 
@@ -564,7 +627,7 @@ export default function CampaignsView({
                       setTimelineFilter('Custom');
                       setIsCustomDateOpen(false);
                     }}
-                    className="bg-[#E8E9D8] text-[#071C1A] px-3 py-1 rounded-[2px] text-[11px] font-mono font-semibold uppercase hover:bg-white transition-colors cursor-pointer"
+                    className={`${isLight ? 'bg-[#143630] text-white hover:bg-[#1E4D45]' : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white'} px-3 py-1 rounded-[2px] text-[11px] font-mono font-semibold uppercase transition-colors cursor-pointer`}
                   >
                     Apply Window
                   </button>
@@ -578,7 +641,7 @@ export default function CampaignsView({
                       setTimelineFilter('All');
                       setIsCustomDateOpen(false);
                     }}
-                    className="border border-[rgba(169,191,165,0.3)] text-[#A9BFA5] hover:text-[#E8E9D8] px-2.5 py-1 rounded-[2px] text-[11px] font-mono transition-colors cursor-pointer"
+                    className={`${isLight ? 'border-[#D0DDD0] text-[#244B40] hover:text-[#122420]' : 'border-[rgba(169,191,165,0.3)] text-[#A9BFA5] hover:text-[#E8E9D8]'} border px-2.5 py-1 rounded-[2px] text-[11px] font-mono transition-colors cursor-pointer`}
                   >
                     Reset
                   </button>
@@ -587,7 +650,7 @@ export default function CampaignsView({
 
               {/* Quick Preset Buttons */}
               <div className="flex items-center flex-wrap gap-1.5 text-[10px] font-mono">
-                <span className="text-[#A9BFA5]/60 mr-1">Quick:</span>
+                <span className={`${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'} mr-1`}>Quick:</span>
                 {[
                   { label: 'May–Jul 2026', start: '2026-05-01', end: '2026-07-31' },
                   { label: 'Jun–Aug 2026', start: '2026-06-01', end: '2026-08-31' },
@@ -605,7 +668,11 @@ export default function CampaignsView({
                       setCustomEndDate(preset.end);
                       setTimelineFilter('Custom');
                     }}
-                    className="px-2 py-0.5 border border-[rgba(169,191,165,0.2)] bg-[#0D2D2A]/40 text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5]/50 transition-colors rounded-[2px] cursor-pointer"
+                    className={`px-2 py-0.5 border rounded-[2px] cursor-pointer transition-colors ${
+                      isLight
+                        ? 'border-[#D0DDD0] bg-white text-[#244B40] hover:border-[#244B40]'
+                        : 'border-[rgba(169,191,165,0.2)] bg-[#0D2D2A]/40 text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5]/50'
+                    }`}
                   >
                     {preset.label}
                   </button>
@@ -615,196 +682,116 @@ export default function CampaignsView({
           </div>
         )}
 
-        {/* Row B: Progress Filter Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-[rgba(169,191,165,0.12)] text-xs">
-          <div className="flex items-center flex-wrap gap-2">
-            <div className="flex items-center space-x-1.5 text-[11px] font-mono uppercase tracking-wider text-[#A9BFA5] mr-1 shrink-0">
-              <Activity className="w-3.5 h-3.5 text-[#A9BFA5]" />
-              <span>Progress:</span>
-            </div>
-
-            {(
-              [
-                { id: 'All', label: 'All Progress' },
-                { id: 'NotStarted', label: '0% (Draft)' },
-                { id: 'Early', label: '1–25% (Early)' },
-                { id: 'InProgress', label: '26–74% (In Flight)' },
-                { id: 'Advanced', label: '75–99% (Advanced)' },
-                { id: 'Completed', label: '100% (Complete)' },
-              ] as const
-            ).map((opt) => {
-              const isSelected = progressFilter === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setProgressFilter(opt.id)}
-                  className={`px-2.5 py-1 text-[11px] font-mono rounded-[2px] border transition-colors cursor-pointer whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-medium shadow-sm'
-                      : 'bg-[#071C1A] text-[#A9BFA5]/70 border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]/50 hover:text-[#E8E9D8]'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Minimum Progress Threshold Quick Buttons */}
-          <div className="flex items-center space-x-2 text-[11px] font-mono shrink-0">
-            <span className="text-[#A9BFA5]/70 text-[10px] uppercase">Min Threshold:</span>
-            {[0, 25, 50, 75].map((val) => {
-              const isSelected = minProgress === val;
-              return (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setMinProgress(isSelected && val !== 0 ? 0 : val)}
-                  className={`px-2 py-0.5 rounded-[2px] border text-[10px] transition-colors cursor-pointer ${
-                    isSelected && val > 0
-                      ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                      : isSelected && val === 0
-                      ? 'bg-[#071C1A] text-[#A9BFA5] border-[rgba(169,191,165,0.3)]'
-                      : 'bg-[#071C1A] text-[#A9BFA5]/60 border-[rgba(169,191,165,0.15)] hover:text-[#E8E9D8]'
-                  }`}
-                >
-                  {val === 0 ? 'Any' : `≥${val}%`}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Row C: Sorting Selector & Active Filters Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-[rgba(169,191,165,0.12)] text-xs">
-          {/* Active Filter Chips */}
-          <div className="flex items-center flex-wrap gap-2">
-            <span className="text-[10px] font-mono uppercase text-[#A9BFA5]/60 tracking-wider">
-              Filters:
+        {/* Active Filter Chips Strip (only displayed when active filters exist) */}
+        {isAnyFilterActive && (
+          <div className={`flex items-center flex-wrap gap-2 pt-2.5 border-t ${isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.12)]'} text-xs`}>
+            <span className={`text-[10px] font-mono uppercase tracking-wider ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'}`}>
+              Active Filters:
             </span>
 
-            {!isAnyFilterActive ? (
-              <span className="text-[11px] font-mono text-[#A9BFA5]/50 italic">
-                Showing all campaigns (no active filters)
-              </span>
-            ) : (
-              <>
-                {statusFilter !== 'All' && (
-                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-[10px] font-mono rounded-[2px]">
-                    <span>Status: {statusFilter}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setStatusFilter('All')} 
-                      className="text-[#A9BFA5] hover:text-white cursor-pointer ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                {timelineFilter !== 'All' && (
-                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-[10px] font-mono rounded-[2px]">
-                    <span>
-                      Timeline: {timelineFilter === 'Custom' ? `${customStartDate} → ${customEndDate}` : timelineFilter}
-                    </span>
-                    <button 
-                      type="button" 
-                      onClick={() => setTimelineFilter('All')} 
-                      className="text-[#A9BFA5] hover:text-white cursor-pointer ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                {progressFilter !== 'All' && (
-                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-[10px] font-mono rounded-[2px]">
-                    <span>Progress: {progressFilter}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setProgressFilter('All')} 
-                      className="text-[#A9BFA5] hover:text-white cursor-pointer ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                {minProgress > 0 && (
-                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-[10px] font-mono rounded-[2px]">
-                    <span>Min: ≥{minProgress}%</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setMinProgress(0)} 
-                      className="text-[#A9BFA5] hover:text-white cursor-pointer ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                {search && (
-                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] text-[10px] font-mono rounded-[2px]">
-                    <span>Search: "{search}"</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setSearch('')} 
-                      className="text-[#A9BFA5] hover:text-white cursor-pointer ml-1"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  className="text-[10px] font-mono text-[#A9BFA5] hover:text-white underline underline-offset-2 cursor-pointer flex items-center space-x-1 ml-1"
+            {statusFilter !== 'All' && (
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px] font-mono rounded-[2px] ${
+                isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#122420]' : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+              }`}>
+                <span>Status: {statusFilter}</span>
+                <button 
+                  type="button" 
+                  onClick={() => setStatusFilter('All')} 
+                  className="hover:opacity-75 cursor-pointer ml-1 font-bold"
                 >
-                  <RotateCcw className="w-2.5 h-2.5" />
-                  <span>Reset All</span>
+                  ×
                 </button>
-              </>
+              </span>
             )}
-          </div>
 
-          {/* Right: Sort Dropdown & Result Count */}
-          <div className="flex items-center space-x-3 shrink-0">
-            <div className="flex items-center space-x-1.5 text-xs font-mono">
-              <span className="text-[#A9BFA5]/60 text-[10px] uppercase">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-xs px-2.5 py-1 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] cursor-pointer"
-              >
-                <option value="Default">Default Order</option>
-                <option value="ProgressDesc">Progress: High → Low</option>
-                <option value="ProgressAsc">Progress: Low → High</option>
-                <option value="StartNewest">Timeline: Start (Newest)</option>
-                <option value="StartOldest">Timeline: Start (Oldest)</option>
-                <option value="EndingSoonest">Timeline: Ending Soonest</option>
-                <option value="NameAsc">Campaign Name (A–Z)</option>
-              </select>
-            </div>
+            {timelineFilter !== 'All' && (
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px] font-mono rounded-[2px] ${
+                isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#122420]' : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+              }`}>
+                <span>
+                  Timeline: {timelineFilter === 'Custom' ? `${customStartDate} → ${customEndDate}` : timelineFilter}
+                </span>
+                <button 
+                  type="button" 
+                  onClick={() => setTimelineFilter('All')} 
+                  className="hover:opacity-75 cursor-pointer ml-1 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            )}
 
-            <div className="text-[11px] font-mono text-[#A9BFA5]">
-              Showing <strong className="text-[#E8E9D8]">{filteredCampaigns.length}</strong> of {campaigns.length}
-            </div>
+            {progressFilter !== 'All' && (
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px] font-mono rounded-[2px] ${
+                isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#122420]' : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+              }`}>
+                <span>Progress: {progressFilter}</span>
+                <button 
+                  type="button" 
+                  onClick={() => setProgressFilter('All')} 
+                  className="hover:opacity-75 cursor-pointer ml-1 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {minProgress > 0 && (
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px] font-mono rounded-[2px] ${
+                isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#122420]' : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+              }`}>
+                <span>Min: ≥{minProgress}%</span>
+                <button 
+                  type="button" 
+                  onClick={() => setMinProgress(0)} 
+                  className="hover:opacity-75 cursor-pointer ml-1 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {search && (
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px] font-mono rounded-[2px] ${
+                isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#122420]' : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+              }`}>
+                <span>Search: "{search}"</span>
+                <button 
+                  type="button" 
+                  onClick={() => setSearch('')} 
+                  className="hover:opacity-75 cursor-pointer ml-1 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className={`text-[10px] font-mono underline underline-offset-2 cursor-pointer flex items-center space-x-1 ml-1 ${
+                isLight ? 'text-[#244B40] hover:text-[#122420]' : 'text-[#A9BFA5] hover:text-white'
+              }`}
+            >
+              <RotateCcw className="w-2.5 h-2.5" />
+              <span>Reset All</span>
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 4. Campaigns Table */}
-      <div className="border border-[rgba(169,191,165,0.2)] divide-y divide-[rgba(169,191,165,0.15)] bg-[#071C1A] overflow-x-auto">
+      <div className={`border ${isLight ? 'border-[#E2ECE0] divide-[#E2ECE0] bg-white' : 'border-[rgba(169,191,165,0.2)] divide-[rgba(169,191,165,0.15)] bg-[#071C1A]'} divide-y overflow-x-auto rounded-[2px] transition-colors shadow-sm`}>
         {/* Table Header with interactive sort triggers */}
-        <div className="min-w-[900px] grid grid-cols-12 px-6 py-3 text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 font-mono bg-[#061816]">
+        <div className={`min-w-[900px] grid grid-cols-12 px-6 py-3 text-[10px] uppercase tracking-widest font-mono ${
+          isLight ? 'text-[#244B40] bg-[#F8F9F5]' : 'text-[#A9BFA5]/60 bg-[#061816]'
+        }`}>
           <div 
             onClick={handleToggleSortName}
-            className="col-span-4 flex items-center space-x-1.5 cursor-pointer hover:text-[#E8E9D8] transition-colors select-none"
+            className={`col-span-4 flex items-center space-x-1.5 cursor-pointer ${isLight ? 'hover:text-[#122420]' : 'hover:text-[#E8E9D8]'} transition-colors select-none`}
           >
             <span>Campaign Name & Objective</span>
-            {sortBy === 'NameAsc' && <span className="text-[#A9BFA5]">↑</span>}
+            {sortBy === 'NameAsc' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>↑</span>}
           </div>
 
           <div className="col-span-2">
@@ -813,12 +800,12 @@ export default function CampaignsView({
 
           <div 
             onClick={handleToggleSortTimeline}
-            className="col-span-2 flex items-center space-x-1.5 cursor-pointer hover:text-[#E8E9D8] transition-colors select-none"
+            className={`col-span-2 flex items-center space-x-1.5 cursor-pointer ${isLight ? 'hover:text-[#122420]' : 'hover:text-[#E8E9D8]'} transition-colors select-none`}
           >
             <span>Timeline</span>
-            {sortBy === 'StartNewest' && <span className="text-[#A9BFA5]">↓ Start</span>}
-            {sortBy === 'StartOldest' && <span className="text-[#A9BFA5]">↑ Start</span>}
-            {sortBy === 'EndingSoonest' && <span className="text-[#A9BFA5]">→ Ending</span>}
+            {sortBy === 'StartNewest' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>↓ Start</span>}
+            {sortBy === 'StartOldest' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>↑ Start</span>}
+            {sortBy === 'EndingSoonest' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>→ Ending</span>}
             {sortBy !== 'StartNewest' && sortBy !== 'StartOldest' && sortBy !== 'EndingSoonest' && (
               <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
             )}
@@ -826,11 +813,11 @@ export default function CampaignsView({
 
           <div 
             onClick={handleToggleSortProgress}
-            className="col-span-2 flex items-center space-x-1.5 cursor-pointer hover:text-[#E8E9D8] transition-colors select-none pr-6"
+            className={`col-span-2 flex items-center space-x-1.5 cursor-pointer ${isLight ? 'hover:text-[#122420]' : 'hover:text-[#E8E9D8]'} transition-colors select-none pr-6`}
           >
             <span>Progress</span>
-            {sortBy === 'ProgressDesc' && <span className="text-[#A9BFA5]">↓ High</span>}
-            {sortBy === 'ProgressAsc' && <span className="text-[#A9BFA5]">↑ Low</span>}
+            {sortBy === 'ProgressDesc' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>↓ High</span>}
+            {sortBy === 'ProgressAsc' && <span className={isLight ? 'text-[#143630] font-bold' : 'text-[#A9BFA5]'}>↑ Low</span>}
             {sortBy !== 'ProgressDesc' && sortBy !== 'ProgressAsc' && (
               <ArrowUpDown className="w-2.5 h-2.5 opacity-40" />
             )}
@@ -843,15 +830,19 @@ export default function CampaignsView({
 
         {/* Campaign Rows */}
         {filteredCampaigns.length === 0 ? (
-          <div className="py-16 text-center text-xs text-[#A9BFA5]/70 font-light space-y-3">
-            <div className="serif text-lg text-[#E8E9D8]">No campaigns match the current criteria</div>
-            <p className="max-w-md mx-auto text-[11px] font-mono text-[#A9BFA5]/60">
+          <div className="py-16 text-center text-xs font-light space-y-3">
+            <div className={`serif text-lg ${isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'}`}>No campaigns match the current criteria</div>
+            <p className={`max-w-md mx-auto text-[11px] font-mono ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'}`}>
               Try adjusting your timeline window, progress threshold, or status filter to reveal campaigns.
             </p>
             <button
               type="button"
               onClick={handleResetFilters}
-              className="mt-2 inline-flex items-center space-x-1.5 px-4 py-2 border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A] text-xs font-mono uppercase tracking-wider rounded-[2px] transition-colors cursor-pointer"
+              className={`mt-2 inline-flex items-center space-x-1.5 px-4 py-2 border text-xs font-mono uppercase tracking-wider rounded-[2px] transition-colors cursor-pointer ${
+                isLight 
+                  ? 'border-[#D0DDD0] text-[#122420] hover:bg-[#EDF3EA]' 
+                  : 'border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
+              }`}
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset All Filters</span>
@@ -872,79 +863,87 @@ export default function CampaignsView({
               <div 
                 key={campaign.id}
                 onClick={() => handleSelectCampaignForBlueprint(campaign)}
-                className="min-w-[900px] grid grid-cols-12 px-6 py-4 items-center transition-colors hover:bg-[#0D2D2A]/30 group cursor-pointer"
+                className={`min-w-[900px] grid grid-cols-12 px-6 py-4 items-center transition-colors ${
+                  isLight ? 'hover:bg-[#F4F8F2]' : 'hover:bg-[#0D2D2A]/30'
+                } group cursor-pointer`}
               >
                 {/* Campaign Name & Objective */}
                 <div className="col-span-4 pr-4">
-                  <h4 className="text-xs sm:text-sm font-medium text-[#E8E9D8] group-hover:text-white transition-colors">
+                  <h4 className={`text-xs sm:text-sm font-medium ${isLight ? 'text-[#122420] group-hover:text-[#0A1F1B]' : 'text-[#E8E9D8] group-hover:text-white'} transition-colors`}>
                     {campaign.name}
                   </h4>
-                  <p className="text-[11px] text-[#A9BFA5]/70 font-light mt-0.5 line-clamp-1">
+                  <p className={`text-[11px] ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/70'} font-light mt-0.5 line-clamp-1`}>
                     {campaign.objective}
                   </p>
-                  <span className="text-[10px] font-mono text-[#A9BFA5]/50 block mt-1">
+                  <span className={`text-[10px] font-mono ${isLight ? 'text-[#244B40]/70' : 'text-[#A9BFA5]/50'} block mt-1`}>
                     {campaign.channel}
                   </span>
                 </div>
 
                 {/* Status */}
                 <div className="col-span-2">
-                  <span className={`inline-block text-[10px] uppercase tracking-widest px-2.5 py-0.5 border font-mono ${
+                  <span className={`inline-block text-[10px] uppercase tracking-widest px-2.5 py-0.5 border font-mono rounded-[2px] ${
                     campaign.status === 'Active' 
-                      ? 'text-emerald-400 border-emerald-500/30 bg-emerald-950/30'
+                      ? isLight ? 'text-[#15803D] border-[#86EFAC] bg-[#F0FDF4]' : 'text-emerald-400 border-emerald-500/30 bg-emerald-950/30'
                       : campaign.status === 'Planning'
-                      ? 'text-sky-400 border-sky-500/30 bg-sky-950/30'
+                      ? isLight ? 'text-[#0369A1] border-[#BAE6FD] bg-[#F0F9FF]' : 'text-sky-400 border-sky-500/30 bg-sky-950/30'
                       : campaign.status === 'Completed'
-                      ? 'text-[#E8E9D8] border-[#A9BFA5]/40 bg-[#0D2D2A]/60'
-                      : 'text-[#A9BFA5] border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
+                      ? isLight ? 'text-[#143630] border-[#D0DDD0] bg-[#EDF3EA]' : 'text-[#E8E9D8] border-[#A9BFA5]/40 bg-[#0D2D2A]/60'
+                      : isLight ? 'text-[#3E6A5E] border-[#D0DDD0] bg-[#F8F9F5]' : 'text-[#A9BFA5] border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
                   }`}>
                     {campaign.status}
                   </span>
                 </div>
 
                 {/* Timeline Column with Status Chip */}
-                <div className="col-span-2 text-xs font-mono text-[#A9BFA5]/90">
+                <div className={`col-span-2 text-xs font-mono ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]/90'}`}>
                   <div className="flex items-center space-x-1.5">
                     {timelineState === 'active' && (
-                      <span className="inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded bg-emerald-950/50 border border-emerald-500/30 text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
+                        isLight ? 'bg-[#F0FDF4] border-[#86EFAC] text-[#15803D]' : 'bg-emerald-950/50 border-emerald-500/30 text-emerald-400'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-[#15803D]' : 'bg-emerald-400'} animate-pulse`} />
                         <span>Active</span>
                       </span>
                     )}
                     {timelineState === 'upcoming' && (
-                      <span className="inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded bg-sky-950/50 border border-sky-500/30 text-sky-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
+                        isLight ? 'bg-[#F0F9FF] border-[#BAE6FD] text-[#0369A1]' : 'bg-sky-950/50 border-sky-500/30 text-sky-400'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-[#0369A1]' : 'bg-sky-400'}`} />
                         <span>Upcoming</span>
                       </span>
                     )}
                     {timelineState === 'concluded' && (
-                      <span className="inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded bg-[#0D2D2A]/60 border border-[#A9BFA5]/30 text-[#A9BFA5]">
+                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
+                        isLight ? 'bg-[#EDF3EA] border-[#D0DDD0] text-[#3E6A5E]' : 'bg-[#0D2D2A]/60 border-[#A9BFA5]/30 text-[#A9BFA5]'
+                      }`}>
                         <span>Concluded</span>
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 text-[#E8E9D8]">{campaign.startDate}</div>
-                  <div className="text-[10px] text-[#A9BFA5]/50 mt-0.5">
+                  <div className={`mt-1 font-medium ${isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'}`}>{campaign.startDate}</div>
+                  <div className={`text-[10px] ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/50'} mt-0.5`}>
                     to {campaign.endDate || 'Ongoing'}
                   </div>
                 </div>
 
                 {/* Progress Column with Dynamic Bar and Stage */}
                 <div className="col-span-2 pr-6">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#E8E9D8] mb-1.5">
-                    <span className="text-[10px] text-[#A9BFA5]/70">{progressStage}</span>
+                  <div className={`flex items-center justify-between text-[11px] font-mono ${isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'} mb-1.5`}>
+                    <span className={`text-[10px] ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/70'}`}>{progressStage}</span>
                     <span className="font-semibold">{campaign.progress}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-[#061816] border border-[rgba(169,191,165,0.2)] overflow-hidden rounded-[1px]">
+                  <div className={`w-full h-1.5 ${isLight ? 'bg-[#E2ECE0] border-[#D0DDD0]' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'} border overflow-hidden rounded-[1px]`}>
                     <div 
                       className={`h-full transition-all duration-300 ${
                         campaign.progress === 100
-                          ? 'bg-emerald-400'
+                          ? isLight ? 'bg-[#15803D]' : 'bg-emerald-400'
                           : campaign.progress >= 75
-                          ? 'bg-[#E8E9D8]'
+                          ? isLight ? 'bg-[#143630]' : 'bg-[#E8E9D8]'
                           : campaign.progress >= 25
-                          ? 'bg-[#A9BFA5]'
-                          : 'bg-[#A9BFA5]/50'
+                          ? isLight ? 'bg-[#2E6B5D]' : 'bg-[#A9BFA5]'
+                          : isLight ? 'bg-[#6D9F91]' : 'bg-[#A9BFA5]/50'
                       }`}
                       style={{ width: `${campaign.progress}%` }}
                     />
@@ -954,10 +953,10 @@ export default function CampaignsView({
                 {/* Owner & Action */}
                 <div className="col-span-2 flex items-center justify-end space-x-4">
                   <div className="text-right">
-                    <span className="text-xs text-[#E8E9D8] font-light block">
+                    <span className={`text-xs ${isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'} font-light block`}>
                       {campaign.owner}
                     </span>
-                    <span className="text-[10px] text-[#A9BFA5]/60 font-mono">
+                    <span className={`text-[10px] ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'} font-mono`}>
                       Owner
                     </span>
                   </div>

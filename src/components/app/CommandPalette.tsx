@@ -49,7 +49,6 @@ export default function CommandPalette({
     { label: 'Insights / Live Leads', category: 'insights' as NavCategory, sub: 'live-leads' as SubCategory, icon: Activity, desc: 'Jump to real-time prospect inquiries' },
     { label: 'Insights / Stats', category: 'insights' as NavCategory, sub: 'stats' as SubCategory, icon: Activity, desc: 'Review 248 leads & 64% conversion' },
     { label: 'Insights / Trending Topics', category: 'insights' as NavCategory, sub: 'trending-topics' as SubCategory, icon: TrendingUp, desc: 'Explore market radar & trends' },
-    { label: 'Insights / Quick Actions', category: 'insights' as NavCategory, sub: 'quick-actions' as SubCategory, icon: Activity, desc: 'Execute immediate operations & setup' },
     { label: 'Campaigns / All Campaigns', category: 'campaigns' as NavCategory, sub: 'campaigns-overview' as SubCategory, icon: Megaphone, desc: 'Plan, launch, and manage campaigns' },
     { label: 'Campaigns / Create New Campaign', category: 'campaigns' as NavCategory, sub: 'create-campaign' as SubCategory, icon: Megaphone, desc: 'AI campaign roadmap & execution blueprint flow' },
     { label: 'Creative Lab / Create', category: 'creative-lab' as NavCategory, sub: 'create' as SubCategory, icon: Wand2, desc: 'Draft AI marketing copy & briefs' },

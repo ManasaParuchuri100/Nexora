@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Activity } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface DayData {
   day: string;
@@ -10,30 +12,48 @@ interface DayData {
 }
 
 const DAYS_DATA: DayData[] = [
-  { day: 'Mon', website: 4, ads: 5, referral: 3, total: 12, x: 45 },
-  { day: 'Tue', website: 4, ads: 6, referral: 4, total: 14, x: 110 },
-  { day: 'Wed', website: 3, ads: 5, referral: 3, total: 11, x: 175 },
-  { day: 'Thu', website: 6, ads: 13, referral: 4, total: 23, x: 240 },
-  { day: 'Fri', website: 4, ads: 8, referral: 3, total: 15, x: 305 },
-  { day: 'Sat', website: 5, ads: 9, referral: 4, total: 18, x: 370 },
-  { day: 'Sun', website: 4, ads: 11, referral: 5, total: 20, x: 435 },
+  { day: 'Mon', website: 4, ads: 5, referral: 3, total: 12, x: 50 },
+  { day: 'Tue', website: 4, ads: 6, referral: 4, total: 14, x: 116 },
+  { day: 'Wed', website: 3, ads: 5, referral: 3, total: 11, x: 183 },
+  { day: 'Thu', website: 6, ads: 13, referral: 4, total: 23, x: 250 },
+  { day: 'Fri', website: 4, ads: 8, referral: 3, total: 15, x: 316 },
+  { day: 'Sat', website: 5, ads: 9, referral: 4, total: 18, x: 383 },
+  { day: 'Sun', website: 4, ads: 11, referral: 5, total: 20, x: 450 },
 ];
 
-export default function NewCustomersChart() {
-  // Default hovered to Thursday to match user's screenshot
-  const [activeDayIndex, setActiveDayIndex] = useState<number>(3);
+interface NewCustomersChartProps {
+  isActivityVisible?: boolean;
+  onToggleActivity?: () => void;
+}
 
-  const activeData = DAYS_DATA[activeDayIndex] || DAYS_DATA[3];
+export default function NewCustomersChart({
+  isActivityVisible = false,
+  onToggleActivity
+}: NewCustomersChartProps = {}) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
-  // Map data to SVG coordinates (viewBox: 0 0 480 230)
-  // Baseline Y = 195, Top Y = 25 (range 170 units for value 25)
-  const baseY = 195;
-  const scale = 7; // 1 unit = 7px
+  // Default to Mon (index 0) matching user's reference screenshot
+  const [activeDayIndex, setActiveDayIndex] = useState<number>(0);
+  const [activeChannel, setActiveChannel] = useState<'all' | 'website' | 'ads' | 'referral'>('all');
 
-  const getY = (val: number) => Math.max(20, baseY - val * scale);
+  const adsStroke = isLight ? '#1B6350' : '#A9BFA5';
+  const gridStroke = isLight ? 'rgba(20, 50, 40, 0.12)' : 'rgba(169, 191, 165, 0.12)';
+  const labelFill = isLight ? '#244B40' : '#A9BFA5';
+  const guidelineStroke = isLight ? 'rgba(20, 50, 40, 0.3)' : 'rgba(169, 191, 165, 0.3)';
+  const dotStroke = isLight ? '#FFFFFF' : '#071C1A';
 
-  // Generate smooth cubic bezier SVG path from points
-  const makeSmoothPath = (points: { x: number; y: number }[]) => {
+  const activeData = DAYS_DATA[activeDayIndex] || DAYS_DATA[0];
+
+  // SVG coordinate configuration (viewBox: 0 0 500 220)
+  // Baseline (0 customers) at Y = 175, Top (15 customers) at Y = 35
+  const baseY = 175;
+  const topY = 35;
+  const maxVal = 15;
+  const getY = (val: number) => baseY - (Math.min(val, maxVal) / maxVal) * (baseY - topY);
+
+  // Generate smooth line path using natural cubic beziers
+  const makeLinePath = (points: { x: number; y: number }[]) => {
     if (points.length === 0) return '';
     let d = `M ${points[0].x} ${points[0].y}`;
     for (let i = 0; i < points.length - 1; i++) {
@@ -48,179 +68,286 @@ export default function NewCustomersChart() {
     return d;
   };
 
-  // Stack 1: Referral (Bottom)
-  const layer1Points = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.referral) }));
-  // Stack 2: Ads (Middle: referral + ads)
-  const layer2Points = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.referral + d.ads) }));
-  // Stack 3: Website (Top: referral + ads + website)
-  const layer3Points = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.total) }));
+  const makeAreaPath = (points: { x: number; y: number }[]) => {
+    const line = makeLinePath(points);
+    if (!line) return '';
+    return `${line} L ${points[points.length - 1].x} ${baseY} L ${points[0].x} ${baseY} Z`;
+  };
 
-  // Closed paths for filled areas
-  const layer1Area = `${makeSmoothPath(layer1Points)} L ${DAYS_DATA[DAYS_DATA.length - 1].x} ${baseY} L ${DAYS_DATA[0].x} ${baseY} Z`;
-  
-  // Layer 2 closed area between Layer 2 and Layer 1
-  const reversedLayer1 = [...layer1Points].reverse();
-  const layer2Area = `${makeSmoothPath(layer2Points)} L ${reversedLayer1[0].x} ${reversedLayer1[0].y} ${reversedLayer1.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')} Z`;
+  const websitePoints = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.website) }));
+  const adsPoints = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.ads) }));
+  const referralPoints = DAYS_DATA.map(d => ({ x: d.x, y: getY(d.referral) }));
 
-  // Layer 3 closed area between Layer 3 and Layer 2
-  const reversedLayer2 = [...layer2Points].reverse();
-  const layer3Area = `${makeSmoothPath(layer3Points)} L ${reversedLayer2[0].x} ${reversedLayer2[0].y} ${reversedLayer2.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')} Z`;
+  const websitePath = makeLinePath(websitePoints);
+  const adsPath = makeLinePath(adsPoints);
+  const referralPath = makeLinePath(referralPoints);
+
+  const websiteArea = makeAreaPath(websitePoints);
+  const adsArea = makeAreaPath(adsPoints);
+  const referralArea = makeAreaPath(referralPoints);
+
+  const showWebsite = activeChannel === 'all' || activeChannel === 'website';
+  const showAds = activeChannel === 'all' || activeChannel === 'ads';
+  const showReferral = activeChannel === 'all' || activeChannel === 'referral';
 
   return (
     <div className="border border-[rgba(169,191,165,0.2)] bg-[#071C1A] p-5 flex flex-col justify-between h-full relative overflow-hidden group">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8] tracking-tight">
-          New customers
-        </h3>
-        <div className="flex items-center space-x-3 text-[10px] font-mono text-[#A9BFA5]/80">
-          <span className="flex items-center space-x-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+        <div className="flex items-center space-x-3">
+          <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8] tracking-tight">
+            New customers
+          </h3>
+          {onToggleActivity && (
+            <button
+              type="button"
+              onClick={onToggleActivity}
+              className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-[2px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
+                isActivityVisible
+                  ? 'border-[#A9BFA5] text-[#E8E9D8] bg-[#072421]'
+                  : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/70 hover:text-[#E8E9D8] hover:border-[rgba(169,191,165,0.4)]'
+              }`}
+            >
+              <Activity className="w-3 h-3 text-[#A9BFA5]" />
+              <span>{isActivityVisible ? 'Hide Activity Graph' : 'Show Activity Graph'}</span>
+            </button>
+          )}
+        </div>
+
+        {/* Legend with interactive channel filters */}
+        <div className="flex items-center space-x-3 text-[10px] font-mono text-[#A9BFA5]/80 select-none">
+          <button
+            type="button"
+            onClick={() => setActiveChannel(activeChannel === 'website' ? 'all' : 'website')}
+            className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
+              showWebsite ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+            }`}
+            title="Filter by Website"
+          >
             <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
             <span>Website</span>
-          </span>
-          <span className="flex items-center space-x-1">
-            <span className="w-2 h-2 rounded-full bg-[#A9BFA5]" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveChannel(activeChannel === 'ads' ? 'all' : 'ads')}
+            className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
+              showAds ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+            }`}
+            title="Filter by Ads"
+          >
+            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-[#1B6350]' : 'bg-[#A9BFA5]'}`} />
             <span>Ads</span>
-          </span>
-          <span className="flex items-center space-x-1">
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveChannel(activeChannel === 'referral' ? 'all' : 'referral')}
+            className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
+              showReferral ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+            }`}
+            title="Filter by Referral"
+          >
             <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
             <span>Referral</span>
-          </span>
+          </button>
         </div>
       </div>
 
-      {/* Interactive SVG Stacked Area Chart */}
+      {/* Clean Line Graph Canvas */}
       <div className="relative w-full h-[210px]">
         <svg
-          viewBox="0 0 480 220"
+          viewBox="0 0 500 220"
           className="w-full h-full overflow-visible select-none"
         >
           <defs>
-            {/* Soft gradient for Layer 3 (Website - Sky/Teal) */}
-            <linearGradient id="websiteGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#0284C7" stopOpacity="0.65" />
+            {/* Subtle under-line gradient fills */}
+            <linearGradient id="websiteLineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#38BDF8" stopOpacity={isLight ? "0.25" : "0.18"} />
+              <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
             </linearGradient>
-
-            {/* Soft gradient for Layer 2 (Ads - Sage/Lime) */}
-            <linearGradient id="adsGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#A9BFA5" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#6EE7B7" stopOpacity="0.75" />
+            <linearGradient id="adsLineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={adsStroke} stopOpacity={isLight ? "0.25" : "0.18"} />
+              <stop offset="100%" stopColor={adsStroke} stopOpacity="0" />
             </linearGradient>
-
-            {/* Soft gradient for Layer 1 (Referral - Cobalt/Navy) */}
-            <linearGradient id="referralGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#1D4ED8" stopOpacity="0.8" />
+            <linearGradient id="referralLineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3B82F6" stopOpacity={isLight ? "0.25" : "0.18"} />
+              <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
             </linearGradient>
           </defs>
 
-          {/* Y Axis Grid lines & Ticks */}
-          {[
-            { val: 20, y: getY(20) },
-            { val: 10, y: getY(10) },
-            { val: 0, y: baseY }
-          ].map(tick => (
-            <g key={tick.val}>
-              <line
-                x1="30"
-                y1={tick.y}
-                x2="465"
-                y2={tick.y}
-                stroke="rgba(169, 191, 165, 0.12)"
-                strokeDasharray={tick.val === 0 ? undefined : '3 3'}
-              />
-              <text
-                x="18"
-                y={tick.y + 4}
-                fill="#A9BFA5"
-                opacity="0.6"
-                fontSize="10"
-                fontFamily="monospace"
-                textAnchor="end"
-              >
-                {tick.val}
-              </text>
-            </g>
-          ))}
+          {/* Y Axis Grid lines & Ticks (0, 5, 10, 15) */}
+          {[15, 10, 5, 0].map(val => {
+            const y = getY(val);
+            return (
+              <g key={val}>
+                <line
+                  x1="35"
+                  y1={y}
+                  x2="480"
+                  y2={y}
+                  stroke={gridStroke}
+                  strokeDasharray={val === 0 ? undefined : '3 3'}
+                />
+                <text
+                  x="26"
+                  y={y + 4}
+                  fill={labelFill}
+                  opacity={isLight ? "0.85" : "0.6"}
+                  fontSize="10"
+                  fontFamily="monospace"
+                  textAnchor="end"
+                >
+                  {val}
+                </text>
+              </g>
+            );
+          })}
 
-          {/* Filled Stacked Areas */}
-          {/* Layer 3: Website (Top Area) */}
-          <path d={layer3Area} fill="url(#websiteGrad)" />
+          {/* Subtle under-line gradient washes */}
+          {showReferral && <path d={referralArea} fill="url(#referralLineGrad)" />}
+          {showAds && <path d={adsArea} fill="url(#adsLineGrad)" />}
+          {showWebsite && <path d={websiteArea} fill="url(#websiteLineGrad)" />}
 
-          {/* Layer 2: Ads (Middle Area) */}
-          <path d={layer2Area} fill="url(#adsGrad)" />
+          {/* Clean Primary Line Graphs */}
+          {showReferral && (
+            <path
+              d={referralPath}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-          {/* Layer 1: Referral (Bottom Area) */}
-          <path d={layer1Area} fill="url(#referralGrad)" />
+          {showAds && (
+            <path
+              d={adsPath}
+              fill="none"
+              stroke={adsStroke}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
 
-          {/* Vertical Active Cursor Guideline */}
+          {showWebsite && (
+            <path
+              d={websitePath}
+              fill="none"
+              stroke="#0284C7"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+
+          {/* Vertical Guideline at Active Day */}
           <line
             x1={activeData.x}
-            y1={20}
+            y1={topY}
             x2={activeData.x}
             y2={baseY}
-            stroke="#071C1A"
-            strokeWidth="2"
-          />
-          <circle
-            cx={activeData.x}
-            cy={getY(activeData.total)}
-            r="3.5"
-            fill="#E8E9D8"
-            stroke="#071C1A"
+            stroke={guidelineStroke}
+            strokeDasharray="3 3"
             strokeWidth="1.5"
           />
 
-          {/* X Axis Labels (Mon - Sun) */}
-          {DAYS_DATA.map((d, idx) => (
-            <g
-              key={d.day}
-              className="cursor-pointer"
-              onMouseEnter={() => setActiveDayIndex(idx)}
-              onClick={() => setActiveDayIndex(idx)}
-            >
-              {/* Invisible touch/hover target column */}
-              <rect
-                x={d.x - 25}
-                y={20}
-                width={50}
-                height={baseY - 20}
-                fill="transparent"
-              />
-              <text
-                x={d.x}
-                y={baseY + 18}
-                fill={activeDayIndex === idx ? '#E8E9D8' : '#A9BFA5'}
-                opacity={activeDayIndex === idx ? '1' : '0.6'}
-                fontSize="11"
-                fontWeight={activeDayIndex === idx ? '600' : '400'}
-                fontFamily="sans-serif"
-                textAnchor="middle"
+          {/* Active Data Points on each Line */}
+          {showWebsite && (
+            <circle
+              cx={activeData.x}
+              cy={getY(activeData.website)}
+              r="4.5"
+              fill="#0284C7"
+              stroke={dotStroke}
+              strokeWidth="2"
+            />
+          )}
+          {showAds && (
+            <circle
+              cx={activeData.x}
+              cy={getY(activeData.ads)}
+              r="4.5"
+              fill={adsStroke}
+              stroke={dotStroke}
+              strokeWidth="2"
+            />
+          )}
+          {showReferral && (
+            <circle
+              cx={activeData.x}
+              cy={getY(activeData.referral)}
+              r="4.5"
+              fill="#3B82F6"
+              stroke={dotStroke}
+              strokeWidth="2"
+            />
+          )}
+
+          {/* X Axis Day Columns & Labels */}
+          {DAYS_DATA.map((d, idx) => {
+            const isSelected = activeDayIndex === idx;
+            return (
+              <g
+                key={d.day}
+                className="cursor-pointer"
+                onMouseEnter={() => setActiveDayIndex(idx)}
+                onClick={() => setActiveDayIndex(idx)}
               >
-                {d.day}
-              </text>
-            </g>
-          ))}
+                {/* Touch/hover target box */}
+                <rect
+                  x={d.x - 28}
+                  y={topY}
+                  width={56}
+                  height={baseY - topY + 30}
+                  fill="transparent"
+                />
+                <text
+                  x={d.x}
+                  y={baseY + 22}
+                  fill={isSelected ? (isLight ? '#122420' : '#E8E9D8') : labelFill}
+                  opacity={isSelected ? '1' : (isLight ? '0.85' : '0.6')}
+                  fontSize="11"
+                  fontWeight={isSelected ? '600' : '400'}
+                  fontFamily="sans-serif"
+                  textAnchor="middle"
+                >
+                  {d.day}
+                </text>
+                {isSelected && (
+                  <circle
+                    cx={d.x}
+                    cy={baseY + 30}
+                    r="1.5"
+                    fill={isLight ? '#122420' : '#E8E9D8'}
+                  />
+                )}
+              </g>
+            );
+          })}
         </svg>
 
-        {/* Floating Tooltip matching image.png exactly */}
+        {/* Floating Tooltip Card exactly matching user's design */}
         <div
-          className="absolute z-20 pointer-events-none transition-all duration-200"
+          className="absolute z-20 pointer-events-none transition-all duration-150"
           style={{
-            left: `${(activeData.x / 480) * 100}%`,
-            top: '25px',
-            transform: 'translateX(-50%)'
+            left: activeDayIndex <= 1
+              ? `${(activeData.x / 500) * 100 + 4}%`
+              : activeDayIndex >= 5
+              ? `${(activeData.x / 500) * 100 - 28}%`
+              : `${(activeData.x / 500) * 100}%`,
+            top: '20px',
+            transform: activeDayIndex > 1 && activeDayIndex < 5 ? 'translateX(-50%)' : 'none'
           }}
         >
-          <div className="bg-[#051513] border border-[rgba(169,191,165,0.3)] shadow-xl px-3 py-2 rounded-[2px] text-[11px] font-mono space-y-1 min-w-[100px]">
+          <div className="bg-[#051513] border border-[rgba(169,191,165,0.3)] shadow-2xl px-3 py-2 rounded-[2px] text-[11px] font-mono space-y-1 min-w-[110px]">
             <div className="flex items-center space-x-2 text-[#E8E9D8]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
               <span className="text-[#A9BFA5]/80">Website -</span>
               <span className="font-semibold text-white">{activeData.website}</span>
             </div>
             <div className="flex items-center space-x-2 text-[#E8E9D8]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#A9BFA5]" />
+              <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-[#1B6350]' : 'bg-[#A9BFA5]'}`} />
               <span className="text-[#A9BFA5]/80">Ads -</span>
               <span className="font-semibold text-white">{activeData.ads}</span>
             </div>

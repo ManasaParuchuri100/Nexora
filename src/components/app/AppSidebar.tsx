@@ -9,9 +9,11 @@ import {
   ChevronRight,
   LogOut,
   SlidersHorizontal,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
 
 interface AppSidebarProps {
   activeCategory: NavCategory;
@@ -20,6 +22,7 @@ interface AppSidebarProps {
   onLogout: () => void;
   isOpenMobile: boolean;
   onCloseMobile: () => void;
+  onOpenSettings?: () => void;
 }
 
 interface NavItemConfig {
@@ -37,8 +40,7 @@ const NAV_ITEMS: NavItemConfig[] = [
     subItems: [
       { id: 'live-leads', label: 'Live Leads' },
       { id: 'stats', label: 'Stats' },
-      { id: 'trending-topics', label: 'Trending Topics' },
-      { id: 'quick-actions', label: 'Quick Actions' }
+      { id: 'trending-topics', label: 'Trending Topics' }
     ]
   },
   {
@@ -92,8 +94,10 @@ export default function AppSidebar({
   onSelectNav,
   onLogout,
   isOpenMobile,
-  onCloseMobile
+  onCloseMobile,
+  onOpenSettings
 }: AppSidebarProps) {
+  const { theme } = useTheme();
   // Track hovered category for smooth submenu display
   const [hoveredCategory, setHoveredCategory] = useState<NavCategory | null>(null);
 
@@ -247,6 +251,27 @@ export default function AppSidebar({
           </span>
           <span className="font-mono text-[9px] text-[#A9BFA5]/50">v2.4</span>
         </div>
+
+        {/* Settings Action Button */}
+        {onOpenSettings && (
+          <button
+            type="button"
+            onClick={() => {
+              onOpenSettings();
+              onCloseMobile();
+            }}
+            id="sidebar-settings-button"
+            className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-widest text-[#A9BFA5]/75 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/40 rounded-[2px] transition-colors cursor-pointer focus:outline-none mb-1"
+          >
+            <span className="flex items-center space-x-2.5">
+              <Settings className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span>Settings</span>
+            </span>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[rgba(169,191,165,0.15)] text-[#A9BFA5]">
+              {theme === 'light' ? 'Light' : 'Dark'}
+            </span>
+          </button>
+        )}
 
         <button
           type="button"

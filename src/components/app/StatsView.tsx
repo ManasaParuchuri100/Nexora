@@ -577,7 +577,6 @@ export default function StatsView() {
                     onChange={(e) => setPendingStartDate(e.target.value)}
                     max={pendingEndDate}
                     className="w-full bg-[#071C1A] text-[#E8E9D8] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[#A9BFA5]"
-                    style={{ colorScheme: 'dark' }}
                   />
                 </div>
 
@@ -591,7 +590,6 @@ export default function StatsView() {
                     onChange={(e) => setPendingEndDate(e.target.value)}
                     min={pendingStartDate}
                     className="w-full bg-[#071C1A] text-[#E8E9D8] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[#A9BFA5]"
-                    style={{ colorScheme: 'dark' }}
                   />
                 </div>
               </div>

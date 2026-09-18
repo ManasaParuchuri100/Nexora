@@ -37,6 +37,11 @@ body {
   border-color: rgba(169, 191, 165, 0.2);
 }
 
+/* Atmospheric background in light/dark */
+.atmosphere-bg {
+  background: radial-gradient(circle at 70% 30%, #0D2D2A 0%, #071C1A 100%);
+}
+
 /* Sophisticated Dark SVG noise filter grain */
 .grain {
   position: absolute;
@@ -64,3 +69,448 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #1D4C44;
 }
+
+/* ==========================================================================
+   LIGHT MODE STYLING SYSTEM (Botanical Ivory)
+   Applied automatically when data-theme="light" or .theme-light is active
+   ========================================================================== */
+
+html[data-theme="light"],
+body[data-theme="light"],
+.theme-light {
+  color-scheme: light !important;
+  background-color: #F8F9F5 !important;
+  color: #122420 !important;
+}
+
+/* Scrollbar in Light Mode */
+[data-theme="light"] ::-webkit-scrollbar-track,
+.theme-light ::-webkit-scrollbar-track {
+  background: #F8F9F5 !important;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb,
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #C4D3C3 !important;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover,
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #A6BAA5 !important;
+}
+
+/* Atmosphere background */
+[data-theme="light"] .atmosphere-bg,
+.theme-light .atmosphere-bg {
+  background: radial-gradient(circle at 70% 30%, #EDF3EC 0%, #F8F9F5 100%) !important;
+}
+
+/* Background overrides: Main containers & layout */
+[data-theme="light"] .bg-\[\#071C1A\],
+.theme-light .bg-\[\#071C1A\],
+[data-theme="light"] .bg-\[\#071C1A\]\/90,
+.theme-light .bg-\[\#071C1A\]\/90,
+[data-theme="light"] .bg-\[\#071C1A\]\/80,
+.theme-light .bg-\[\#071C1A\]\/80 {
+  background-color: #F8F9F5 !important;
+}
+
+[data-theme="light"] .bg-\[\#071C1A\]\/60,
+.theme-light .bg-\[\#071C1A\]\/60 {
+  background-color: rgba(248, 249, 245, 0.9) !important;
+}
+
+[data-theme="light"] .bg-\[\#071C1A\]\/40,
+.theme-light .bg-\[\#071C1A\]\/40 {
+  background-color: rgba(248, 249, 245, 0.7) !important;
+}
+
+/* Cards & Modals: Deep dark teal becomes pure crisp white */
+[data-theme="light"] [class*="bg-[#061816]"],
+.theme-light [class*="bg-[#061816]"],
+[data-theme="light"] [class*="bg-[#051513]"],
+.theme-light [class*="bg-[#051513]"] {
+  background-color: #FFFFFF !important;
+}
+
+/* Elevated cards, selected items, active tabs */
+[data-theme="light"] .bg-\[\#0D2D2A\],
+.theme-light .bg-\[\#0D2D2A\] {
+  background-color: #EDF3EA !important;
+}
+
+[data-theme="light"] [class*="bg-[#0D2D2A]/"],
+.theme-light [class*="bg-[#0D2D2A]/"] {
+  background-color: #EDF3EA !important;
+}
+
+[data-theme="light"] .bg-\[\#09221F\],
+.theme-light .bg-\[\#09221F\],
+[data-theme="light"] .bg-\[\#08221F\],
+.theme-light .bg-\[\#08221F\],
+[data-theme="light"] .bg-\[\#072421\],
+.theme-light .bg-\[\#072421\],
+[data-theme="light"] .bg-\[\#0A2E28\],
+.theme-light .bg-\[\#0A2E28\] {
+  background-color: #E5EDE2 !important;
+}
+
+/* Hover background states */
+[data-theme="light"] .hover\:bg-\[\#0D2D2A\]:hover,
+.theme-light .hover\:bg-\[\#0D2D2A\]:hover,
+[data-theme="light"] [class*="hover:bg-[#0D2D2A]"]:hover,
+.theme-light [class*="hover:bg-[#0D2D2A]"]:hover {
+  background-color: #E2ECE0 !important;
+}
+
+[data-theme="light"] .hover\:bg-\[\#09221F\]:hover,
+.theme-light .hover\:bg-\[\#09221F\]:hover,
+[data-theme="light"] .hover\:bg-\[\#08221F\]:hover,
+.theme-light .hover\:bg-\[\#08221F\]:hover,
+[data-theme="light"] .hover\:bg-\[\#061816\]:hover,
+.theme-light .hover\:bg-\[\#061816\]:hover {
+  background-color: #DFE8DC !important;
+}
+
+/* Primary Action Buttons (Dark forest background with crisp white text) */
+[data-theme="light"] .bg-\[\#E8E9D8\],
+.theme-light .bg-\[\#E8E9D8\],
+[data-theme="light"] button.bg-\[\#E8E9D8\],
+.theme-light button.bg-\[\#E8E9D8\],
+[data-theme="light"] a.bg-\[\#E8E9D8\],
+.theme-light a.bg-\[\#E8E9D8\] {
+  background-color: #143630 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#E8E9D8\] *,
+.theme-light .bg-\[\#E8E9D8\] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#E8E9D8\]:hover,
+.theme-light .bg-\[\#E8E9D8\]:hover,
+[data-theme="light"] button.bg-\[\#E8E9D8\]:hover,
+.theme-light button.bg-\[\#E8E9D8\]:hover,
+[data-theme="light"] a.bg-\[\#E8E9D8\]:hover,
+.theme-light a.bg-\[\#E8E9D8\]:hover {
+  background-color: #1E4D45 !important;
+  color: #FFFFFF !important;
+}
+
+/* Sage Accent Buttons & Active Indicators */
+[data-theme="light"] .bg-\[\#A9BFA5\],
+.theme-light .bg-\[\#A9BFA5\] {
+  background-color: #143630 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-\[\#A9BFA5\] *,
+.theme-light .bg-\[\#A9BFA5\] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY CONTRAST OVERRIDES
+   Ensures WCAG AA/AAA compliance across all font weights and opacities
+   ========================================================================== */
+
+/* Primary Body and Display Typography */
+[data-theme="light"] .text-\[\#E8E9D8\],
+.theme-light .text-\[\#E8E9D8\] {
+  color: #122420 !important;
+}
+
+[data-theme="light"] .text-\[\#E8E9D8\]\/90,
+.theme-light .text-\[\#E8E9D8\]\/90 {
+  color: #1A332E !important;
+}
+
+[data-theme="light"] .text-\[\#E8E9D8\]\/80,
+.theme-light .text-\[\#E8E9D8\]\/80 {
+  color: #223E38 !important;
+}
+
+[data-theme="light"] .text-\[\#E8E9D8\]\/70,
+.theme-light .text-\[\#E8E9D8\]\/70 {
+  color: #2C4B44 !important;
+}
+
+/* Sage text becomes high-contrast botanical slate-sage */
+[data-theme="light"] .text-\[\#A9BFA5\],
+.theme-light .text-\[\#A9BFA5\] {
+  color: #244B40 !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/90,
+.theme-light .text-\[\#A9BFA5\]\/90 {
+  color: #285045 !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/80,
+.theme-light .text-\[\#A9BFA5\]\/80 {
+  color: #2E574B !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/75,
+.theme-light .text-\[\#A9BFA5\]\/75,
+[data-theme="light"] .text-\[\#A9BFA5\]\/70,
+.theme-light .text-\[\#A9BFA5\]\/70 {
+  color: #356054 !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/60,
+.theme-light .text-\[\#A9BFA5\]\/60 {
+  color: #3E6A5E !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/50,
+.theme-light .text-\[\#A9BFA5\]\/50 {
+  color: #487568 !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/40,
+.theme-light .text-\[\#A9BFA5\]\/40 {
+  color: #507D70 !important;
+}
+
+[data-theme="light"] .text-\[\#A9BFA5\]\/30,
+.theme-light .text-\[\#A9BFA5\]\/30 {
+  color: #5A877A !important;
+}
+
+/* Default text-white becomes deep botanical charcoal in light mode */
+[data-theme="light"] .text-white,
+.theme-light .text-white {
+  color: #122420 !important;
+}
+
+/* Keep white text inside dark buttons and badges */
+[data-theme="light"] .bg-\[\#E8E9D8\] .text-white,
+.theme-light .bg-\[\#E8E9D8\] .text-white,
+[data-theme="light"] .bg-\[\#143630\] .text-white,
+.theme-light .bg-\[\#143630\] .text-white,
+[data-theme="light"] .bg-\[\#A9BFA5\] .text-white,
+.theme-light .bg-\[\#A9BFA5\] .text-white {
+  color: #FFFFFF !important;
+}
+
+/* Hover typography */
+[data-theme="light"] .hover\:text-white:hover,
+.theme-light .hover\:text-white:hover,
+[data-theme="light"] .hover\:text-\[\#E8E9D8\]:hover,
+.theme-light .hover\:text-\[\#E8E9D8\]:hover {
+  color: #0A1B18 !important;
+}
+
+[data-theme="light"] .hover\:text-\[\#A9BFA5\]:hover,
+.theme-light .hover\:text-\[\#A9BFA5\]:hover {
+  color: #143630 !important;
+}
+
+[data-theme="light"] .group:hover .group-hover\:text-white,
+.theme-light .group:hover .group-hover\:text-white,
+[data-theme="light"] .group:hover .group-hover\:text-\[\#E8E9D8\],
+.theme-light .group:hover .group-hover\:text-\[\#E8E9D8\] {
+  color: #0A1B18 !important;
+}
+
+/* ==========================================================================
+   SEMANTIC STATUS BADGES & TELEMETRY CHIPS
+   Ensures badges are vibrant, high-contrast, and beautiful in Light Mode
+   ========================================================================== */
+
+/* Emerald / Positive / High Conviction */
+[data-theme="light"] [class*="text-emerald-300"],
+.theme-light [class*="text-emerald-300"],
+[data-theme="light"] [class*="text-emerald-400"],
+.theme-light [class*="text-emerald-400"],
+[data-theme="light"] .text-emerald-500,
+.theme-light .text-emerald-500 {
+  color: #046A4E !important;
+}
+
+[data-theme="light"] [class*="bg-emerald-950"],
+.theme-light [class*="bg-emerald-950"] {
+  background-color: #E6F5EE !important;
+}
+
+[data-theme="light"] [class*="border-emerald-500"],
+.theme-light [class*="border-emerald-500"] {
+  border-color: rgba(4, 120, 87, 0.28) !important;
+}
+
+[data-theme="light"] .bg-emerald-400,
+.theme-light .bg-emerald-400 {
+  background-color: #059669 !important;
+}
+
+/* Amber / Warning / Medium / Meeting */
+[data-theme="light"] [class*="text-amber-300"],
+.theme-light [class*="text-amber-300"],
+[data-theme="light"] [class*="text-amber-400"],
+.theme-light [class*="text-amber-400"],
+[data-theme="light"] .text-amber-500,
+.theme-light .text-amber-500 {
+  color: #92400E !important;
+}
+
+[data-theme="light"] [class*="bg-amber-950"],
+.theme-light [class*="bg-amber-950"] {
+  background-color: #FEF3C7 !important;
+}
+
+[data-theme="light"] [class*="border-amber-500"],
+.theme-light [class*="border-amber-500"] {
+  border-color: rgba(180, 83, 9, 0.28) !important;
+}
+
+[data-theme="light"] .bg-amber-400,
+.theme-light .bg-amber-400 {
+  background-color: #D97706 !important;
+}
+
+/* Sky / Blue / Cyan / Info / Contacted */
+[data-theme="light"] [class*="text-sky-300"],
+.theme-light [class*="text-sky-300"],
+[data-theme="light"] [class*="text-sky-400"],
+.theme-light [class*="text-sky-400"],
+[data-theme="light"] [class*="text-cyan-300"],
+.theme-light [class*="text-cyan-300"],
+[data-theme="light"] [class*="text-cyan-400"],
+.theme-light [class*="text-cyan-400"] {
+  color: #0369A1 !important;
+}
+
+[data-theme="light"] [class*="bg-sky-950"],
+.theme-light [class*="bg-sky-950"],
+[data-theme="light"] [class*="bg-cyan-950"],
+.theme-light [class*="bg-cyan-950"] {
+  background-color: #E0F2FE !important;
+}
+
+[data-theme="light"] [class*="border-sky-500"],
+.theme-light [class*="border-sky-500"],
+[data-theme="light"] [class*="border-cyan-500"],
+.theme-light [class*="border-cyan-500"] {
+  border-color: rgba(2, 132, 199, 0.28) !important;
+}
+
+/* Rose / Red / Error / Danger / High Severity */
+[data-theme="light"] [class*="text-rose-400"],
+.theme-light [class*="text-rose-400"],
+[data-theme="light"] [class*="text-red-400"],
+.theme-light [class*="text-red-400"] {
+  color: #9F1239 !important;
+}
+
+[data-theme="light"] [class*="bg-rose-950"],
+.theme-light [class*="bg-rose-950"],
+[data-theme="light"] [class*="bg-red-950"],
+.theme-light [class*="bg-red-950"] {
+  background-color: #FFE4E6 !important;
+}
+
+[data-theme="light"] [class*="border-rose-500"],
+.theme-light [class*="border-rose-500"],
+[data-theme="light"] [class*="border-red-500"],
+.theme-light [class*="border-red-500"] {
+  border-color: rgba(225, 29, 72, 0.28) !important;
+}
+
+/* Purple / Violet */
+[data-theme="light"] [class*="text-purple-300"],
+.theme-light [class*="text-purple-300"],
+[data-theme="light"] [class*="text-purple-400"],
+.theme-light [class*="text-purple-400"] {
+  color: #5B21B6 !important;
+}
+
+[data-theme="light"] [class*="bg-purple-950"],
+.theme-light [class*="bg-purple-950"] {
+  background-color: #F3E8FF !important;
+}
+
+/* ==========================================================================
+   BORDERS, DIVIDERS & ACTIVE INDICATORS
+   ========================================================================== */
+
+[data-theme="light"] [class*="border-\[rgba(169,191,165,"],
+.theme-light [class*="border-\[rgba(169,191,165,"],
+[data-theme="light"] [class*="border-\[rgba(169, 191, 165,"],
+.theme-light [class*="border-\[rgba(169, 191, 165,"],
+[data-theme="light"] .thin-border,
+.theme-light .thin-border {
+  border-color: rgba(20, 50, 40, 0.16) !important;
+}
+
+[data-theme="light"] .border-\[\#A9BFA5\],
+.theme-light .border-\[\#A9BFA5\] {
+  border-color: #3A584E !important;
+}
+
+[data-theme="light"] [class*="border-[#A9BFA5]/"],
+.theme-light [class*="border-[#A9BFA5]/"] {
+  border-color: rgba(36, 75, 64, 0.24) !important;
+}
+
+/* Active Tab Underlines and Focus Borders */
+[data-theme="light"] .border-\[\#E8E9D8\],
+.theme-light .border-\[\#E8E9D8\],
+[data-theme="light"] .hover\:border-\[\#E8E9D8\]:hover,
+.theme-light .hover\:border-\[\#E8E9D8\]:hover {
+  border-color: #143630 !important;
+}
+
+[data-theme="light"] .hover\:border-\[\#A9BFA5\]:hover,
+.theme-light .hover\:border-\[\#A9BFA5\]:hover {
+  border-color: #244B40 !important;
+}
+
+[data-theme="light"] [class*="divide-\[rgba(169,191,165,"],
+.theme-light [class*="divide-\[rgba(169,191,165,"],
+[data-theme="light"] [class*="divide-\[rgba(169, 191, 165,"],
+.theme-light [class*="divide-\[rgba(169, 191, 165,"] {
+  border-color: rgba(20, 50, 40, 0.12) !important;
+}
+
+/* ==========================================================================
+   INPUTS, TEXTAREAS & CONTROLS
+   ========================================================================== */
+
+[data-theme="light"] input,
+.theme-light input,
+[data-theme="light"] textarea,
+.theme-light textarea,
+[data-theme="light"] select,
+.theme-light select {
+  color-scheme: light !important;
+  color: #122420 !important;
+}
+
+[data-theme="light"] input::placeholder,
+.theme-light input::placeholder,
+[data-theme="light"] textarea::placeholder,
+.theme-light textarea::placeholder {
+  color: #487568 !important;
+}
+
+/* Shadows and elevation in light mode */
+[data-theme="light"] .shadow-2xl,
+.theme-light .shadow-2xl,
+[data-theme="light"] .shadow-xl,
+.theme-light .shadow-xl {
+  box-shadow: 0 12px 32px -4px rgba(20, 45, 38, 0.1), 0 4px 8px -2px rgba(20, 45, 38, 0.05) !important;
+}
+
+/* SVGs & Charts in light mode */
+[data-theme="light"] svg text,
+.theme-light svg text {
+  fill: #244B40 !important;
+}
+
+[data-theme="light"] svg line,
+.theme-light svg line {
+  stroke: rgba(20, 50, 40, 0.14) !important;
+}
+

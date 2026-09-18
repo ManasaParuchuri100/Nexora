@@ -11,9 +11,12 @@ import {
   CheckCircle2,
   Sparkles,
   Command,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { NavCategory, SubCategory, SystemNotification } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
 
 interface AppTopBarProps {
   activeCategory: NavCategory;
@@ -23,6 +26,7 @@ interface AppTopBarProps {
   onLogout: () => void;
   onOpenQuickSearch: () => void;
   onSelectNav: (category: NavCategory, subCategory?: SubCategory) => void;
+  onOpenSettings?: () => void;
 }
 
 export default function AppTopBar({
@@ -32,8 +36,10 @@ export default function AppTopBar({
   onOpenMobileMenu,
   onLogout,
   onOpenQuickSearch,
-  onSelectNav
+  onSelectNav,
+  onOpenSettings
 }: AppTopBarProps) {
+  const { theme, toggleTheme } = useTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [localNotifications, setLocalNotifications] = useState(notifications);
@@ -208,6 +214,36 @@ export default function AppTopBar({
             )}
           </div>
 
+          {/* Theme Quick Toggle */}
+          <button
+            type="button"
+            id="topbar-theme-toggle"
+            onClick={toggleTheme}
+            className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors rounded-[2px] hover:bg-[#0D2D2A]/40 flex items-center justify-center"
+            title={theme === 'light' ? 'Switch to Dark Mode (Botanical Noir)' : 'Switch to Light Mode (Botanical Ivory)'}
+            aria-label="Toggle light or dark theme"
+          >
+            {theme === 'light' ? (
+              <Sun className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+            ) : (
+              <Moon className="w-4 h-4 text-sky-300" strokeWidth={1.5} />
+            )}
+          </button>
+
+          {/* Settings Trigger Icon */}
+          {onOpenSettings && (
+            <button
+              type="button"
+              id="topbar-settings-trigger"
+              onClick={onOpenSettings}
+              className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors rounded-[2px] hover:bg-[#0D2D2A]/40"
+              title="Workspace Settings"
+              aria-label="Open workspace settings"
+            >
+              <Settings className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+          )}
+
           <div className="h-4 w-px bg-[rgba(169,191,165,0.2)]" />
 
           {/* User Avatar + Dropdown Menu */}
@@ -259,11 +295,37 @@ export default function AppTopBar({
 
                   <button
                     type="button"
-                    onClick={() => { setUserMenuOpen(false); }}
+                    id="topbar-menu-settings-btn"
+                    onClick={() => { 
+                      setUserMenuOpen(false); 
+                      if (onOpenSettings) onOpenSettings(); 
+                    }}
                     className="w-full flex items-center space-x-3 px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
                   >
                     <Settings className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>Settings</span>
+                    <span className="flex-1">Settings</span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[rgba(169,191,165,0.15)] text-[#A9BFA5]">
+                      {theme === 'light' ? 'Light' : 'Dark'}
+                    </span>
+                  </button>
+
+                  {/* Direct Theme Toggle option inside Settings dropdown */}
+                  <button
+                    type="button"
+                    id="topbar-menu-theme-btn"
+                    onClick={() => {
+                      toggleTheme();
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-3">
+                      {theme === 'light' ? (
+                        <Moon className="w-3.5 h-3.5 text-sky-400" strokeWidth={1.5} />
+                      ) : (
+                        <Sun className="w-3.5 h-3.5 text-amber-400" strokeWidth={1.5} />
+                      )}
+                      <span>{theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}</span>
+                    </div>
                   </button>
 
                   <button

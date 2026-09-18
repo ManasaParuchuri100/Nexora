@@ -9,9 +9,6 @@ import {
   ExternalLink,
   Plus,
   Sparkles,
-  Megaphone,
-  Calendar,
-  UserPlus,
   ArrowRight,
   Eye
 } from 'lucide-react';
@@ -94,11 +91,10 @@ export default function InsightsView({
   const isLiveLeadsView = !activeSubCategory || activeSubCategory === 'overview' || activeSubCategory === 'live-leads';
   const isStatsView = activeSubCategory === 'stats';
   const isTrendingTopicsView = activeSubCategory === 'trending-topics';
-  const isQuickActionsView = activeSubCategory === 'quick-actions';
 
   /* =========================================================================
      1. LIVE LEADS VIEW (DEFAULT SCREEN AFTER LOGIN)
-     Shows ONLY Live Leads. No Stats, Trending Topics, or Quick Actions.
+     Shows ONLY Live Leads. No Stats or Trending Topics.
      ========================================================================= */
   if (isLiveLeadsView) {
     return (
@@ -346,147 +342,6 @@ export default function InsightsView({
               itemName="topics"
             />
           )}
-        </div>
-      </div>
-    );
-  }
-
-  /* =========================================================================
-     4. QUICK ACTIONS VIEW (ONLY VISIBLE WHEN INSIGHTS -> QUICK ACTIONS IS CLICKED)
-     ========================================================================= */
-  if (isQuickActionsView) {
-    return (
-      <div className="space-y-12 py-4 animate-fadeIn">
-        {/* Header */}
-        <section className="border-b border-[rgba(169,191,165,0.2)] pb-8">
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-normal block mb-2">
-            INSIGHTS // OPERATIONAL SHORTCUTS
-          </span>
-          <h1 className="serif text-4xl sm:text-5xl font-light text-[#E8E9D8] tracking-tight">
-            Quick Actions
-          </h1>
-          <p className="mt-3 text-xs sm:text-sm text-[#A9BFA5]/80 font-light leading-relaxed max-w-xl">
-            Rapid command shortcuts to initiate campaigns, content, leads, and broadcasts without navigating nested submenus.
-          </p>
-        </section>
-
-        {/* Action Panels Grid (Sharp, no rounded cards, clean typography) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Action 1: Create Campaign */}
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 sm:p-8 bg-[#071C1A] flex flex-col justify-between space-y-6 hover:bg-[#0D2D2A]/20 transition-colors">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] uppercase tracking-widest font-mono text-[#A9BFA5]">
-                  CAMPAIGNS // PIPELINE
-                </span>
-                <Megaphone className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
-              </div>
-
-              <h3 className="serif text-2xl font-light text-[#E8E9D8] mb-2">
-                Create Campaign
-              </h3>
-
-              <p className="text-xs text-[#A9BFA5]/80 font-light leading-relaxed">
-                Launch a targeted multichannel broadcast cadence with automated qualification rules and budget allocation.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onTriggerQuickAction('campaign')}
-              className="w-full bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Launch Campaign Builder</span>
-            </button>
-          </div>
-
-          {/* Action 2: Generate Content */}
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 sm:p-8 bg-[#071C1A] flex flex-col justify-between space-y-6 hover:bg-[#0D2D2A]/20 transition-colors">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] uppercase tracking-widest font-mono text-[#A9BFA5]">
-                  CREATIVE LAB // AI SYNTHESIS
-                </span>
-                <Sparkles className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
-              </div>
-
-              <h3 className="serif text-2xl font-light text-[#E8E9D8] mb-2">
-                Generate Content
-              </h3>
-
-              <p className="text-xs text-[#A9BFA5]/80 font-light leading-relaxed">
-                Synthesize high-conviction marketing copy, direct outreach letters, and editorial narratives calibrated to your studio tone.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onTriggerQuickAction('content')}
-              className="w-full bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Synthesize New Asset</span>
-            </button>
-          </div>
-
-          {/* Action 3: Add Lead */}
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 sm:p-8 bg-[#071C1A] flex flex-col justify-between space-y-6 hover:bg-[#0D2D2A]/20 transition-colors">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] uppercase tracking-widest font-mono text-[#A9BFA5]">
-                  CLIENTS // INBOUND
-                </span>
-                <UserPlus className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
-              </div>
-
-              <h3 className="serif text-2xl font-light text-[#E8E9D8] mb-2">
-                Add Inbound Lead
-              </h3>
-
-              <p className="text-xs text-[#A9BFA5]/80 font-light leading-relaxed">
-                Manually record a studio lead, direct referral, or partnership inquiry to initiate automated qualification scoring.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onTriggerQuickAction('lead')}
-              className="w-full bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Register Inbound Lead</span>
-            </button>
-          </div>
-
-          {/* Action 4: Schedule Post */}
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 sm:p-8 bg-[#071C1A] flex flex-col justify-between space-y-6 hover:bg-[#0D2D2A]/20 transition-colors">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] uppercase tracking-widest font-mono text-[#A9BFA5]">
-                  SOCIAL HUB // BROADCAST
-                </span>
-                <Calendar className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
-              </div>
-
-              <h3 className="serif text-2xl font-light text-[#E8E9D8] mb-2">
-                Schedule Broadcast
-              </h3>
-
-              <p className="text-xs text-[#A9BFA5]/80 font-light leading-relaxed">
-                Queue synchronized releases across LinkedIn, X, Substack, and Instagram with automated release slot routing.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onTriggerQuickAction('schedule')}
-              className="w-full bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Queue Scheduled Post</span>
-            </button>
-          </div>
         </div>
       </div>
     );

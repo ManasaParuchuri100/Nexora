@@ -15,7 +15,8 @@ import {
   Calendar,
   Phone,
   Paperclip,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from 'lucide-react';
 import { Lead, SubCategory, LeadTag } from '../../types';
 import NewCustomersChart from './leads/NewCustomersChart';
@@ -54,6 +55,9 @@ export default function LeadsView({
   const [search, setSearch] = useState('');
   const [tagFilter, setTagFilter] = useState<string>('All');
   const [inspectingLead, setInspectingLead] = useState<Lead | null>(null);
+
+  // Hidden activity graph by default; shown only if requested by the user
+  const [showActivityGraph, setShowActivityGraph] = useState<boolean>(false);
 
   // Pagination states
   const [tablePage, setTablePage] = useState<number>(1);
@@ -219,23 +223,28 @@ export default function LeadsView({
       {/* 2. Primary Tab: Live Leads & Pipeline (matching screenshot layout) */}
       {currentTab === 'live-leads' && (
         <div className="space-y-8">
-          {/* Top Analytics & Activity Row matching screenshot exactly:
-              Left: New customers stacked area chart
-              Center: Activity 6x13 heatmap matrix
+          {/* Top Analytics & Activity Row:
+              Left: New customers clean line graph (expanded when activity graph is hidden)
+              Center: Activity matrix (hidden by default, shown only when requested by user)
               Right: Tasks in progress & Prepayments metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* New Customers Area Chart */}
-            <div className="lg:col-span-5 min-h-[260px]">
-              <NewCustomersChart />
+            {/* New Customers Line Chart */}
+            <div className={`${showActivityGraph ? 'lg:col-span-5' : 'lg:col-span-8 xl:col-span-9'} min-h-[260px] transition-all duration-300`}>
+              <NewCustomersChart
+                isActivityVisible={showActivityGraph}
+                onToggleActivity={() => setShowActivityGraph(prev => !prev)}
+              />
             </div>
 
-            {/* Activity Heatmap Grid */}
-            <div className="lg:col-span-4 min-h-[260px]">
-              <ActivityHeatmap />
-            </div>
+            {/* Activity Heatmap Grid (Hidden by default; shown only when requested) */}
+            {showActivityGraph && (
+              <div className="lg:col-span-4 min-h-[260px] transition-all duration-300">
+                <ActivityHeatmap onClose={() => setShowActivityGraph(false)} />
+              </div>
+            )}
 
             {/* Tasks in progress + Prepayments Summary */}
-            <div className="lg:col-span-3 min-h-[260px]">
+            <div className={`${showActivityGraph ? 'lg:col-span-3' : 'lg:col-span-4 xl:col-span-3'} min-h-[260px] transition-all duration-300`}>
               <LeadSummaryStats
                 tasksInProgress={76}
                 tasksChange="+ 6%"

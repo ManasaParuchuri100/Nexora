@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenApp: (mode: 'login' | 'signup') => void;
@@ -7,6 +8,7 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenApp }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="relative z-30 w-full thin-border border-b border-[rgba(169,191,165,0.2)] bg-[#071C1A]/80 backdrop-blur-sm transition-colors">
@@ -49,7 +51,22 @@ export default function Navbar({ onOpenApp }: NavbarProps) {
         </nav>
 
         {/* Far right: Log in & Get started */}
-        <div className="hidden md:flex items-center space-x-8 text-sm">
+        <div className="hidden md:flex items-center space-x-6 text-sm">
+          <button
+            type="button"
+            id="nav-theme-toggle"
+            onClick={toggleTheme}
+            className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors rounded-[2px]"
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            aria-label="Toggle theme mode"
+          >
+            {theme === 'light' ? (
+              <Sun className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+            ) : (
+              <Moon className="w-4 h-4 text-sky-300" strokeWidth={1.5} />
+            )}
+          </button>
+
           <button
             type="button"
             id="nav-login-button"

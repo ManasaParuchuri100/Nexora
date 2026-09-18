@@ -1,11 +1,8 @@
 export default function BackgroundAtmosphere() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-      {/* Sophisticated Dark gradient background: radial-gradient(circle at 70% 30%, #0D2D2A 0%, #071C1A 100%) */}
-      <div 
-        className="absolute inset-0" 
-        style={{ background: 'radial-gradient(circle at 70% 30%, #0D2D2A 0%, #071C1A 100%)' }}
-      />
+      {/* Sophisticated gradient background that adapts to dark / light mode */}
+      <div className="absolute inset-0 atmosphere-bg" />
 
       {/* SVG Fractal noise grain */}
       <div className="grain" />
