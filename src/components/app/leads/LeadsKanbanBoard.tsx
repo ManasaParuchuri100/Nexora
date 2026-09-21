@@ -49,7 +49,7 @@ const COLUMNS: ColumnConfig[] = [
     stage: 'Deal closed', 
     label: 'Deal closed', 
     badgeCount: 12,
-    description: 'Signed agreements, initial prepayments, and project onboarding'
+    description: 'Signed agreements, contract finalization, and project onboarding'
   },
 ];
 

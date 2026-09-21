@@ -226,7 +226,7 @@ export default function LeadsView({
           {/* Top Analytics & Activity Row:
               Left: New customers clean line graph (expanded when activity graph is hidden)
               Center: Activity matrix (hidden by default, shown only when requested by user)
-              Right: Tasks in progress & Prepayments metrics */}
+              Right: Tasks in progress metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             {/* New Customers Line Chart */}
             <div className={`${showActivityGraph ? 'lg:col-span-5' : 'lg:col-span-8 xl:col-span-9'} min-h-[260px] transition-all duration-300`}>
@@ -243,13 +243,11 @@ export default function LeadsView({
               </div>
             )}
 
-            {/* Tasks in progress + Prepayments Summary */}
+            {/* Tasks in progress Summary */}
             <div className={`${showActivityGraph ? 'lg:col-span-3' : 'lg:col-span-4 xl:col-span-3'} min-h-[260px] transition-all duration-300`}>
               <LeadSummaryStats
                 tasksInProgress={76}
                 tasksChange="+ 6%"
-                prepayments="$12,076"
-                prepaymentsChange="+ 12%"
               />
             </div>
           </div>
