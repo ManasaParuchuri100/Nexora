@@ -182,7 +182,11 @@ body[data-theme="light"],
 }
 
 [data-theme="light"] .bg-\[\#E8E9D8\] *,
-.theme-light .bg-\[\#E8E9D8\] * {
+.theme-light .bg-\[\#E8E9D8\] *,
+[data-theme="light"] .bg-\[\#E8E9D8\] .text-\[\#071C1A\],
+.theme-light .bg-\[\#E8E9D8\] .text-\[\#071C1A\],
+[data-theme="light"] [class*="bg-[#E8E9D8]"] [class*="text-[#071C1A]"],
+.theme-light [class*="bg-[#E8E9D8]"] [class*="text-[#071C1A]"] {
   color: #FFFFFF !important;
   stroke: #FFFFFF !important;
 }
@@ -205,7 +209,31 @@ body[data-theme="light"],
 }
 
 [data-theme="light"] .bg-\[\#A9BFA5\] *,
-.theme-light .bg-\[\#A9BFA5\] * {
+.theme-light .bg-\[\#A9BFA5\] *,
+[data-theme="light"] .bg-\[\#A9BFA5\] .text-\[\#071C1A\],
+.theme-light .bg-\[\#A9BFA5\] .text-\[\#071C1A\] {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Forest Green Buttons in Light Mode: Crisp White Text */
+[data-theme="light"] button[class*="bg-[#143630]"],
+.theme-light button[class*="bg-[#143630]"],
+[data-theme="light"] button.bg-\[\#143630\],
+.theme-light button.bg-\[\#143630\],
+[data-theme="light"] a[class*="bg-[#143630]"],
+.theme-light a[class*="bg-[#143630]"],
+[data-theme="light"] .bg-\[\#143630\].text-white,
+.theme-light .bg-\[\#143630\].text-white {
+  color: #FFFFFF !important;
+}
+
+[data-theme="light"] button[class*="bg-[#143630]"] *,
+.theme-light button[class*="bg-[#143630]"] *,
+[data-theme="light"] button.bg-\[\#143630\] *,
+.theme-light button.bg-\[\#143630\] *,
+[data-theme="light"] a[class*="bg-[#143630]"] *,
+.theme-light a[class*="bg-[#143630]"] * {
   color: #FFFFFF !important;
   stroke: #FFFFFF !important;
 }
@@ -279,20 +307,97 @@ body[data-theme="light"],
   color: #5A877A !important;
 }
 
-/* Default text-white becomes deep botanical charcoal in light mode */
-[data-theme="light"] .text-white,
-.theme-light .text-white {
+/* Default text-white on light mode body text, BUT PROTECTED from altering text on dark surfaces */
+[data-theme="light"] .text-white:not([class*="bg-[#143630]"]):not([class*="bg-[#1E4D45]"]):not([class*="bg-[#071C1A]"]):not([class*="bg-[#0D2D2A]"]):not([class*="bg-[#061816]"]):not([class*="bg-[#E8E9D8]"]):not([class*="bg-emerald-"]):not(button):not(svg):not(path),
+.theme-light .text-white:not([class*="bg-[#143630]"]):not([class*="bg-[#1E4D45]"]):not([class*="bg-[#071C1A]"]):not([class*="bg-[#0D2D2A]"]):not([class*="bg-[#061816]"]):not([class*="bg-[#E8E9D8]"]):not([class*="bg-emerald-"]):not(button):not(svg):not(path) {
   color: #122420 !important;
 }
 
-/* Keep white text inside dark buttons and badges */
+/* Explicitly preserve crisp white on all dark buttons and elements */
 [data-theme="light"] .bg-\[\#E8E9D8\] .text-white,
 .theme-light .bg-\[\#E8E9D8\] .text-white,
 [data-theme="light"] .bg-\[\#143630\] .text-white,
 .theme-light .bg-\[\#143630\] .text-white,
 [data-theme="light"] .bg-\[\#A9BFA5\] .text-white,
-.theme-light .bg-\[\#A9BFA5\] .text-white {
+.theme-light .bg-\[\#A9BFA5\] .text-white,
+.bg-\[\#143630\].text-white,
+[class*="bg-[#143630]"].text-white,
+.bg-\[\#1E4D45\].text-white,
+[class*="bg-[#1E4D45]"].text-white {
   color: #FFFFFF !important;
+}
+
+/* Strict rule: Pure black text is NEVER allowed on dark green surfaces */
+.text-black,
+.theme-dark .text-black,
+:root:not([data-theme="light"]) .text-black,
+.bg-\[\#071C1A\] .text-black,
+.bg-\[\#061816\] .text-black,
+.bg-\[\#0D2D2A\] .text-black,
+.bg-\[\#143630\] .text-black,
+.bg-\[\#08221F\] .text-black,
+.bg-\[\#0A1F1B\] .text-black {
+  color: #E8E9D8 !important;
+}
+
+/* ==========================================================================
+   DARK MODE COLOR ENFORCEMENT
+   Guarantees crisp readability and high contrast on buttons, inputs & surfaces
+   ========================================================================== */
+
+/* In Dark Mode, Cream Elements (.bg-[#E8E9D8], .bg-white) MUST HAVE Deep Dark Forest Green Text (#071C1A) */
+:root:not([data-theme="light"]) .bg-\[\#E8E9D8\],
+:root:not([data-theme="light"]) [class*="bg-[#E8E9D8]"],
+:root:not([data-theme="light"]) .bg-white,
+:root:not([data-theme="light"]) [class*="bg-white"],
+html:not([data-theme="light"]) .bg-\[\#E8E9D8\],
+html:not([data-theme="light"]) [class*="bg-[#E8E9D8]"],
+html:not([data-theme="light"]) .bg-white,
+html:not([data-theme="light"]) [class*="bg-white"] {
+  color: #071C1A !important;
+}
+
+/* Ensure child text and icons inside dark mode cream buttons/badges are dark forest green */
+:root:not([data-theme="light"]) .bg-\[\#E8E9D8\] *:not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-sky-"]):not([class*="text-purple-"]):not([class*="bg-[#071C1A]"] *):not([class*="bg-[#0D2D2A]"] *),
+:root:not([data-theme="light"]) [class*="bg-[#E8E9D8]"] *:not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-sky-"]):not([class*="text-purple-"]):not([class*="bg-[#071C1A]"] *):not([class*="bg-[#0D2D2A]"] *),
+:root:not([data-theme="light"]) .bg-white *:not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-sky-"]):not([class*="text-purple-"]):not([class*="bg-[#071C1A]"] *):not([class*="bg-[#0D2D2A]"] *),
+:root:not([data-theme="light"]) [class*="bg-white"] *:not([class*="text-emerald-"]):not([class*="text-amber-"]):not([class*="text-rose-"]):not([class*="text-sky-"]):not([class*="text-purple-"]):not([class*="bg-[#071C1A]"] *):not([class*="bg-[#0D2D2A]"] *) {
+  color: #071C1A !important;
+  stroke: #071C1A !important;
+}
+
+/* Hover states on cream/white buttons in dark mode: white background with dark green text */
+:root:not([data-theme="light"]) .hover\:bg-white:hover,
+:root:not([data-theme="light"]) [class*="hover:bg-white"]:hover,
+:root:not([data-theme="light"]) .hover\:bg-\[\#E8E9D8\]:hover,
+:root:not([data-theme="light"]) [class*="hover:bg-[#E8E9D8]"]:hover {
+  color: #071C1A !important;
+}
+
+:root:not([data-theme="light"]) .hover\:bg-white:hover *,
+:root:not([data-theme="light"]) [class*="hover:bg-white"]:hover *,
+:root:not([data-theme="light"]) .hover\:bg-\[\#E8E9D8\]:hover *,
+:root:not([data-theme="light"]) [class*="hover:bg-[#E8E9D8]"]:hover * {
+  color: #071C1A !important;
+  stroke: #071C1A !important;
+}
+
+/* Select & Option dropdown options: high contrast on all platforms */
+select {
+  color-scheme: dark;
+}
+select option {
+  background-color: #071C1A !important;
+  color: #E8E9D8 !important;
+}
+[data-theme="light"] select,
+.theme-light select {
+  color-scheme: light !important;
+}
+[data-theme="light"] select option,
+.theme-light select option {
+  background-color: #FFFFFF !important;
+  color: #122420 !important;
 }
 
 /* Hover typography */

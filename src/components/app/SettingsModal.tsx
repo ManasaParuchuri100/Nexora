@@ -215,7 +215,7 @@ export default function SettingsModal({
                           </h4>
                         </div>
                         {theme === 'light' && (
-                          <span className="w-5 h-5 rounded-full bg-[#A9BFA5] text-[#071C1A] flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-[#E8E9D8] text-[#071C1A] flex items-center justify-center shadow-sm">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </span>
                         )}
@@ -276,7 +276,7 @@ export default function SettingsModal({
                           </h4>
                         </div>
                         {theme === 'dark' && (
-                          <span className="w-5 h-5 rounded-full bg-[#A9BFA5] text-[#071C1A] flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-[#E8E9D8] text-[#071C1A] flex items-center justify-center shadow-sm">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </span>
                         )}

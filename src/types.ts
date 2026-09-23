@@ -217,7 +217,7 @@ export interface CampaignBlueprint {
 export interface GeneratedAsset {
   id: string;
   title: string;
-  type: 'Email Copy' | 'Social Post' | 'Headline Set' | 'Hero Brief' | 'Ad Script';
+  type: 'Email Copy' | 'Social Post' | 'Headline Set' | 'Hero Brief' | 'Ad Script' | 'Thought Leadership';
   platform: string;
   preview: string;
   createdAt: string;

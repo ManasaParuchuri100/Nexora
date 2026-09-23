@@ -457,7 +457,7 @@ export default function CampaignCreationFlow({
                 <button
                   type="button"
                   onClick={addMeasurableGoal}
-                  className="px-4 py-2.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] hover:bg-[#A9BFA5] hover:text-[#071C1A] transition-colors cursor-pointer font-mono"
+                  className="px-4 py-2.5 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] hover:bg-[#E8E9D8] hover:text-[#071C1A] transition-colors cursor-pointer font-mono"
                 >
                   + Add Goal
                 </button>
@@ -677,9 +677,9 @@ export default function CampaignCreationFlow({
                     >
                       <span>{res}</span>
                       <div className={`w-4 h-4 border flex items-center justify-center ${
-                        isChecked ? 'bg-[#A9BFA5] border-[#A9BFA5]' : 'border-[rgba(169,191,165,0.4)]'
+                        isChecked ? 'bg-[#E8E9D8] border-[#E8E9D8]' : 'border-[rgba(169,191,165,0.4)]'
                       }`}>
-                        {isChecked && <Check className="w-3 h-3 text-[#071C1A]" />}
+                        {isChecked && <Check className="w-3 h-3 text-[#071C1A] stroke-[2.5]" />}
                       </div>
                     </div>
                   );
@@ -749,7 +749,7 @@ export default function CampaignCreationFlow({
                 <button
                   type="button"
                   onClick={addMilestone}
-                  className="px-4 py-2 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] hover:bg-[#A9BFA5] hover:text-[#071C1A] cursor-pointer font-mono"
+                  className="px-4 py-2 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] hover:bg-[#E8E9D8] hover:text-[#071C1A] cursor-pointer font-mono"
                 >
                   + Add
                 </button>
@@ -810,9 +810,9 @@ export default function CampaignCreationFlow({
                 </span>
               </div>
               <div className={`w-4 h-4 border flex items-center justify-center shrink-0 ml-4 ${
-                formData.autoRecommendChannels ? 'bg-[#A9BFA5] border-[#A9BFA5]' : 'border-[rgba(169,191,165,0.4)]'
+                formData.autoRecommendChannels ? 'bg-[#E8E9D8] border-[#E8E9D8]' : 'border-[rgba(169,191,165,0.4)]'
               }`}>
-                {formData.autoRecommendChannels && <Check className="w-3 h-3 text-[#071C1A]" />}
+                {formData.autoRecommendChannels && <Check className="w-3 h-3 text-[#071C1A] stroke-[2.5]" />}
               </div>
             </div>
 
@@ -837,9 +837,9 @@ export default function CampaignCreationFlow({
                     >
                       <span>{chan}</span>
                       <div className={`w-3.5 h-3.5 border flex items-center justify-center ${
-                        isChecked ? 'bg-[#A9BFA5] border-[#A9BFA5]' : 'border-[rgba(169,191,165,0.4)]'
+                        isChecked ? 'bg-[#E8E9D8] border-[#E8E9D8]' : 'border-[rgba(169,191,165,0.4)]'
                       }`}>
-                        {isChecked && <Check className="w-2.5 h-2.5 text-[#071C1A]" />}
+                        {isChecked && <Check className="w-2.5 h-2.5 text-[#071C1A] stroke-[2.5]" />}
                       </div>
                     </div>
                   );
@@ -960,7 +960,7 @@ export default function CampaignCreationFlow({
             onClick={handleStartGeneration}
             className="px-8 py-3 bg-[#E8E9D8] text-[#071C1A] hover:bg-white text-xs uppercase tracking-widest font-bold transition-all shadow-lg hover:shadow-xl cursor-pointer flex items-center space-x-2"
           >
-            <Sparkles className="w-4 h-4 text-[#071C1A]" />
+            <Sparkles className="w-4 h-4 text-current" />
             <span>Generate Campaign Blueprint &rarr;</span>
           </button>
         )}

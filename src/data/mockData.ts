@@ -812,6 +812,33 @@ export const INITIAL_GENERATED_ASSETS: GeneratedAsset[] = [
     preview: 'Elena, congratulations on initiating your studio migration to Nexora. Your dedicated lead qualifier sandbox is primed...',
     createdAt: 'May 18, 2026',
     tags: ['Onboarding', 'Customer Success', 'VIP']
+  },
+  {
+    id: 'asset-9',
+    title: 'Architecture of Stillness 30s Brand Reel',
+    type: 'Ad Script',
+    platform: 'Paid Social & Video',
+    preview: '[00:00-00:05] Macro shot of matte titanium hardware. Voiceover: "We didn\'t subtract features to be minimal. We subtracted them so you could breathe..."',
+    createdAt: 'May 15, 2026',
+    tags: ['Video Script', 'Storyboard', '30-Second']
+  },
+  {
+    id: 'asset-10',
+    title: 'Kyoto Residency Visual Art Direction Brief',
+    type: 'Hero Brief',
+    platform: 'Design Systems & 3D',
+    preview: 'Deliverable: 16:9 3D Hero Render. Aesthetic: Wabi-sabi brutalism with tactile textured cedar and razor-sharp hairline interface glow...',
+    createdAt: 'May 12, 2026',
+    tags: ['Art Direction', '3D Visual', 'Key Visual']
+  },
+  {
+    id: 'asset-11',
+    title: 'The Tyranny of the Unread Notification Badge',
+    type: 'Thought Leadership',
+    platform: 'Substack & Medium',
+    preview: 'How notification badges hijacked executive dopamine cycles, and why high-output ateliers are systematically returning to asynchronous quietude...',
+    createdAt: 'May 08, 2026',
+    tags: ['Long-form Essay', 'Product Strategy', 'Deep Work']
   }
 ];
 

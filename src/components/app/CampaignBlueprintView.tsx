@@ -476,9 +476,9 @@ export default function CampaignBlueprintView({
                         }`}
                       >
                         <div className={`w-3.5 h-3.5 mt-0.5 border flex items-center justify-center shrink-0 ${
-                          isDone ? 'bg-[#A9BFA5] border-[#A9BFA5]' : 'border-[rgba(169,191,165,0.4)]'
+                          isDone ? 'bg-[#E8E9D8] border-[#E8E9D8]' : 'border-[rgba(169,191,165,0.4)]'
                         }`}>
-                          {isDone && <Check className="w-2.5 h-2.5 text-[#071C1A]" />}
+                          {isDone && <Check className="w-2.5 h-2.5 text-[#071C1A] stroke-[2.5]" />}
                         </div>
                         <span className="leading-snug">{task}</span>
                       </div>

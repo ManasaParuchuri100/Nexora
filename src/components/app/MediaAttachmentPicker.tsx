@@ -244,7 +244,7 @@ export default function MediaAttachmentPicker({
                       </div>
                     )}
                     {isSelected && (
-                      <div className="absolute top-1 right-1 bg-emerald-500 text-black p-0.5 rounded-full">
+                      <div className="absolute top-1 right-1 bg-emerald-600 text-white p-0.5 rounded-full shadow-sm">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
                     )}

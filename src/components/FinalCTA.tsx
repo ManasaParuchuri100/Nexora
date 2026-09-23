@@ -62,7 +62,7 @@ export default function FinalCTA({ onGetStarted }: FinalCTAProps) {
             className="group inline-flex items-center justify-center bg-[#E8E9D8] text-[#071C1A] px-8 sm:px-9 py-3.5 sm:py-4 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-all duration-200 cursor-pointer focus:outline-none shadow-sm"
           >
             <span>Get started</span>
-            <ArrowRight className="ml-2.5 w-4 h-4 text-[#071C1A] group-hover:translate-x-1 transition-transform duration-200" strokeWidth={1.75} />
+            <ArrowRight className="ml-2.5 w-4 h-4 text-current group-hover:translate-x-1 transition-transform duration-200" strokeWidth={1.75} />
           </button>
         </div>
 

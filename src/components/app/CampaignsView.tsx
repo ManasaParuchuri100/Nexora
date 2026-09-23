@@ -396,7 +396,7 @@ export default function CampaignsView({
             onClick={handleOpenCreate}
             className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer focus:outline-none flex items-center space-x-2"
           >
-            <Plus className="w-3.5 h-3.5 text-[#071C1A]" />
+            <Plus className="w-3.5 h-3.5 text-current" />
             <span>Create New Campaign</span>
           </button>
         </div>

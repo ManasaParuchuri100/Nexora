@@ -571,7 +571,7 @@ export default function SocialHubView({
               <button
                 type="button"
                 onClick={handleConfirmSchedule}
-                className="w-full mt-6 bg-[#A9BFA5] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-[#E8E9D8] transition-colors cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full mt-6 bg-[#E8E9D8] text-[#071C1A] py-3 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer flex items-center justify-center space-x-2"
               >
                 {isScheduled ? (
                   <>
@@ -1041,7 +1041,7 @@ export default function SocialHubView({
                             </div>
                             <div className={`w-3.5 h-3.5 rounded-[1px] border flex items-center justify-center shrink-0 ${
                               isSelected 
-                                ? 'bg-[#A9BFA5] border-[#A9BFA5] text-[#071C1A]' 
+                                ? 'bg-[#E8E9D8] border-[#E8E9D8] text-[#071C1A]' 
                                 : 'border-[rgba(169,191,165,0.3)]'
                             }`}>
                               {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
