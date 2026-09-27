@@ -1068,15 +1068,17 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
             onUpdateContext={setBrandContext}
           />
 
-          {/* 1. COMPACT ASSET CATEGORY SELECTOR (Email, Social, Headlines, Video, Editorial, Visual) */}
-          <CategoryNav
-            selectedCategory={selectedCategory}
-            onSelectCategory={(cat) => {
-              setSelectedCategory(cat);
-              // Clear previous outputs when switching category to keep workflow clean
-              setVariations([]);
-            }}
-          />
+          {/* 1. COMPACT ASSET CATEGORY SELECTOR (Email, Social, Headlines, Video, Editorial, Visual) - Only in Structured Brief mode */}
+          {createMode === 'structured' && (
+            <CategoryNav
+              selectedCategory={selectedCategory}
+              onSelectCategory={(cat) => {
+                setSelectedCategory(cat);
+                // Clear previous outputs when switching category to keep workflow clean
+                setVariations([]);
+              }}
+            />
+          )}
 
           {/* 15. MAIN GENERATION WORKFLOW GRID (Input vs Output Workspace) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
