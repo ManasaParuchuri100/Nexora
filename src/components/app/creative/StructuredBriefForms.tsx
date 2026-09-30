@@ -798,7 +798,7 @@ export default function StructuredBriefForms({
       {/* ------------------------------------------------------------- */}
       {/* 4. VIDEO / AD SCRIPT */}
       {/* ------------------------------------------------------------- */}
-      {category === 'Ad Script' && (
+      {(category === 'Ad Script' || category === 'Product Demo' || category === 'Brand Film') && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -1236,7 +1236,7 @@ export default function StructuredBriefForms({
       {/* ------------------------------------------------------------- */}
       {/* 6. VISUAL BRIEF / HERO BRIEF (Explicitly Specified in Point 13) */}
       {/* ------------------------------------------------------------- */}
-      {category === 'Hero Brief' && (
+      {(category === 'Hero Brief' || category === 'Product Render' || category === 'Brand Specimen') && (
         <div className="space-y-4">
           <div>
             <label

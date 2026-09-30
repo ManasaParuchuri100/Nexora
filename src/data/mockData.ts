@@ -742,6 +742,36 @@ export const INITIAL_CAMPAIGNS: Campaign[] = [
 
 export const INITIAL_GENERATED_ASSETS: GeneratedAsset[] = [
   {
+    id: 'asset-img-1',
+    title: '3D Spatial Atelier Key Visual',
+    type: 'Hero Brief',
+    platform: 'Studio 3D & Visual',
+    preview: 'Octane path-traced render: Cantilevered dark smoked obsidian glass desk displaying minimal hairline telemetry graph with soft 4500K morning sunlight.',
+    createdAt: 'Just now',
+    tags: ['3D Key Visual', 'Octane 4K', 'Atelier'],
+    imageUrl: '/src/assets/images/spatial_key_visual_1790755715787.jpg'
+  },
+  {
+    id: 'asset-img-2',
+    title: 'Machined Titanium Tactile Hardware Console',
+    type: 'Product Render',
+    platform: 'Studio 3D & Visual',
+    preview: 'Macro studio photography: Billet titanium hardware console with micro-knurled dial, chamfered bevels, and overhead warm rim lighting.',
+    createdAt: '30 mins ago',
+    tags: ['Product Render', 'Macro Hardware', 'Titanium'],
+    imageUrl: '/src/assets/images/titanium_studio_render_1790755733959.jpg'
+  },
+  {
+    id: 'asset-img-3',
+    title: 'Swiss International Typographic Poster',
+    type: 'Brand Specimen',
+    platform: 'Studio 3D & Visual',
+    preview: 'Exhibition specimen sheet: 12-column asymmetric baseline grid with hairline serif scales printed on textured cotton rag paper.',
+    createdAt: '1 hour ago',
+    tags: ['Brand Specimen', 'Swiss Grid', 'Print'],
+    imageUrl: '/src/assets/images/swiss_brand_specimen_1790755749195.jpg'
+  },
+  {
     id: 'asset-1',
     title: 'The Art of Unhurried Productivity',
     type: 'Email Copy',

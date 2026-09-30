@@ -221,6 +221,66 @@ export default function CreativeLabView({
           additionalConstraints: 'No saturated neon lights, keep typography safe margins'
         }
       }));
+    } else if (selectedCategory === 'Product Render') {
+      setFormsState(prev => ({
+        ...prev,
+        heroBriefForm: {
+          deliverable: 'Editorial Product Specimen (1:1)',
+          focalSubject: 'Micro-textured solid billet titanium hardware dial displaying precision knurling and warm studio edge lighting.',
+          aesthetic: 'Brutalist Precision & High-End Industrial Design',
+          lightingMood: 'Dramatic 3200K rim lighting with deep velvety shadows and high specular highlights',
+          composition: 'Centered macro hero composition with shallow depth of field',
+          colorPalette: 'Brushed Titanium (#C8CCD0), Matte Obsidian (#071C1A), Deep Sage (#244B40)',
+          aspectRatio: '1:1 Square (2048×2048)',
+          cameraDirection: '90mm macro lens, 30° elevated oblique view',
+          materials: 'Aerospace-grade titanium, micro-bead blasted steel, sapphire crystal',
+          additionalConstraints: 'Emphasize micro-machining tolerances and clean bevel lines'
+        }
+      }));
+    } else if (selectedCategory === 'Brand Specimen') {
+      setFormsState(prev => ({
+        ...prev,
+        heroBriefForm: {
+          deliverable: 'Brand Identity Lockup & Specimen',
+          focalSubject: 'Minimal Swiss typography specimen sheet showing Nexora hairline serif font scales and mathematical margin grid.',
+          aesthetic: 'International Typographic Style + Architectural Minimalism',
+          lightingMood: 'Even diffuse gallery daylight (5500K) across heavy tactile paper stock',
+          composition: 'Strict asymmetrical grid with 65% negative space and crisp ink boundaries',
+          colorPalette: 'Warm Parchment (#FDFBF7), Forest Slate (#143630), Muted Sage (#A9BFA5)',
+          aspectRatio: '16:9 Landscape (3840×2160)',
+          cameraDirection: 'Top-down orthographic flatlay with subtle paper cast shadow',
+          materials: 'Heavy 350gsm cotton rag paper, debossed foil accents',
+          additionalConstraints: 'Strict typographic hierarchy, no blurred glyphs'
+        }
+      }));
+    } else if (selectedCategory === 'Product Demo') {
+      setFormsState(prev => ({
+        ...prev,
+        adScriptForm: {
+          videoFormat: '60s Manifesto Storyboard (YouTube/Web)',
+          hookScene: 'Screen opens on total silence. A single cursor glides across a hairline pipeline graph with instant response.',
+          coreTension: 'Contrasts cluttered SaaS interfaces with Nexora’s serene, distraction-free workflow.',
+          solutionReveal: 'Step-by-step walkthrough of AI lead scoring, instant pipeline sync, and automated quiet outreach.',
+          closingCta: 'Elevate your studio. Experience Nexora at nexora.studio/demo.',
+          voiceoverStyle: 'Measured, Informative & Confident',
+          audioDirection: 'Minimalist ambient synth pad with soft acoustic clicks',
+          aspectRatio: '16:9 Desktop (1920×1080)'
+        }
+      }));
+    } else if (selectedCategory === 'Brand Film') {
+      setFormsState(prev => ({
+        ...prev,
+        adScriptForm: {
+          videoFormat: '60s Manifesto Storyboard (YouTube/Web)',
+          hookScene: 'Dawn light sweeps across an architect’s drafting table. Hands sketch a single hairline with brass compass.',
+          coreTension: 'The modern creative mind is drowned in notifications. We surrendered craft for synthetic urgency.',
+          solutionReveal: 'The transition from chaos to computational stillness. Nexora emerges as quiet architecture for thought.',
+          closingCta: 'Stillness is a strategy. Nexora Atelier OS.',
+          voiceoverStyle: 'Quiet, Cinematic & Profound',
+          audioDirection: 'Solo acoustic cello into warm analog reverb and subtle room tone',
+          aspectRatio: '16:9 Cinematic (2.39:1 Anamorphic)'
+        }
+      }));
     }
   };
 
@@ -241,7 +301,7 @@ export default function CreativeLabView({
         ...prev,
         headlineForm: { ...prev.headlineForm, productFocus: '', coreTransformation: '', targetAudience: '' }
       }));
-    } else if (selectedCategory === 'Ad Script') {
+    } else if (selectedCategory === 'Ad Script' || selectedCategory === 'Product Demo' || selectedCategory === 'Brand Film') {
       setFormsState(prev => ({
         ...prev,
         adScriptForm: { ...prev.adScriptForm, hookScene: '', coreTension: '', solutionReveal: '', closingCta: '' }
@@ -251,7 +311,7 @@ export default function CreativeLabView({
         ...prev,
         thoughtLeadershipForm: { ...prev.thoughtLeadershipForm, workingTitle: '', coreThesis: '', supportingArguments: '', pullQuote: '' }
       }));
-    } else if (selectedCategory === 'Hero Brief') {
+    } else if (selectedCategory === 'Hero Brief' || selectedCategory === 'Product Render' || selectedCategory === 'Brand Specimen') {
       setFormsState(prev => ({
         ...prev,
         heroBriefForm: { ...prev.heroBriefForm, focalSubject: '', lightingMood: '', colorPalette: '', composition: '' }
@@ -778,6 +838,7 @@ Nexora is our contribution to this quiet revolution.`
         id: `var-${Date.now()}-1`,
         versionLabel: 'VERSION 01 — WABI-SABI ATELIER',
         imagePrompt: promptText,
+        imageUrl: '/src/assets/images/spatial_key_visual_1790755715787.jpg',
         content: `[CREATIVE ART DIRECTION BRIEF · ${b.deliverable.toUpperCase()}]
 Aesthetic Paradigm: ${b.aesthetic}
 Format: ${b.aspectRatio}
@@ -807,6 +868,7 @@ ${b.composition || 'Left-heavy layout with 60% negative space on right for edito
           id: `var-${Date.now()}-2`,
           versionLabel: 'VERSION 02 — MONOLITHIC TITANIUM',
           imagePrompt: `monolithic titanium desk terminal floating in obsidian void, soft warm 3200k spotlight, hairline gold wireframe crm graph, extreme macro texture, 8k studio product render`,
+          imageUrl: '/src/assets/images/titanium_studio_render_1790755733959.jpg',
           content: `[CREATIVE ART DIRECTION BRIEF · MONOLITHIC VARIATION]
 Aesthetic Paradigm: Minimalist Monolith & Titanium Brutalism
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -821,6 +883,7 @@ Color Palette: Anodized Gunmetal (#1A1E1D), Warm Titanium (#D1D5DB), Soft Sage A
           id: `var-${Date.now()}-3`,
           versionLabel: 'VERSION 03 — ARCHITECTURAL DAWN',
           imagePrompt: `scandinavian concrete and light birch architect studio at 6am sunrise, cantilevered glass monitor displaying quiet minimal crm, cinematic depth of field, high resolution`,
+          imageUrl: '/src/assets/images/scandinavian_dawn_studio_1790755765807.jpg',
           content: `[CREATIVE ART DIRECTION BRIEF · SCANDINAVIAN DAWN]
 Aesthetic Paradigm: Scandinavian Restraint & Light Birch Wood
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -835,13 +898,214 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
           id: `var-${Date.now()}-4`,
           versionLabel: 'VERSION 04 — MACRO TACTILE',
           imagePrompt: `extreme macro texture of tactile ceramic vessel next to machined dark steel dial, warm lighting`,
+          imageUrl: '/src/assets/images/ceramic_glass_volume_1790755783767.jpg',
           content: `[CREATIVE ART DIRECTION BRIEF · MACRO TACTILE]`
         });
         list.push({
           id: `var-${Date.now()}-5`,
           versionLabel: 'VERSION 05 — EDITORIAL SPECIMEN',
           imagePrompt: `swiss typography specimen poster printed on heavy uncoated linen paper, hairline layouts`,
+          imageUrl: '/src/assets/images/swiss_brand_specimen_1790755749195.jpg',
           content: `[CREATIVE ART DIRECTION BRIEF · EDITORIAL SPECIMEN]`
+        });
+      }
+    } else if (cat === 'Product Render') {
+      const b = formsState.heroBriefForm;
+      const promptText = `macro studio industrial design product photography of ${b.focalSubject || 'billet titanium tactile interface dial with micro-knurled bezel'}, ${b.aesthetic || 'brutalist minimalism'}, rim light, deep shadows, shot on 90mm macro lens, 8k uhd, photorealistic`;
+
+      list.push({
+        id: `var-${Date.now()}-1`,
+        versionLabel: 'VERSION 01 — MACRO TITANIUM SPEC',
+        imagePrompt: promptText,
+        imageUrl: '/src/assets/images/titanium_studio_render_1790755733959.jpg',
+        content: `[PRODUCT STUDIO RENDER SPEC · HARDWARE SPECIFICATION]
+Deliverable: High-Res Macro Product Visual (1:1 / 16:9)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Subject: ${b.focalSubject || 'Machined titanium tactile dial and cantilevered obsidian glass display.'}
+• Lighting Mood: Dramatic 3200K studio rim light with soft specular reflections.
+• Material Palette: Micro-bead blasted aerospace titanium, matte obsidian acrylic, anti-glare glass.
+• Camera Spec: 90mm tilt-shift macro lens, f/5.6 aperture, 25° oblique elevation.
+• Texture Fidelity: Subtle hairline grain, chamfered edge highlights, zero plastic gloss.`
+      });
+
+      if (count >= 2) {
+        list.push({
+          id: `var-${Date.now()}-2`,
+          versionLabel: 'VERSION 02 — MONOLITHIC ANODIZED SLATE',
+          imagePrompt: `monolithic matte black anodized aluminum enclosure on slate stone slab, soft warm directional studio light, 8k uhd`,
+          imageUrl: '/src/assets/images/ceramic_glass_volume_1790755783767.jpg',
+          content: `[PRODUCT STUDIO RENDER SPEC · ANODIZED SLATE]
+• Subject: Solid CNC milled obsidian aluminum console with hairline illuminated edge.
+• Studio Lighting: High-contrast 4000K softbox overhead with deep linear reflections.`
+        });
+      }
+      if (count >= 3) {
+        list.push({
+          id: `var-${Date.now()}-3`,
+          versionLabel: 'VERSION 03 — CERAMIC & GLASS HARMONY',
+          imagePrompt: `minimalist unglazed white ceramic cylinder next to smoked glass touch terminal, morning architectural light, 8k`,
+          imageUrl: '/src/assets/images/spatial_key_visual_1790755715787.jpg',
+          content: `[PRODUCT STUDIO RENDER SPEC · CERAMIC & SMOKED GLASS]
+• Subject: Artisanal wabi-sabi ceramic volume paired with precision optical glass telemetry surface.
+• Materials: Matte porous clay, optical float glass, brushed hairline copper.`
+        });
+      }
+      if (count >= 5) {
+        list.push({
+          id: `var-${Date.now()}-4`,
+          versionLabel: 'VERSION 04 — EXPLODED HARDWARE ISOMETRIC',
+          imagePrompt: `exploded isometric technical render of precision titanium dial and tactile haptic bearings, 8k uhd`,
+          imageUrl: '/src/assets/images/scandinavian_dawn_studio_1790755765807.jpg',
+          content: `[PRODUCT STUDIO RENDER SPEC · EXPLODED ISOMETRIC]`
+        });
+        list.push({
+          id: `var-${Date.now()}-5`,
+          versionLabel: 'VERSION 05 — DESK INTEGRATION HERO',
+          imagePrompt: `luxury architect desk with floating glass terminal displaying minimal interface, dawn light, 8k`,
+          imageUrl: '/src/assets/images/swiss_brand_specimen_1790755749195.jpg',
+          content: `[PRODUCT STUDIO RENDER SPEC · DESK INTEGRATION]`
+        });
+      }
+    } else if (cat === 'Brand Specimen') {
+      const b = formsState.heroBriefForm;
+      const promptText = `swiss modernism typography specimen poster, ${b.focalSubject || 'hairline serif typography system with strict asymmetric grid'}, black and ivory ink on textured cotton rag paper, museum archive, 8k uhd`;
+
+      list.push({
+        id: `var-${Date.now()}-1`,
+        versionLabel: 'VERSION 01 — SWISS GRID POSTER',
+        imagePrompt: promptText,
+        imageUrl: '/src/assets/images/swiss_brand_specimen_1790755749195.jpg',
+        content: `[BRAND & EDITORIAL SPECIMEN · TYPOGRAPHIC SHEET]
+Format: 350gsm Cotton Rag Specimen Poster (A2 / 16:9)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Concept: ${b.focalSubject || 'Architectural scale typographic layout demonstrating Nexora’s serene hierarchy.'}
+• Grid System: 12-column asymmetric baseline grid with 40mm exterior margins.
+• Color System: Deep Forest Obsidian (#071C1A), Warm Parchment (#FDFBF7), Soft Sage (#A9BFA5).
+• Paper & Finish: Uncoated heavy linen stock with deep blind deboss brand seal.`
+      });
+
+      if (count >= 2) {
+        list.push({
+          id: `var-${Date.now()}-2`,
+          versionLabel: 'VERSION 02 — FOIL EMBOSSED LOCKUP',
+          imagePrompt: `close-up debossed warm brass foil logo lockup on dark matte obsidian linen board, angled raking light, 8k`,
+          imageUrl: '/src/assets/images/spatial_key_visual_1790755715787.jpg',
+          content: `[BRAND & EDITORIAL SPECIMEN · DEBOSSED FOIL LOCKUP]
+• Concept: Deep blind-embossed typography with selective micro-foil accent on hand-milled cardstock.`
+        });
+      }
+      if (count >= 3) {
+        list.push({
+          id: `var-${Date.now()}-3`,
+          versionLabel: 'VERSION 03 — SPATIAL RATIO DOSSIER',
+          imagePrompt: `architectural fold-out blueprint brochure with hairline graphs and golden ratio dimensions, minimal, 8k`,
+          imageUrl: '/src/assets/images/scandinavian_dawn_studio_1790755765807.jpg',
+          content: `[BRAND & EDITORIAL SPECIMEN · GOLDEN RATIO SPECIMEN]
+• Concept: Multi-page accordion fold-out brochure with architectural proportion ratios and typographic specimens.`
+        });
+      }
+      if (count >= 5) {
+        list.push({
+          id: `var-${Date.now()}-4`,
+          versionLabel: 'VERSION 04 — MONOCHROME BILLBOARD MOCKUP',
+          imagePrompt: `brutalist concrete gallery wall with minimal typography exhibition poster, 8k`,
+          imageUrl: '/src/assets/images/titanium_studio_render_1790755733959.jpg',
+          content: `[BRAND & EDITORIAL SPECIMEN · GALLERY BILLBOARD]`
+        });
+        list.push({
+          id: `var-${Date.now()}-5`,
+          versionLabel: 'VERSION 05 — EDITORIAL COVER SPECIMEN',
+          imagePrompt: `quarterly hardcover journal cover with hairline typography and debossed title, 8k`,
+          imageUrl: '/src/assets/images/ceramic_glass_volume_1790755783767.jpg',
+          content: `[BRAND & EDITORIAL SPECIMEN · HARDCOVER JOURNAL]`
+        });
+      }
+    } else if (cat === 'Product Demo') {
+      const a = formsState.adScriptForm;
+      list.push({
+        id: `var-${Date.now()}-1`,
+        versionLabel: 'VERSION 01 — 60S INTERACTIVE SCREENFLOW',
+        content: `[PRODUCT DEMO WALKTHROUGH · 60-SECOND SCREENFLOW]
+Pacing: Measured, Architectural & Serene
+Audio: Minimalist ambient synth pad with soft acoustic clicks
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[00:00 - 00:12] SCENE 01 · THE SILENT CANVAS
+• Video: Fluid 60fps screen capture gliding across Nexora's obsidian dashboard. Zero red badges or jarring alerts.
+• Voiceover (Warm, Calm): "Modern agencies don’t need louder software. They need computational composure."
+
+[00:12 - 00:30] SCENE 02 · REAL-TIME PIPELINE INTELLIGENCE
+• Video: Single keypress opens live lead scoring. AI automatically ranks high-conviction studio inquiries without friction.
+• Voiceover: "Nexora unifies client acquisition, pipeline tracking, and revenue forecasting into a single hairline canvas."
+
+[00:30 - 00:48] SCENE 03 · AUTOMATED STILL OUTREACH
+• Video: One click generates bespoke VIP outreach copy with editorial precision.
+• Voiceover: "No bloat. No phantom urgency. Just quiet execution."
+
+[00:48 - 01:00] SCENE 04 · CLOSING MONOGRAM & ACCESS
+• Video: Screen fades to minimalist monogram. Hairline URL appears: nexora.studio/demo.
+• Voiceover: "Make space for what matters. Reserve your atelier access today."`
+      });
+
+      if (count >= 2) {
+        list.push({
+          id: `var-${Date.now()}-2`,
+          versionLabel: 'VERSION 02 — 30S QUICK FEATURE SPRINT',
+          content: `[PRODUCT DEMO WALKTHROUGH · 30S FEATURE SPRINT]
+• Focus: Rapid zero-friction lead conversion and automated calendar sync.`
+        });
+      }
+      if (count >= 3) {
+        list.push({
+          id: `var-${Date.now()}-3`,
+          versionLabel: 'VERSION 03 — ARCHITECTURAL DEEP-DIVE',
+          content: `[PRODUCT DEMO WALKTHROUGH · ARCHITECTURAL DEEP-DIVE]
+• Focus: Full studio workflow walkthrough from discovery call to retainer signoff.`
+        });
+      }
+    } else if (cat === 'Brand Film') {
+      const a = formsState.adScriptForm;
+      list.push({
+        id: `var-${Date.now()}-1`,
+        versionLabel: 'VERSION 01 — MANIFESTO: IN PRAISE OF STILLNESS',
+        content: `[BRAND MANIFESTO FILM · 90-SECOND CINEMATIC SCRIPT]
+Aspect Ratio: 2.39:1 Anamorphic Cinema
+Audio: Solo cello harmonics and tactile room tone
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[00:00 - 00:20] PROLOGUE · THE COGNITIVE TOLL
+• Visual: Dawn light sweeps over an empty timber studio desk. A designer sits quietly with tea. Suddenly, three monitors light up with flashing alerts, red counter numbers, and chime notifications.
+• Audio: Cacophony of synthetic chimes slowly builds, then abruptly cuts to total silence.
+• Voiceover: "At some point over the last decade, business software made a fatal mistake: it mistook noise for engagement."
+
+[00:20 - 00:50] THE THESIS · ARCHITECTURE FOR THOUGHT
+• Visual: Macro shot of a titanium pen drafting a single clean hairline on paper. The shot transitions into Nexora's dark glass interface.
+• Audio: Warm, sustained cello chord enters.
+• Voiceover: "The tools you open at 8 AM dictate the boundaries of your mind. If your software is chaotic, your judgment will be fractured. We engineered Nexora as quiet architecture for deliberate work."
+
+[00:50 - 01:20] THE CONVICTION · ZERO NOISE
+• Visual: Fluid choreography of studio directors managing multimillion-dollar accounts in seamless silence. Hairline typography. Serene pacing.
+• Voiceover: "No unread badges. No synthetic urgency. Just pure, uncompromised focus."
+
+[01:20 - 01:30] EPILOGUE · THE CALL
+• Visual: Monolithic brass wordmark on obsidian slate.
+• Voiceover: "Stillness is not the absence of energy. It is the concentration of power. Nexora Atelier OS."`
+      });
+
+      if (count >= 2) {
+        list.push({
+          id: `var-${Date.now()}-2`,
+          versionLabel: 'VERSION 02 — THE CRAFT OF REST',
+          content: `[BRAND MANIFESTO FILM · THE CRAFT OF REST]
+• Pacing: Meditative essay on slowing down to accelerate quality.`
+        });
+      }
+      if (count >= 3) {
+        list.push({
+          id: `var-${Date.now()}-3`,
+          versionLabel: 'VERSION 03 — ARCHITECTURAL CADENCE',
+          content: `[BRAND MANIFESTO FILM · ARCHITECTURAL CADENCE]
+• Pacing: High-contrast Scandinavian architecture and computational clarity.`
         });
       }
     }
@@ -873,10 +1137,17 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
           id: `asset-${Date.now()}`,
           title: title,
           type: cat,
-          platform: cat === 'Social Post' ? formsState.socialForm.platform : cat === 'Ad Script' ? 'Paid Video' : 'Atelier Studio',
+          platform: cat === 'Social Post'
+            ? formsState.socialForm.platform
+            : (cat === 'Ad Script' || cat === 'Product Demo' || cat === 'Brand Film')
+              ? 'Paid Video & Motion'
+              : (cat === 'Hero Brief' || cat === 'Product Render' || cat === 'Brand Specimen')
+                ? 'Studio 3D & Visual'
+                : 'Atelier Studio',
           preview: generated[0].content.slice(0, 140) + '...',
           createdAt: 'Just now',
-          tags: [cat.split(' ')[0], brandContext.productName.split(' ')[0], 'Studio']
+          tags: [cat.split(' ')[0], brandContext.productName.split(' ')[0], 'Studio'],
+          imageUrl: generated[0].imageUrl
         };
         onGenerateSuccess(newAsset);
       }
@@ -933,6 +1204,14 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
     }
   };
 
+  const handleUpdateVariationImage = (idx: number, newImageUrl: string) => {
+    const updated = [...variations];
+    if (updated[idx]) {
+      updated[idx] = { ...updated[idx], imageUrl: newImageUrl };
+      setVariations(updated);
+    }
+  };
+
   const handleCopyAsset = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -940,38 +1219,31 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
   };
 
   return (
-    <div className="space-y-8 py-3">
+    <div className="space-y-5 py-2">
       {/* Header with Subnav Switcher */}
       <section
         className={`border-b ${
           isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.2)]'
-        } pb-5 flex flex-col md:flex-row md:items-end justify-between gap-5`}
+        } pb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
       >
         <div>
-          <span
-            className={`text-[10px] sm:text-xs uppercase tracking-widest-plus ${
-              isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
-            } font-normal block mb-1.5`}
-          >
-            AI CREATIVE LABORATORY
-          </span>
           <h1
-            className={`serif text-3xl sm:text-4xl font-light ${
+            className={`serif text-2xl sm:text-3xl font-light ${
               isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'
             } tracking-tight`}
           >
-            Creative Lab
+            Creative Studio
           </h1>
           <p
-            className={`mt-2 text-xs sm:text-sm ${
+            className={`text-xs ${
               isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/80'
-            } font-light leading-relaxed max-w-xl`}
+            } font-light`}
           >
-            Synthesize high-conviction marketing copy, video storyboards, editorial essays, and visual art briefs tailored to each creative asset category.
+            Synthesize copy, visual artwork, and video storyboards.
           </p>
         </div>
 
-        {/* Subnav switcher: Create vs Generated Assets */}
+        {/* Subnav switcher: Studio vs Archive */}
         <div
           className={`flex items-center space-x-6 text-xs uppercase tracking-widest border-b ${
             isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.2)]'
@@ -990,7 +1262,7 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                   : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
             }`}
           >
-            Create
+            Studio
           </button>
           <button
             type="button"
@@ -1005,21 +1277,21 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                   : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
             }`}
           >
-            Generated Assets ({assets.length})
+            Archive ({assets.length})
           </button>
         </div>
       </section>
 
       {!isAssetsView ? (
         /* CREATE EXPERIENCE */
-        <div className="space-y-6">
-          {/* 2. MODE SWITCHER: [ Quick Generate ] [ Structured Brief ] */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="inline-flex rounded-[2px] border border-inherit p-0.5 bg-inherit">
+        <div className="space-y-4">
+          {/* Top Control Bar: Mode Toggle + Compact Brand Context */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="inline-flex rounded-[2px] border border-inherit p-0.5 bg-inherit shrink-0">
               <button
                 type="button"
                 onClick={() => setCreateMode('quick')}
-                className={`px-3.5 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
+                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
                   createMode === 'quick'
                     ? isLight
                       ? 'bg-[#143630] text-white font-medium rounded-[1px] shadow-sm'
@@ -1030,13 +1302,13 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Quick Generate</span>
+                <span>Quick Prompt</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setCreateMode('structured')}
-                className={`px-3.5 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
+                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
                   createMode === 'structured'
                     ? isLight
                       ? 'bg-[#143630] text-white font-medium rounded-[1px] shadow-sm'
@@ -1051,39 +1323,27 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
               </button>
             </div>
 
-            <span
-              className={`text-[11px] font-mono ${
-                isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
-              }`}
-            >
-              {createMode === 'quick'
-                ? 'Prompt with natural language'
-                : 'Configure precision category parameters'}
-            </span>
+            <div className="flex-1 sm:max-w-md w-full">
+              <BrandContextBanner
+                context={brandContext}
+                onUpdateContext={setBrandContext}
+              />
+            </div>
           </div>
 
-          {/* 3. GLOBAL BRAND CONTEXT BANNER */}
-          <BrandContextBanner
-            context={brandContext}
-            onUpdateContext={setBrandContext}
+          {/* 3 Core Asset Categories (Text, Images, Videos + Sub-format dropdown) */}
+          <CategoryNav
+            selectedCategory={selectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              setVariations([]);
+            }}
           />
 
-          {/* 1. COMPACT ASSET CATEGORY SELECTOR (Email, Social, Headlines, Video, Editorial, Visual) - Only in Structured Brief mode */}
-          {createMode === 'structured' && (
-            <CategoryNav
-              selectedCategory={selectedCategory}
-              onSelectCategory={(cat) => {
-                setSelectedCategory(cat);
-                // Clear previous outputs when switching category to keep workflow clean
-                setVariations([]);
-              }}
-            />
-          )}
-
-          {/* 15. MAIN GENERATION WORKFLOW GRID (Input vs Output Workspace) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+          {/* MAIN GENERATION WORKFLOW GRID (Input vs Output Workspace) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* Left Column: Input Form (Quick or Structured) */}
-            <div className="lg:col-span-6 space-y-6">
+            <div className="lg:col-span-6 space-y-4">
               {createMode === 'quick' ? (
                 <QuickGenerateForm
                   onQuickGenerate={(prompt, count, detectedCat) => {
@@ -1115,6 +1375,7 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                 activeVariationIndex={activeVariationIndex}
                 onSelectVariation={setActiveVariationIndex}
                 onUpdateVariationContent={handleUpdateVariationContent}
+                onUpdateVariationImage={handleUpdateVariationImage}
                 onRegenerate={() => handleGenerate()}
                 onRefine={handleRefine}
                 isGenerating={isGenerating}
@@ -1147,9 +1408,13 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                   'Email Copy',
                   'Social Post',
                   'Headline Set',
-                  'Ad Script',
                   'Thought Leadership',
-                  'Hero Brief'
+                  'Hero Brief',
+                  'Product Render',
+                  'Brand Specimen',
+                  'Ad Script',
+                  'Product Demo',
+                  'Brand Film'
                 ] as const
               ).map((f) => {
                 const isSelected = typeFilter === f;
@@ -1249,6 +1514,17 @@ Color Palette: Pale Birch (#E5D8C5), Warm Parchment (#FDFBF7), Matte Slate (#244
                     >
                       {asset.title}
                     </h4>
+
+                    {asset.imageUrl && (
+                      <div className="mb-3.5 aspect-video w-full rounded-[2px] overflow-hidden border border-inherit bg-black shadow-sm">
+                        <img
+                          src={asset.imageUrl}
+                          alt={asset.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.02]"
+                        />
+                      </div>
+                    )}
 
                     <p
                       className={`text-xs font-light leading-relaxed mb-4 line-clamp-3 ${

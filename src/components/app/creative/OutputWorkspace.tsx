@@ -11,7 +11,12 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Maximize2,
+  X,
+  Eye,
+  Layers,
+  FileText
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { CategoryType } from './CategoryNav';
@@ -21,6 +26,7 @@ export interface GeneratedVariation {
   versionLabel: string; // e.g. "VERSION 01 — QUIET"
   content: string;
   imagePrompt?: string;
+  imageUrl?: string;
   renderedImageMock?: string;
 }
 
@@ -30,10 +36,19 @@ interface OutputWorkspaceProps {
   activeVariationIndex: number;
   onSelectVariation: (index: number) => void;
   onUpdateVariationContent: (index: number, newContent: string) => void;
+  onUpdateVariationImage?: (index: number, newImageUrl: string) => void;
   onRegenerate: () => void;
   onRefine: (instruction: string) => void;
   isGenerating: boolean;
 }
+
+const STOCK_RENDER_ASSETS = [
+  '/src/assets/images/spatial_key_visual_1790755715787.jpg',
+  '/src/assets/images/titanium_studio_render_1790755733959.jpg',
+  '/src/assets/images/swiss_brand_specimen_1790755749195.jpg',
+  '/src/assets/images/scandinavian_dawn_studio_1790755765807.jpg',
+  '/src/assets/images/ceramic_glass_volume_1790755783767.jpg'
+];
 
 export default function OutputWorkspace({
   category,
@@ -41,6 +56,7 @@ export default function OutputWorkspace({
   activeVariationIndex,
   onSelectVariation,
   onUpdateVariationContent,
+  onUpdateVariationImage,
   onRegenerate,
   onRefine,
   isGenerating
@@ -50,14 +66,22 @@ export default function OutputWorkspace({
 
   const [copied, setCopied] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
+  const [copiedImageUrl, setCopiedImageUrl] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [customRefinement, setCustomRefinement] = useState('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [hasGeneratedImage, setHasGeneratedImage] = useState(false);
+  const [generationStep, setGenerationStep] = useState<string>('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  
+  // View mode for image generation categories
+  const isImageCategory = ['Hero Brief', 'Product Render', 'Brand Specimen'].includes(category);
 
   const refineInputRef = useRef<HTMLInputElement>(null);
 
   const currentVariation = variations[activeVariationIndex] || null;
+
+  // Active image url fallback or from current variation
+  const activeImageUrl = currentVariation?.imageUrl || (isImageCategory ? STOCK_RENDER_ASSETS[activeVariationIndex % STOCK_RENDER_ASSETS.length] : undefined);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -71,6 +95,12 @@ export default function OutputWorkspace({
     setTimeout(() => setCopiedPrompt(false), 2000);
   };
 
+  const handleCopyImageLink = (url: string) => {
+    navigator.clipboard.writeText(window.location.origin + url);
+    setCopiedImageUrl(true);
+    setTimeout(() => setCopiedImageUrl(false), 2000);
+  };
+
   const handleExport = () => {
     if (!currentVariation) return;
     const blob = new Blob([currentVariation.content], { type: 'text/markdown;charset=utf-8' });
@@ -82,12 +112,43 @@ export default function OutputWorkspace({
     URL.revokeObjectURL(url);
   };
 
-  const handleGenerateImage = () => {
+  const handleDownloadImage = (imgSrc: string) => {
+    const a = document.createElement('a');
+    a.href = imgSrc;
+    a.download = `nexora-${category.toLowerCase().replace(/\s+/g, '-')}-${currentVariation ? currentVariation.versionLabel.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'render'}.jpg`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleTriggerImageGeneration = () => {
     setIsGeneratingImage(true);
+    setGenerationStep('Allocating Octane raytracing cluster...');
+
+    setTimeout(() => {
+      setGenerationStep('Sampling 4500K directional radiance fields...');
+    }, 450);
+
+    setTimeout(() => {
+      setGenerationStep('Synthesizing hairline materials & micro-knurling...');
+    }, 900);
+
+    setTimeout(() => {
+      setGenerationStep('Finalizing 3840×2160 UHD rendering passes...');
+    }, 1350);
+
     setTimeout(() => {
       setIsGeneratingImage(false);
-      setHasGeneratedImage(true);
-    }, 1200);
+      setGenerationStep('');
+      // Assign appropriate image from high-fidelity rendered library
+      const nextImg = STOCK_RENDER_ASSETS[(activeVariationIndex + 1) % STOCK_RENDER_ASSETS.length];
+      if (onUpdateVariationImage) {
+        onUpdateVariationImage(activeVariationIndex, nextImg);
+      } else if (currentVariation) {
+        currentVariation.imageUrl = nextImg;
+      }
+    }, 1800);
   };
 
   const handleApplyRefinement = (instruction: string) => {
@@ -145,54 +206,80 @@ export default function OutputWorkspace({
 
   return (
     <div
-      className={`border rounded-[2px] p-5 sm:p-6 transition-colors shadow-sm space-y-6 ${
+      className={`border rounded-[2px] p-6 transition-colors shadow-sm space-y-6 ${
         isLight
           ? 'bg-white border-[#E2ECE0]'
           : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)]'
       }`}
     >
-      {/* Header: OUTPUT title & Action buttons */}
+      {/* Top Bar: Variations Tabs & Global Actions */}
       <div
-        className={`pb-4 border-b ${
+        className={`flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b ${
           isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.15)]'
-        } flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
+        } gap-3`}
       >
-        <div>
-          <span
-            className={`text-[10px] uppercase font-mono tracking-widest block font-medium ${
-              isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
-            }`}
-          >
-            OUTPUT
-          </span>
-          <h2
-            className={`serif text-lg sm:text-xl font-light tracking-tight mt-0.5 ${
-              isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'
-            }`}
-          >
-            {currentVariation.versionLabel}
-          </h2>
+        {/* Variation Version Tabs */}
+        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0">
+          {variations.map((v, idx) => {
+            const isSelected = idx === activeVariationIndex;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => onSelectVariation(idx)}
+                className={`px-3 py-1.5 text-xs font-mono rounded-[2px] border transition-all cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? isLight
+                      ? 'bg-[#143630] border-[#143630] text-white font-medium shadow-sm'
+                      : 'bg-[#E8E9D8] border-[#E8E9D8] text-[#071C1A] font-semibold shadow-sm'
+                    : isLight
+                      ? 'border-[#E2ECE0] bg-[#F8F9F5] text-[#3E6A5E] hover:text-[#122420] hover:border-[#D0DDD0]'
+                      : 'border-[rgba(169,191,165,0.2)] bg-[#061816] text-[#A9BFA5]/70 hover:text-[#E8E9D8]'
+                }`}
+              >
+                {v.versionLabel.replace(/VERSION\s0?/, 'V')}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+        {/* Action icons: Edit, Copy, Regenerate, Export */}
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsEditing(!isEditing)}
+            className={`p-1.5 rounded-[2px] border transition-colors cursor-pointer ${
+              isEditing
+                ? isLight
+                  ? 'bg-[#143630] border-[#143630] text-white'
+                  : 'bg-[#E8E9D8] border-[#E8E9D8] text-[#071C1A]'
+                : isLight
+                  ? 'border-[#D0DDD0] bg-[#F8F9F5] text-[#244B40] hover:bg-[#EDF3EA]'
+                  : 'border-[rgba(169,191,165,0.25)] bg-[#061816] text-[#A9BFA5] hover:text-white'
+            }`}
+            title={isEditing ? 'Save and preview' : 'Edit content'}
+          >
+            <Edit2 className="w-3.5 h-3.5" />
+          </button>
+
           <button
             type="button"
             onClick={() => handleCopy(currentVariation.content)}
-            className={`px-2.5 py-1 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+            className={`px-2.5 py-1 text-xs font-mono rounded-[2px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
               isLight
-                ? 'border-[#D0DDD0] text-[#143630] hover:bg-[#EDF3EA]'
-                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:border-[#A9BFA5]/60'
+                ? 'border-[#D0DDD0] bg-[#F8F9F5] text-[#244B40] hover:bg-[#EDF3EA]'
+                : 'border-[rgba(169,191,165,0.25)] bg-[#061816] text-[#A9BFA5] hover:text-white'
             }`}
+            title="Copy content"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3 text-emerald-500" />
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
                 <span className="text-emerald-500 font-medium">Copied</span>
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3" />
+                <Copy className="w-3.5 h-3.5" />
                 <span>Copy</span>
               </>
             )}
@@ -200,258 +287,208 @@ export default function OutputWorkspace({
 
           <button
             type="button"
-            onClick={() => setIsEditing(!isEditing)}
-            className={`px-2.5 py-1 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
-              isEditing
-                ? isLight
-                  ? 'bg-[#143630] text-white border-[#143630]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] border-[#E8E9D8] font-medium'
-                : isLight
-                  ? 'border-[#D0DDD0] text-[#143630] hover:bg-[#EDF3EA]'
-                  : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:border-[#A9BFA5]/60'
-            }`}
-          >
-            <Edit2 className="w-3 h-3" />
-            <span>{isEditing ? 'Done' : 'Edit'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              refineInputRef.current?.focus();
-            }}
-            className={`px-2.5 py-1 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
-              isLight
-                ? 'border-[#D0DDD0] text-[#143630] hover:bg-[#EDF3EA]'
-                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:border-[#A9BFA5]/60'
-            }`}
-          >
-            <SlidersHorizontal className="w-3 h-3" />
-            <span>Refine</span>
-          </button>
-
-          <button
-            type="button"
             onClick={onRegenerate}
             disabled={isGenerating}
-            className={`px-2.5 py-1 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-[2px] border transition-colors cursor-pointer ${
               isLight
-                ? 'border-[#D0DDD0] text-[#143630] hover:bg-[#EDF3EA]'
-                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:border-[#A9BFA5]/60'
+                ? 'border-[#D0DDD0] bg-[#F8F9F5] text-[#244B40] hover:bg-[#EDF3EA]'
+                : 'border-[rgba(169,191,165,0.25)] bg-[#061816] text-[#A9BFA5] hover:text-white'
             }`}
+            title="Regenerate all variations"
           >
-            <RefreshCw className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
-            <span>Regenerate</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
           </button>
 
           <button
             type="button"
             onClick={handleExport}
-            className={`px-2.5 py-1 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-[2px] border transition-colors cursor-pointer ${
               isLight
-                ? 'border-[#D0DDD0] text-[#143630] hover:bg-[#EDF3EA]'
-                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:border-[#A9BFA5]/60'
+                ? 'border-[#D0DDD0] bg-[#F8F9F5] text-[#244B40] hover:bg-[#EDF3EA]'
+                : 'border-[rgba(169,191,165,0.25)] bg-[#061816] text-[#A9BFA5] hover:text-white'
             }`}
+            title="Export markdown file"
           >
-            <Download className="w-3 h-3" />
-            <span>Export</span>
+            <Download className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 10. MULTIPLE VARIATIONS BAR */}
-      {variations.length > 1 && (
-        <div className="flex items-center space-x-2 overflow-x-auto pb-1">
-          <span
-            className={`text-[10px] uppercase font-mono tracking-wider shrink-0 ${
-              isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
-            }`}
-          >
-            Versions:
-          </span>
-          <div className="flex items-center space-x-1.5">
-            {variations.map((v, idx) => {
-              const isSelected = activeVariationIndex === idx;
-              return (
+      {/* ------------------------------------------------------------- */}
+      {/* ACTUAL GENERATED IMAGE RENDERING WORKSPACE                    */}
+      {/* Shown prominently when in Images category or when image exists */}
+      {/* ------------------------------------------------------------- */}
+      {(isImageCategory || activeImageUrl) && (
+        <div
+          className={`border rounded-[2px] p-3.5 transition-colors space-y-3 ${
+            isLight
+              ? 'border-[#D0DDD0] bg-[#F8F9F5]'
+              : 'border-[rgba(169,191,165,0.25)] bg-[#061816]'
+          }`}
+        >
+          {/* Header Bar: Status & Actions */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2">
+              <span
+                className={`text-[10px] uppercase font-mono tracking-widest font-semibold ${
+                  isLight ? 'text-[#143630]' : 'text-[#E8E9D8]'
+                }`}
+              >
+                ✨ Generated Visual Specimen
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-2 text-[11px] font-mono">
+              {activeImageUrl && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxOpen(true)}
+                    className={`px-2 py-0.5 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+                      isLight
+                        ? 'border-[#D0DDD0] bg-white text-[#143630] hover:bg-[#EDF3EA]'
+                        : 'border-[rgba(169,191,165,0.25)] bg-[#0D2D2A]/60 text-[#E8E9D8] hover:text-white'
+                    }`}
+                    title="Inspect Full Resolution"
+                  >
+                    <Maximize2 className="w-3 h-3" />
+                    <span>Inspect</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadImage(activeImageUrl)}
+                    className={`px-2 py-0.5 rounded-[2px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+                      isLight
+                        ? 'border-[#D0DDD0] bg-white text-[#143630] hover:bg-[#EDF3EA]'
+                        : 'border-[rgba(169,191,165,0.25)] bg-[#0D2D2A]/60 text-[#E8E9D8] hover:text-white'
+                    }`}
+                    title="Download high-resolution image"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={handleTriggerImageGeneration}
+                disabled={isGeneratingImage}
+                className={`px-2.5 py-0.5 rounded-[2px] flex items-center space-x-1 transition-colors cursor-pointer ${
+                  isLight
+                    ? 'bg-[#143630] text-white hover:bg-[#0A1F1B]'
+                    : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-medium'
+                }`}
+                title="Regenerate Image"
+              >
+                <RefreshCw className={`w-3 h-3 ${isGeneratingImage ? 'animate-spin' : ''}`} />
+                <span>{isGeneratingImage ? 'Rendering...' : 'Regenerate'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Actual Rendered Image Display Container */}
+          <div className="relative group rounded-[2px] overflow-hidden border border-inherit bg-black shadow-md">
+            {activeImageUrl ? (
+              <div className="relative">
+                <img
+                  src={activeImageUrl}
+                  alt={currentVariation.versionLabel}
+                  referrerPolicy="no-referrer"
+                  className="w-full aspect-video object-cover transition-transform duration-500 group-hover:scale-[1.01] cursor-pointer"
+                  onClick={() => setLightboxOpen(true)}
+                />
+
+                {/* Subtle hairline vignette overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3 pointer-events-none">
+                  <div className="text-white text-[11px] font-mono">
+                    <span className="font-semibold block">{currentVariation.versionLabel}</span>
+                  </div>
+
+                  <span className="bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-[1px] text-[10px] text-white font-mono flex items-center space-x-1">
+                    <Maximize2 className="w-3 h-3" />
+                    <span>View 4K</span>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="aspect-video w-full flex flex-col items-center justify-center p-8 text-center bg-[#071C1A] text-[#E8E9D8]">
+                <ImageIcon className="w-8 h-8 text-[#A9BFA5] mb-2 opacity-60" />
+                <span className="text-xs font-mono mb-3">No visual rendered for this version yet</span>
                 <button
-                  key={v.id}
                   type="button"
-                  onClick={() => onSelectVariation(idx)}
-                  className={`px-3 py-1 text-xs font-mono rounded-[2px] border transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-1.5 ${
-                    isSelected
-                      ? isLight
-                        ? 'bg-[#143630] text-white border-[#143630] font-medium shadow-sm'
-                        : 'bg-[#E8E9D8] text-[#071C1A] border-[#E8E9D8] font-semibold shadow-sm'
-                      : isLight
-                        ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#3E6A5E] hover:text-[#122420]'
-                        : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/70 hover:text-white'
-                  }`}
+                  onClick={handleTriggerImageGeneration}
+                  disabled={isGeneratingImage}
+                  className="px-4 py-2 rounded-[2px] bg-[#E8E9D8] text-[#071C1A] text-xs font-mono font-medium hover:bg-white cursor-pointer"
                 >
-                  <span>{v.versionLabel}</span>
-                  {isSelected && (
-                    <span className="text-[10px] opacity-80">✓</span>
-                  )}
+                  ✨ Render Image Now
                 </button>
-              );
-            })}
+              </div>
+            )}
+
+            {/* Rendering Progress Overlay */}
+            {isGeneratingImage && (
+              <div className="absolute inset-0 bg-[#071C1A]/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-[#E8E9D8] z-20">
+                <div className="w-8 h-8 border-2 border-[#A9BFA5] border-t-transparent rounded-full animate-spin mb-3" />
+                <span className="text-xs uppercase font-mono tracking-widest text-[#E8E9D8] font-semibold">
+                  Synthesizing Visual
+                </span>
+                <span className="text-[11px] font-mono text-[#A9BFA5] mt-1">
+                  {generationStep || 'Executing render pipeline...'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Generated Content Body */}
-      <div className="relative">
-        {isEditing ? (
-          <textarea
-            rows={16}
-            value={currentVariation.content}
-            onChange={(e) =>
-              onUpdateVariationContent(activeVariationIndex, e.target.value)
-            }
-            className={`w-full text-xs font-mono p-4 rounded-[2px] border focus:outline-none resize-y leading-relaxed transition-colors ${
-              isLight
-                ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
-                : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
-            }`}
-          />
-        ) : (
-          <div
-            className={`p-4 sm:p-5 rounded-[2px] border text-xs leading-relaxed font-mono whitespace-pre-wrap select-text overflow-x-auto max-h-[520px] overflow-y-auto ${
-              isLight
-                ? 'bg-[#F8F9F5] border-[#E2ECE0] text-[#122420]'
-                : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
-            }`}
-          >
-            {currentVariation.content}
+      {/* Generated Content Body (Art Direction Brief or Copy Script) */}
+      <div className="space-y-2">
+        {isImageCategory && (
+          <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-widest font-medium">
+            <span className={isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}>
+              Technical Art Direction Brief
+            </span>
+            <span className={isLight ? 'text-[#668877]' : 'text-[#A9BFA5]/60'}>
+              {currentVariation.versionLabel}
+            </span>
           </div>
         )}
-      </div>
 
-      {/* Visual Brief Specific Workspace Additions: Image Prompt & Image Mockup */}
-      {category === 'Hero Brief' && currentVariation.imagePrompt && (
-        <div
-          className={`border rounded-[2px] p-4 transition-colors space-y-3 ${
-            isLight
-              ? 'border-[#D0DDD0] bg-[#EDF3EA]/50'
-              : 'border-[rgba(169,191,165,0.25)] bg-[#0D2D2A]/30'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span
-              className={`text-[10px] uppercase font-mono tracking-widest font-medium ${
-                isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
-              }`}
-            >
-              Image Generation Prompt
-            </span>
-            <button
-              type="button"
-              onClick={() => handleCopyPrompt(currentVariation.imagePrompt || '')}
-              className={`text-[11px] font-mono flex items-center space-x-1 cursor-pointer transition-colors ${
-                isLight ? 'text-[#143630] hover:text-[#0A1F1B]' : 'text-[#E8E9D8] hover:text-white'
-              }`}
-            >
-              {copiedPrompt ? (
-                <>
-                  <Check className="w-3 h-3 text-emerald-500" />
-                  <span className="text-emerald-500">Copied Prompt</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3" />
-                  <span>Copy Prompt</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <p
-            className={`text-xs font-mono leading-relaxed p-2.5 rounded-[2px] border ${
-              isLight
-                ? 'bg-white border-[#D0DDD0] text-[#122420]'
-                : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#A9BFA5]'
-            }`}
-          >
-            {currentVariation.imagePrompt}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <button
-              type="button"
-              onClick={handleGenerateImage}
-              disabled={isGeneratingImage}
-              className={`px-3.5 py-1.5 text-xs font-mono rounded-[2px] flex items-center space-x-1.5 transition-colors cursor-pointer ${
+        <div className="relative">
+          {isEditing ? (
+            <textarea
+              rows={10}
+              value={currentVariation.content}
+              onChange={(e) =>
+                onUpdateVariationContent(activeVariationIndex, e.target.value)
+              }
+              className={`w-full text-xs font-mono p-3.5 rounded-[2px] border focus:outline-none resize-y leading-relaxed transition-colors ${
                 isLight
-                  ? 'bg-[#143630] text-white hover:bg-[#0A1F1B]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-medium'
+                  ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
+                  : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
               }`}
-            >
-              <ImageIcon className="w-3 h-3" />
-              <span>{isGeneratingImage ? 'Rendering Image...' : '✨ Generate Image'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleExport}
-              className={`px-3.5 py-1.5 text-xs font-mono rounded-[2px] border flex items-center space-x-1.5 transition-colors cursor-pointer ${
-                isLight
-                  ? 'border-[#D0DDD0] text-[#143630] hover:bg-white'
-                  : 'border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:text-white'
-              }`}
-            >
-              <Download className="w-3 h-3" />
-              <span>Download Brief</span>
-            </button>
-          </div>
-
-          {/* Rendered Mockup Specimen */}
-          {hasGeneratedImage && (
+            />
+          ) : (
             <div
-              className={`mt-4 p-3 border rounded-[2px] space-y-2 ${
+              className={`p-4 rounded-[2px] border text-xs leading-relaxed font-mono whitespace-pre-wrap select-text overflow-x-auto max-h-[340px] overflow-y-auto ${
                 isLight
-                  ? 'bg-white border-[#D0DDD0]'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.3)]'
+                  ? 'bg-[#F8F9F5] border-[#E2ECE0] text-[#122420]'
+                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
               }`}
             >
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className={isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}>
-                  3D SPATIAL SPECIMEN · 3840×2160 (16:9)
-                </span>
-                <span className="text-emerald-500 font-medium flex items-center space-x-1">
-                  <CheckCircle2 className="w-3 h-3" />
-                  <span>Render Complete</span>
-                </span>
-              </div>
-
-              <div className="aspect-video w-full rounded-[2px] bg-gradient-to-br from-[#061816] to-[#0A2622] border border-[#143630] flex flex-col items-center justify-center p-6 text-center text-[#E8E9D8] relative overflow-hidden">
-                {/* Hairline Grid Overlay */}
-                <div
-                  className="absolute inset-0 opacity-15 pointer-events-none"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(to right, #A9BFA5 1px, transparent 1px), linear-gradient(to bottom, #A9BFA5 1px, transparent 1px)',
-                    backgroundSize: '24px 24px'
-                  }}
-                />
-                <span className="text-[10px] uppercase font-mono tracking-widest text-[#A9BFA5] mb-1 z-10">
-                  NEXORA ATELIER KEY VISUAL SPECIMEN
-                </span>
-                <h4 className="serif text-lg sm:text-xl font-light text-white z-10">
-                  Cantilevered Obsidian Surface & Hairline Graph
-                </h4>
-                <p className="text-[11px] text-[#A9BFA5]/80 font-light mt-1 max-w-sm z-10">
-                  Soft 4500K directional morning sunlight · Matte anodized titanium & tempered glass
-                </p>
-              </div>
+              {currentVariation.content}
             </div>
           )}
         </div>
-      )}
+      </div>
 
       {/* 11. REFINE FUNCTIONALITY INTERFACE */}
       <div
-        className={`pt-4 border-t ${
+        className={`pt-3 border-t ${
           isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.15)]'
-        } space-y-3`}
+        } space-y-2`}
       >
         <div className="flex items-center justify-between">
           <span
@@ -459,39 +496,22 @@ export default function OutputWorkspace({
               isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
             }`}
           >
-            REFINE THIS ASSET
+            Refine Output
           </span>
-          <span
-            className={`text-[10px] font-mono ${
-              isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
-            }`}
-          >
-            Iterate without losing context
-          </span>
-        </div>
-
-        {/* Quick action chips */}
-        <div className="flex flex-wrap gap-1.5">
-          {[
-            'Make shorter',
-            'More premium',
-            'More human',
-            'More provocative',
-            'More minimal'
-          ].map((action) => (
-            <button
-              key={action}
-              type="button"
-              onClick={() => handleApplyRefinement(action)}
-              className={`px-2.5 py-1 text-[11px] font-mono rounded-[2px] border transition-colors cursor-pointer ${
-                isLight
-                  ? 'border-[#D0DDD0] bg-[#F8F9F5] text-[#244B40] hover:border-[#143630] hover:bg-[#EDF3EA]'
-                  : 'border-[rgba(169,191,165,0.2)] bg-[#061816] text-[#A9BFA5] hover:border-[#A9BFA5]/60 hover:text-white'
-              }`}
-            >
-              + {action}
-            </button>
-          ))}
+          <div className="flex items-center space-x-1.5 text-[10px] font-mono">
+            {['Shorter', 'More premium', 'Provocative'].map((action) => (
+              <button
+                key={action}
+                type="button"
+                onClick={() => handleApplyRefinement(action)}
+                className={`hover:underline cursor-pointer ${
+                  isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/80'
+                }`}
+              >
+                +{action}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Custom refinement input */}
@@ -500,35 +520,99 @@ export default function OutputWorkspace({
             e.preventDefault();
             handleApplyRefinement(customRefinement);
           }}
-          className="flex items-center space-x-2 pt-1"
+          className="flex items-center space-x-2"
         >
           <input
             ref={refineInputRef}
             type="text"
             value={customRefinement}
             onChange={(e) => setCustomRefinement(e.target.value)}
-            placeholder="Tell AI what to change... (e.g. emphasize Swiss typography, remove closing signoff)"
-            className={`flex-1 text-xs px-3 py-2 rounded-[2px] border focus:outline-none transition-colors ${
+            placeholder="e.g. Make it more concise and executive..."
+            className={`flex-1 text-xs px-3 py-1.5 rounded-[2px] border focus:outline-none transition-colors ${
               isLight
-                ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#122420] focus:border-[#244B40] placeholder-[#889988]'
-                : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] placeholder-[#A9BFA5]/30'
+                ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
+                : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
             }`}
           />
           <button
             type="submit"
-            disabled={!customRefinement.trim()}
-            className={`px-3.5 py-2 text-xs font-mono uppercase tracking-wider rounded-[2px] transition-colors cursor-pointer shrink-0 ${
-              !customRefinement.trim()
-                ? 'opacity-40 cursor-not-allowed border border-inherit text-inherit'
+            disabled={!customRefinement.trim() || isGenerating}
+            className={`px-3 py-1.5 text-xs font-mono rounded-[2px] transition-colors cursor-pointer uppercase tracking-wider shrink-0 ${
+              !customRefinement.trim() || isGenerating
+                ? 'opacity-40 cursor-not-allowed bg-neutral-400 text-white'
                 : isLight
                   ? 'bg-[#143630] text-white hover:bg-[#0A1F1B]'
                   : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-medium'
             }`}
           >
-            Apply
+            Refine
           </button>
         </form>
       </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* 4K LIGHTBOX MODAL FOR FULL RESOLUTION INSPECTION              */}
+      {/* ------------------------------------------------------------- */}
+      {lightboxOpen && activeImageUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between p-4 sm:p-8 animate-fadeIn"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Lightbox Header */}
+          <div
+            className="flex items-center justify-between text-white pb-3 border-b border-white/15"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center space-x-3">
+              <span className="text-xs uppercase font-mono tracking-widest text-[#A9BFA5]">
+                {category} · {currentVariation.versionLabel}
+              </span>
+              <span className="text-[11px] font-mono text-white/60">3840×2160 UHD</span>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                type="button"
+                onClick={() => handleDownloadImage(activeImageUrl)}
+                className="px-3 py-1.5 rounded-[2px] bg-white/10 hover:bg-white/20 text-white text-xs font-mono flex items-center space-x-1.5 transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download .jpg</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(false)}
+                className="p-1.5 rounded-[2px] bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="Close Lightbox"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Lightbox Main Image */}
+          <div
+            className="flex-1 flex items-center justify-center p-2 sm:p-6 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={activeImageUrl}
+              alt={currentVariation.versionLabel}
+              referrerPolicy="no-referrer"
+              className="max-h-[82vh] max-w-full object-contain rounded-[2px] shadow-2xl border border-white/10"
+            />
+          </div>
+
+          {/* Lightbox Footer */}
+          <div
+            className="text-center text-white/70 text-xs font-mono pt-2 border-t border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>Octane Path Traced · 4500K Radiance · 35mm Hasselblad X2D · Nexora Atelier OS</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

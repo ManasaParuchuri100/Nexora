@@ -214,14 +214,27 @@ export interface CampaignBlueprint {
   }[];
 }
 
+export type CategoryType = 
+  | 'Email Copy' 
+  | 'Social Post' 
+  | 'Headline Set' 
+  | 'Thought Leadership'
+  | 'Hero Brief' 
+  | 'Product Render' 
+  | 'Brand Specimen' 
+  | 'Ad Script' 
+  | 'Product Demo' 
+  | 'Brand Film';
+
 export interface GeneratedAsset {
   id: string;
   title: string;
-  type: 'Email Copy' | 'Social Post' | 'Headline Set' | 'Hero Brief' | 'Ad Script' | 'Thought Leadership';
+  type: CategoryType;
   platform: string;
   preview: string;
   createdAt: string;
   tags: string[];
+  imageUrl?: string;
 }
 
 export interface SocialAccount {
