@@ -25,15 +25,19 @@ import {
 
 import AppSidebar from './app/AppSidebar';
 import AppTopBar from './app/AppTopBar';
-import InsightsView from './app/InsightsView';
-import CampaignsView from './app/CampaignsView';
+import OverviewView from './app/OverviewView';
+import EngageView from './app/EngageView';
+import LeadsView from './app/LeadsView';
 import CreativeLabView from './app/CreativeLabView';
 import SocialHubView from './app/SocialHubView';
-import LeadsView from './app/LeadsView';
+import CampaignsView from './app/CampaignsView';
+import AnalyticsView from './app/AnalyticsView';
+import SettingsView from './app/SettingsView';
 import AssistantView from './app/AssistantView';
 import ActionModals from './app/ActionModals';
 import CommandPalette from './app/CommandPalette';
 import SettingsModal from './app/SettingsModal';
+import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
 
 interface NexoraAppProps {
   initialMode: 'login' | 'signup';
@@ -41,9 +45,9 @@ interface NexoraAppProps {
 }
 
 export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
-  // Navigation State (Insights -> Live Leads is default per requirements)
-  const [activeCategory, setActiveCategory] = useState<NavCategory>('insights');
-  const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('live-leads');
+  // Navigation State (Overview is the top-level default)
+  const [activeCategory, setActiveCategory] = useState<NavCategory>('overview');
+  const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('default');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Application Data States
@@ -85,16 +89,44 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
   }, []);
 
   const handleSelectNav = (category: NavCategory, subCategory?: SubCategory) => {
-    setActiveCategory(category);
-    const resolvedSub = subCategory || (
-      category === 'insights' 
-        ? 'live-leads' 
-        : category === 'campaigns' 
-        ? 'campaigns-overview' 
-        : category === 'leads'
-        ? 'live-leads'
-        : 'overview'
+    setSelectedLead(null);
+    if (activeModal === 'lead-details') setActiveModal(null);
+
+    // Normalization for legacy routes
+    let targetCategory = category;
+    let targetSub = subCategory;
+
+    if (category === 'insights') {
+      targetCategory = 'overview';
+      targetSub = 'default';
+    } else if (category === 'creative-lab') {
+      targetCategory = 'content';
+      targetSub = subCategory === 'generated-assets' ? 'content-library' : 'ai-content';
+    } else if (category === 'social-hub') {
+      targetCategory = 'content';
+      targetSub = 'social-posts';
+    }
+
+    setActiveCategory(targetCategory);
+
+    const resolvedSub = targetSub || (
+      targetCategory === 'overview'
+        ? 'default'
+        : targetCategory === 'engage'
+        ? 'inbox'
+        : targetCategory === 'leads'
+        ? 'all-leads'
+        : targetCategory === 'content'
+        ? 'ai-content'
+        : targetCategory === 'campaigns'
+        ? 'campaigns-list'
+        : targetCategory === 'analytics'
+        ? 'analytics-overview'
+        : targetCategory === 'settings'
+        ? 'business-profile'
+        : 'default'
     );
+
     setActiveSubCategory(resolvedSub);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -114,19 +146,19 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
 
   const handleAddLead = (newLead: Lead) => {
     setLeads([newLead, ...leads]);
-    // update metric
     setMetrics(metrics.map(m => m.id === 'leads' ? { ...m, value: (parseInt(m.value) + 1).toString() } : m));
+    showToast('Lead Created', `Added ${newLead.name} (${newLead.company}) to pipeline.`);
   };
 
   const handleAddCampaign = (newCamp: Campaign) => {
     setCampaigns([newCamp, ...campaigns]);
-    // update metric
     setMetrics(metrics.map(m => m.id === 'campaigns' ? { ...m, value: (parseInt(m.value) + 1).toString() } : m));
+    showToast('Campaign Launched', `"${newCamp.name}" has been created.`);
   };
 
   const handleAddAsset = (newAsset: GeneratedAsset) => {
     setAssets([newAsset, ...assets]);
-    showToast('Asset Saved', `"${newAsset.title}" added to your creative archive.`);
+    showToast('Asset Saved', `"${newAsset.title}" added to your content library.`);
   };
 
   const handleAddScheduledPost = (newPost: ScheduledPost) => {
@@ -155,7 +187,7 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
         style={{ background: 'radial-gradient(circle, #0D2D2A 0%, transparent 70%)' }}
       />
 
-      {/* Fixed Left Sidebar Navigation */}
+      {/* Fixed Left Sidebar Navigation (New Tree Architecture) */}
       <AppSidebar
         activeCategory={activeCategory}
         activeSubCategory={activeSubCategory}
@@ -163,12 +195,12 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
         onLogout={onReturnToLanding}
         isOpenMobile={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => handleSelectNav('settings', 'business-profile')}
       />
 
-      {/* Main Workspace Frame (offset by sidebar width on desktop: md:pl-60) */}
+      {/* Main Workspace Frame */}
       <div className="md:pl-60 flex flex-col min-h-screen">
-        {/* Minimal Top Bar */}
+        {/* Top Navigation Bar with Dynamic Breadcrumb */}
         <AppTopBar
           activeCategory={activeCategory}
           activeSubCategory={activeSubCategory}
@@ -177,23 +209,94 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
           onLogout={onReturnToLanding}
           onOpenQuickSearch={() => setIsSearchOpen(true)}
           onSelectNav={handleSelectNav}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={() => handleSelectNav('settings', 'business-profile')}
         />
 
         {/* Dynamic Main Workspace Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-6 sm:px-10 lg:px-12 py-8 lg:py-10">
-          {activeCategory === 'insights' && (
-            <InsightsView
-              activeSubCategory={activeSubCategory}
+        <main className="flex-1 w-full min-h-[calc(100vh-65px)] flex flex-col">
+          {selectedLead ? (
+            <LeadIntelligenceWorkspace
+              lead={selectedLead}
+              onClose={() => {
+                setSelectedLead(null);
+                if (activeModal === 'lead-details') setActiveModal(null);
+              }}
+              onUpdateLead={(updated) => {
+                handleUpdateLead(updated);
+                setSelectedLead(updated);
+              }}
+              onNavigate={(category, sub) => {
+                setSelectedLead(null);
+                handleSelectNav(category, sub);
+              }}
+              onNotify={showToast}
+            />
+          ) : (
+            <div className="max-w-7xl w-full mx-auto px-6 sm:px-10 lg:px-12 py-8 lg:py-10">
+              {/* 1. OVERVIEW */}
+          {activeCategory === 'overview' && (
+            <OverviewView
               metrics={metrics}
               leads={leads}
+              campaigns={campaigns}
               trendingTopics={trendingTopics}
-              onTriggerQuickAction={handleTriggerQuickAction}
+              onNavigate={handleSelectNav}
               onSelectLead={handleSelectLead}
-              onNavigateSub={(sub) => handleSelectNav('insights', sub)}
+              onTriggerQuickAction={handleTriggerQuickAction}
             />
           )}
 
+          {/* 2. ENGAGE (Inbox, Conversations, Human Handoff) */}
+          {activeCategory === 'engage' && (
+            <EngageView
+              activeSubCategory={activeSubCategory}
+              leads={leads}
+              onNavigateSub={(sub) => handleSelectNav('engage', sub)}
+              onSelectLead={handleSelectLead}
+              onNotify={showToast}
+            />
+          )}
+
+          {/* 3. LEADS (All Leads, Pipeline, Follow-ups) */}
+          {activeCategory === 'leads' && (
+            <LeadsView
+              activeSubCategory={activeSubCategory}
+              leads={leads}
+              onNavigateSub={(sub) => handleSelectNav('leads', sub)}
+              onSelectLead={handleSelectLead}
+              onAddLeadModal={() => setActiveModal('lead')}
+              onUpdateLead={handleUpdateLead}
+            />
+          )}
+
+          {/* 4. CONTENT (AI Content, Social Posts, Content Library) */}
+          {activeCategory === 'content' && (
+            <>
+              {(activeSubCategory === 'ai-content' || activeSubCategory === 'content-library' || activeSubCategory === 'create' || activeSubCategory === 'generated-assets') && (
+                <CreativeLabView
+                  activeSubCategory={activeSubCategory === 'content-library' || activeSubCategory === 'generated-assets' ? 'generated-assets' : 'create'}
+                  assets={assets}
+                  onNavigateSub={(sub) => handleSelectNav('content', sub === 'generated-assets' ? 'content-library' : 'ai-content')}
+                  onGenerateSuccess={handleAddAsset}
+                />
+              )}
+
+              {activeSubCategory === 'social-posts' && (
+                <SocialHubView
+                  activeSubCategory="ai-guided-creation"
+                  accounts={accounts}
+                  scheduledPosts={scheduledPosts}
+                  onNavigateSub={(sub) => handleSelectNav('content', 'social-posts')}
+                  onSchedulePostSuccess={() => showToast('Post Queued', 'Your broadcast has been added to the release schedule.')}
+                  onAddScheduledPost={handleAddScheduledPost}
+                  onDeleteScheduledPost={handleDeleteScheduledPost}
+                  onUpdateScheduledPost={handleUpdateScheduledPost}
+                />
+              )}
+            </>
+          )}
+
+          {/* 5. CAMPAIGNS (Campaigns, Create Campaign, Campaign Performance) */}
           {activeCategory === 'campaigns' && (
             <CampaignsView
               campaigns={campaigns}
@@ -206,39 +309,25 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
             />
           )}
 
-          {activeCategory === 'creative-lab' && (
-            <CreativeLabView
+          {/* 6. ANALYTICS (Overview, Lead Analytics, Channel Performance) */}
+          {activeCategory === 'analytics' && (
+            <AnalyticsView
               activeSubCategory={activeSubCategory}
-              assets={assets}
-              onNavigateSub={(sub) => handleSelectNav('creative-lab', sub)}
-              onGenerateSuccess={handleAddAsset}
+              onNavigateSub={(sub) => handleSelectNav('analytics', sub)}
+              metrics={metrics}
             />
           )}
 
-          {activeCategory === 'social-hub' && (
-            <SocialHubView
+          {/* 7. SETTINGS (Business Profile, Channels, AI & Automation, Team & Access) */}
+          {activeCategory === 'settings' && (
+            <SettingsView
               activeSubCategory={activeSubCategory}
-              accounts={accounts}
-              scheduledPosts={scheduledPosts}
-              onNavigateSub={(sub) => handleSelectNav('social-hub', sub)}
-              onSchedulePostSuccess={() => showToast('Post Queued', 'Your broadcast has been added to the release schedule.')}
-              onAddScheduledPost={handleAddScheduledPost}
-              onDeleteScheduledPost={handleDeleteScheduledPost}
-              onUpdateScheduledPost={handleUpdateScheduledPost}
+              onNavigateSub={(sub) => handleSelectNav('settings', sub)}
+              onNotify={showToast}
             />
           )}
 
-          {activeCategory === 'leads' && (
-            <LeadsView
-              activeSubCategory={activeSubCategory}
-              leads={leads}
-              onNavigateSub={(sub) => handleSelectNav('leads', sub)}
-              onSelectLead={handleSelectLead}
-              onAddLeadModal={() => setActiveModal('lead')}
-              onUpdateLead={handleUpdateLead}
-            />
-          )}
-
+          {/* Legacy Assistant View if selected */}
           {activeCategory === 'assistant' && (
             <AssistantView
               metrics={metrics}
@@ -247,12 +336,14 @@ export default function NexoraApp({ onReturnToLanding }: NexoraAppProps) {
               onTriggerQuickAction={handleTriggerQuickAction}
             />
           )}
+            </div>
+          )}
         </main>
       </div>
 
       {/* Interactive Action Modals */}
       <ActionModals
-        activeModal={activeModal}
+        activeModal={activeModal === 'lead-details' ? null : activeModal}
         selectedLead={selectedLead}
         onClose={() => { setActiveModal(null); setSelectedLead(null); }}
         onAddLead={handleAddLead}

@@ -33,7 +33,7 @@ export default function CreativeLabView({
   const { theme } = useTheme();
   const isLight = theme === 'light';
 
-  const isAssetsView = activeSubCategory === 'generated-assets';
+  const isAssetsView = activeSubCategory === 'generated-assets' || activeSubCategory === 'content-library';
 
   // 2. Generation Mode: Structured Brief (default) vs Quick Generate
   const [createMode, setCreateMode] = useState<'structured' | 'quick'>('structured');

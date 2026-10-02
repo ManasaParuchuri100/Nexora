@@ -21,9 +21,7 @@ import {
 import { Lead, SubCategory, LeadTag } from '../../types';
 import NewCustomersChart from './leads/NewCustomersChart';
 import ActivityHeatmap from './leads/ActivityHeatmap';
-import LeadSummaryStats from './leads/LeadSummaryStats';
 import LeadsKanbanBoard from './leads/LeadsKanbanBoard';
-import LeadDetailModal from './leads/LeadDetailModal';
 import Pagination from './Pagination';
 
 interface LeadsViewProps {
@@ -43,18 +41,29 @@ export default function LeadsView({
   onAddLeadModal,
   onUpdateLead
 }: LeadsViewProps) {
+  // Determine active tab from activeSubCategory
   const currentTab = 
-    activeSubCategory === 'lead-automation' 
-      ? 'lead-automation' 
-      : activeSubCategory === 'generated-responses' 
-      ? 'generated-responses' 
-      : 'live-leads';
+    activeSubCategory === 'pipeline'
+      ? 'pipeline'
+      : activeSubCategory === 'follow-ups' || activeSubCategory === 'lead-automation' || activeSubCategory === 'generated-responses'
+      ? 'follow-ups'
+      : 'all-leads';
 
-  // Toggle between Kanban Board (matching screenshot) and Data Table
-  const [viewLayout, setViewLayout] = useState<'board' | 'table'>('board');
+  // Toggle between Kanban Board and Data Table
+  const [viewLayout, setViewLayout] = useState<'board' | 'table'>(
+    activeSubCategory === 'pipeline' ? 'board' : 'table'
+  );
+
+  // Sync viewLayout if activeSubCategory changes
+  useEffect(() => {
+    if (activeSubCategory === 'pipeline') {
+      setViewLayout('board');
+    } else if (activeSubCategory === 'all-leads') {
+      setViewLayout('table');
+    }
+  }, [activeSubCategory]);
   const [search, setSearch] = useState('');
   const [tagFilter, setTagFilter] = useState<string>('All');
-  const [inspectingLead, setInspectingLead] = useState<Lead | null>(null);
 
   // Hidden activity graph by default; shown only if requested by the user
   const [showActivityGraph, setShowActivityGraph] = useState<boolean>(false);
@@ -73,9 +82,6 @@ export default function LeadsView({
   const handleUpdate = (updated: Lead) => {
     if (onUpdateLead) {
       onUpdateLead(updated);
-    }
-    if (inspectingLead && inspectingLead.id === updated.id) {
-      setInspectingLead(updated);
     }
   };
 
@@ -177,36 +183,36 @@ export default function LeadsView({
           <div className="flex items-center space-x-6 text-xs uppercase tracking-widest border-b border-[rgba(169,191,165,0.2)] pb-1 font-mono">
             <button
               type="button"
-              onClick={() => onNavigateSub('live-leads')}
+              onClick={() => onNavigateSub('all-leads')}
               className={`pb-1 border-b transition-colors cursor-pointer ${
-                currentTab === 'live-leads' 
+                currentTab === 'all-leads' 
                   ? 'text-[#E8E9D8] border-[#E8E9D8] font-medium' 
                   : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
               }`}
             >
-              Pipeline ({leads.length})
+              All Leads ({leads.length})
             </button>
             <button
               type="button"
-              onClick={() => onNavigateSub('lead-automation')}
+              onClick={() => onNavigateSub('pipeline')}
               className={`pb-1 border-b transition-colors cursor-pointer ${
-                currentTab === 'lead-automation' 
+                currentTab === 'pipeline' 
                   ? 'text-[#E8E9D8] border-[#E8E9D8] font-medium' 
                   : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
               }`}
             >
-              Lead Automation
+              Pipeline
             </button>
             <button
               type="button"
-              onClick={() => onNavigateSub('generated-responses')}
+              onClick={() => onNavigateSub('follow-ups')}
               className={`pb-1 border-b transition-colors cursor-pointer ${
-                currentTab === 'generated-responses' 
+                currentTab === 'follow-ups' 
                   ? 'text-[#E8E9D8] border-[#E8E9D8] font-medium' 
                   : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
               }`}
             >
-              Generated Responses
+              Follow-ups
             </button>
           </div>
 
@@ -220,16 +226,13 @@ export default function LeadsView({
         </div>
       </section>
 
-      {/* 2. Primary Tab: Live Leads & Pipeline (matching screenshot layout) */}
-      {currentTab === 'live-leads' && (
+      {/* 2. Primary Tab: All Leads or Pipeline Board */}
+      {(currentTab === 'all-leads' || currentTab === 'pipeline') && (
         <div className="space-y-8">
-          {/* Top Analytics & Activity Row:
-              Left: New customers clean line graph (expanded when activity graph is hidden)
-              Center: Activity matrix (hidden by default, shown only when requested by user)
-              Right: Tasks in progress metrics */}
+          {/* Top Analytics & Activity Row */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
             {/* New Customers Line Chart */}
-            <div className={`${showActivityGraph ? 'lg:col-span-5' : 'lg:col-span-8 xl:col-span-9'} min-h-[260px] transition-all duration-300`}>
+            <div className={`${showActivityGraph ? 'lg:col-span-7' : 'lg:col-span-12'} min-h-[260px] transition-all duration-300`}>
               <NewCustomersChart
                 isActivityVisible={showActivityGraph}
                 onToggleActivity={() => setShowActivityGraph(prev => !prev)}
@@ -238,18 +241,10 @@ export default function LeadsView({
 
             {/* Activity Heatmap Grid (Hidden by default; shown only when requested) */}
             {showActivityGraph && (
-              <div className="lg:col-span-4 min-h-[260px] transition-all duration-300">
+              <div className="lg:col-span-5 min-h-[260px] transition-all duration-300">
                 <ActivityHeatmap onClose={() => setShowActivityGraph(false)} />
               </div>
             )}
-
-            {/* Tasks in progress Summary */}
-            <div className={`${showActivityGraph ? 'lg:col-span-3' : 'lg:col-span-4 xl:col-span-3'} min-h-[260px] transition-all duration-300`}>
-              <LeadSummaryStats
-                tasksInProgress={76}
-                tasksChange="+ 6%"
-              />
-            </div>
           </div>
 
           {/* Sub-toolbar: Search, Tag Filters, Layout Switcher */}
@@ -322,10 +317,7 @@ export default function LeadsView({
           {viewLayout === 'board' ? (
             <LeadsKanbanBoard
               leads={filteredLeads}
-              onSelectLead={(l) => {
-                setInspectingLead(l);
-                onSelectLead(l);
-              }}
+              onSelectLead={onSelectLead}
               onUpdateLead={handleUpdate}
               onAddLeadModal={onAddLeadModal}
             />
@@ -337,16 +329,13 @@ export default function LeadsView({
                 <div className="col-span-2">Stage</div>
                 <div className="col-span-2">Tag</div>
                 <div className="col-span-2">Assignee</div>
-                <div className="col-span-2 text-right">Value</div>
+                <div className="col-span-2 text-right">Value & Actions</div>
               </div>
 
               {paginatedLeads.map(lead => (
                 <div 
                   key={lead.id}
-                  onClick={() => {
-                    setInspectingLead(lead);
-                    onSelectLead(lead);
-                  }}
+                  onClick={() => onSelectLead(lead)}
                   className="min-w-[800px] grid grid-cols-12 px-6 py-4 items-center hover:bg-[#0D2D2A]/30 transition-colors cursor-pointer group"
                 >
                   <div className="col-span-4">
@@ -379,8 +368,20 @@ export default function LeadsView({
                     {lead.assignee?.name || 'Mateo Petty'}
                   </div>
 
-                  <div className="col-span-2 text-right font-mono text-xs text-white">
-                    {lead.value}
+                  <div className="col-span-2 flex items-center justify-end space-x-3">
+                    <span className="font-mono text-xs text-white">
+                      {lead.value}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectLead(lead);
+                      }}
+                      className="px-2.5 py-1 text-xs font-mono font-medium rounded-[2px] bg-[#0D2D2A] hover:bg-[#E8E9D8] text-[#A9BFA5] hover:text-[#071C1A] border border-[rgba(169,191,165,0.3)] transition-colors cursor-pointer"
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
               ))}
@@ -402,58 +403,14 @@ export default function LeadsView({
         </div>
       )}
 
-      {/* 3. Lead Automation Tab */}
-      {currentTab === 'lead-automation' && (
+      {/* 3. Follow-ups Tab (Outreach Letters & Automated Rules) */}
+      {currentTab === 'follow-ups' && (
         <div className="space-y-6">
+          {/* AI Prepared Follow-up Letters */}
           <div className="border border-[rgba(169,191,165,0.2)] p-6 bg-[#071C1A]">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
               <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                Automated Lead Routing & Triggers
-              </h3>
-              <span className="text-[11px] font-mono text-[#A9BFA5]/70">
-                Active Rules: {automationRules.length}
-              </span>
-            </div>
-            <p className="text-xs text-[#A9BFA5]/80 font-light mb-6">
-              Define operational thresholds to immediately qualify incoming studio inquiries without human delay.
-            </p>
-
-            <div className="divide-y divide-[rgba(169,191,165,0.15)]">
-              {paginatedRules.map((auto, i) => (
-                <div key={i} className="py-4 flex items-center justify-between gap-4">
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-medium text-[#E8E9D8]">{auto.name}</h4>
-                    <p className="text-[11px] text-[#A9BFA5]/75 font-light mt-0.5">{auto.rule}</p>
-                  </div>
-                  <span className="text-[10px] uppercase tracking-widest font-mono text-emerald-400 border border-emerald-500/30 px-2 py-0.5 bg-emerald-950/20">
-                    {auto.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination for Rules */}
-            <div className="mt-4 -mx-6 -mb-6">
-              <Pagination
-                currentPage={automationPage}
-                totalItems={automationRules.length}
-                pageSize={3}
-                onPageChange={setAutomationPage}
-                showPageSize={false}
-                itemName="rules"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. Generated Responses Tab */}
-      {currentTab === 'generated-responses' && (
-        <div className="space-y-6">
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 bg-[#071C1A]">
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
-              <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                AI Prepared Follow-up Letters
+                Scheduled Follow-up Letters & Outreach
               </h3>
               <span className="text-[11px] font-mono text-[#A9BFA5]/70">
                 Drafts in Queue: {followUpLetters.length}
@@ -496,19 +453,48 @@ export default function LeadsView({
               />
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Interactive Lead Detail Inspector Modal */}
-      {inspectingLead && (
-        <LeadDetailModal
-          lead={inspectingLead}
-          onClose={() => setInspectingLead(null)}
-          onUpdateLead={handleUpdate}
-          onDispatchResponse={(name) => {
-            // Can show a toast or alert
-          }}
-        />
+          {/* Automated Cadence Rules */}
+          <div className="border border-[rgba(169,191,165,0.2)] p-6 bg-[#071C1A]">
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
+              <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
+                Follow-up Automation Rules
+              </h3>
+              <span className="text-[11px] font-mono text-[#A9BFA5]/70">
+                Active Rules: {automationRules.length}
+              </span>
+            </div>
+            <p className="text-xs text-[#A9BFA5]/80 font-light mb-6">
+              Define operational thresholds to immediately qualify incoming studio inquiries without human delay.
+            </p>
+
+            <div className="divide-y divide-[rgba(169,191,165,0.15)]">
+              {paginatedRules.map((auto, i) => (
+                <div key={i} className="py-4 flex items-center justify-between gap-4">
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-medium text-[#E8E9D8]">{auto.name}</h4>
+                    <p className="text-[11px] text-[#A9BFA5]/75 font-light mt-0.5">{auto.rule}</p>
+                  </div>
+                  <span className="text-[10px] uppercase tracking-widest font-mono text-emerald-400 border border-emerald-500/30 px-2 py-0.5 bg-emerald-950/20">
+                    {auto.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination for Rules */}
+            <div className="mt-4 -mx-6 -mb-6">
+              <Pagination
+                currentPage={automationPage}
+                totalItems={automationRules.length}
+                pageSize={3}
+                onPageChange={setAutomationPage}
+                showPageSize={false}
+                itemName="rules"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

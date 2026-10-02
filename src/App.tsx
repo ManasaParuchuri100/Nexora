@@ -11,7 +11,7 @@ import NexoraApp from './components/NexoraApp';
 import InfoModal from './components/InfoModal';
 
 export default function App() {
-  const [inApp, setInApp] = useState(false);
+  const [inApp, setInApp] = useState(true);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [modalType, setModalType] = useState<'contact' | 'privacy' | 'terms' | null>(null);
 

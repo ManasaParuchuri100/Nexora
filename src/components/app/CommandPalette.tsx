@@ -46,17 +46,26 @@ export default function CommandPalette({
   if (!isOpen) return null;
 
   const commands = [
-    { label: 'Insights / Live Leads', category: 'insights' as NavCategory, sub: 'live-leads' as SubCategory, icon: Activity, desc: 'Jump to real-time prospect inquiries' },
-    { label: 'Insights / Stats', category: 'insights' as NavCategory, sub: 'stats' as SubCategory, icon: Activity, desc: 'Review 248 leads & 64% conversion' },
-    { label: 'Insights / Trending Topics', category: 'insights' as NavCategory, sub: 'trending-topics' as SubCategory, icon: TrendingUp, desc: 'Explore market radar & trends' },
-    { label: 'Campaigns / All Campaigns', category: 'campaigns' as NavCategory, sub: 'campaigns-overview' as SubCategory, icon: Megaphone, desc: 'Plan, launch, and manage campaigns' },
-    { label: 'Campaigns / Create New Campaign', category: 'campaigns' as NavCategory, sub: 'create-campaign' as SubCategory, icon: Megaphone, desc: 'AI campaign roadmap & execution blueprint flow' },
-    { label: 'Creative Lab / Create', category: 'creative-lab' as NavCategory, sub: 'create' as SubCategory, icon: Wand2, desc: 'Draft AI marketing copy & briefs' },
-    { label: 'Creative Lab / Generated Assets', category: 'creative-lab' as NavCategory, sub: 'generated-assets' as SubCategory, icon: Wand2, desc: 'Browse saved creative copies' },
-    { label: 'Social Hub / AI Guided Creation', category: 'social-hub' as NavCategory, sub: 'ai-guided-creation' as SubCategory, icon: Share2, desc: 'Multichannel composition tool' },
-    { label: 'Social Hub / Connect Accounts', category: 'social-hub' as NavCategory, sub: 'connect' as SubCategory, icon: Share2, desc: 'LinkedIn, X, Substack integrations' },
-    { label: 'Leads / Lead Automation', category: 'leads' as NavCategory, sub: 'lead-automation' as SubCategory, icon: Users, desc: 'Automated qualification & routing' },
-    { label: 'Assistant Copilot', category: 'assistant' as NavCategory, sub: 'overview' as SubCategory, icon: Sparkles, desc: 'Conversational command center' }
+    { label: 'Overview', category: 'overview' as NavCategory, sub: 'default' as SubCategory, icon: Activity, desc: 'Executive pulse & cross-functional dashboard' },
+    { label: 'Engage / Inbox', category: 'engage' as NavCategory, sub: 'inbox' as SubCategory, icon: Activity, desc: 'Omnichannel message inquiries' },
+    { label: 'Engage / Conversations', category: 'engage' as NavCategory, sub: 'conversations' as SubCategory, icon: Activity, desc: 'Active conversational CRM threads' },
+    { label: 'Engage / Human Handoff', category: 'engage' as NavCategory, sub: 'human-handoff' as SubCategory, icon: Activity, desc: 'Autonomous escalation queue for review' },
+    { label: 'Leads / All Leads', category: 'leads' as NavCategory, sub: 'all-leads' as SubCategory, icon: Users, desc: 'Directory of all prospects and client accounts' },
+    { label: 'Leads / Pipeline', category: 'leads' as NavCategory, sub: 'pipeline' as SubCategory, icon: Users, desc: 'Visual Kanban pipeline across conversion stages' },
+    { label: 'Leads / Follow-ups', category: 'leads' as NavCategory, sub: 'follow-ups' as SubCategory, icon: Users, desc: 'Scheduled cadences and follow-up letters' },
+    { label: 'Content / AI Content', category: 'content' as NavCategory, sub: 'ai-content' as SubCategory, icon: Wand2, desc: 'Creative Studio prompt & brief synthesis' },
+    { label: 'Content / Social Posts', category: 'content' as NavCategory, sub: 'social-posts' as SubCategory, icon: Share2, desc: 'Multichannel composition & scheduler' },
+    { label: 'Content / Content Library', category: 'content' as NavCategory, sub: 'content-library' as SubCategory, icon: Wand2, desc: 'Archive of saved visual & editorial assets' },
+    { label: 'Campaigns / Campaigns', category: 'campaigns' as NavCategory, sub: 'campaigns-list' as SubCategory, icon: Megaphone, desc: 'Plan and orchestrate live campaigns' },
+    { label: 'Campaigns / Create Campaign', category: 'campaigns' as NavCategory, sub: 'create-campaign' as SubCategory, icon: Megaphone, desc: 'Step-by-step AI campaign blueprint generator' },
+    { label: 'Campaigns / Campaign Performance', category: 'campaigns' as NavCategory, sub: 'campaign-performance' as SubCategory, icon: TrendingUp, desc: 'Performance analytics and conversion metrics' },
+    { label: 'Analytics / Overview', category: 'analytics' as NavCategory, sub: 'analytics-overview' as SubCategory, icon: Activity, desc: 'Executive performance KPIs and growth metrics' },
+    { label: 'Analytics / Lead Analytics', category: 'analytics' as NavCategory, sub: 'lead-analytics' as SubCategory, icon: TrendingUp, desc: 'Acquisition velocity and conversion heatmaps' },
+    { label: 'Analytics / Channel Performance', category: 'analytics' as NavCategory, sub: 'channel-performance' as SubCategory, icon: TrendingUp, desc: 'Attribution, CAC, and ROI by channel' },
+    { label: 'Settings / Business Profile', category: 'settings' as NavCategory, sub: 'business-profile' as SubCategory, icon: Sparkles, desc: 'Studio brand parameters and tone guidelines' },
+    { label: 'Settings / Channels', category: 'settings' as NavCategory, sub: 'channels' as SubCategory, icon: Share2, desc: 'Manage connected API and social endpoints' },
+    { label: 'Settings / AI & Automation', category: 'settings' as NavCategory, sub: 'ai-automation' as SubCategory, icon: Sparkles, desc: 'Configure AI rules, temperature & handoff triggers' },
+    { label: 'Settings / Team & Access', category: 'settings' as NavCategory, sub: 'team-access' as SubCategory, icon: Users, desc: 'Manage studio collaborators & permissions' }
   ];
 
   const filtered = commands.filter(c => 

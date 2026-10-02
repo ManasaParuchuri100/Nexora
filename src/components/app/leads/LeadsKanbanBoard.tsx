@@ -338,22 +338,28 @@ export default function LeadsKanbanBoard({
                     </div>
                   </div>
 
-                  {/* Card Footer: Date, Attachments, Messages */}
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#A9BFA5]/70">
+                  {/* Card Footer: Date, Attachments, Messages & View Action */}
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#A9BFA5]/70 pt-1">
                     <div className="flex items-center space-x-1.5">
                       <Calendar className="w-3.5 h-3.5 text-[#A9BFA5]/70" />
                       <span>{lead.date || '13 May'}</span>
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-1">
-                        <Paperclip className="w-3.5 h-3.5 text-[#A9BFA5]/70" />
-                        <span>{lead.attachmentsCount ?? 2}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <MessageSquare className="w-3.5 h-3.5 text-[#A9BFA5]/70" />
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1 text-[#A9BFA5]/70">
+                        <MessageSquare className="w-3.5 h-3.5" />
                         <span>{lead.messagesCount ?? 4}</span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectLead(lead);
+                        }}
+                        className="px-2 py-0.5 text-[10px] font-mono rounded-[2px] bg-[#0D2D2A] hover:bg-[#E8E9D8] text-[#A9BFA5] hover:text-[#071C1A] border border-[rgba(169,191,165,0.25)] transition-colors cursor-pointer"
+                      >
+                        View
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { 
-  Activity, 
-  Megaphone, 
-  Wand2, 
-  Share2, 
+  Compass, 
+  MessageSquareText, 
   Users, 
-  Sparkles,
-  ChevronRight,
-  LogOut,
-  SlidersHorizontal,
+  Wand2, 
+  Megaphone, 
+  BarChart3, 
+  Settings, 
+  ChevronRight, 
+  LogOut, 
   X,
-  Settings
+  Sparkles
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,50 +25,35 @@ interface AppSidebarProps {
   onOpenSettings?: () => void;
 }
 
+interface SubItemConfig {
+  id: SubCategory;
+  label: string;
+  isLast?: boolean;
+}
+
 interface NavItemConfig {
   id: NavCategory;
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  subItems?: { id: SubCategory; label: string }[];
+  isStandalone?: boolean;
+  subItems?: SubItemConfig[];
 }
 
-const NAV_ITEMS: NavItemConfig[] = [
+export const NAV_ITEMS: NavItemConfig[] = [
   {
-    id: 'insights',
-    label: 'Insights',
-    icon: Activity,
-    subItems: [
-      { id: 'live-leads', label: 'Live Leads' },
-      { id: 'stats', label: 'Stats' },
-      { id: 'trending-topics', label: 'Trending Topics' }
-    ]
+    id: 'overview',
+    label: 'Overview',
+    icon: Compass,
+    isStandalone: true
   },
   {
-    id: 'campaigns',
-    label: 'Campaigns',
-    icon: Megaphone,
+    id: 'engage',
+    label: 'Engage',
+    icon: MessageSquareText,
     subItems: [
-      { id: 'campaigns-overview', label: 'All Campaigns' },
-      { id: 'create-campaign', label: 'Create New Campaign' }
-    ]
-  },
-  {
-    id: 'creative-lab',
-    label: 'Creative Lab',
-    icon: Wand2,
-    subItems: [
-      { id: 'create', label: 'Create' },
-      { id: 'generated-assets', label: 'Generated Assets' }
-    ]
-  },
-  {
-    id: 'social-hub',
-    label: 'Social Hub',
-    icon: Share2,
-    subItems: [
-      { id: 'connect', label: 'Connect' },
-      { id: 'ai-guided-creation', label: 'AI Guided Creation' },
-      { id: 'manual-scheduling', label: 'Manual Scheduling' }
+      { id: 'inbox', label: 'Inbox' },
+      { id: 'conversations', label: 'Conversations' },
+      { id: 'human-handoff', label: 'Handoff', isLast: true }
     ]
   },
   {
@@ -76,15 +61,50 @@ const NAV_ITEMS: NavItemConfig[] = [
     label: 'Leads',
     icon: Users,
     subItems: [
-      { id: 'live-leads', label: 'Pipeline Board' },
-      { id: 'lead-automation', label: 'Lead Automation' },
-      { id: 'generated-responses', label: 'Generated Responses' }
+      { id: 'all-leads', label: 'All Leads' },
+      { id: 'pipeline', label: 'Pipeline' },
+      { id: 'follow-ups', label: 'Follow-ups', isLast: true }
     ]
   },
   {
-    id: 'assistant',
-    label: 'Assistant',
-    icon: Sparkles
+    id: 'content',
+    label: 'Content',
+    icon: Wand2,
+    subItems: [
+      { id: 'ai-content', label: 'AI Content' },
+      { id: 'social-posts', label: 'Social' },
+      { id: 'content-library', label: 'Library', isLast: true }
+    ]
+  },
+  {
+    id: 'campaigns',
+    label: 'Campaigns',
+    icon: Megaphone,
+    subItems: [
+      { id: 'campaigns-list', label: 'Campaigns' },
+      { id: 'create-campaign', label: 'Create', isLast: true }
+    ]
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: BarChart3,
+    subItems: [
+      { id: 'analytics-overview', label: 'Overview' },
+      { id: 'lead-analytics', label: 'Leads' },
+      { id: 'channel-performance', label: 'Channels', isLast: true }
+    ]
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    subItems: [
+      { id: 'business-profile', label: 'Business Profile' },
+      { id: 'channels', label: 'Channels' },
+      { id: 'ai-automation', label: 'AI & Automation' },
+      { id: 'team-access', label: 'Team & Access', isLast: true }
+    ]
   }
 ];
 
@@ -98,30 +118,45 @@ export default function AppSidebar({
   onOpenSettings
 }: AppSidebarProps) {
   const { theme } = useTheme();
-  // Track hovered category for smooth submenu display
-  const [hoveredCategory, setHoveredCategory] = useState<NavCategory | null>(null);
 
-  // For mobile/touch support, also allow explicit tap toggle
-  const [mobileExpandedCategory, setMobileExpandedCategory] = useState<NavCategory | null>('insights');
+  // Track which category is currently hovered
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
-  const handleCategoryClick = (category: NavCategory, hasSubItems: boolean) => {
-    if (hasSubItems) {
-      // If clicking category directly, default to first subitem or toggle for mobile
-      setMobileExpandedCategory(prev => (prev === category ? null : category));
-      const config = NAV_ITEMS.find(n => n.id === category);
-      if (config?.subItems && config.subItems.length > 0) {
-        onSelectNav(category, config.subItems[0].id);
-      } else {
-        onSelectNav(category, 'overview');
-      }
-    } else {
-      onSelectNav(category, 'overview');
+  // Track explicitly clicked/toggled categories; default only activeCategory is open
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategory = (catId: string) => {
+    setExpandedCategories(prev => {
+      const isCurrentlyExpanded = prev[catId] ?? (activeCategory === catId);
+      return {
+        ...prev,
+        [catId]: !isCurrentlyExpanded
+      };
+    });
+  };
+
+  const handleCategoryClick = (item: NavItemConfig) => {
+    if (item.isStandalone) {
+      onSelectNav(item.id, 'overview');
       onCloseMobile();
+      return;
+    }
+
+    toggleCategory(item.id);
+    if (item.subItems && item.subItems.length > 0) {
+      // If switching to this category, activate it and select its first subitem
+      if (activeCategory !== item.id) {
+        onSelectNav(item.id, item.subItems[0].id);
+      }
     }
   };
 
   const handleSubItemClick = (category: NavCategory, subCategory: SubCategory, e: React.MouseEvent) => {
     e.stopPropagation();
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: true
+    }));
     onSelectNav(category, subCategory);
     onCloseMobile();
   };
@@ -129,14 +164,14 @@ export default function AppSidebar({
   const renderNavContent = () => (
     <div className="flex flex-col h-full bg-[#071C1A] select-none text-[#A9BFA5]">
       {/* Sidebar Header / Brand */}
-      <div className="px-6 py-7 border-b border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+      <div className="px-6 py-6 border-b border-[rgba(169,191,165,0.2)] flex items-center justify-between">
         <button
           type="button"
-          onClick={() => onSelectNav('insights', 'live-leads')}
+          onClick={() => onSelectNav('overview', 'overview')}
           className="group flex items-baseline space-x-2 text-left focus:outline-none cursor-pointer"
         >
-          <span className="serif text-2xl font-medium tracking-tight text-[#E8E9D8] group-hover:text-white transition-colors lowercase">
-            nexora
+          <span className="font-mono text-xl font-bold tracking-wider text-[#E8E9D8] group-hover:text-white transition-colors uppercase">
+            TECAVY
           </span>
           <span className="inline-block w-1.5 h-1.5 bg-[#A9BFA5] rounded-full opacity-60 group-hover:opacity-100 transition-opacity" />
         </button>
@@ -145,61 +180,59 @@ export default function AppSidebar({
         <button
           type="button"
           onClick={onCloseMobile}
-          className="md:hidden text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none"
+          className="md:hidden text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer"
           aria-label="Close navigation"
         >
           <X className="w-5 h-5" strokeWidth={1.5} />
         </button>
       </div>
 
-      {/* Main Navigation List */}
-      <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
-        <div className="px-3 pb-3 text-[10px] uppercase tracking-widest-plus text-[#A9BFA5]/50 font-medium">
-          Command
-        </div>
-
+      {/* Main Navigation Tree List */}
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isCategoryActive = activeCategory === item.id;
           const hasSub = !!(item.subItems && item.subItems.length > 0);
-          
-          // Revealed when hovered on desktop or expanded on mobile or active
+          const isClickedExpanded = expandedCategories[item.id] ?? isCategoryActive;
           const isHovered = hoveredCategory === item.id;
-          const isMobileExpanded = mobileExpandedCategory === item.id;
-          const showSubmenu = hasSub && (isHovered || isMobileExpanded || isCategoryActive);
+          const isSubVisible = hasSub && (isClickedExpanded || isHovered);
 
           return (
-            <div
-              key={item.id}
+            <div 
+              key={item.id} 
               className="relative group"
               onMouseEnter={() => setHoveredCategory(item.id)}
               onMouseLeave={() => setHoveredCategory(null)}
             >
-              {/* Category button */}
+              {/* Category Header Button */}
               <button
                 type="button"
                 id={`sidebar-nav-${item.id}`}
-                onClick={() => handleCategoryClick(item.id, hasSub)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-[2px] text-xs uppercase tracking-widest transition-all duration-150 cursor-pointer focus:outline-none text-left ${
-                  isCategoryActive
-                    ? 'text-[#E8E9D8] bg-[#0D2D2A]/50 border-l-2 border-[#A9BFA5] pl-2.5'
-                    : 'text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 border-l-2 border-transparent'
+                onClick={() => handleCategoryClick(item)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-[2px] text-xs uppercase tracking-widest transition-all duration-150 cursor-pointer focus:outline-none text-left ${
+                  item.isStandalone && isCategoryActive
+                    ? 'text-[#E8E9D8] bg-[#0D2D2A]/60 border-l-2 border-[#A9BFA5] pl-2.5 font-medium'
+                    : isCategoryActive
+                      ? 'text-[#E8E9D8] font-medium'
+                      : 'text-[#A9BFA5]/90 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30'
                 }`}
               >
-                <div className="flex items-center space-x-3 truncate">
+                <div className="flex items-center space-x-2.5 truncate">
                   <Icon 
                     className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                      isCategoryActive ? 'text-[#E8E9D8]' : 'text-[#A9BFA5]/80 group-hover:text-[#E8E9D8]'
+                      isCategoryActive ? 'text-[#E8E9D8]' : 'text-[#A9BFA5]/70 group-hover:text-[#E8E9D8]'
                     }`}
                     strokeWidth={1.5}
                   />
-                  <span className="font-normal truncate">{item.label}</span>
+                  <span className="font-mono text-[11px] tracking-widest font-semibold">
+                    {item.label}
+                  </span>
                 </div>
 
                 {hasSub && (
                   <span 
                     className={`text-[9px] text-[#A9BFA5]/60 transition-transform duration-200 ${
-                      showSubmenu ? 'rotate-90 text-[#E8E9D8]' : ''
+                      isSubVisible ? 'rotate-90 text-[#E8E9D8]' : ''
                     }`}
                   >
                     <ChevronRight className="w-3 h-3" strokeWidth={1.5} />
@@ -207,29 +240,40 @@ export default function AppSidebar({
                 )}
               </button>
 
-              {/* Submenu: smoothly reveals underneath with subtle tree/bracket lines */}
+              {/* Sub-Items Tree List */}
               {hasSub && (
                 <div
                   className={`overflow-hidden transition-all duration-200 ease-out ${
-                    showSubmenu ? 'max-h-56 opacity-100 mt-1 mb-1.5' : 'max-h-0 opacity-0 pointer-events-none'
+                    isSubVisible ? 'max-h-60 opacity-100 my-0.5' : 'max-h-0 opacity-0 pointer-events-none'
                   }`}
                 >
-                  <div className="pl-7 pr-2 py-1 space-y-0.5 border-l border-[rgba(169,191,165,0.15)] ml-5">
+                  <div className="pl-6 pr-2 py-0.5 space-y-0.5">
                     {item.subItems?.map((sub) => {
-                      const isSubActive = isCategoryActive && activeSubCategory === sub.id;
+                      const isSubActive = isCategoryActive && (
+                        activeSubCategory === sub.id ||
+                        // Backwards-compatible matches
+                        (sub.id === 'all-leads' && activeSubCategory === 'live-leads') ||
+                        (sub.id === 'campaigns-list' && activeSubCategory === 'campaigns-overview') ||
+                        (sub.id === 'ai-content' && activeSubCategory === 'create') ||
+                        (sub.id === 'content-library' && activeSubCategory === 'generated-assets') ||
+                        (sub.id === 'analytics-overview' && activeSubCategory === 'stats')
+                      );
+
                       return (
                         <button
                           key={sub.id}
                           type="button"
                           id={`sidebar-subnav-${item.id}-${sub.id}`}
                           onClick={(e) => handleSubItemClick(item.id, sub.id, e)}
-                          className={`w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-[2px] text-[11px] font-light tracking-wide transition-all duration-150 cursor-pointer focus:outline-none text-left ${
+                          className={`w-full flex items-center px-2 py-1.5 rounded-[2px] text-xs font-mono transition-all duration-150 cursor-pointer focus:outline-none text-left ${
                             isSubActive
-                              ? 'text-[#E8E9D8] font-normal bg-[#0D2D2A]/60 text-shadow-sm border-l border-[#A9BFA5]'
+                              ? 'text-[#E8E9D8] font-medium bg-[#0D2D2A]/60 border-l border-[#A9BFA5]'
                               : 'text-[#A9BFA5]/75 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/20'
                           }`}
                         >
-                          <span className="w-1 h-px bg-[rgba(169,191,165,0.3)]" />
+                          <span className="text-[#A9BFA5]/40 mr-2 text-[10px] select-none font-mono">
+                            {sub.isLast ? '└' : '├'}
+                          </span>
                           <span className="truncate">{sub.label}</span>
                         </button>
                       );
@@ -242,42 +286,21 @@ export default function AppSidebar({
         })}
       </nav>
 
-      {/* Sidebar Footer: System Status & User Action */}
+      {/* Sidebar Footer */}
       <div className="p-4 border-t border-[rgba(169,191,165,0.2)] bg-[#071C1A]/60">
-        <div className="px-2 py-2 mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-[#A9BFA5]/60">
+        <div className="px-2 py-1.5 mb-2 flex items-center justify-between text-[10px] uppercase tracking-widest text-[#A9BFA5]/60 font-mono">
           <span className="flex items-center space-x-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
-            <span>Workspace Sync</span>
+            <span>Studio Operational</span>
           </span>
-          <span className="font-mono text-[9px] text-[#A9BFA5]/50">v2.4</span>
+          <span className="font-mono text-[9px] text-[#A9BFA5]/50">v2.5</span>
         </div>
-
-        {/* Settings Action Button */}
-        {onOpenSettings && (
-          <button
-            type="button"
-            onClick={() => {
-              onOpenSettings();
-              onCloseMobile();
-            }}
-            id="sidebar-settings-button"
-            className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-widest text-[#A9BFA5]/75 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/40 rounded-[2px] transition-colors cursor-pointer focus:outline-none mb-1"
-          >
-            <span className="flex items-center space-x-2.5">
-              <Settings className="w-3.5 h-3.5" strokeWidth={1.5} />
-              <span>Settings</span>
-            </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[rgba(169,191,165,0.15)] text-[#A9BFA5]">
-              {theme === 'light' ? 'Light' : 'Dark'}
-            </span>
-          </button>
-        )}
 
         <button
           type="button"
           onClick={onLogout}
           id="sidebar-logout-button"
-          className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-widest text-[#A9BFA5]/75 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/40 rounded-[2px] transition-colors cursor-pointer focus:outline-none"
+          className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-widest text-[#A9BFA5]/75 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/40 rounded-[2px] transition-colors cursor-pointer focus:outline-none font-mono"
         >
           <span className="flex items-center space-x-2.5">
             <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -291,7 +314,7 @@ export default function AppSidebar({
 
   return (
     <>
-      {/* Desktop Fixed Sidebar (w-60 or 240px wide) */}
+      {/* Desktop Fixed Sidebar (w-60 / 240px wide) */}
       <aside 
         id="app-desktop-sidebar"
         className="hidden md:block fixed top-0 left-0 bottom-0 w-60 z-30 border-r border-[rgba(169,191,165,0.2)] bg-[#071C1A]"
@@ -299,7 +322,7 @@ export default function AppSidebar({
         {renderNavContent()}
       </aside>
 
-      {/* Mobile Backdrop & Drawer */}
+      {/* Mobile Drawer */}
       {isOpenMobile && (
         <div 
           className="md:hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity"

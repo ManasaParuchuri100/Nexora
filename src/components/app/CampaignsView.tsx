@@ -106,7 +106,10 @@ export default function CampaignsView({
   useEffect(() => {
     if (activeSubCategory === 'create-campaign') {
       setViewMode('create');
-    } else if (activeSubCategory === 'campaigns-overview') {
+    } else if (activeSubCategory === 'campaign-performance') {
+      setViewMode('landing');
+      setStatusFilter('Active');
+    } else if (activeSubCategory === 'campaigns-list' || activeSubCategory === 'campaigns-overview') {
       setViewMode('landing');
     }
   }, [activeSubCategory]);

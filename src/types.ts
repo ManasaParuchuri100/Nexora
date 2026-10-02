@@ -20,37 +20,65 @@ export interface StepItem {
 
 // Navigation structure for authenticated Nexora
 export type NavCategory = 
-  | 'insights'
+  | 'overview'
+  | 'engage'
+  | 'leads'
+  | 'content'
   | 'campaigns'
+  | 'analytics'
+  | 'settings'
+  // Backwards-compatible aliases
+  | 'insights'
   | 'creative-lab'
   | 'social-hub'
-  | 'leads'
   | 'assistant';
 
 export type SubCategory = 
-  // Insights subcategories
+  // Engage subcategories
+  | 'inbox'
+  | 'conversations'
+  | 'human-handoff'
+  // Leads subcategories
+  | 'all-leads'
+  | 'pipeline'
+  | 'follow-ups'
+  // Content subcategories
+  | 'ai-content'
+  | 'social-posts'
+  | 'content-library'
+  // Campaigns subcategories
+  | 'campaigns-list'
+  | 'create-campaign'
+  | 'campaign-performance'
+  // Analytics subcategories
+  | 'analytics-overview'
+  | 'lead-analytics'
+  | 'channel-performance'
+  // Settings subcategories
+  | 'business-profile'
+  | 'channels'
+  | 'ai-automation'
+  | 'team-access'
+  // Legacy & general subcategories
   | 'live-leads'
   | 'stats'
   | 'trending-topics'
   | 'quick-actions'
-  // Campaigns subcategories
   | 'campaigns-overview'
-  | 'create-campaign'
-  // Creative Lab subcategories
   | 'create'
   | 'generated-assets'
-  // Social Hub subcategories
   | 'connect'
   | 'ai-guided-creation'
   | 'manual-scheduling'
-  // Leads subcategories
   | 'lead-automation'
   | 'generated-responses'
-  // Main without sub
-  | 'overview';
+  | 'overview'
+  | 'default';
 
 export type LeadStage = 'Contacted' | 'Negotiation' | 'Offer sent' | 'Deal closed';
 export type LeadTag = 'New lead' | 'Returning' | 'Priority' | 'Follow-up';
+export type LeadTemperature = 'HOT' | 'WARM' | 'COLD';
+export type LeadHandlingMode = 'AI' | 'HUMAN';
 
 export interface LeadAssignee {
   name: string;
@@ -58,13 +86,47 @@ export interface LeadAssignee {
   avatar?: string;
 }
 
+export interface LeadMessage {
+  id: string;
+  sender: 'customer' | 'ai' | 'human';
+  senderName: string;
+  text: string;
+  time: string;
+  channel?: string;
+}
+
+export interface LeadTimelineEvent {
+  id: string;
+  time: string;
+  title: string;
+  description?: string;
+  type: 'message' | 'ai_action' | 'qualification' | 'assignment' | 'status_change' | 'follow_up' | 'handoff' | 'campaign';
+}
+
+export interface LeadFollowUp {
+  id: string;
+  title: string;
+  dueTime: string;
+  isCompleted: boolean;
+  type: 'upcoming' | 'previous';
+}
+
+export interface CampaignAttribution {
+  campaignName: string;
+  adName?: string;
+  firstTouch?: string;
+  lastTouch?: string;
+  leadsGenerated?: number;
+  status?: string;
+}
+
 export interface Lead {
   id: string;
   name: string;
   company: string;
   email: string;
-  source: 'Organic Search' | 'LinkedIn' | 'Referral' | 'X (Twitter)' | 'Newsletter' | 'Product Hunt' | 'Instagram' | 'Website';
-  status: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Converted';
+  source: 'Organic Search' | 'LinkedIn' | 'Referral' | 'X (Twitter)' | 'Newsletter' | 'Product Hunt' | 'Instagram' | 'Website' | 'WhatsApp' | 'Campaign' | 'Manual';
+  status: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Converted' | 'Engaged' | 'Won' | 'Lost';
   value: string;
   lastActivity: string;
   score: number;
@@ -76,6 +138,31 @@ export interface Lead {
   attachmentsCount?: number;
   messagesCount?: number;
   isPriority?: boolean;
+  phone?: string;
+  title?: string;
+  location?: string;
+  requirement?: string;
+  productInterested?: string;
+  budget?: string;
+  timeline?: string;
+  decisionMaker?: boolean;
+  preferredChannel?: string;
+  companySize?: string;
+  temperature?: LeadTemperature;
+  intentLevel?: string;
+  purchaseReadiness?: string;
+  aiConfidence?: string;
+  aiRecommendation?: string;
+  qualificationChecks?: string[];
+  conversationSummary?: string;
+  messages?: LeadMessage[];
+  timelineEvents?: LeadTimelineEvent[];
+  followUps?: LeadFollowUp[];
+  internalNotes?: string[];
+  tags?: string[];
+  handlingMode?: LeadHandlingMode;
+  humanAttentionRequired?: boolean;
+  campaignAttribution?: CampaignAttribution;
 }
 
 export interface TrendingTopic {

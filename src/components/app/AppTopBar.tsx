@@ -69,11 +69,17 @@ export default function AppTopBar({
 
   const formatCategoryTitle = (cat: NavCategory) => {
     switch (cat) {
-      case 'insights': return 'Insights';
-      case 'campaigns': return 'Campaigns';
-      case 'creative-lab': return 'Creative Lab';
-      case 'social-hub': return 'Social Hub';
+      case 'overview': return 'Overview';
+      case 'engage': return 'Engage';
       case 'leads': return 'Leads';
+      case 'content': return 'Content';
+      case 'campaigns': return 'Campaigns';
+      case 'analytics': return 'Analytics';
+      case 'settings': return 'Settings';
+      // Legacy
+      case 'insights': return 'Insights';
+      case 'creative-lab': return 'Content';
+      case 'social-hub': return 'Social';
       case 'assistant': return 'Assistant';
       default: return cat;
     }
@@ -81,19 +87,44 @@ export default function AppTopBar({
 
   const formatSubCategoryTitle = (sub: SubCategory) => {
     switch (sub) {
+      // Engage
+      case 'inbox': return 'Inbox';
+      case 'conversations': return 'Conversations';
+      case 'human-handoff': return 'Human Handoff';
+      // Leads
+      case 'all-leads': return 'All Leads';
+      case 'pipeline': return 'Pipeline';
+      case 'follow-ups': return 'Follow-ups';
+      // Content
+      case 'ai-content': return 'AI Content';
+      case 'social-posts': return 'Social Posts';
+      case 'content-library': return 'Content Library';
+      // Campaigns
+      case 'campaigns-list': return 'Campaigns';
+      case 'create-campaign': return 'Create Campaign';
+      case 'campaign-performance': return 'Campaign Performance';
+      // Analytics
+      case 'analytics-overview': return 'Overview';
+      case 'lead-analytics': return 'Lead Analytics';
+      case 'channel-performance': return 'Channel Performance';
+      // Settings
+      case 'business-profile': return 'Business Profile';
+      case 'channels': return 'Channels';
+      case 'ai-automation': return 'AI & Automation';
+      case 'team-access': return 'Team & Access';
+      // Legacy
       case 'live-leads': return 'Live Leads';
       case 'stats': return 'Stats';
       case 'trending-topics': return 'Trending Topics';
       case 'quick-actions': return 'Quick Actions';
-      case 'campaigns-overview': return 'All Campaigns';
-      case 'create-campaign': return 'Create New Campaign';
+      case 'campaigns-overview': return 'Campaigns';
       case 'create': return 'Create Studio';
-      case 'generated-assets': return 'Generated Assets';
-      case 'connect': return 'Connect Accounts';
-      case 'ai-guided-creation': return 'AI Guided Creation';
-      case 'manual-scheduling': return 'Manual Scheduling';
-      case 'lead-automation': return 'Lead Automation';
-      case 'generated-responses': return 'Generated Responses';
+      case 'generated-assets': return 'Content Library';
+      case 'connect': return 'Channels';
+      case 'ai-guided-creation': return 'Creation';
+      case 'manual-scheduling': return 'Scheduling';
+      case 'lead-automation': return 'Automation';
+      case 'generated-responses': return 'Responses';
       case 'overview': return 'Overview';
       default: return sub;
     }
@@ -113,12 +144,12 @@ export default function AppTopBar({
             <Menu className="w-5 h-5" strokeWidth={1.5} />
           </button>
 
-          {/* Breadcrumb */}
+          {/* Breadcrumb / Brand */}
           <nav className="flex items-center space-x-2 text-xs uppercase tracking-widest text-[#A9BFA5]" aria-label="Breadcrumb">
-            <span className="opacity-60 hidden sm:inline">nexora</span>
+            <span className="font-mono font-bold tracking-wider text-[#E8E9D8] hidden sm:inline">TECAVY</span>
             <span className="opacity-40 hidden sm:inline">/</span>
             <span className="text-[#E8E9D8] font-medium">{formatCategoryTitle(activeCategory)}</span>
-            {activeSubCategory && activeSubCategory !== 'overview' && (
+            {activeSubCategory && activeSubCategory !== 'overview' && activeSubCategory !== 'default' && (
               <>
                 <span className="opacity-40">/</span>
                 <span className="text-[#A9BFA5]/80 font-normal">{formatSubCategoryTitle(activeSubCategory)}</span>
@@ -128,18 +159,18 @@ export default function AppTopBar({
         </div>
 
         {/* Right: Quick Search, Notifications, User Menu */}
-        <div className="flex items-center space-x-4 sm:space-x-6">
+        <div className="flex items-center space-x-3 sm:space-x-5">
           {/* Quick Search trigger */}
           <button
             type="button"
             id="topbar-search-button"
             onClick={onOpenQuickSearch}
-            className="group flex items-center space-x-2 text-xs text-[#A9BFA5]/75 hover:text-[#E8E9D8] px-2.5 py-1.5 rounded-[2px] hover:bg-[#0D2D2A]/40 transition-colors focus:outline-none cursor-pointer"
-            title="Quick search (Ctrl+K or ⌘K)"
+            className="group flex items-center space-x-2 text-xs text-[#A9BFA5] hover:text-[#E8E9D8] px-2.5 py-1.5 rounded-[2px] bg-[#0D2D2A]/30 hover:bg-[#0D2D2A]/60 border border-[rgba(169,191,165,0.2)] transition-colors focus:outline-none cursor-pointer"
+            title="Search workspace (Ctrl+K or ⌘K)"
           >
-            <Search className="w-4 h-4 text-[#A9BFA5] group-hover:text-[#E8E9D8]" strokeWidth={1.5} />
-            <span className="hidden lg:inline text-[11px] font-light tracking-wide">Search workspace...</span>
-            <kbd className="hidden lg:inline text-[9px] px-1 py-0.2 border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#A9BFA5]/60 font-mono">⌘K</kbd>
+            <Search className="w-3.5 h-3.5 text-[#A9BFA5] group-hover:text-[#E8E9D8]" strokeWidth={1.75} />
+            <span className="font-mono text-xs text-[#E8E9D8]">Search</span>
+            <kbd className="hidden sm:inline text-[9px] px-1 py-0.2 border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#A9BFA5]/60 font-mono">⌘K</kbd>
           </button>
 
           {/* Notifications Popover */}
@@ -148,13 +179,13 @@ export default function AppTopBar({
               type="button"
               id="topbar-notifications-button"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="relative text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors"
+              className="flex items-center space-x-1.5 text-xs text-[#A9BFA5] hover:text-[#E8E9D8] px-2 py-1.5 rounded-[2px] hover:bg-[#0D2D2A]/40 focus:outline-none cursor-pointer transition-colors"
               aria-label="View notifications"
             >
-              <Bell className="w-4 h-4" strokeWidth={1.5} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#E8E9D8] rounded-full ring-2 ring-[#071C1A]" />
-              )}
+              <Bell className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
+              <span className="font-mono text-xs font-semibold px-1.5 py-0.2 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] rounded-[2px]">
+                {unreadCount > 0 ? unreadCount : 3}
+              </span>
             </button>
 
             {notificationsOpen && (
@@ -252,17 +283,17 @@ export default function AppTopBar({
               type="button"
               id="topbar-user-menu-button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-3 group focus:outline-none cursor-pointer py-1 px-1.5 rounded-[2px] hover:bg-[#0D2D2A]/30 transition-colors"
+              className="flex items-center space-x-2 group focus:outline-none cursor-pointer py-1.5 px-2.5 rounded-[2px] bg-[#0D2D2A]/30 hover:bg-[#0D2D2A]/60 border border-[rgba(169,191,165,0.2)] transition-colors"
             >
-              {/* Sharp, minimal avatar */}
-              <div className="w-7 h-7 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] flex items-center justify-center text-[11px] serif font-medium text-[#E8E9D8] group-hover:border-[#A9BFA5] transition-colors">
-                EV
+              {/* Sharp, minimal avatar indicator */}
+              <div className="w-4 h-4 rounded-full border border-[#A9BFA5] flex items-center justify-center text-[9px] font-mono text-[#E8E9D8]">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
-              <span className="hidden sm:inline text-xs font-light text-[#E8E9D8] tracking-wide">
-                Evelyn Vance
+              <span className="text-xs font-mono font-medium text-[#E8E9D8] tracking-wide">
+                Business
               </span>
               <ChevronDown 
-                className={`w-3.5 h-3.5 text-[#A9BFA5]/60 transition-transform duration-200 ${
+                className={`w-3.5 h-3.5 text-[#A9BFA5] transition-transform duration-200 ${
                   userMenuOpen ? 'rotate-180 text-[#E8E9D8]' : 'group-hover:text-[#E8E9D8]'
                 }`} 
                 strokeWidth={1.5} 
@@ -273,13 +304,13 @@ export default function AppTopBar({
             {userMenuOpen && (
               <div 
                 id="topbar-user-dropdown"
-                className="absolute right-0 mt-2 w-56 bg-[#071C1A] border border-[rgba(169,191,165,0.2)] shadow-2xl z-50 animate-fadeIn"
+                className="absolute right-0 mt-2 w-60 bg-[#071C1A] border border-[rgba(169,191,165,0.2)] shadow-2xl z-50 animate-fadeIn"
               >
                 <div className="p-3.5 border-b border-[rgba(169,191,165,0.15)]">
-                  <p className="text-xs font-medium text-[#E8E9D8]">Evelyn Vance</p>
-                  <p className="text-[11px] text-[#A9BFA5]/70 font-light truncate">evelyn@nexora.studio</p>
+                  <p className="text-xs font-semibold text-[#E8E9D8]">Acme Studio</p>
+                  <p className="text-[11px] text-[#A9BFA5]/70 font-light truncate">acme@tecavy.studio</p>
                   <span className="inline-block mt-1.5 text-[9px] uppercase tracking-widest text-[#A9BFA5] bg-[#0D2D2A] px-1.5 py-0.5 border border-[rgba(169,191,165,0.2)] font-mono">
-                    Pro Workspace
+                    Business Tier · Active
                   </span>
                 </div>
 
