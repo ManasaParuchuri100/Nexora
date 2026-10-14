@@ -26,6 +26,7 @@ import CampaignCreationFlow from './CampaignCreationFlow';
 import CampaignBlueprintView from './CampaignBlueprintView';
 import Pagination from './Pagination';
 import { SAMPLE_BLUEPRINT, generateBlueprintFromForm } from '../../data/campaignBlueprintGenerator';
+import DateRangeCalendarModal, { DateRangeSelection } from './DateRangeCalendarModal';
 
 export type TimelineFilterOption = 'All' | 'Active' | 'Upcoming' | 'Concluded' | 'Q2' | 'Q3' | 'Custom';
 export type ProgressFilterOption = 'All' | 'NotStarted' | 'Early' | 'InProgress' | 'Advanced' | 'Completed';
@@ -37,6 +38,7 @@ interface CampaignsViewProps {
   onAddCampaign: (newCamp: Campaign) => void;
   onUpdateCampaign?: (updatedCamp: Campaign) => void;
   onNavigateToModule?: (category: string, subCategory?: string) => void;
+  isFirstRun?: boolean;
 }
 
 function parseCampaignDate(dateStr?: string): Date | null {
@@ -70,7 +72,8 @@ export default function CampaignsView({
   activeSubCategory,
   onAddCampaign,
   onUpdateCampaign,
-  onNavigateToModule
+  onNavigateToModule,
+  isFirstRun = false
 }: CampaignsViewProps) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
@@ -85,6 +88,7 @@ export default function CampaignsView({
   // Timeline Filter
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilterOption>('All');
   const [isCustomDateOpen, setIsCustomDateOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [customStartDate, setCustomStartDate] = useState('2026-05-01');
   const [customEndDate, setCustomEndDate] = useState('2026-08-31');
   const [pendingStartDate, setPendingStartDate] = useState('2026-05-01');
@@ -405,6 +409,34 @@ export default function CampaignsView({
         </div>
       </section>
 
+      {/* First-Run Empty State (Image 6 spec) */}
+      {isFirstRun && (
+        <div className="p-8 sm:p-12 rounded-[2px] bg-[#061816] border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div className="space-y-1.5">
+            <h3 className="serif text-xl sm:text-2xl font-light text-white">
+              No campaigns yet.
+            </h3>
+            <p className="text-xs text-[#A9BFA5] font-light max-w-md mx-auto leading-relaxed">
+              Launch strategic automated outreach and multichannel campaign initiatives.
+            </p>
+          </div>
+          <div>
+            <button
+              type="button"
+              id="campaigns-new-campaign-btn"
+              onClick={handleOpenCreate}
+              className="px-6 py-2.5 bg-[#E8E9D8] text-[#071C1A] hover:bg-white text-xs font-mono font-bold uppercase tracking-wider rounded-[2px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>New campaign → /campaigns/new</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 2. Top Filter and Search Row */}
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.15)]'} text-xs`}>
         <div className="flex items-center space-x-5 uppercase tracking-widest font-mono text-[11px] overflow-x-auto pb-1 sm:pb-0">
@@ -473,7 +505,7 @@ export default function CampaignsView({
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs">
           {/* Left: Filter Selectors */}
           <div className="flex items-center flex-wrap gap-2.5">
-            {/* Timeline Filter Select */}
+            {/* Timeline Filter Select & Direct Custom Button */}
             <div className="flex items-center space-x-1.5">
               <CalendarRange className={`w-3.5 h-3.5 ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'}`} />
               <select
@@ -482,6 +514,7 @@ export default function CampaignsView({
                   const val = e.target.value as TimelineFilterOption;
                   setTimelineFilter(val);
                   if (val === 'Custom') {
+                    setIsCalendarModalOpen(true);
                     setIsCustomDateOpen(true);
                   } else {
                     setIsCustomDateOpen(false);
@@ -501,6 +534,27 @@ export default function CampaignsView({
                 <option value="Q3">Q3 2026 (Jul–Sep)</option>
                 <option value="Custom">Custom Date Range...</option>
               </select>
+
+              {/* Direct Custom Timeline Button */}
+              <button
+                type="button"
+                id="campaigns-custom-btn"
+                onClick={() => setIsCalendarModalOpen(true)}
+                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-[2px] border text-xs font-mono transition-colors cursor-pointer ${
+                  timelineFilter === 'Custom'
+                    ? (isLight ? 'bg-[#143630] text-white border-[#143630]' : 'bg-[#0D2D2A] text-emerald-300 border-emerald-500/50 shadow-sm')
+                    : (isLight ? 'bg-white text-[#244B40] border-[#D0DDD0] hover:border-[#244B40]' : 'bg-[#061816] text-[#A9BFA5] border-[rgba(169,191,165,0.25)] hover:text-white')
+                }`}
+                title="Click on Custom to decide start and end date on calendar and sort campaigns on that basis"
+              >
+                <Calendar className="w-3 h-3 text-emerald-400" />
+                <span>Custom</span>
+                {timelineFilter === 'Custom' && (
+                  <span className="text-[10px] text-emerald-400/90 font-mono">
+                    ({customStartDate.slice(5)} → {customEndDate.slice(5)})
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Progress Filter Select */}
@@ -633,6 +687,14 @@ export default function CampaignsView({
                     className={`${isLight ? 'bg-[#143630] text-white hover:bg-[#1E4D45]' : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white'} px-3 py-1 rounded-[2px] text-[11px] font-mono font-semibold uppercase transition-colors cursor-pointer`}
                   >
                     Apply Window
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarModalOpen(true)}
+                    className="border border-emerald-500/50 bg-[#0D2D2A] text-emerald-300 hover:text-white px-2.5 py-1 rounded-[2px] text-[11px] font-mono flex items-center space-x-1 cursor-pointer"
+                  >
+                    <Calendar className="w-3 h-3 text-emerald-400" />
+                    <span>Open Calendar 📅</span>
                   </button>
                   <button
                     type="button"
@@ -993,6 +1055,39 @@ export default function CampaignsView({
           />
         )}
       </div>
+
+      {/* Date Range & Sort Calendar Modal */}
+      <DateRangeCalendarModal
+        isOpen={isCalendarModalOpen}
+        title="Decide Campaign Timeline & Sorting"
+        subtitle="Click on the calendar to pick start and end dates. Campaigns will be filtered and sorted on that basis."
+        initialStartDate={customStartDate}
+        initialEndDate={customEndDate}
+        initialSortBasis={
+          sortBy === 'StartOldest' ? 'oldest' :
+          sortBy === 'NameAsc' ? 'alphabetical' :
+          sortBy === 'ProgressDesc' ? 'priority' : 'newest'
+        }
+        onClose={() => setIsCalendarModalOpen(false)}
+        onApply={(selection) => {
+          setCustomStartDate(selection.startDate);
+          setCustomEndDate(selection.endDate);
+          setPendingStartDate(selection.startDate);
+          setPendingEndDate(selection.endDate);
+          setTimelineFilter('Custom');
+          if (selection.sortBasis === 'oldest') {
+            setSortBy('StartOldest');
+          } else if (selection.sortBasis === 'alphabetical') {
+            setSortBy('NameAsc');
+          } else if (selection.sortBasis === 'priority' || selection.sortBasis === 'value') {
+            setSortBy('ProgressDesc');
+          } else {
+            setSortBy('StartNewest');
+          }
+          setIsCalendarModalOpen(false);
+          setIsCustomDateOpen(false);
+        }}
+      />
     </div>
   );
 }

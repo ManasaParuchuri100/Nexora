@@ -3,22 +3,32 @@ import {
   Building2, 
   Radio, 
   Cpu, 
-  ShieldCheck, 
-  Check, 
-  RotateCcw, 
+  Users2, 
+  CreditCard, 
+  Bell, 
+  Sparkles, 
+  Bot, 
+  Send, 
   Plus, 
   Trash2, 
-  Sun, 
-  Moon, 
-  Sliders, 
-  Sparkles, 
+  Check, 
+  Clock, 
   ExternalLink,
-  Users2,
-  Mail,
-  UserCheck
+  ShieldAlert,
+  AlertTriangle,
+  FileText,
+  UploadCloud
 } from 'lucide-react';
 import { SubCategory } from '../../types';
-import { useTheme } from '../../context/ThemeContext';
+
+export interface OrganizationDocument {
+  id: string;
+  name: string;
+  size: string;
+  type?: string;
+  uploadedAt?: string;
+  status?: string;
+}
 
 interface SettingsViewProps {
   activeSubCategory: SubCategory;
@@ -26,531 +36,765 @@ interface SettingsViewProps {
   onNotify?: (title: string, desc: string) => void;
 }
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Owner' | 'Creative Director' | 'Account Executive' | 'AI Agent';
-  status: 'Active' | 'Invited';
-}
-
-const INITIAL_TEAM: TeamMember[] = [
-  { id: '1', name: 'Mateo Petty', email: 'mateo@nexora.studio', role: 'Owner', status: 'Active' },
-  { id: '2', name: 'Aurelia Vance', email: 'aurelia@nexora.studio', role: 'Creative Director', status: 'Active' },
-  { id: '3', name: 'Julian Montgomery', email: 'julian@nexora.studio', role: 'Account Executive', status: 'Active' },
-  { id: '4', name: 'Nexora Copilot v2.4', email: 'agent@nexora.internal', role: 'AI Agent', status: 'Active' }
-];
+export type SettingsSection = 'business' | 'ai' | 'channels' | 'automation' | 'team' | 'billing' | 'notifications';
 
 export default function SettingsView({
   activeSubCategory,
   onNavigateSub,
   onNotify
 }: SettingsViewProps) {
-  const { theme, setTheme, toggleTheme } = useTheme();
-  const isLight = theme === 'light';
+  // Active Section
+  const initialSection: SettingsSection = 
+    activeSubCategory === 'ai-knowledge' || activeSubCategory === 'ai-automation' ? 'ai' :
+    activeSubCategory === 'channels' ? 'channels' :
+    activeSubCategory === 'automation' ? 'automation' :
+    activeSubCategory === 'team' || activeSubCategory === 'team-access' ? 'team' :
+    activeSubCategory === 'billing' ? 'billing' :
+    activeSubCategory === 'notifications' ? 'notifications' : 'business';
 
-  // Business Profile states
-  const [studioName, setStudioName] = useState('Nexora Atelier OS');
-  const [brandVoice, setBrandVoice] = useState('Quiet · Precise · Editorial · Premium');
-  const [audience, setAudience] = useState('Creative directors · Studio founders · Enterprise leaders');
-  const [visualLanguage, setVisualLanguage] = useState('Minimal · Architectural · Wabi-Sabi');
-  const [constraints, setConstraints] = useState('No hype · No excessive emojis · No buzzwords');
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
+
+  // Business state
+  const [businessName, setBusinessName] = useState('Acme Studio');
+  const [website, setWebsite] = useState('acme.com');
+  const [industry, setIndustry] = useState('Interior design');
+  const [location, setLocation] = useState('Pune');
+  const [whatYouSell, setWhatYouSell] = useState('Residential and office interiors…');
+  const [workingHours, setWorkingHours] = useState('Mon–Sat 10:00–19:00');
+  const [outsideHoursPolicy, setOutsideHoursPolicy] = useState<'ai' | 'callback'>('ai');
+
+  // AI Knowledge state
+  const [toneOfVoice, setToneOfVoice] = useState('Friendly');
+  const [testQuestion, setTestQuestion] = useState('');
+  const [testAnswer, setTestAnswer] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  // Organization files linked to AI Knowledge (synced with onboarding Step 3)
+  const [orgDocs, setOrgDocs] = useState<OrganizationDocument[]>(() => {
+    try {
+      const stored = localStorage.getItem('tecavy_org_files');
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return [
+      {
+        id: 'doc-sample-1',
+        name: 'Acme_Studio_Catalog_&_Pricing_2026.pdf',
+        size: '2.4 MB',
+        type: 'application/pdf',
+        uploadedAt: 'Indexed',
+        status: 'indexed'
+      }
+    ];
+  });
+  const orgFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleUploadOrgDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const added: OrganizationDocument[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      const sizeStr = f.size > 1024 * 1024 
+        ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` 
+        : `${Math.round(f.size / 1024)} KB`;
+      added.push({
+        id: `doc-${Date.now()}-${i}`,
+        name: f.name,
+        size: sizeStr,
+        type: f.type || 'document',
+        uploadedAt: 'Just now',
+        status: 'indexed'
+      });
+    }
+    const updated = [...orgDocs, ...added];
+    setOrgDocs(updated);
+    try {
+      localStorage.setItem('tecavy_org_files', JSON.stringify(updated));
+    } catch {}
+    e.target.value = '';
+    if (onNotify) onNotify('Files Uploaded', `Linked ${added.length} organization document(s) to AI knowledge.`);
+  };
+
+  const handleRemoveOrgDoc = (id: string) => {
+    const updated = orgDocs.filter(d => d.id !== id);
+    setOrgDocs(updated);
+    try {
+      localStorage.setItem('tecavy_org_files', JSON.stringify(updated));
+    } catch {}
+    if (onNotify) onNotify('Document Removed', 'Organization file removed from AI Knowledge.');
+  };
+
+  // Automation state
+  const [handoffThreshold, setHandoffThreshold] = useState('50,000');
+  const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
+  const [qualifyThreshold, setQualifyThreshold] = useState(80);
 
   // Channels state
-  const [connectedChannels, setConnectedChannels] = useState([
-    { id: 'linkedin', name: 'LinkedIn Professional', handle: 'nexora-systems', connected: true, status: 'Active Sync' },
-    { id: 'x', name: 'X (Twitter) Broadcast', handle: '@nexora_hq', connected: true, status: 'Active Sync' },
-    { id: 'substack', name: 'Substack Editorial', handle: 'The Quiet Horizon', connected: true, status: 'Active Sync' },
-    { id: 'email', name: 'Atelier SMTP Outreach', handle: 'outreach@nexora.studio', connected: true, status: 'Verified' },
-    { id: 'whatsapp', name: 'WhatsApp Business API', handle: '+1 (555) 902-4411', connected: false, status: 'Disconnected' },
-    { id: 'webhook', name: 'Custom CRM Webhook', handle: 'https://api.nexora.studio/v1/inbound', connected: true, status: 'Listening' }
+  const [channels, setChannels] = useState([
+    { name: 'WhatsApp', handle: '+91 98201 44820', status: 'Connected', owner: 'Priya', icon: '🟢' },
+    { name: 'Instagram', handle: '@acmestudio', status: 'Connected', owner: 'Aisha', icon: '🟣' },
+    { name: 'Facebook', handle: 'Not connected', status: 'Disconnected', owner: '—', icon: '🔵' },
+    { name: 'LinkedIn', handle: 'Not connected', status: 'Disconnected', owner: '—', icon: '🔷' },
+    { name: 'Email', handle: 'hello@acme.com', status: 'Connected', owner: 'Priya', icon: '✉' }
   ]);
 
-  // AI & Automation state
-  const [temperature, setTemperature] = useState('0.4');
-  const [autoQualifyScore, setAutoQualifyScore] = useState(85);
-  const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
-  const [handoffThreshold, setHandoffThreshold] = useState('$25,000');
-
   // Team state
-  const [team, setTeam] = useState<TeamMember[]>(INITIAL_TEAM);
-  const [newEmail, setNewEmail] = useState('');
-  const [newName, setNewName] = useState('');
-  const [newRole, setNewRole] = useState<'Creative Director' | 'Account Executive'>('Account Executive');
+  const [team, setTeam] = useState([
+    { id: 't1', name: 'You', email: 'you@acme.com', role: 'Owner' },
+    { id: 't2', name: 'Priya Shah', email: 'priya@acme.com', role: 'Sales' },
+    { id: 't3', name: 'Aisha Khan', email: 'aisha@acme.com', role: 'Marketing' }
+  ]);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Sales');
 
-  const handleToggleChannel = (id: string) => {
-    setConnectedChannels(prev => prev.map(ch => {
-      if (ch.id === id) {
-        const nextState = !ch.connected;
-        if (onNotify) {
-          onNotify(
-            nextState ? 'Channel Connected' : 'Channel Disconnected',
-            `${ch.name} has been ${nextState ? 'authorized and connected' : 'disconnected'}.`
-          );
-        }
-        return {
-          ...ch,
-          connected: nextState,
-          status: nextState ? 'Active Sync' : 'Disconnected'
-        };
-      }
-      return ch;
-    }));
+  // Test the AI sandbox handler (Page 35 spec)
+  const handleTestAi = () => {
+    if (!testQuestion.trim()) return;
+    setIsTesting(true);
+    setTimeout(() => {
+      setTestAnswer(
+        `"Hello! For our residential and office interiors in ${location}, projects typically start at ₹50,000. Our turnaround timeline is usually within 30 days. Would you like to schedule a discovery walkthrough with our solutions architect?"`
+      );
+      setIsTesting(false);
+    }, 450);
   };
 
-  const handleSaveProfile = () => {
-    if (onNotify) {
-      onNotify('Profile Saved', 'Atelier brand guidelines and profile parameters updated.');
-    }
+  const handleSave = () => {
+    if (onNotify) onNotify('Settings Saved', 'Configuration and policies have been updated.');
   };
-
-  const handleAddMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newEmail.trim() || !newName.trim()) return;
-    setTeam(prev => [
-      ...prev,
-      {
-        id: `team-${Date.now()}`,
-        name: newName,
-        email: newEmail,
-        role: newRole,
-        status: 'Invited'
-      }
-    ]);
-    if (onNotify) {
-      onNotify('Invitation Dispatched', `Invitation email sent to ${newEmail}.`);
-    }
-    setNewName('');
-    setNewEmail('');
-  };
-
-  const isBusinessProfile = activeSubCategory === 'business-profile' || !activeSubCategory || activeSubCategory === 'overview';
-  const isChannels = activeSubCategory === 'channels';
-  const isAIAutomation = activeSubCategory === 'ai-automation';
-  const isTeamAccess = activeSubCategory === 'team-access';
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Settings Module Header */}
-      <section className="flex flex-col sm:flex-row sm:items-end justify-between pb-4 border-b border-[rgba(169,191,165,0.2)] gap-4">
-        <div>
-          <span className="text-[10px] uppercase font-mono tracking-widest text-[#A9BFA5] font-medium block mb-1">
-            STUDIO CONFIGURATION & ACCESS
-          </span>
-          <h1 className={`serif text-3xl sm:text-4xl font-light tracking-tight ${isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'}`}>
-            Settings
-          </h1>
-          <p className="mt-1 text-xs text-[#A9BFA5]/80 font-light">
-            Manage business profile, syndicate channels, configure AI rules, and manage team access.
-          </p>
+    <div className="space-y-6 pb-12 animate-fadeIn text-[#E8E9D8] select-text font-mono">
+      
+      {/* Header */}
+      <div className="border-b border-[rgba(169,191,165,0.2)] pb-4">
+        <h1 className="serif text-3xl font-light text-white tracking-tight font-sans">
+          Settings
+        </h1>
+        <p className="text-xs text-[#A9BFA5] mt-1 font-mono">
+          Teach the AI, connect channels, calibrate qualification, and manage team access.
+        </p>
+      </div>
+
+      {/* 2-Column Layout: Left Nav List + Right Settings Form (Page 35 spec) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left-hand List of Sections (Page 35 spec) */}
+        <div className="lg:col-span-3 border border-[rgba(169,191,165,0.2)] bg-[#061816] rounded-[2px] p-2 space-y-1">
+          {[
+            { id: 'business', label: 'Business', icon: Building2 },
+            { id: 'ai', label: 'AI Knowledge', icon: Sparkles },
+            { id: 'channels', label: 'Channels', icon: Radio },
+            { id: 'automation', label: 'Automation', icon: Cpu },
+            { id: 'team', label: 'Team', icon: Users2 },
+            { id: 'billing', label: 'Billing', icon: CreditCard },
+            { id: 'notifications', label: 'Notifications', icon: Bell }
+          ].map(sec => {
+            const Icon = sec.icon;
+            const isActive = activeSection === sec.id;
+            return (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => {
+                  setActiveSection(sec.id as SettingsSection);
+                  onNavigateSub(sec.id as SubCategory);
+                }}
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[2px] text-xs transition-colors cursor-pointer text-left ${
+                  isActive
+                    ? 'bg-[#0D2D2A] text-white font-semibold border-l-2 border-[#A9BFA5]'
+                    : 'text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{sec.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Subnav Pills */}
-        <div className="inline-flex rounded-[2px] border border-[rgba(169,191,165,0.2)] p-0.5 bg-inherit flex-wrap">
-          <button
-            type="button"
-            onClick={() => onNavigateSub('business-profile')}
-            className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              isBusinessProfile
-                ? isLight
-                  ? 'bg-[#143630] text-white font-medium rounded-[1px]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px]'
-                : isLight
-                  ? 'text-[#3E6A5E] hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/70 hover:text-white'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Business Profile</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigateSub('channels')}
-            className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              isChannels
-                ? isLight
-                  ? 'bg-[#143630] text-white font-medium rounded-[1px]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px]'
-                : isLight
-                  ? 'text-[#3E6A5E] hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/70 hover:text-white'
-            }`}
-          >
-            <Radio className="w-3.5 h-3.5" />
-            <span>Channels</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigateSub('ai-automation')}
-            className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              isAIAutomation
-                ? isLight
-                  ? 'bg-[#143630] text-white font-medium rounded-[1px]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px]'
-                : isLight
-                  ? 'text-[#3E6A5E] hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/70 hover:text-white'
-            }`}
-          >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>AI & Automation</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigateSub('team-access')}
-            className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              isTeamAccess
-                ? isLight
-                  ? 'bg-[#143630] text-white font-medium rounded-[1px]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px]'
-                : isLight
-                  ? 'text-[#3E6A5E] hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/70 hover:text-white'
-            }`}
-          >
-            <Users2 className="w-3.5 h-3.5" />
-            <span>Team & Access</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 1. BUSINESS PROFILE */}
-      {isBusinessProfile && (
-        <div className="space-y-6">
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 rounded-[2px] bg-[#071C1A] space-y-5">
-            <div>
-              <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                Studio & Brand Parameters
-              </h3>
-              <p className="text-xs text-[#A9BFA5]/75 font-mono mt-1">
-                Global brand context injected across all AI generators and outreach letters
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#A9BFA5] mb-1.5">
-                  Studio / Brand Name
-                </label>
-                <input
-                  type="text"
-                  value={studioName}
-                  onChange={(e) => setStudioName(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2 rounded-[2px] bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] focus:outline-none"
-                />
+        {/* Right Settings Content */}
+        <div className="lg:col-span-9 border border-[rgba(169,191,165,0.2)] bg-[#071C1A] rounded-[2px] p-6 space-y-6">
+          
+          {/* ========================================================
+              SECTION: BUSINESS (Page 35 spec)
+             ======================================================== */}
+          {activeSection === 'business' && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  BUSINESS PROFILE
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBusinessName('Acme Studio');
+                    setIndustry('Interior design');
+                    setLocation('Pune');
+                    if (onNotify) onNotify('Fields Filled', 'Drafted business fields from website.');
+                  }}
+                  className="text-xs text-emerald-300 hover:underline cursor-pointer"
+                >
+                  ✦ Fill from website
+                </button>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#A9BFA5] mb-1.5">
-                  Brand Voice & Tone
-                </label>
-                <input
-                  type="text"
-                  value={brandVoice}
-                  onChange={(e) => setBrandVoice(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2 rounded-[2px] bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] focus:outline-none"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="text-[#A9BFA5]/70 block mb-1">Business Name</label>
+                  <input
+                    type="text"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#A9BFA5]/70 block mb-1">Website</label>
+                  <input
+                    type="text"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#A9BFA5]/70 block mb-1">Industry</label>
+                  <input
+                    type="text"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#A9BFA5]/70 block mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[#A9BFA5]/70 block mb-1">What you sell</label>
+                  <textarea
+                    rows={2}
+                    value={whatYouSell}
+                    onChange={(e) => setWhatYouSell(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[#A9BFA5]/70 block mb-1">Working hours</label>
+                  <input
+                    type="text"
+                    value={workingHours}
+                    onChange={(e) => setWorkingHours(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-[#A9BFA5]/70 block mb-1">Outside hours policy</label>
+                  <div className="flex items-center space-x-4 pt-1">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="policy"
+                        checked={outsideHoursPolicy === 'ai'}
+                        onChange={() => setOutsideHoursPolicy('ai')}
+                        className="accent-emerald-400"
+                      />
+                      <span>AI replies 24/7</span>
+                    </label>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="policy"
+                        checked={outsideHoursPolicy === 'callback'}
+                        onChange={() => setOutsideHoursPolicy('callback')}
+                        className="accent-emerald-400"
+                      />
+                      <span>Auto "we'll call back"</span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#A9BFA5] mb-1.5">
-                  Primary Target Audience
-                </label>
-                <input
-                  type="text"
-                  value={audience}
-                  onChange={(e) => setAudience(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2 rounded-[2px] bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#A9BFA5] mb-1.5">
-                  Visual Direction / Aesthetic
-                </label>
-                <input
-                  type="text"
-                  value={visualLanguage}
-                  onChange={(e) => setVisualLanguage(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2 rounded-[2px] bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] focus:outline-none"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-mono uppercase tracking-wider text-[#A9BFA5] mb-1.5">
-                  Brand Negative Constraints
-                </label>
-                <input
-                  type="text"
-                  value={constraints}
-                  onChange={(e) => setConstraints(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2 rounded-[2px] bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5] focus:outline-none"
-                />
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[rgba(169,191,165,0.15)]">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded-[2px]"
+                >
+                  Save changes
+                </button>
               </div>
             </div>
+          )}
 
-            {/* Appearance Theme Selector */}
-            <div className="pt-4 border-t border-[rgba(169,191,165,0.15)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <span className="text-xs font-medium text-[#E8E9D8] block">Atelier Appearance Palette</span>
-                <span className="text-[11px] text-[#A9BFA5]/70 font-mono">
-                  Currently active: {theme === 'light' ? 'Botanical Ivory (Light)' : 'Botanical Noir (Dark)'}
+          {/* ========================================================
+              SECTION: AI KNOWLEDGE (Page 35 spec with "Test the AI")
+             ======================================================== */}
+          {activeSection === 'ai' && (
+            <div className="space-y-5">
+              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  AI KNOWLEDGE — WHAT THE AI KNOWS WHEN IT TALKS TO CUSTOMERS
                 </span>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setTheme('dark')}
-                  className={`px-3 py-1.5 text-xs font-mono rounded-[2px] border transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                    theme === 'dark'
-                      ? 'bg-[#E8E9D8] text-[#071C1A] border-[#E8E9D8] font-medium'
-                      : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]'
-                  }`}
-                >
-                  <Moon className="w-3.5 h-3.5" />
-                  <span>Dark</span>
-                </button>
+              <div className="space-y-4 text-xs">
+                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                  <span>Products & services</span>
+                  <span className="text-emerald-300 font-semibold">[+ Add] 3 items</span>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setTheme('light')}
-                  className={`px-3 py-1.5 text-xs font-mono rounded-[2px] border transition-colors flex items-center space-x-1.5 cursor-pointer ${
-                    theme === 'light'
-                      ? 'bg-[#143630] text-white border-[#143630] font-medium'
-                      : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]'
-                  }`}
-                >
-                  <Sun className="w-3.5 h-3.5" />
-                  <span>Light</span>
-                </button>
-              </div>
-            </div>
+                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                  <span>Pricing</span>
+                  <span className="text-emerald-300 font-semibold">[Upload price list] or type</span>
+                </div>
 
-            <div className="pt-3 flex justify-end">
-              <button
-                type="button"
-                onClick={handleSaveProfile}
-                className="px-5 py-2 text-xs font-mono uppercase tracking-widest bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px] hover:bg-white transition-colors cursor-pointer"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                  <span>FAQs</span>
+                  <span className="text-emerald-300 font-semibold">[+ Add] 12 items</span>
+                </div>
 
-      {/* 2. CHANNELS */}
-      {isChannels && (
-        <div className="space-y-6">
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 rounded-[2px] bg-[#071C1A]">
-            <div className="mb-5">
-              <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                Connected Syndication Channels
-              </h3>
-              <p className="text-xs text-[#A9BFA5]/75 font-mono mt-1">
-                Authorize social networks, outreach mailboxes, and automated incoming webhooks
-              </p>
-            </div>
-
-            <div className="divide-y divide-[rgba(169,191,165,0.15)]">
-              {connectedChannels.map((channel) => (
-                <div key={channel.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs font-semibold text-[#E8E9D8]">{channel.name}</span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-[1px] border ${
-                        channel.connected 
-                          ? 'border-emerald-500/30 text-emerald-400 bg-emerald-950/20' 
-                          : 'border-neutral-500/30 text-neutral-400 bg-neutral-900/40'
-                      }`}>
-                        {channel.status}
-                      </span>
+                {/* Organization Documents & Uploaded Files */}
+                <div className="p-3.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.25)] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[#E8E9D8] font-bold text-xs uppercase tracking-wider">
+                          Organization Documents & Knowledge Files
+                        </span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          {orgDocs.length} linked
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#A9BFA5]/70 font-light mt-0.5">
+                        Brochures, rate cards, and catalogs uploaded during Step 3 onboarding or directly below.
+                      </p>
                     </div>
-                    <span className="text-[11px] font-mono text-[#A9BFA5]/70 block mt-0.5">
-                      Account / Endpoint: {channel.handle}
+
+                    <button
+                      type="button"
+                      onClick={() => orgFileInputRef.current?.click()}
+                      className="px-2.5 py-1 text-[11px] font-mono bg-[#0D2D2A] hover:bg-[#123834] border border-emerald-400/40 hover:border-emerald-400 text-emerald-300 hover:text-white rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1 shrink-0"
+                    >
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>+ Upload Files</span>
+                    </button>
+                    <input
+                      ref={orgFileInputRef}
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.png,.jpg,.jpeg"
+                      onChange={handleUploadOrgDoc}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {orgDocs.length > 0 ? (
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                      {orgDocs.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="p-2 bg-[#051513] border border-[rgba(169,191,165,0.2)] rounded-[2px] flex items-center justify-between text-xs transition-colors hover:border-emerald-400/40"
+                        >
+                          <div className="flex items-center space-x-2.5 min-w-0">
+                            <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[#E8E9D8] font-medium truncate text-xs">
+                                {doc.name}
+                              </p>
+                              <div className="flex items-center space-x-2 text-[10px] text-[#A9BFA5]/60 font-mono">
+                                <span>{doc.size}</span>
+                                <span>·</span>
+                                <span className="text-emerald-400 flex items-center space-x-0.5">
+                                  <Check className="w-2.5 h-2.5" />
+                                  <span>Active AI Knowledge</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOrgDoc(doc.id)}
+                            className="text-[#A9BFA5]/60 hover:text-rose-400 p-1 cursor-pointer transition-colors"
+                            title="Remove document"
+                            aria-label="Remove document"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-[#A9BFA5]/60 italic font-mono py-1">
+                      No organization documents uploaded yet. Click "+ Upload Files" to train the AI.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-[#A9BFA5]/70 block mb-1">Tone of voice</label>
+                  <select
+                    value={toneOfVoice}
+                    onChange={(e) => setToneOfVoice(e.target.value)}
+                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                  >
+                    <option value="Professional">Professional</option>
+                    <option value="Friendly">Friendly</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Conversational">Conversational</option>
+                  </select>
+                </div>
+
+                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)] space-y-1">
+                  <p className="text-[#A9BFA5] font-semibold">AI may say:</p>
+                  <p className="text-white italic">"Prices start at ₹50,000 for bespoke studio architecture."</p>
+                </div>
+
+                <div className="p-3 bg-[#061816] rounded border border-rose-500/20 space-y-1">
+                  <p className="text-rose-300 font-semibold">AI must never:</p>
+                  <p className="text-rose-100 italic">"Never discount beyond 10%, promise fixed delivery under 14 days, or give medical advice."</p>
+                </div>
+
+                {/* ┌ Test the AI ───────────────────────────────────┐ (Page 35 spec) */}
+                <div className="p-4 rounded-[2px] bg-[#061816] border border-emerald-500/35 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs uppercase font-semibold text-emerald-400">
+                      Test the AI
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleChannel(channel.id)}
-                    className={`px-3 py-1.5 text-xs font-mono rounded-[2px] border transition-colors cursor-pointer ${
-                      channel.connected
-                        ? 'border-red-500/30 text-red-300 hover:bg-red-950/30'
-                        : 'border-emerald-500/40 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/40'
-                    }`}
-                  >
-                    {channel.connected ? 'Disconnect' : 'Connect Channel'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+                  <p className="text-[11px] text-[#A9BFA5]">
+                    Ask a customer question… → see the AI's instant answer live based on your business knowledge.
+                  </p>
 
-      {/* 3. AI & AUTOMATION */}
-      {isAIAutomation && (
-        <div className="space-y-6">
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 rounded-[2px] bg-[#071C1A] space-y-6">
-            <div>
-              <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                Autonomous AI & Engine Policies
-              </h3>
-              <p className="text-xs text-[#A9BFA5]/75 font-mono mt-1">
-                Calibrate creative temperature, automatic lead qualification thresholds, and human handoff triggers
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="p-4 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#061816]">
-                <label className="text-xs font-semibold text-[#E8E9D8] block mb-1">
-                  Creative Temperature (Register)
-                </label>
-                <p className="text-[11px] text-[#A9BFA5]/70 mb-3">
-                  Low values enforce strict, concise restraint. Higher values permit expansive essays.
-                </p>
-                <div className="flex items-center space-x-3">
-                  {['0.2 (Restrained)', '0.4 (Atelier Default)', '0.7 (Expansive)'].map(val => (
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. What are your pricing packages in Pune?"
+                      value={testQuestion}
+                      onChange={(e) => setTestQuestion(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleTestAi(); }}
+                      className="flex-1 bg-[#071C1A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    />
                     <button
-                      key={val}
                       type="button"
-                      onClick={() => setTemperature(val)}
-                      className={`px-2.5 py-1 text-[11px] font-mono rounded-[2px] border transition-colors cursor-pointer ${
-                        temperature === val
-                          ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold'
-                          : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]'
-                      }`}
+                      onClick={handleTestAi}
+                      className="px-4 py-2 bg-emerald-400 text-[#071C1A] font-semibold rounded text-xs cursor-pointer"
                     >
-                      {val}
+                      {isTesting ? 'Thinking...' : 'Test'}
                     </button>
-                  ))}
+                  </div>
+
+                  {testAnswer && (
+                    <div className="p-3 bg-[#071C1A] border border-emerald-500/30 rounded text-xs text-emerald-200 leading-relaxed animate-fadeIn">
+                      <span className="text-[10px] text-emerald-400 block font-semibold mb-1">AI Output:</span>
+                      {testAnswer}
+                    </div>
+                  )}
                 </div>
+
               </div>
 
-              <div className="p-4 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#061816]">
-                <label className="text-xs font-semibold text-[#E8E9D8] block mb-1">
-                  Auto-Qualification Minimum Score
-                </label>
-                <p className="text-[11px] text-[#A9BFA5]/70 mb-3">
-                  Prospects scoring above this score skip manual intake triage.
-                </p>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="range"
-                    min="50"
-                    max="95"
-                    value={autoQualifyScore}
-                    onChange={(e) => setAutoQualifyScore(Number(e.target.value))}
-                    className="flex-1 accent-[#A9BFA5]"
-                  />
-                  <span className="text-sm font-mono font-semibold text-emerald-400">
-                    {autoQualifyScore} / 100
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[rgba(169,191,165,0.15)]">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded-[2px]"
+                >
+                  Save changes
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              SECTION: CHANNELS (Page 35 spec)
+             ======================================================== */}
+          {activeSection === 'channels' && (
+            <div className="space-y-4">
+              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  CONNECTED CHANNELS (WHATSAPP FIRST)
+                </span>
+              </div>
+
+              <div className="divide-y divide-[rgba(169,191,165,0.15)] text-xs">
+                {channels.map((ch, i) => (
+                  <div key={i} className="py-3 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span>{ch.icon}</span>
+                      <div>
+                        <span className="font-semibold text-white block">{ch.name}</span>
+                        <span className="text-[11px] text-[#A9BFA5]/70">{ch.handle}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-500/30' : 'text-[#A9BFA5]/60'}`}>
+                        {ch.status}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onNotify) onNotify('Channel Status', `Configured settings for ${ch.name}.`);
+                        }}
+                        className="px-3 py-1 bg-[#061816] hover:bg-[#0D2D2A] border border-[rgba(169,191,165,0.25)] rounded text-[#E8E9D8] cursor-pointer"
+                      >
+                        {ch.status === 'Connected' ? 'Manage' : 'Connect'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              SECTION: AUTOMATION (Page 36 spec with Handoff sentence rules)
+             ======================================================== */}
+          {activeSection === 'automation' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  AUTOMATION & HANDOFF RULES
+                </span>
+                <span className="text-xs text-emerald-300 font-semibold cursor-pointer">[+ New rule]</span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white block">● On: Auto-reply on all channels</span>
+                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 2m ago</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
+                </div>
+
+                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white block">● On: Qualify leads, Hot at score ≥ 80</span>
+                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 22m ago</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
+                </div>
+
+                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white block">● On: Follow up after 2 days of silence</span>
+                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 1h ago</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
+                </div>
+
+                {/* Handoff Sentence Rule (Page 37 spec) */}
+                <div className="p-4 bg-[#061816] rounded border border-amber-500/30 space-y-2">
+                  <span className="text-amber-400 font-semibold block text-[11px] uppercase">
+                    Sentence Handoff Rule
                   </span>
-                </div>
-              </div>
-
-              <div className="sm:col-span-2 p-4 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#061816] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#E8E9D8] block">
-                    Escalate to Human Handoff when Deal Value exceeds
-                  </label>
-                  <p className="text-[11px] text-[#A9BFA5]/70">
-                    High-conviction inquiries automatically pause AI responses and alert the studio founder
+                  <p className="text-white leading-relaxed">
+                    "Hand to a human when: <span className="text-amber-300 font-semibold">customer asks for a person</span> / deal value exceeds <span className="text-amber-300 font-semibold">₹{handoffThreshold}</span> / AI confidence is low, and notify <span className="text-emerald-300 font-semibold">Sales team</span>."
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
 
+          {/* ========================================================
+              SECTION: TEAM (Page 36 spec)
+             ======================================================== */}
+          {activeSection === 'team' && (
+            <div className="space-y-4">
+              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  TEAM MEMBERS & ROLES
+                </span>
+              </div>
+
+              {/* Invite Form */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-3 py-1.5 rounded sm:w-1/3"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-3 py-1.5 rounded flex-1"
+                />
                 <select
-                  value={handoffThreshold}
-                  onChange={(e) => setHandoffThreshold(e.target.value)}
-                  className="text-xs font-mono px-3 py-1.5 bg-[#071C1A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] rounded-[2px] focus:outline-none"
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-2 py-1.5 rounded"
                 >
-                  <option value="$15,000">$15,000+</option>
-                  <option value="$25,000">$25,000+ (Recommended)</option>
-                  <option value="$50,000">$50,000+</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Viewer">Viewer</option>
                 </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 4. TEAM & ACCESS */}
-      {isTeamAccess && (
-        <div className="space-y-6">
-          <div className="border border-[rgba(169,191,165,0.2)] p-6 rounded-[2px] bg-[#071C1A] space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3">
-              <div>
-                <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8]">
-                  Team Directory & Role Permissions
-                </h3>
-                <p className="text-xs text-[#A9BFA5]/75 font-mono mt-1">
-                  Invite collaborators and assign workspace authorization tiers
-                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (inviteEmail) {
+                      setTeam([...team, { id: `t-${Date.now()}`, name: inviteName || 'Colleague', email: inviteEmail, role: inviteRole }]);
+                      setInviteName('');
+                      setInviteEmail('');
+                      if (onNotify) onNotify('Invite Sent', 'Colleague invited to workspace.');
+                    }
+                  }}
+                  className="px-4 py-1.5 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded cursor-pointer"
+                >
+                  Invite
+                </button>
               </div>
 
-              <span className="text-xs font-mono text-[#A9BFA5]">
-                {team.length} Team Members
-              </span>
-            </div>
-
-            {/* Invite Form */}
-            <form onSubmit={handleAddMember} className="p-4 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#061816] flex flex-col sm:flex-row items-center gap-3">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Full Name"
-                className="w-full sm:w-1/3 text-xs font-mono px-3 py-1.5 rounded-[2px] bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:outline-none"
-              />
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="Colleague Email (e.g. name@studio.com)"
-                className="w-full sm:w-1/2 text-xs font-mono px-3 py-1.5 rounded-[2px] bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!newEmail.trim() || !newName.trim()}
-                className="w-full sm:w-auto px-4 py-1.5 text-xs font-mono uppercase tracking-wider bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px] hover:bg-white transition-colors cursor-pointer shrink-0 disabled:opacity-40"
-              >
-                + Invite
-              </button>
-            </form>
-
-            {/* Team List Table */}
-            <div className="divide-y divide-[rgba(169,191,165,0.15)]">
-              {team.map((m) => (
-                <div key={m.id} className="py-3 flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-7 h-7 rounded-full bg-[#0D2D2A] border border-[rgba(169,191,165,0.25)] flex items-center justify-center text-[10px] text-[#E8E9D8]">
-                      {m.name.slice(0, 2).toUpperCase()}
-                    </div>
+              <div className="divide-y divide-[rgba(169,191,165,0.15)] text-xs pt-2">
+                {team.map(m => (
+                  <div key={m.id} className="py-2.5 flex items-center justify-between">
                     <div>
-                      <span className="font-medium text-[#E8E9D8] block">{m.name}</span>
-                      <span className="text-[11px] text-[#A9BFA5]/60">{m.email}</span>
+                      <span className="font-semibold text-white block">{m.name}</span>
+                      <span className="text-[11px] text-[#A9BFA5]">{m.email}</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <span className="px-2 py-0.5 rounded-[2px] border border-[rgba(169,191,165,0.2)] text-[10px] text-[#A9BFA5]">
+                    <span className="px-2 py-0.5 rounded bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[11px]">
                       {m.role}
                     </span>
-                    <span className={`text-[10px] ${m.status === 'Active' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                      {m.status}
-                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================
+              SECTION: BILLING (Page 36 spec)
+             ======================================================== */}
+          {activeSection === 'billing' && (
+            <div className="space-y-4 text-xs">
+              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  PLAN & USAGE
+                </span>
+                <span className="text-emerald-300 font-semibold cursor-pointer">[Change plan]</span>
+              </div>
+
+              <div className="p-4 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-semibold">Plan: Growth</span>
+                  <span className="text-emerald-400 font-bold">₹4,999 / month</span>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-[rgba(169,191,165,0.1)]">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Conversations: 612 / 1,000</span>
+                      <span>61%</span>
+                    </div>
+                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-400 h-full w-[61%]" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>AI replies: 3,140 / 5,000</span>
+                      <span>63%</span>
+                    </div>
+                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-400 h-full w-[63%]" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Seats: 4 / 5</span>
+                      <span>80%</span>
+                    </div>
+                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-400 h-full w-[80%]" />
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <span className="text-[#A9BFA5] uppercase text-[10px] block font-semibold">Invoices</span>
+                <div className="flex items-center justify-between p-2.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)]">
+                  <span>Sep 2026 · ₹4,999</span>
+                  <span className="text-emerald-300 cursor-pointer">[PDF]</span>
+                </div>
+                <div className="flex items-center justify-between p-2.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)]">
+                  <span>Aug 2026 · ₹4,999</span>
+                  <span className="text-emerald-300 cursor-pointer">[PDF]</span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* ========================================================
+              SECTION: NOTIFICATIONS (Page 36 spec)
+             ======================================================== */}
+          {activeSection === 'notifications' && (
+            <div className="space-y-4 text-xs">
+              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
+                <span className="uppercase tracking-widest text-[#A9BFA5] font-semibold">
+                  NOTIFICATION CHANNELS MATRIX
+                </span>
+              </div>
+
+              <div className="divide-y divide-[rgba(169,191,165,0.15)]">
+                <div className="grid grid-cols-12 py-2 font-semibold text-[#A9BFA5] text-[11px]">
+                  <div className="col-span-6">Event</div>
+                  <div className="col-span-2 text-center">In-app</div>
+                  <div className="col-span-2 text-center">Email</div>
+                  <div className="col-span-2 text-center">WhatsApp</div>
+                </div>
+
+                <div className="grid grid-cols-12 py-2.5 items-center">
+                  <div className="col-span-6 text-white">Conversation needs me</div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                </div>
+
+                <div className="grid grid-cols-12 py-2.5 items-center">
+                  <div className="col-span-6 text-white">New Hot lead</div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                </div>
+
+                <div className="grid grid-cols-12 py-2.5 items-center">
+                  <div className="col-span-6 text-white">Follow-up due</div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
+                  <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
-      )}
+
+      </div>
+
     </div>
   );
 }

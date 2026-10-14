@@ -18,10 +18,11 @@ export interface StepItem {
   detail: string;
 }
 
-// Navigation structure for authenticated Nexora
+// Navigation structure for authenticated Tecavy Marketing OS
 export type NavCategory = 
   | 'overview'
-  | 'engage'
+  | 'inbox'
+  | 'engage' // backwards-compatible alias for inbox
   | 'leads'
   | 'content'
   | 'campaigns'
@@ -34,29 +35,57 @@ export type NavCategory =
   | 'assistant';
 
 export type SubCategory = 
-  // Engage subcategories
+  // 1. Overview subcategories
+  | 'dashboard'
+  // 2. Inbox subcategories
+  | 'views'
+  | 'conversation'
   | 'inbox'
   | 'conversations'
   | 'human-handoff'
-  // Leads subcategories
+  | 'waiting-human'
+  | 'overdue-followups'
+  | 'asked-pricing'
+  | 'pricing'
+  | 'ready-to-book'
+  | 'book-call'
+  // 3. Leads subcategories
+  | 'leads-list'
+  | 'lead-page'
+  | 'lead-details'
   | 'all-leads'
   | 'pipeline'
   | 'follow-ups'
-  // Content subcategories
+  // 4. Content subcategories
+  | 'create'
+  | 'schedule'
+  | 'library'
   | 'ai-content'
   | 'social-posts'
   | 'content-library'
-  // Campaigns subcategories
+  // 5. Campaigns subcategories
+  | 'campaign-list'
+  | 'new-campaign'
+  | 'campaign-page'
   | 'campaigns-list'
   | 'create-campaign'
   | 'campaign-performance'
-  // Analytics subcategories
+  // 6. Analytics subcategories
+  | 'overview'
+  | 'leads'
+  | 'channels'
+  | 'activity-log'
   | 'analytics-overview'
   | 'lead-analytics'
   | 'channel-performance'
-  // Settings subcategories
+  // 7. Settings subcategories
+  | 'business'
+  | 'ai-knowledge'
+  | 'automation'
+  | 'team'
+  | 'billing'
+  | 'notifications'
   | 'business-profile'
-  | 'channels'
   | 'ai-automation'
   | 'team-access'
   // Legacy & general subcategories
@@ -65,17 +94,16 @@ export type SubCategory =
   | 'trending-topics'
   | 'quick-actions'
   | 'campaigns-overview'
-  | 'create'
   | 'generated-assets'
   | 'connect'
   | 'ai-guided-creation'
   | 'manual-scheduling'
   | 'lead-automation'
   | 'generated-responses'
-  | 'overview'
   | 'default';
 
-export type LeadStage = 'Contacted' | 'Negotiation' | 'Offer sent' | 'Deal closed';
+export type LeadStage = 'New' | 'Engaged' | 'Qualified' | 'Contacted' | 'Proposal' | 'Won' | 'Lost' | 'Negotiation' | 'Offer sent' | 'Deal closed';
+export type LeadOwner = 'AI' | 'Human';
 export type LeadTag = 'New lead' | 'Returning' | 'Priority' | 'Follow-up';
 export type LeadTemperature = 'HOT' | 'WARM' | 'COLD';
 export type LeadHandlingMode = 'AI' | 'HUMAN';

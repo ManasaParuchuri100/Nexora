@@ -12,6 +12,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import Pagination from './Pagination';
+import DateRangeCalendarModal, { DateRangeSelection, SortBasis } from './DateRangeCalendarModal';
 
 type TimeRange = '7D' | '30D' | '90D' | '1Y';
 type LeadGrowthRange = TimeRange | 'CUSTOM';
@@ -26,6 +27,8 @@ export default function StatsView() {
   // Lead Growth Specific Time Range & Custom Date Filters
   const [leadRangeMode, setLeadRangeMode] = useState<LeadGrowthRange>('30D');
   const [isCustomPickerOpen, setIsCustomPickerOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [growthSortBasis, setGrowthSortBasis] = useState<SortBasis>('newest');
   const [customStartDate, setCustomStartDate] = useState('2026-08-10');
   const [customEndDate, setCustomEndDate] = useState('2026-09-08');
   const [pendingStartDate, setPendingStartDate] = useState('2026-08-10');
@@ -498,20 +501,20 @@ export default function StatsView() {
             {/* Custom Date Filter Toggle */}
             <button
               type="button"
-              onClick={() => setIsCustomPickerOpen(!isCustomPickerOpen)}
+              id="stats-custom-dates-btn"
+              onClick={() => setIsCalendarModalOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs transition-colors cursor-pointer border ${
                 leadRangeMode === 'CUSTOM'
                   ? 'bg-[#A9BFA5]/20 text-[#E8E9D8] border-[#A9BFA5] font-medium'
-                  : isCustomPickerOpen
-                  ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5]/50'
                   : 'text-[#A9BFA5]/70 border-[rgba(169,191,165,0.25)] hover:text-[#E8E9D8] hover:border-[#A9BFA5]'
               }`}
+              title="Click to decide start and end date on calendar and sort on that basis"
             >
               <Calendar className="w-3.5 h-3.5 text-[#A9BFA5]" />
-              <span>Custom Dates</span>
+              <span>Custom Dates 📅</span>
               {leadRangeMode === 'CUSTOM' && (
                 <span className="ml-1 text-[10px] bg-[#071C1A] text-[#A9BFA5] px-1.5 py-0.2 border border-[rgba(169,191,165,0.3)]">
-                  Active
+                  {customStartDate.slice(5)} → {customEndDate.slice(5)}
                 </span>
               )}
             </button>
@@ -1082,6 +1085,27 @@ export default function StatsView() {
           </div>
         </div>
       </section>
+
+      {/* Date Range & Sort Calendar Modal */}
+      <DateRangeCalendarModal
+        isOpen={isCalendarModalOpen}
+        title="Decide Lead Growth Timeline & Sorting"
+        subtitle="Click on the calendar to pick start and end dates. Growth analytics will be filtered and sorted on that basis."
+        initialStartDate={customStartDate}
+        initialEndDate={customEndDate}
+        initialSortBasis={growthSortBasis}
+        onClose={() => setIsCalendarModalOpen(false)}
+        onApply={(selection) => {
+          setCustomStartDate(selection.startDate);
+          setCustomEndDate(selection.endDate);
+          setPendingStartDate(selection.startDate);
+          setPendingEndDate(selection.endDate);
+          setGrowthSortBasis(selection.sortBasis);
+          setLeadRangeMode('CUSTOM');
+          setIsCalendarModalOpen(false);
+          setIsCustomPickerOpen(false);
+        }}
+      />
     </div>
   );
 }

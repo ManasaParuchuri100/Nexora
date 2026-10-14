@@ -44,6 +44,7 @@ interface SocialHubViewProps {
   onAddScheduledPost?: (post: ScheduledPost) => void;
   onDeleteScheduledPost?: (id: string) => void;
   onUpdateScheduledPost?: (post: ScheduledPost) => void;
+  isFirstRun?: boolean;
 }
 
 const PLATFORM_OPTIONS = [
@@ -91,7 +92,8 @@ export default function SocialHubView({
   onSchedulePostSuccess,
   onAddScheduledPost,
   onDeleteScheduledPost,
-  onUpdateScheduledPost
+  onUpdateScheduledPost,
+  isFirstRun = false
 }: SocialHubViewProps) {
   const currentTab = 
     activeSubCategory === 'connect' 
@@ -388,6 +390,34 @@ export default function SocialHubView({
           </button>
         </div>
       </section>
+
+      {/* First-Run Empty State (Image 6 spec) */}
+      {isFirstRun && (
+        <div className="p-8 sm:p-12 rounded-[2px] bg-[#061816] border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+            <CalendarIcon className="w-6 h-6" />
+          </div>
+          <div className="space-y-1.5">
+            <h3 className="serif text-xl sm:text-2xl font-light text-white">
+              Nothing scheduled.
+            </h3>
+            <p className="text-xs text-[#A9BFA5] font-light max-w-md mx-auto leading-relaxed">
+              Plan and automate social publications across connected brand accounts.
+            </p>
+          </div>
+          <div>
+            <button
+              type="button"
+              id="schedule-create-post-btn"
+              onClick={() => onNavigateSub('manual-scheduling')}
+              className="px-6 py-2.5 bg-[#E8E9D8] text-[#071C1A] hover:bg-white text-xs font-mono font-bold uppercase tracking-wider rounded-[2px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create a post → composer drawer</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 1. Connect Tab */}
       {currentTab === 'connect' && (

@@ -36,33 +36,33 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
     intensity: number;
   } | null>(null);
 
-  // Return color style for activity block in Nexora palette
+  // Return color style for activity block in accessible cyan token palette
   const getCellColor = (val: number) => {
     if (isLight) {
       switch (val) {
         case 1:
-          return 'bg-[#9FC2B0] border border-[#7FA894]';
+          return 'bg-cyan-100 border border-cyan-200';
         case 2:
-          return 'bg-[#3A6B58] border border-[#2B5545] text-white';
+          return 'bg-cyan-300 border border-cyan-400 text-slate-900';
         case 3:
-          return 'bg-[#0284C7] border border-[#0369A1] text-white';
+          return 'bg-cyan-600 border border-cyan-700 text-white';
         case 4:
-          return 'bg-[#1D4ED8] border border-[#1E40AF] text-white';
+          return 'bg-cyan-800 border border-cyan-900 text-white';
         default:
-          return 'bg-[#E5ECE3] border border-[rgba(20,50,40,0.12)]';
+          return 'bg-slate-100 border border-slate-200';
       }
     }
     switch (val) {
       case 1:
-        return 'bg-[#A9BFA5]/30 border border-[#A9BFA5]/20';
+        return 'bg-cyan-950/70 border border-cyan-800/50';
       case 2:
-        return 'bg-[#A9BFA5] border border-[#A9BFA5] text-[#071C1A]';
+        return 'bg-cyan-800/70 border border-cyan-600/60 text-white';
       case 3:
-        return 'bg-[#38BDF8] border border-[#38BDF8]';
+        return 'bg-cyan-500 border border-cyan-400 text-[#070B14]';
       case 4:
-        return 'bg-[#3B82F6] border border-[#3B82F6]';
+        return 'bg-cyan-400 border border-cyan-300 text-[#070B14] font-bold';
       default:
-        return 'bg-[#08221F] border border-[rgba(169,191,165,0.08)]';
+        return 'bg-[#0F172A] border border-slate-800';
     }
   };
 
@@ -85,13 +85,13 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
             </button>
           )}
         </div>
-        <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/70">
+        <div className="flex items-center space-x-2 text-[10px] font-mono text-[var(--text-secondary)]">
           <span>Less</span>
-          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#E5ECE3] border border-[rgba(20,50,40,0.15)]' : 'bg-[#08221F] border border-[rgba(169,191,165,0.1)]'}`} />
-          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#9FC2B0]' : 'bg-[#A9BFA5]/30'}`} />
-          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#3A6B58]' : 'bg-[#A9BFA5]'}`} />
-          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#0284C7]' : 'bg-[#38BDF8]'}`} />
-          <span className={`w-2 h-2 rounded-[1px] ${isLight ? 'bg-[#1D4ED8]' : 'bg-[#3B82F6]'}`} />
+          <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(0)}`} />
+          <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(1)}`} />
+          <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(2)}`} />
+          <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(3)}`} />
+          <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(4)}`} />
           <span>More</span>
         </div>
       </div>

@@ -13,192 +13,360 @@ import {
   Command,
   X,
   Sun,
-  Moon
+  Moon,
+  Plus,
+  Calendar,
+  Megaphone,
+  Check,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
-import { NavCategory, SubCategory, SystemNotification } from '../../types';
+import { NavCategory, SubCategory } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
 
 interface AppTopBarProps {
   activeCategory: NavCategory;
   activeSubCategory: SubCategory;
-  notifications: SystemNotification[];
   onOpenMobileMenu: () => void;
   onLogout: () => void;
   onOpenQuickSearch: () => void;
   onSelectNav: (category: NavCategory, subCategory?: SubCategory) => void;
-  onOpenSettings?: () => void;
+  onTriggerNew: (type: 'lead' | 'post' | 'content' | 'campaign') => void;
+  onOpenProfileDrawer?: () => void;
+  onOpenLogin?: () => void;
+  currentUser?: { name: string; email: string; workspace: string; role?: string } | null;
+  currentRecordTitle?: string;
 }
 
 export default function AppTopBar({
   activeCategory,
   activeSubCategory,
-  notifications,
   onOpenMobileMenu,
   onLogout,
   onOpenQuickSearch,
   onSelectNav,
-  onOpenSettings
+  onTriggerNew,
+  onOpenProfileDrawer,
+  onOpenLogin,
+  currentUser,
+  currentRecordTitle
 }: AppTopBarProps) {
-  const { theme, toggleTheme } = useTheme();
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [localNotifications, setLocalNotifications] = useState(notifications);
+  const { theme, setTheme } = useTheme();
 
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  // Menus state
+  const [newMenuOpen, setNewMenuOpen] = useState(false);
+  const [notifMenuOpen, setNotifMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+
+  const newMenuRef = useRef<HTMLDivElement>(null);
   const notifMenuRef = useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close menus when clicking outside
+  // Close menus on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setUserMenuOpen(false);
+      if (newMenuRef.current && !newMenuRef.current.contains(event.target as Node)) {
+        setNewMenuOpen(false);
       }
       if (notifMenuRef.current && !notifMenuRef.current.contains(event.target as Node)) {
-        setNotificationsOpen(false);
+        setNotifMenuOpen(false);
+      }
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const unreadCount = localNotifications.filter(n => n.unread).length;
+  // Keyboard shortcut listeners for + New
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      if (e.key === 'l' || e.key === 'L') {
+        onTriggerNew('lead');
+      } else if (e.key === 'p' || e.key === 'P') {
+        onTriggerNew('post');
+      } else if (e.key === 'c' || e.key === 'C') {
+        onTriggerNew('content');
+      } else if (e.key === 'm' || e.key === 'M') {
+        onTriggerNew('campaign');
+      } else if (e.key === '?') {
+        setShowShortcutsModal(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onTriggerNew]);
+
+  // Notifications State (Page 9 spec)
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'n-1',
+      group: 'TODAY',
+      unread: true,
+      title: 'Rahul Sharma needs a human',
+      time: '4m',
+      detail: 'WhatsApp · asked for custom pricing',
+      category: 'inbox' as NavCategory,
+      sub: 'inbox' as SubCategory
+    },
+    {
+      id: 'n-2',
+      group: 'TODAY',
+      unread: true,
+      title: 'Aster Labs qualified as Hot',
+      time: '22m',
+      detail: 'Score 92 · budget & timeline verified',
+      category: 'leads' as NavCategory,
+      sub: 'all-leads' as SubCategory
+    },
+    {
+      id: 'n-3',
+      group: 'TODAY',
+      unread: true,
+      title: 'Follow-up due: Nova Retail',
+      time: '1h',
+      detail: 'Priya Mehta · Email revised proposal',
+      category: 'leads' as NavCategory,
+      sub: 'follow-ups' as SubCategory
+    },
+    {
+      id: 'n-4',
+      group: 'EARLIER',
+      unread: false,
+      title: '"Diwali offer" post published',
+      time: 'Yest.',
+      detail: 'Scheduled broadcast live on Instagram',
+      category: 'content' as NavCategory,
+      sub: 'schedule' as SubCategory
+    },
+    {
+      id: 'n-5',
+      group: 'EARLIER',
+      unread: false,
+      title: 'Aisha joined the workspace',
+      time: 'Mon',
+      detail: 'Role: Marketing · Invited by Owner',
+      category: 'settings' as NavCategory,
+      sub: 'team' as SubCategory
+    }
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const markAllRead = () => {
-    setLocalNotifications(localNotifications.map(n => ({ ...n, unread: false })));
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 
   const formatCategoryTitle = (cat: NavCategory) => {
     switch (cat) {
       case 'overview': return 'Overview';
-      case 'engage': return 'Engage';
+      case 'inbox': return 'Inbox';
       case 'leads': return 'Leads';
       case 'content': return 'Content';
       case 'campaigns': return 'Campaigns';
       case 'analytics': return 'Analytics';
       case 'settings': return 'Settings';
-      // Legacy
-      case 'insights': return 'Insights';
-      case 'creative-lab': return 'Content';
-      case 'social-hub': return 'Social';
-      case 'assistant': return 'Assistant';
       default: return cat;
     }
   };
 
-  const formatSubCategoryTitle = (sub: SubCategory) => {
-    switch (sub) {
-      // Engage
-      case 'inbox': return 'Inbox';
-      case 'conversations': return 'Conversations';
-      case 'human-handoff': return 'Human Handoff';
-      // Leads
-      case 'all-leads': return 'All Leads';
-      case 'pipeline': return 'Pipeline';
-      case 'follow-ups': return 'Follow-ups';
-      // Content
-      case 'ai-content': return 'AI Content';
-      case 'social-posts': return 'Social Posts';
-      case 'content-library': return 'Content Library';
-      // Campaigns
-      case 'campaigns-list': return 'Campaigns';
-      case 'create-campaign': return 'Create Campaign';
-      case 'campaign-performance': return 'Campaign Performance';
-      // Analytics
-      case 'analytics-overview': return 'Overview';
-      case 'lead-analytics': return 'Lead Analytics';
-      case 'channel-performance': return 'Channel Performance';
-      // Settings
-      case 'business-profile': return 'Business Profile';
-      case 'channels': return 'Channels';
-      case 'ai-automation': return 'AI & Automation';
-      case 'team-access': return 'Team & Access';
-      // Legacy
-      case 'live-leads': return 'Live Leads';
-      case 'stats': return 'Stats';
-      case 'trending-topics': return 'Trending Topics';
-      case 'quick-actions': return 'Quick Actions';
-      case 'campaigns-overview': return 'Campaigns';
-      case 'create': return 'Create Studio';
-      case 'generated-assets': return 'Content Library';
-      case 'connect': return 'Channels';
-      case 'ai-guided-creation': return 'Creation';
-      case 'manual-scheduling': return 'Scheduling';
-      case 'lead-automation': return 'Automation';
-      case 'generated-responses': return 'Responses';
-      case 'overview': return 'Overview';
-      default: return sub;
-    }
-  };
-
   return (
-    <header className="sticky top-0 z-20 w-full h-16 border-b border-[rgba(169,191,165,0.2)] bg-[#071C1A]/90 backdrop-blur-md transition-colors">
-      <div className="h-full px-6 sm:px-10 flex items-center justify-between">
-        {/* Left: Mobile hamburger & Breadcrumb */}
-        <div className="flex items-center space-x-4">
+    <header className={`sticky top-0 z-20 w-full h-14 sm:h-16 shrink-0 border-b transition-colors select-none ${
+      theme === 'light' 
+        ? 'border-[#CBD5E1] bg-[#FFFFFF] shadow-2xs' 
+        : 'border-[rgba(169,191,165,0.18)] bg-[#061816]'
+    }`}>
+      <div className={`h-full px-4 sm:px-8 flex items-center justify-between ${
+        theme === 'light' ? 'bg-[#FFFFFF] text-[#000000]' : 'bg-transparent text-[#E8E9D8]'
+      }`}>
+        
+        {/* Left: Mobile hamburger & Breadcrumb (Page 6 & 7 spec) */}
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <button
             type="button"
             onClick={onOpenMobileMenu}
-            className="md:hidden text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer"
+            className={`md:hidden p-1.5 focus:outline-none cursor-pointer ${
+              theme === 'light' ? 'text-[#000000] hover:text-black' : 'text-[#A9BFA5] hover:text-white'
+            }`}
             aria-label="Open sidebar menu"
           >
-            <Menu className="w-5 h-5" strokeWidth={1.5} />
+            <Menu className="w-5 h-5 stroke-[2.2]" />
           </button>
 
-          {/* Breadcrumb / Brand */}
-          <nav className="flex items-center space-x-2 text-xs uppercase tracking-widest text-[#A9BFA5]" aria-label="Breadcrumb">
-            <span className="font-mono font-bold tracking-wider text-[#E8E9D8] hidden sm:inline">TECAVY</span>
-            <span className="opacity-40 hidden sm:inline">/</span>
-            <span className="text-[#E8E9D8] font-medium">{formatCategoryTitle(activeCategory)}</span>
-            {activeSubCategory && activeSubCategory !== 'overview' && activeSubCategory !== 'default' && (
+          {/* Breadcrumb Segment */}
+          <nav className={`flex items-center space-x-2 text-xs font-mono tracking-widest ${
+            theme === 'light' ? 'text-[#000000]' : 'text-[#E8E9D8]'
+          }`} aria-label="Breadcrumb">
+            <button
+              type="button"
+              onClick={() => onSelectNav(activeCategory)}
+              className={`px-3.5 py-1.5 rounded-[6px] uppercase tracking-wider transition-all cursor-pointer font-extrabold ${
+                theme === 'light'
+                  ? 'bg-[#FFFFFF] border-2 border-[#CBD5E1] text-[#000000] hover:bg-white hover:border-[#94A3B8] shadow-xs'
+                  : 'bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:border-[#A9BFA5]'
+              }`}
+            >
+              {formatCategoryTitle(activeCategory)}
+            </button>
+
+            {currentRecordTitle && (
               <>
-                <span className="opacity-40">/</span>
-                <span className="text-[#A9BFA5]/80 font-normal">{formatSubCategoryTitle(activeSubCategory)}</span>
+                <span className={theme === 'light' ? 'text-[#000000] font-extrabold' : 'text-[#A9BFA5]/60'}>›</span>
+                <span className={`px-3.5 py-1.5 rounded-[6px] font-extrabold truncate max-w-[140px] sm:max-w-[240px] ${
+                  theme === 'light'
+                    ? 'bg-[#FFFFFF] border-2 border-[#CBD5E1] text-[#000000] shadow-xs'
+                    : 'bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                }`}>
+                  {currentRecordTitle}
+                </span>
               </>
             )}
           </nav>
         </div>
 
-        {/* Right: Quick Search, Notifications, User Menu */}
-        <div className="flex items-center space-x-3 sm:space-x-5">
-          {/* Quick Search trigger */}
+        {/* Right Controls: Search ⌘K | + New ▼ | 🔔 3 | ◯ Acme ▼ */}
+        <div className="flex items-center space-x-2 sm:space-x-3.5">
+          
+          {/* 1. [🔍 Search ⌘K] Command Palette trigger */}
           <button
             type="button"
             id="topbar-search-button"
             onClick={onOpenQuickSearch}
-            className="group flex items-center space-x-2 text-xs text-[#A9BFA5] hover:text-[#E8E9D8] px-2.5 py-1.5 rounded-[2px] bg-[#0D2D2A]/30 hover:bg-[#0D2D2A]/60 border border-[rgba(169,191,165,0.2)] transition-colors focus:outline-none cursor-pointer"
-            title="Search workspace (Ctrl+K or ⌘K)"
+            className={`flex items-center space-x-2 text-xs px-3.5 py-1.5 rounded-[6px] transition-all focus:outline-none cursor-pointer font-mono font-extrabold ${
+              theme === 'light'
+                ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
+                : 'text-[#A9BFA5] hover:text-white bg-[#051513] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
+            }`}
+            title="Search workspace (⌘K or Ctrl+K)"
           >
-            <Search className="w-3.5 h-3.5 text-[#A9BFA5] group-hover:text-[#E8E9D8]" strokeWidth={1.75} />
-            <span className="font-mono text-xs text-[#E8E9D8]">Search</span>
-            <kbd className="hidden sm:inline text-[9px] px-1 py-0.2 border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#A9BFA5]/60 font-mono">⌘K</kbd>
+            <Search className={`w-3.5 h-3.5 stroke-[2.5] ${theme === 'light' ? 'text-[#000000]' : 'text-[#A9BFA5]'}`} />
+            <span className={`hidden sm:inline text-xs font-extrabold ${theme === 'light' ? 'text-[#000000]' : 'text-[#A9BFA5]'}`}>Search</span>
+            <kbd className={`text-[10px] px-1.5 py-0.2 border rounded-[3px] font-mono font-extrabold ${
+              theme === 'light' ? 'border-[#94A3B8] bg-[#F1F5F9] text-[#000000]' : 'border-[rgba(169,191,165,0.2)] bg-[#041210] text-[#A9BFA5]/60'
+            }`}>⌘K</kbd>
           </button>
 
-          {/* Notifications Popover */}
+          {/* 2. [+ New ▼] Universal Creator Menu (Page 8 spec) */}
+          <div className="relative" ref={newMenuRef}>
+            <button
+              type="button"
+              id="topbar-new-button"
+              onClick={() => setNewMenuOpen(!newMenuOpen)}
+              className={`flex items-center space-x-1.5 text-xs font-mono font-extrabold px-3.5 py-1.5 rounded-[6px] transition-all cursor-pointer ${
+                theme === 'light'
+                  ? 'bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] text-[#000000] shadow-xs'
+                  : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white shadow-sm'
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span className="font-extrabold">New</span>
+              <ChevronDown className="w-3 h-3 stroke-[2.5]" />
+            </button>
+
+            {newMenuOpen && (
+              <div className="absolute right-0 mt-1.5 w-48 bg-[#051513] border border-[rgba(169,191,165,0.3)] shadow-2xl rounded-[2px] py-1.5 z-50 font-mono text-xs animate-fadeIn">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewMenuOpen(false);
+                    onTriggerNew('lead');
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <User className="w-3.5 h-3.5 text-[#A9BFA5]" />
+                    <span>Lead</span>
+                  </div>
+                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">L</kbd>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewMenuOpen(false);
+                    onTriggerNew('post');
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Post</span>
+                  </div>
+                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">P</kbd>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewMenuOpen(false);
+                    onTriggerNew('content');
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Content</span>
+                  </div>
+                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">C</kbd>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewMenuOpen(false);
+                    onTriggerNew('campaign');
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <Megaphone className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Campaign</span>
+                  </div>
+                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">M</kbd>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 3. 🔔 Notifications Panel (Page 8 & 9 spec) */}
           <div className="relative" ref={notifMenuRef}>
             <button
               type="button"
               id="topbar-notifications-button"
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="flex items-center space-x-1.5 text-xs text-[#A9BFA5] hover:text-[#E8E9D8] px-2 py-1.5 rounded-[2px] hover:bg-[#0D2D2A]/40 focus:outline-none cursor-pointer transition-colors"
+              onClick={() => setNotifMenuOpen(!notifMenuOpen)}
+              className={`flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-[6px] focus:outline-none cursor-pointer transition-all font-extrabold ${
+                theme === 'light'
+                  ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
+                  : 'text-[#A9BFA5] hover:text-white bg-[#051513] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
+              }`}
               aria-label="View notifications"
             >
-              <Bell className="w-4 h-4 text-[#A9BFA5]" strokeWidth={1.5} />
-              <span className="font-mono text-xs font-semibold px-1.5 py-0.2 bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8] rounded-[2px]">
-                {unreadCount > 0 ? unreadCount : 3}
-              </span>
+              <Bell className="w-4 h-4 stroke-[2.2]" />
+              {unreadCount > 0 && (
+                <span className={`font-mono text-[11px] font-extrabold px-1.5 py-0.2 rounded-[3px] ${
+                  theme === 'light'
+                    ? 'bg-[#FEF3C7] border border-[#F59E0B] text-[#000000]'
+                    : 'bg-emerald-400 text-[#071C1A]'
+                }`}>
+                  {unreadCount}
+                </span>
+              )}
             </button>
 
-            {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#071C1A] border border-[rgba(169,191,165,0.2)] shadow-2xl z-50 animate-fadeIn">
-                <div className="p-4 border-b border-[rgba(169,191,165,0.15)] flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs uppercase tracking-widest text-[#E8E9D8] font-medium">Notifications</span>
-                    {unreadCount > 0 && (
-                      <span className="text-[10px] px-1.5 py-0.5 bg-[#0D2D2A] text-[#A9BFA5] rounded-[2px] font-mono">
-                        {unreadCount} new
-                      </span>
-                    )}
-                  </div>
+            {notifMenuOpen && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#061816] border border-[rgba(169,191,165,0.25)] shadow-2xl z-50 rounded-[2px] animate-fadeIn font-mono text-xs">
+                <div className="p-3.5 border-b border-[rgba(169,191,165,0.15)] flex items-center justify-between">
+                  <span className="uppercase tracking-widest text-[#E8E9D8] font-semibold text-[11px]">
+                    Notifications
+                  </span>
                   {unreadCount > 0 && (
                     <button
                       type="button"
@@ -210,181 +378,293 @@ export default function AppTopBar({
                   )}
                 </div>
 
-                <div className="max-h-72 overflow-y-auto divide-y divide-[rgba(169,191,165,0.1)]">
-                  {localNotifications.map((notif) => (
-                    <div 
+                <div className="max-h-80 overflow-y-auto divide-y divide-[rgba(169,191,165,0.1)]">
+                  {/* Group: TODAY */}
+                  <div className="px-3.5 py-1.5 bg-[#051513] text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
+                    TODAY
+                  </div>
+                  {notifications.filter(n => n.group === 'TODAY').map(notif => (
+                    <div
                       key={notif.id}
-                      className={`p-4 transition-colors hover:bg-[#0D2D2A]/30 ${
-                        notif.unread ? 'bg-[#0D2D2A]/20' : ''
-                      }`}
+                      onClick={() => {
+                        setNotifMenuOpen(false);
+                        onSelectNav(notif.category, notif.sub);
+                      }}
+                      className="p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5"
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-xs font-medium text-[#E8E9D8]">{notif.title}</h4>
-                        <span className="text-[10px] text-[#A9BFA5]/60 font-mono whitespace-nowrap">{notif.time}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1.5">
+                          {notif.unread && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                          )}
+                          <span className="font-semibold text-white text-xs">{notif.title}</span>
+                        </div>
+                        <span className="text-[10px] text-[#A9BFA5]/60">{notif.time}</span>
                       </div>
-                      <p className="text-xs text-[#A9BFA5]/80 font-light mt-1 leading-relaxed">
-                        {notif.description}
+                      <p className="text-[11px] text-[#A9BFA5] font-light pl-3">
+                        {notif.detail}
+                      </p>
+                    </div>
+                  ))}
+
+                  {/* Group: EARLIER */}
+                  <div className="px-3.5 py-1.5 bg-[#051513] text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
+                    EARLIER
+                  </div>
+                  {notifications.filter(n => n.group === 'EARLIER').map(notif => (
+                    <div
+                      key={notif.id}
+                      onClick={() => {
+                        setNotifMenuOpen(false);
+                        onSelectNav(notif.category, notif.sub);
+                      }}
+                      className="p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-white text-xs">{notif.title}</span>
+                        <span className="text-[10px] text-[#A9BFA5]/60">{notif.time}</span>
+                      </div>
+                      <p className="text-[11px] text-[#A9BFA5]/70 font-light">
+                        {notif.detail}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="p-3 border-t border-[rgba(169,191,165,0.15)] text-center bg-[#061816]">
+                <div className="p-2.5 border-t border-[rgba(169,191,165,0.15)] bg-[#051513] text-center">
                   <button
                     type="button"
                     onClick={() => {
-                      setNotificationsOpen(false);
-                      onSelectNav('insights', 'live-leads');
+                      setNotifMenuOpen(false);
+                      onSelectNav('settings', 'notifications');
                     }}
-                    className="text-[11px] uppercase tracking-widest text-[#A9BFA5] hover:text-[#E8E9D8] transition-colors cursor-pointer"
+                    className="text-[11px] text-emerald-300 hover:underline cursor-pointer"
                   >
-                    View activity history &rarr;
+                    Notification settings →
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Theme Quick Toggle */}
+          {/* Theme Toggle Button (Light / Dark) */}
           <button
             type="button"
             id="topbar-theme-toggle"
-            onClick={toggleTheme}
-            className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors rounded-[2px] hover:bg-[#0D2D2A]/40 flex items-center justify-center"
-            title={theme === 'light' ? 'Switch to Dark Mode (Botanical Noir)' : 'Switch to Light Mode (Botanical Ivory)'}
-            aria-label="Toggle light or dark theme"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className={`flex items-center space-x-1.5 p-2 rounded-[6px] text-xs transition-all cursor-pointer ${
+              theme === 'light'
+                ? 'bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] text-[#000000] shadow-xs'
+                : 'bg-[#051513] hover:bg-[#081F1C] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5] text-[#A9BFA5] hover:text-white'
+            }`}
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            aria-label="Toggle theme mode"
           >
             {theme === 'light' ? (
-              <Sun className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+              <Moon className="w-4 h-4 text-[#000000] stroke-[2.5]" />
             ) : (
-              <Moon className="w-4 h-4 text-sky-300" strokeWidth={1.5} />
+              <Sun className="w-4 h-4 text-[#E8E9D8] stroke-[2.5]" />
             )}
           </button>
 
-          {/* Settings Trigger Icon */}
-          {onOpenSettings && (
+          {/* 4. ◯ Acme ▼ Account Menu (Page 9 spec) */}
+          <div className="relative" ref={accountMenuRef}>
             <button
               type="button"
-              id="topbar-settings-trigger"
-              onClick={onOpenSettings}
-              className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1.5 focus:outline-none cursor-pointer transition-colors rounded-[2px] hover:bg-[#0D2D2A]/40"
-              title="Workspace Settings"
-              aria-label="Open workspace settings"
+              id="topbar-user-menu"
+              onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              className={`flex items-center space-x-2 text-xs p-1.5 pr-2.5 rounded-[6px] transition-all cursor-pointer font-extrabold ${
+                theme === 'light'
+                  ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
+                  : 'text-[#E8E9D8] bg-[#051513] hover:bg-[#081F1C] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
+              }`}
             >
-              <Settings className="w-4 h-4" strokeWidth={1.5} />
-            </button>
-          )}
-
-          <div className="h-4 w-px bg-[rgba(169,191,165,0.2)]" />
-
-          {/* User Avatar + Dropdown Menu */}
-          <div className="relative" ref={userMenuRef}>
-            <button
-              type="button"
-              id="topbar-user-menu-button"
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-2 group focus:outline-none cursor-pointer py-1.5 px-2.5 rounded-[2px] bg-[#0D2D2A]/30 hover:bg-[#0D2D2A]/60 border border-[rgba(169,191,165,0.2)] transition-colors"
-            >
-              {/* Sharp, minimal avatar indicator */}
-              <div className="w-4 h-4 rounded-full border border-[#A9BFA5] flex items-center justify-center text-[9px] font-mono text-[#E8E9D8]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-[10px] font-black uppercase ${
+                theme === 'light'
+                  ? 'bg-[#E2E8F0] border border-[#94A3B8] text-[#000000]'
+                  : 'bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#A9BFA5]'
+              }`}>
+                {(currentUser?.workspace || currentUser?.name || 'A')[0]}
               </div>
-              <span className="text-xs font-mono font-medium text-[#E8E9D8] tracking-wide">
-                Business
+              <span className={`hidden sm:inline font-mono text-xs font-extrabold ${
+                theme === 'light' ? 'text-[#000000]' : 'text-[#E8E9D8]'
+              }`}>
+                {currentUser?.workspace || currentUser?.name || 'Acme'}
               </span>
-              <ChevronDown 
-                className={`w-3.5 h-3.5 text-[#A9BFA5] transition-transform duration-200 ${
-                  userMenuOpen ? 'rotate-180 text-[#E8E9D8]' : 'group-hover:text-[#E8E9D8]'
-                }`} 
-                strokeWidth={1.5} 
-              />
+              <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
 
-            {/* Dropdown Menu */}
-            {userMenuOpen && (
-              <div 
-                id="topbar-user-dropdown"
-                className="absolute right-0 mt-2 w-60 bg-[#071C1A] border border-[rgba(169,191,165,0.2)] shadow-2xl z-50 animate-fadeIn"
-              >
-                <div className="p-3.5 border-b border-[rgba(169,191,165,0.15)]">
-                  <p className="text-xs font-semibold text-[#E8E9D8]">Acme Studio</p>
-                  <p className="text-[11px] text-[#A9BFA5]/70 font-light truncate">acme@tecavy.studio</p>
-                  <span className="inline-block mt-1.5 text-[9px] uppercase tracking-widest text-[#A9BFA5] bg-[#0D2D2A] px-1.5 py-0.5 border border-[rgba(169,191,165,0.2)] font-mono">
-                    Business Tier · Active
-                  </span>
+            {accountMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-[#061816] border border-[rgba(169,191,165,0.25)] shadow-2xl rounded-[2px] py-1.5 z-50 font-mono text-xs animate-fadeIn">
+                {/* User details */}
+                <div className="px-3.5 py-2 border-b border-[rgba(169,191,165,0.15)]">
+                  <p className="text-[#E8E9D8] font-semibold text-xs">
+                    {currentUser?.workspace || currentUser?.name || 'Acme Studio'}
+                  </p>
+                  <p className="text-[11px] text-[#A9BFA5]/70 truncate">
+                    {currentUser?.email || 'you@acme.com'} · {currentUser?.role || 'Owner'}
+                  </p>
                 </div>
 
-                <div className="py-1 text-xs text-[#A9BFA5]">
+                <div className="py-1">
                   <button
                     type="button"
-                    onClick={() => { setUserMenuOpen(false); }}
-                    className="w-full flex items-center space-x-3 px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
-                  >
-                    <User className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>Profile</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    id="topbar-menu-settings-btn"
-                    onClick={() => { 
-                      setUserMenuOpen(false); 
-                      if (onOpenSettings) onOpenSettings(); 
-                    }}
-                    className="w-full flex items-center space-x-3 px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
-                  >
-                    <Settings className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span className="flex-1">Settings</span>
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[rgba(169,191,165,0.15)] text-[#A9BFA5]">
-                      {theme === 'light' ? 'Light' : 'Dark'}
-                    </span>
-                  </button>
-
-                  {/* Direct Theme Toggle option inside Settings dropdown */}
-                  <button
-                    type="button"
-                    id="topbar-menu-theme-btn"
                     onClick={() => {
-                      toggleTheme();
+                      setAccountMenuOpen(false);
+                      if (onOpenProfileDrawer) onOpenProfileDrawer();
+                      else onSelectNav('settings', 'business');
                     }}
-                    className="w-full flex items-center justify-between px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
+                    className="w-full text-left px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center space-x-3">
-                      {theme === 'light' ? (
-                        <Moon className="w-3.5 h-3.5 text-sky-400" strokeWidth={1.5} />
-                      ) : (
-                        <Sun className="w-3.5 h-3.5 text-amber-400" strokeWidth={1.5} />
-                      )}
-                      <span>{theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}</span>
+                    Your profile
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      if (onOpenLogin) onOpenLogin();
+                      else onLogout();
+                    }}
+                    className="w-full text-left px-3.5 py-1.5 text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer flex items-center space-x-2"
+                  >
+                    <User className="w-3.5 h-3.5 text-[#A9BFA5]/70" />
+                    <span>Switch account / Log in</span>
+                  </button>
+
+                  {/* Theme Switcher: Light · Dark · System */}
+                  <div className="px-3.5 py-1.5 flex items-center justify-between text-[#A9BFA5]">
+                    <span>Theme</span>
+                    <div className="flex items-center space-x-1 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setTheme('light')}
+                        className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                          theme === 'light'
+                            ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                        }`}
+                      >
+                        Light
+                      </button>
+                      <span className="text-[var(--text-muted)]">·</span>
+                      <button
+                        type="button"
+                        onClick={() => setTheme('dark')}
+                        className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                          theme === 'dark'
+                            ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold shadow-sm'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                        }`}
+                      >
+                        Dark
+                      </button>
                     </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      setShowShortcutsModal(true);
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
+                  >
+                    <span>Keyboard shortcuts</span>
+                    <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">?</kbd>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => { setUserMenuOpen(false); }}
-                    className="w-full flex items-center space-x-3 px-4 py-2 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30 transition-colors text-left cursor-pointer"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      onSelectNav('settings', 'billing');
+                    }}
+                    className="w-full text-left px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
                   >
-                    <HelpCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>Help</span>
+                    Billing
                   </button>
                 </div>
 
-                <div className="p-1 border-t border-[rgba(169,191,165,0.15)]">
-                  <button
-                    type="button"
-                    id="topbar-user-logout"
-                    onClick={() => { setUserMenuOpen(false); onLogout(); }}
-                    className="w-full flex items-center space-x-3 px-4 py-2 text-xs text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/40 transition-colors text-left cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    <span>Log out</span>
-                  </button>
-                </div>
+                <div className="border-t border-[rgba(169,191,165,0.15)] my-1" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="w-full text-left px-3.5 py-1.5 text-rose-300 hover:bg-[#0D2D2A] transition-colors cursor-pointer flex items-center space-x-2"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log out</span>
+                </button>
               </div>
             )}
           </div>
+
         </div>
+
       </div>
+
+      {/* Keyboard Shortcuts Dialog */}
+      {showShortcutsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="w-full max-w-md bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-2xl p-6 rounded-[2px] font-mono text-xs space-y-4 text-[#E8E9D8]">
+            <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.2)] pb-3">
+              <span className="serif text-lg font-light text-white">Keyboard Shortcuts</span>
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(false)}
+                className="p-1 text-[#A9BFA5] hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Open Command Palette</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">⌘K / Ctrl+K</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Create New Lead</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">L</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Create New Post</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">P</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Create Content</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">C</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Create Campaign</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">M</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Inbox Navigation</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">J / K</kbd>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#A9BFA5]">Take over conversation</span>
+                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">T</kbd>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[rgba(169,191,165,0.15)] text-right">
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(false)}
+                className="px-3 py-1.5 bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

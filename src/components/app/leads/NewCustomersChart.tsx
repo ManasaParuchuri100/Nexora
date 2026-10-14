@@ -37,11 +37,13 @@ export default function NewCustomersChart({
   const [activeDayIndex, setActiveDayIndex] = useState<number>(0);
   const [activeChannel, setActiveChannel] = useState<'all' | 'website' | 'ads' | 'referral'>('all');
 
-  const adsStroke = isLight ? '#1B6350' : '#A9BFA5';
-  const gridStroke = isLight ? 'rgba(20, 50, 40, 0.12)' : 'rgba(169, 191, 165, 0.12)';
-  const labelFill = isLight ? '#244B40' : '#A9BFA5';
-  const guidelineStroke = isLight ? 'rgba(20, 50, 40, 0.3)' : 'rgba(169, 191, 165, 0.3)';
-  const dotStroke = isLight ? '#FFFFFF' : '#071C1A';
+  const adsStroke = isLight ? '#15803D' : '#4ADE80';
+  const websiteStroke = isLight ? '#0284C7' : '#38BDF8';
+  const referralStroke = isLight ? '#2563EB' : '#818CF8';
+  const gridStroke = isLight ? '#E2E8F0' : 'rgba(148, 163, 184, 0.22)';
+  const labelFill = isLight ? '#475569' : '#CBD5E1';
+  const guidelineStroke = isLight ? '#94A3B8' : 'rgba(148, 163, 184, 0.45)';
+  const dotStroke = isLight ? '#FFFFFF' : '#070B14';
 
   const activeData = DAYS_DATA[activeDayIndex] || DAYS_DATA[0];
 
@@ -191,7 +193,6 @@ export default function NewCustomersChart({
                   x="26"
                   y={y + 4}
                   fill={labelFill}
-                  opacity={isLight ? "0.85" : "0.6"}
                   fontSize="10"
                   fontFamily="monospace"
                   textAnchor="end"
@@ -305,10 +306,9 @@ export default function NewCustomersChart({
                 <text
                   x={d.x}
                   y={baseY + 22}
-                  fill={isSelected ? (isLight ? '#122420' : '#E8E9D8') : labelFill}
-                  opacity={isSelected ? '1' : (isLight ? '0.85' : '0.6')}
+                  fill={isSelected ? (isLight ? '#0F172A' : '#F8FAFC') : labelFill}
                   fontSize="11"
-                  fontWeight={isSelected ? '600' : '400'}
+                  fontWeight={isSelected ? '600' : '500'}
                   fontFamily="sans-serif"
                   textAnchor="middle"
                 >
@@ -319,7 +319,7 @@ export default function NewCustomersChart({
                     cx={d.x}
                     cy={baseY + 30}
                     r="1.5"
-                    fill={isLight ? '#122420' : '#E8E9D8'}
+                    fill={isLight ? '#0F172A' : '#F8FAFC'}
                   />
                 )}
               </g>
@@ -327,7 +327,7 @@ export default function NewCustomersChart({
           })}
         </svg>
 
-        {/* Floating Tooltip Card exactly matching user's design */}
+        {/* Floating Tooltip Card */}
         <div
           className="absolute z-20 pointer-events-none transition-all duration-150"
           style={{
@@ -340,21 +340,21 @@ export default function NewCustomersChart({
             transform: activeDayIndex > 1 && activeDayIndex < 5 ? 'translateX(-50%)' : 'none'
           }}
         >
-          <div className="bg-[#051513] border border-[rgba(169,191,165,0.3)] shadow-2xl px-3 py-2 rounded-[2px] text-[11px] font-mono space-y-1 min-w-[110px]">
-            <div className="flex items-center space-x-2 text-[#E8E9D8]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
-              <span className="text-[#A9BFA5]/80">Website -</span>
-              <span className="font-semibold text-white">{activeData.website}</span>
+          <div className="bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-2xl px-3 py-2 rounded-[2px] text-[11px] font-mono space-y-1 min-w-[110px]">
+            <div className="flex items-center space-x-2 text-[var(--text-primary)]">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: websiteStroke }} />
+              <span className="text-[var(--text-secondary)]">Website -</span>
+              <span className="font-semibold text-[var(--text-primary)]">{activeData.website}</span>
             </div>
-            <div className="flex items-center space-x-2 text-[#E8E9D8]">
-              <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-[#1B6350]' : 'bg-[#A9BFA5]'}`} />
-              <span className="text-[#A9BFA5]/80">Ads -</span>
-              <span className="font-semibold text-white">{activeData.ads}</span>
+            <div className="flex items-center space-x-2 text-[var(--text-primary)]">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: adsStroke }} />
+              <span className="text-[var(--text-secondary)]">Ads -</span>
+              <span className="font-semibold text-[var(--text-primary)]">{activeData.ads}</span>
             </div>
-            <div className="flex items-center space-x-2 text-[#E8E9D8]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
-              <span className="text-[#A9BFA5]/80">Referral -</span>
-              <span className="font-semibold text-white">{activeData.referral}</span>
+            <div className="flex items-center space-x-2 text-[var(--text-primary)]">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: referralStroke }} />
+              <span className="text-[var(--text-secondary)]">Referral -</span>
+              <span className="font-semibold text-[var(--text-primary)]">{activeData.referral}</span>
             </div>
           </div>
         </div>
