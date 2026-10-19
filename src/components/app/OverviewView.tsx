@@ -11,7 +11,6 @@ import {
   Plus, 
   X,
   Calendar as CalendarIcon,
-  ArrowUpDown,
   Filter,
   SlidersHorizontal
 } from 'lucide-react';
@@ -365,8 +364,8 @@ export default function OverviewView({
           </p>
         </div>
 
-        {/* Right side: Date range controls and sort option */}
-        <div className="flex flex-col sm:items-end gap-2">
+        {/* Right side: Date range controls */}
+        <div className="flex items-center">
           {/* Date range controls (Segmented control matching Inbox) */}
           <div className={`flex items-center space-x-1 p-0.5 rounded-lg border text-xs font-medium shrink-0 ${
             isLight ? 'bg-slate-100/90 border-slate-200/80' : 'bg-[#041210] border-[rgba(169,191,165,0.16)]'
@@ -420,37 +419,6 @@ export default function OverviewView({
                 </>
               )}
             </button>
-          </div>
-
-          {/* Sort option */}
-          <div className="flex items-center space-x-2 text-xs">
-            <span className={`text-[11px] font-medium flex items-center space-x-1 ${
-              isLight ? 'text-slate-500' : 'text-[#A9BFA5]/80'
-            }`}>
-              <ArrowUpDown className={`w-3 h-3 ${isLight ? 'text-teal-600' : 'text-teal-400'}`} />
-              <span>Sort:</span>
-            </span>
-
-            <div className="relative">
-              <select
-                id="overview-sort-basis-select"
-                value={customRange.sortBasis}
-                onChange={(e) => setCustomRange(prev => ({ ...prev, sortBasis: e.target.value as SortBasis }))}
-                className={`text-xs px-2.5 py-1 pr-6 rounded-lg border focus:outline-none cursor-pointer appearance-none font-medium transition-colors ${
-                  isLight
-                    ? 'bg-white border-slate-200 text-slate-700 hover:border-slate-300 focus:border-teal-600 shadow-xs'
-                    : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-teal-400'
-                }`}
-                title="Sort records on this basis"
-              >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-                <option value="priority">Priority (High to Low)</option>
-                <option value="value">Deal Value (High to Low)</option>
-                <option value="alphabetical">Alphabetical (A → Z)</option>
-              </select>
-              <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-2 pointer-events-none" />
-            </div>
           </div>
         </div>
       </div>

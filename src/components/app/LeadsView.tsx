@@ -72,8 +72,8 @@ export default function LeadsView({
     activeSubCategory === 'pipeline' ? 'board' : 'table'
   );
 
-  // Saved Views: 'All' | 'Mine' | 'Hot' | 'Needs follow-up'
-  const [activeViewChip, setActiveViewChip] = useState<'All' | 'Mine' | 'Hot' | 'Needs follow-up'>('All');
+  // Saved Views: 'All' | 'Hot' | 'Needs follow-up'
+  const [activeViewChip, setActiveViewChip] = useState<'All' | 'Hot' | 'Needs follow-up'>('All');
 
   // Filter Dropdowns
   const [stageFilter, setStageFilter] = useState<string>('All');
@@ -146,9 +146,6 @@ export default function LeadsView({
   const filteredLeads = useMemo(() => {
     const list = leads.filter(l => {
       // Saved views
-      if (activeViewChip === 'Mine' && l.assignee?.name !== 'Rahul — Sales' && l.assignee?.name !== 'You') {
-        return false;
-      }
       if (activeViewChip === 'Hot' && l.score < 80 && l.temperature !== 'HOT') {
         return false;
       }
@@ -420,14 +417,14 @@ export default function LeadsView({
           
           {/* Row 2: Saved Views Chips & Table/Board Switcher */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            {/* Views: [All] [Mine] [Hot] [Needs follow-up] [+ Save view] */}
+            {/* Views: [All] [Hot] [Needs follow-up] [+ Save view] */}
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
               <span className={`text-[11px] font-semibold uppercase tracking-wider mr-1 ${
                 isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
               }`}>
                 Views:
               </span>
-              {(['All', 'Mine', 'Hot', 'Needs follow-up'] as const).map(chip => (
+              {(['All', 'Hot', 'Needs follow-up'] as const).map(chip => (
                 <button
                   key={chip}
                   type="button"

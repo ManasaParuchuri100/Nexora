@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { 
   NavCategory, 
@@ -82,11 +83,14 @@ export default function NexoraApp({
 
   // Toast Notification
   const [toastMessage, setToastMessage] = useState<{ title: string; desc: string } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = (title: string, desc: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToastMessage({ title, desc });
-    setTimeout(() => {
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
+      toastTimerRef.current = null;
     }, 4000);
   };
 
@@ -586,15 +590,28 @@ export default function NexoraApp({
         </div>
       )}
 
-      {/* Floating System Toast */}
+      {/* Floating System Toast (positioned top-right to avoid covering bottom-right action buttons) */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-2xl p-4 max-w-sm text-[#E8E9D8] animate-fadeIn rounded-[2px]">
-          <p className="text-xs uppercase tracking-widest text-[#A9BFA5] font-medium mb-1">
-            {toastMessage.title}
-          </p>
-          <p className="text-xs font-light text-[#E8E9D8]/90 leading-relaxed">
-            {toastMessage.desc}
-          </p>
+        <div className="fixed top-5 right-5 sm:right-6 z-50 bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-xl p-3.5 max-w-sm text-[#E8E9D8] animate-fadeIn rounded-lg flex items-start justify-between space-x-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs uppercase tracking-wider text-[#A9BFA5] font-semibold mb-0.5">
+              {toastMessage.title}
+            </p>
+            <p className="text-xs text-[#E8E9D8]/90 leading-relaxed">
+              {toastMessage.desc}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+              setToastMessage(null);
+            }}
+            className="text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5 shrink-0"
+            title="Dismiss notification"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </div>
