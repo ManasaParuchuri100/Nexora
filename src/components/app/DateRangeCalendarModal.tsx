@@ -234,72 +234,7 @@ export default function DateRangeCalendarModal({
     }
   };
 
-  // Quick preset helper
-  const applyPreset = (preset: 'today' | '7days' | '30days' | 'thisMonth') => {
-    const now = new Date(2026, 9, 6); // Anchored to app mock date Oct 6, 2026
-    let start = new Date(now);
-    let end = new Date(now);
 
-    if (preset === 'today') {
-      start = new Date(now);
-      end = new Date(now);
-    } else if (preset === '7days') {
-      start = new Date(now);
-      start.setDate(now.getDate() - 6);
-    } else if (preset === '30days') {
-      start = new Date(now);
-      start.setDate(now.getDate() - 29);
-    } else if (preset === 'thisMonth') {
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    }
-
-    setStartDate(formatDateISO(start));
-    setEndDate(formatDateISO(end));
-    setSelectingStep('start');
-  };
-
-  const isPresetActive = (preset: 'today' | '7days' | '30days' | 'thisMonth'): boolean => {
-    const now = new Date(2026, 9, 6);
-    if (preset === 'today') {
-      const todayStr = formatDateISO(now);
-      return startDate === todayStr && endDate === todayStr;
-    }
-    if (preset === '7days') {
-      const s = new Date(now);
-      s.setDate(now.getDate() - 6);
-      return startDate === formatDateISO(s) && endDate === formatDateISO(now);
-    }
-    if (preset === '30days') {
-      const s = new Date(now);
-      s.setDate(now.getDate() - 29);
-      return startDate === formatDateISO(s) && endDate === formatDateISO(now);
-    }
-    if (preset === 'thisMonth') {
-      const s = new Date(now.getFullYear(), now.getMonth(), 1);
-      const e = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      return startDate === formatDateISO(s) && endDate === formatDateISO(e);
-    }
-    return false;
-  };
-
-  // Selected range day count calculation
-  const daysSelectedCount = (() => {
-    if (!startDate || !endDate) return null;
-    const d1 = parseDateISO(startDate);
-    const d2 = parseDateISO(endDate);
-    const diffTime = Math.abs(d2.getTime() - d1.getTime());
-    return Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  })();
-
-  const formatFriendlyRange = () => {
-    if (!startDate || !endDate) return '';
-    const d1 = parseDateISO(startDate);
-    const d2 = parseDateISO(endDate);
-    const m1 = FULL_MONTH_NAMES[d1.getMonth()].slice(0, 3);
-    const m2 = FULL_MONTH_NAMES[d2.getMonth()].slice(0, 3);
-    return `${m1} ${String(d1.getDate()).padStart(2, '0')}, ${d1.getFullYear()} – ${m2} ${String(d2.getDate()).padStart(2, '0')}, ${d2.getFullYear()}`;
-  };
 
   // Calendar cells calculation for optional visual grid
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -539,23 +474,6 @@ export default function DateRangeCalendarModal({
         )}
       </div>
 
-      {/* 3. SELECTED RANGE SUMMARY: subtle line displaying selected date range and total days */}
-      <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium border ${
-        isLight
-          ? 'bg-teal-50/60 border-teal-200/70 text-teal-900'
-          : 'bg-teal-950/30 border-teal-800/40 text-teal-300'
-      }`}>
-        <div className="flex items-center space-x-1.5 truncate">
-          <CalendarIcon className="w-3.5 h-3.5 shrink-0 text-teal-600 dark:text-teal-400" />
-          <span className="truncate text-[11px] sm:text-xs">{formatFriendlyRange()}</span>
-        </div>
-        {daysSelectedCount !== null && (
-          <span className="font-semibold shrink-0 text-[11px] tabular-nums ml-2">
-            {daysSelectedCount} {daysSelectedCount === 1 ? 'day' : 'days'}
-          </span>
-        )}
-      </div>
-
       {/* 4. SORT BASIS: compact dropdown with existing options */}
       <div className="space-y-1">
         <label className={`block text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
@@ -578,44 +496,6 @@ export default function DateRangeCalendarModal({
             <option value="alphabetical">Alphabetical (A → Z)</option>
           </select>
           <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none" />
-        </div>
-      </div>
-
-      {/* 5. QUICK PRESETS: small buttons for Today, Last 7 Days, Last 30 Days, and This Month */}
-      <div className="space-y-1.5">
-        <span className={`block text-[10px] font-semibold uppercase tracking-wider ${
-          isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
-        }`}>
-          Quick Presets
-        </span>
-        <div className="grid grid-cols-4 gap-1.5">
-          {[
-            { id: 'today', label: 'Today' },
-            { id: '7days', label: 'Last 7D' },
-            { id: '30days', label: 'Last 30D' },
-            { id: 'thisMonth', label: 'This Month' }
-          ].map((p) => {
-            const active = isPresetActive(p.id as any);
-            return (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => applyPreset(p.id as any)}
-                className={`py-1 px-1 text-[11px] rounded-md border text-center transition-all cursor-pointer font-medium truncate ${
-                  active
-                    ? isLight
-                      ? 'bg-teal-50 text-teal-700 border-teal-300 font-semibold shadow-2xs'
-                      : 'bg-[#0D2D2A] border-teal-500/50 text-teal-200 font-semibold'
-                    : isLight
-                      ? 'bg-slate-50/80 border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300'
-                      : 'bg-[#041210] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white'
-                }`}
-                title={p.label === 'Last 7D' ? 'Last 7 Days' : p.label === 'Last 30D' ? 'Last 30 Days' : p.label}
-              >
-                {p.label}
-              </button>
-            );
-          })}
         </div>
       </div>
 
