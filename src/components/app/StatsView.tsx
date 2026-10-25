@@ -1086,9 +1086,10 @@ export default function StatsView() {
         </div>
       </section>
 
-      {/* Date Range & Sort Calendar Modal */}
+      {/* Date Range & Sort Calendar Popover Dropdown */}
       <DateRangeCalendarModal
         isOpen={isCalendarModalOpen}
+        anchorId="stats-custom-dates-btn"
         title="Decide Lead Growth Timeline & Sorting"
         subtitle="Click on the calendar to pick start and end dates. Growth analytics will be filtered and sorted on that basis."
         initialStartDate={customStartDate}

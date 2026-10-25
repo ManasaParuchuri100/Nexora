@@ -1056,9 +1056,10 @@ export default function CampaignsView({
         )}
       </div>
 
-      {/* Date Range & Sort Calendar Modal */}
+      {/* Date Range & Sort Calendar Popover Dropdown */}
       <DateRangeCalendarModal
         isOpen={isCalendarModalOpen}
+        anchorId="campaigns-custom-btn"
         title="Decide Campaign Timeline & Sorting"
         subtitle="Click on the calendar to pick start and end dates. Campaigns will be filtered and sorted on that basis."
         initialStartDate={customStartDate}

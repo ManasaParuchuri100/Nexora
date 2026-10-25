@@ -394,8 +394,12 @@ export default function OverviewView({
               type="button"
               id="custom-date-btn"
               onClick={() => {
-                setDateRange('Custom');
-                setIsCalendarOpen(true);
+                if (isCalendarOpen) {
+                  setIsCalendarOpen(false);
+                } else {
+                  setDateRange('Custom');
+                  setIsCalendarOpen(true);
+                }
               }}
               className={`px-3 py-1 rounded-md flex items-center space-x-1.5 transition-all cursor-pointer text-xs ${
                 dateRange === 'Custom'
@@ -1054,9 +1058,10 @@ export default function OverviewView({
         )}
       </div>
 
-      {/* Date Range & Calendar Selection Modal */}
+      {/* Date Range & Calendar Selection Popover Dropdown */}
       <DateRangeCalendarModal
         isOpen={isCalendarOpen}
+        anchorId="custom-date-btn"
         initialStartDate={customRange.startDate}
         initialEndDate={customRange.endDate}
         initialSortBasis={customRange.sortBasis}

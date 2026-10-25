@@ -586,7 +586,7 @@ export default function LeadsView({
               <button
                 type="button"
                 id="leads-custom-date-btn"
-                onClick={() => setIsCalendarModalOpen(true)}
+                onClick={() => setIsCalendarModalOpen(prev => !prev)}
                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
                   isCustomDateActive
                     ? isLight
@@ -1268,9 +1268,10 @@ export default function LeadsView({
         </div>
       )}
 
-      {/* Date Range & Sort Calendar Modal */}
+      {/* Date Range & Sort Calendar Popover Dropdown */}
       <DateRangeCalendarModal
         isOpen={isCalendarModalOpen}
+        anchorId="leads-custom-date-btn"
         title="Decide Leads Date Window & Sorting"
         subtitle="Click on the calendar to pick start and end dates. Leads will be filtered and sorted on that basis."
         initialStartDate={customRange.startDate}

@@ -25,6 +25,8 @@ interface DateRangeCalendarModalProps {
   initialStartDate?: string;
   initialEndDate?: string;
   initialSortBasis?: SortBasis;
+  anchorId?: string;
+  anchorRef?: React.RefObject<HTMLElement | null>;
   onClose: () => void;
   onApply: (selection: DateRangeSelection) => void;
 }
@@ -44,28 +46,20 @@ function parseDateISO(str: string): Date {
   return new Date();
 }
 
-function formatMMDDYYYY(dateStr: string): string {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length !== 3) return '';
-  return `${parts[1]}/${parts[2]}/${parts[0]}`;
-}
-
 const FULL_MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-// Weekday row in Monday-first order as specified in requirements & reference image
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function DateRangeCalendarModal({
   isOpen,
-  title = 'Date Range & Filter',
-  subtitle = 'Select date range and sorting basis to filter workspace records.',
   initialStartDate = '2026-09-01',
   initialEndDate = '2026-10-06',
   initialSortBasis = 'newest',
+  anchorId = 'custom-date-btn',
+  anchorRef,
   onClose,
   onApply
 }: DateRangeCalendarModalProps) {
@@ -75,42 +69,73 @@ export default function DateRangeCalendarModal({
   // Range selection states
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(initialEndDate);
-  const [hoverDate, setHoverDate] = useState<string | null>(null);
-  const [selectingStep, setSelectingStep] = useState<'start' | 'end'>('start');
   const [sortBasis, setSortBasis] = useState<SortBasis>(initialSortBasis);
 
-  // Popover open state
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // Optional visual calendar grid expansion
+  const [showCalendarGrid, setShowCalendarGrid] = useState(false);
+  const [hoverDate, setHoverDate] = useState<string | null>(null);
+  const [selectingStep, setSelectingStep] = useState<'start' | 'end'>('start');
 
-  // Month & Year view state for the calendar
+  // Month & Year view state for visual calendar
   const initialDateObj = parseDateISO(initialEndDate || initialStartDate || '2026-10-06');
   const [viewYear, setViewYear] = useState<number>(initialDateObj.getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(initialDateObj.getMonth());
 
-  // Refs for click outside handling
-  const popoverContainerRef = useRef<HTMLDivElement>(null);
-  const inputButtonRef = useRef<HTMLButtonElement>(null);
+  // Fixed anchored position style
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+  const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Close popover when clicking outside of it (but keep modal open)
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!isPopoverOpen) return;
-      const target = event.target as Node;
-      if (
-        popoverContainerRef.current && 
-        !popoverContainerRef.current.contains(target) &&
-        inputButtonRef.current &&
-        !inputButtonRef.current.contains(target)
-      ) {
-        setIsPopoverOpen(false);
-        setHoverDate(null);
-      }
+  // Position update function: anchors directly below the Custom button aligned to its right edge
+  const updatePosition = () => {
+    const targetId = anchorId || 'custom-date-btn';
+    let el = anchorRef?.current || (targetId ? document.getElementById(targetId) : null);
+    if (!el) {
+      el = document.querySelector('button[id*="custom-date-btn"], button[id*="custom-btn"], button[id*="custom-dates-btn"]') as HTMLElement;
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isPopoverOpen]);
+    
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const panelWidth = Math.min(340, viewportWidth - 24);
 
-  // Sync on modal open
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      // Align panel's right edge with the right edge of the Custom button
+      let right = viewportWidth - rect.right;
+      
+      // Ensure right margin >= 12px
+      if (right < 12) right = 12;
+      // Ensure left margin >= 12px
+      if (viewportWidth - right - panelWidth < 12) {
+        right = Math.max(12, viewportWidth - panelWidth - 12);
+      }
+      
+      let top = rect.bottom + 6;
+      const estimatedHeight = showCalendarGrid ? 520 : 340;
+      if (top + estimatedHeight > viewportHeight && rect.top > estimatedHeight + 12) {
+        top = Math.max(12, rect.top - estimatedHeight - 6);
+      }
+
+      setPopoverStyle({
+        position: 'fixed',
+        top: `${top}px`,
+        right: `${right}px`,
+        width: `${panelWidth}px`,
+        maxWidth: 'calc(100vw - 24px)',
+        zIndex: 50,
+      });
+    } else {
+      setPopoverStyle({
+        position: 'fixed',
+        top: '80px',
+        right: '24px',
+        width: `${panelWidth}px`,
+        maxWidth: 'calc(100vw - 24px)',
+        zIndex: 50,
+      });
+    }
+  };
+
+  // Sync state whenever opened
   useEffect(() => {
     if (isOpen) {
       setStartDate(initialStartDate);
@@ -118,34 +143,61 @@ export default function DateRangeCalendarModal({
       setSortBasis(initialSortBasis);
       setSelectingStep('start');
       setHoverDate(null);
-      setIsPopoverOpen(false);
+      setShowCalendarGrid(false);
       const d = parseDateISO(initialEndDate || initialStartDate || '2026-10-06');
       setViewYear(d.getFullYear());
       setViewMonth(d.getMonth());
+      updatePosition();
     }
   }, [isOpen, initialStartDate, initialEndDate, initialSortBasis]);
 
-  // Keyboard navigation
+  // Handle position re-calculation on resize and scroll
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'Escape') {
-        if (isPopoverOpen) {
-          setIsPopoverOpen(false);
-        } else {
-          onClose();
-        }
-      } else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        handleApply();
-      }
+    if (!isOpen) return;
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
+  }, [isOpen, showCalendarGrid, anchorId, anchorRef]);
+
+  // Click outside and Escape key listeners
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (popoverRef.current && popoverRef.current.contains(target)) {
+        return;
+      }
+      // If clicking on the trigger button itself, let the button's toggle logic handle it
+      const targetId = anchorId || 'custom-date-btn';
+      const anchor = anchorRef?.current || (targetId ? document.getElementById(targetId) : null) || document.querySelector('button[id*="custom-date-btn"], button[id*="custom-btn"]');
+      if (anchor && anchor.contains(target)) {
+        return;
+      }
+      onClose();
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isPopoverOpen, startDate, endDate, sortBasis]);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose, anchorId, anchorRef]);
 
   if (!isOpen) return null;
 
-  // Month navigation
+  // Month navigation for visual calendar
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
       setViewMonth(11);
@@ -164,578 +216,452 @@ export default function DateRangeCalendarModal({
     }
   };
 
-  // Day click logic
-  const handleDayClick = (dayISO: string) => {
+  // Day click on visual calendar
+  const handleDayClick = (iso: string) => {
     if (selectingStep === 'start') {
-      setStartDate(dayISO);
-      setEndDate('');
+      setStartDate(iso);
+      setEndDate(iso);
       setSelectingStep('end');
     } else {
-      if (dayISO < startDate) {
-        setStartDate(dayISO);
+      if (iso < startDate) {
+        setStartDate(iso);
         setEndDate(startDate);
       } else {
-        setEndDate(dayISO);
+        setEndDate(iso);
       }
       setSelectingStep('start');
       setHoverDate(null);
     }
   };
 
-  // Build complete 35/42-cell calendar matrix with overflow days (Monday-first)
-  const calendarCells = (() => {
-    const firstDay = new Date(viewYear, viewMonth, 1);
-    // Convert getDay() (Sunday=0, Monday=1, ..., Saturday=6) to Monday=0, ..., Sunday=6
-    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
-    const daysInCurrentMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+  // Quick preset helper
+  const applyPreset = (preset: 'today' | '7days' | '30days' | 'thisMonth') => {
+    const now = new Date(2026, 9, 6); // Anchored to app mock date Oct 6, 2026
+    let start = new Date(now);
+    let end = new Date(now);
 
-    const cells: { dayNumber: number; iso: string; isCurrentMonth: boolean }[] = [];
-
-    // Preceding month trailing days
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const d = daysInPrevMonth - i;
-      const prevDate = new Date(viewYear, viewMonth - 1, d);
-      cells.push({
-        dayNumber: d,
-        iso: formatDateISO(prevDate),
-        isCurrentMonth: false
-      });
+    if (preset === 'today') {
+      start = new Date(now);
+      end = new Date(now);
+    } else if (preset === '7days') {
+      start = new Date(now);
+      start.setDate(now.getDate() - 6);
+    } else if (preset === '30days') {
+      start = new Date(now);
+      start.setDate(now.getDate() - 29);
+    } else if (preset === 'thisMonth') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     }
 
-    // Current month days
-    for (let d = 1; d <= daysInCurrentMonth; d++) {
-      const currDate = new Date(viewYear, viewMonth, d);
-      cells.push({
-        dayNumber: d,
-        iso: formatDateISO(currDate),
-        isCurrentMonth: true
-      });
+    setStartDate(formatDateISO(start));
+    setEndDate(formatDateISO(end));
+    setSelectingStep('start');
+  };
+
+  const isPresetActive = (preset: 'today' | '7days' | '30days' | 'thisMonth'): boolean => {
+    const now = new Date(2026, 9, 6);
+    if (preset === 'today') {
+      const todayStr = formatDateISO(now);
+      return startDate === todayStr && endDate === todayStr;
     }
-
-    // Following month leading days to complete full weeks
-    const totalCells = cells.length <= 35 ? 35 : 42;
-    const remaining = totalCells - cells.length;
-    for (let d = 1; d <= remaining; d++) {
-      const nextDate = new Date(viewYear, viewMonth + 1, d);
-      cells.push({
-        dayNumber: d,
-        iso: formatDateISO(nextDate),
-        isCurrentMonth: false
-      });
+    if (preset === '7days') {
+      const s = new Date(now);
+      s.setDate(now.getDate() - 6);
+      return startDate === formatDateISO(s) && endDate === formatDateISO(now);
     }
-
-    return cells;
-  })();
-
-  // Range and selection checks
-  const isDateSelectedStart = (iso: string) => startDate === iso;
-  const isDateSelectedEnd = (iso: string) => endDate === iso;
-
-  const isDateInRange = (iso: string) => {
-    if (startDate && endDate) {
-      const s = startDate < endDate ? startDate : endDate;
-      const e = startDate < endDate ? endDate : startDate;
-      return iso >= s && iso <= e;
+    if (preset === '30days') {
+      const s = new Date(now);
+      s.setDate(now.getDate() - 29);
+      return startDate === formatDateISO(s) && endDate === formatDateISO(now);
     }
-    if (startDate && !endDate && hoverDate) {
-      const min = startDate < hoverDate ? startDate : hoverDate;
-      const max = startDate < hoverDate ? hoverDate : startDate;
-      return iso >= min && iso <= max;
+    if (preset === 'thisMonth') {
+      const s = new Date(now.getFullYear(), now.getMonth(), 1);
+      const e = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return startDate === formatDateISO(s) && endDate === formatDateISO(e);
     }
     return false;
   };
 
-  // Presets
-  const applyPreset = (preset: 'today' | '7days' | '30days' | 'thisMonth') => {
-    const ref = new Date('2026-10-06');
-    let start = new Date(ref);
-    let end = new Date(ref);
-
-    switch (preset) {
-      case 'today':
-        break;
-      case '7days':
-        start.setDate(ref.getDate() - 6);
-        break;
-      case '30days':
-        start.setDate(ref.getDate() - 29);
-        break;
-      case 'thisMonth':
-        start = new Date(ref.getFullYear(), ref.getMonth(), 1);
-        break;
-    }
-
-    const sISO = formatDateISO(start);
-    const eISO = formatDateISO(end);
-    setStartDate(sISO);
-    setEndDate(eISO);
-    setSelectingStep('start');
-    setHoverDate(null);
-    setViewYear(end.getFullYear());
-    setViewMonth(end.getMonth());
-  };
-
-  const isPresetActive = (preset: 'today' | '7days' | '30days' | 'thisMonth') => {
-    const ref = new Date('2026-10-06');
-    let start = new Date(ref);
-    let end = new Date(ref);
-
-    switch (preset) {
-      case 'today':
-        break;
-      case '7days':
-        start.setDate(ref.getDate() - 6);
-        break;
-      case '30days':
-        start.setDate(ref.getDate() - 29);
-        break;
-      case 'thisMonth':
-        start = new Date(ref.getFullYear(), ref.getMonth(), 1);
-        break;
-    }
-
-    return startDate === formatDateISO(start) && endDate === formatDateISO(end);
-  };
-
-  // Range days count
+  // Selected range day count calculation
   const daysSelectedCount = (() => {
     if (!startDate || !endDate) return null;
-    const s = parseDateISO(startDate < endDate ? startDate : endDate);
-    const e = parseDateISO(startDate < endDate ? endDate : startDate);
-    const diffTime = Math.abs(e.getTime() - s.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const d1 = parseDateISO(startDate);
+    const d2 = parseDateISO(endDate);
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    return Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
   })();
 
-  // Reset to default
-  const handleReset = () => {
-    setStartDate('2026-09-01');
-    setEndDate('2026-10-06');
-    setSortBasis('newest');
-    setSelectingStep('start');
-    setHoverDate(null);
-    setIsPopoverOpen(false);
-    setViewYear(2026);
-    setViewMonth(9); // October
+  const formatFriendlyRange = () => {
+    if (!startDate || !endDate) return '';
+    const d1 = parseDateISO(startDate);
+    const d2 = parseDateISO(endDate);
+    const m1 = FULL_MONTH_NAMES[d1.getMonth()].slice(0, 3);
+    const m2 = FULL_MONTH_NAMES[d2.getMonth()].slice(0, 3);
+    return `${m1} ${String(d1.getDate()).padStart(2, '0')}, ${d1.getFullYear()} – ${m2} ${String(d2.getDate()).padStart(2, '0')}, ${d2.getFullYear()}`;
   };
 
-  // Submit / Apply
-  const handleApply = () => {
-    const finalStart = startDate || '2026-09-01';
-    const finalEnd = endDate || startDate || '2026-10-06';
-    onApply({
-      startDate: finalStart <= finalEnd ? finalStart : finalEnd,
-      endDate: finalStart <= finalEnd ? finalEnd : finalStart,
-      sortBasis
+  // Calendar cells calculation for optional visual grid
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfWeek = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // Monday = 0
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  interface CalendarCell {
+    iso: string;
+    dayNumber: number;
+    isCurrentMonth: boolean;
+  }
+
+  const calendarCells: CalendarCell[] = [];
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const prevDate = new Date(viewYear, viewMonth - 1, day);
+    calendarCells.push({
+      iso: formatDateISO(prevDate),
+      dayNumber: day,
+      isCurrentMonth: false
     });
-    onClose();
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const curDate = new Date(viewYear, viewMonth, d);
+    calendarCells.push({
+      iso: formatDateISO(curDate),
+      dayNumber: d,
+      isCurrentMonth: true
+    });
+  }
+
+  const remaining = 42 - calendarCells.length;
+  for (let d = 1; d <= remaining; d++) {
+    const nextDate = new Date(viewYear, viewMonth + 1, d);
+    calendarCells.push({
+      iso: formatDateISO(nextDate),
+      dayNumber: d,
+      isCurrentMonth: false
+    });
+  }
+
+  const isDateSelectedStart = (iso: string) => startDate === iso;
+  const isDateSelectedEnd = (iso: string) => endDate === iso;
+  const isDateInRange = (iso: string) => {
+    if (!startDate) return false;
+    const effectiveEnd = (selectingStep === 'end' && hoverDate) ? hoverDate : endDate;
+    if (!effectiveEnd) return false;
+    const minD = startDate < effectiveEnd ? startDate : effectiveEnd;
+    const maxD = startDate < effectiveEnd ? effectiveEnd : startDate;
+    return iso >= minD && iso <= maxD;
   };
 
-  // Format the display string for the single date range input
-  const dateRangeDisplayValue = (() => {
-    if (startDate && endDate) {
-      return `${formatMMDDYYYY(startDate)} – ${formatMMDDYYYY(endDate)}`;
-    }
-    if (startDate && !endDate) {
-      return `${formatMMDDYYYY(startDate)} – Select end date`;
-    }
-    return 'MM/DD/YYYY – MM/DD/YYYY';
-  })();
+  const handleReset = () => {
+    setStartDate(initialStartDate);
+    setEndDate(initialEndDate);
+    setSortBasis(initialSortBasis);
+    setShowCalendarGrid(false);
+  };
 
-  const isToday = (iso: string) => iso === '2026-10-06';
+  const handleApply = () => {
+    if (startDate && endDate) {
+      const finalStart = startDate <= endDate ? startDate : endDate;
+      const finalEnd = startDate <= endDate ? endDate : startDate;
+      onApply({
+        startDate: finalStart,
+        endDate: finalEnd,
+        sortBasis
+      });
+      onClose();
+    } else {
+      onClose();
+    }
+  };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn"
+    <div
+      ref={popoverRef}
+      style={popoverStyle}
       role="dialog"
-      aria-modal="true"
-      onClick={onClose}
+      aria-label="Custom Date Range Dropdown"
+      className={`rounded-xl border shadow-xl transition-all duration-150 animate-fadeIn p-3.5 sm:p-4 space-y-3 ${
+        isLight
+          ? 'bg-white border-slate-200 text-slate-900 shadow-slate-900/10'
+          : 'bg-[#061816] border-[rgba(169,191,165,0.22)] text-[#E8E9D8] shadow-black/70'
+      }`}
     >
-      <div 
-        className={`relative w-full max-w-lg p-6 sm:p-7 rounded-2xl shadow-2xl transition-colors duration-150 border ${
-          isLight 
-            ? 'bg-white border-slate-200 text-slate-900' 
-            : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Top Close Button */}
+      {/* 1. HEADER: “Custom Date Range” with small close icon */}
+      <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-[rgba(169,191,165,0.12)]">
+        <div className="flex items-center space-x-2">
+          <div className="w-5 h-5 rounded-md bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+            <CalendarIcon className="w-3.5 h-3.5" />
+          </div>
+          <h3 className={`text-xs sm:text-sm font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            Custom Date Range
+          </h3>
+        </div>
         <button
           type="button"
           onClick={onClose}
-          className={`absolute top-5 right-5 p-1.5 rounded-lg transition-colors cursor-pointer ${
-            isLight 
-              ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100' 
-              : 'text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-[#0D2D2A]'
+          className={`p-1 rounded-md transition-colors cursor-pointer ${
+            isLight
+              ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+              : 'text-[#A9BFA5]/60 hover:text-white hover:bg-[#0D2D2A]'
           }`}
-          aria-label="Close dialog"
+          aria-label="Close"
+          title="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
+      </div>
 
-        {/* Modal Header */}
-        <div className="mb-5 pr-8">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
-            Date Window Selection
-          </span>
-          <h2 className={`text-xl sm:text-2xl font-bold tracking-tight ${
-            isLight ? 'text-slate-900' : 'text-white'
-          }`}>
-            {title}
-          </h2>
-          <p className={`text-xs mt-1 leading-relaxed ${isLight ? 'text-slate-500' : 'text-[#A9BFA5]'}`}>
-            {subtitle}
-          </p>
+      {/* 2. DATE RANGE SELECTOR: Two compact date inputs, “Start date” and “End date” */}
+      <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+              Start date
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStartDate(val);
+                if (endDate && val > endDate) {
+                  setEndDate(val);
+                }
+              }}
+              className={`w-full text-xs px-2.5 py-1.5 rounded-lg border font-mono focus:outline-none transition-colors cursor-pointer ${
+                isLight
+                  ? 'bg-slate-50/80 border-slate-200 text-slate-800 focus:bg-white focus:border-teal-600 focus:ring-1 focus:ring-teal-500/20'
+                  : 'bg-[#041210] border-[rgba(169,191,165,0.22)] text-[#E8E9D8] focus:border-teal-400'
+              }`}
+            />
+          </div>
+
+          <div>
+            <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+              End date
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              onChange={(e) => {
+                const val = e.target.value;
+                setEndDate(val);
+                if (startDate && val < startDate) {
+                  setStartDate(val);
+                }
+              }}
+              className={`w-full text-xs px-2.5 py-1.5 rounded-lg border font-mono focus:outline-none transition-colors cursor-pointer ${
+                isLight
+                  ? 'bg-slate-50/80 border-slate-200 text-slate-800 focus:bg-white focus:border-teal-600 focus:ring-1 focus:ring-teal-500/20'
+                  : 'bg-[#041210] border-[rgba(169,191,165,0.22)] text-[#E8E9D8] focus:border-teal-400'
+              }`}
+            />
+          </div>
         </div>
 
-        {/* Filter Form Controls */}
-        <div className="space-y-4">
-          
-          {/* ========================================================
-              SINGLE DATE RANGE INPUT WITH FLOATING COMPACT POPOVER
-             ======================================================== */}
-          <div className="relative">
-            <label className={`block text-xs font-semibold mb-1.5 ${
-              isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
-            }`}>
-              Select date range
-            </label>
+        {/* Optional Visual Calendar Toggle */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowCalendarGrid(prev => !prev)}
+            className="text-[10px] text-teal-600 dark:text-teal-400 font-medium hover:underline cursor-pointer flex items-center space-x-1"
+          >
+            <span>{showCalendarGrid ? 'Hide Calendar Grid' : 'Show Calendar Grid'}</span>
+            <ChevronDown className={`w-3 h-3 transition-transform ${showCalendarGrid ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
 
-            <button
-              ref={inputButtonRef}
-              type="button"
-              id="date-range-single-input"
-              onClick={() => setIsPopoverOpen(prev => !prev)}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-sm font-sans transition-all cursor-pointer ${
-                isPopoverOpen
-                  ? isLight
-                    ? 'border-teal-500 ring-2 ring-teal-500/20 bg-white text-slate-900 shadow-xs'
-                    : 'border-teal-400 ring-2 ring-teal-400/20 bg-[#041210] text-white shadow-xs'
-                  : isLight
-                    ? 'border-slate-200 hover:border-slate-300 bg-white text-slate-900'
-                    : 'border-[rgba(169,191,165,0.25)] hover:border-[rgba(169,191,165,0.4)] bg-[#041210] text-[#E8E9D8]'
-              }`}
-            >
-              <span className={`tabular-nums ${
-                startDate ? 'font-medium' : isLight ? 'text-slate-400' : 'text-[#A9BFA5]/50'
-              }`}>
-                {dateRangeDisplayValue}
-              </span>
-
-              <div className={`p-1 rounded-md transition-colors ${
-                isPopoverOpen
-                  ? isLight ? 'bg-teal-50 text-teal-600' : 'bg-teal-950/60 text-teal-300'
-                  : isLight ? 'text-slate-400 hover:text-slate-600' : 'text-[#A9BFA5]/70 hover:text-white'
-              }`}>
-                <CalendarIcon className="w-4 h-4" />
-              </div>
-            </button>
-
-            {/* ========================================================
-                COMPACT CALENDAR POPOVER (Matched to Reference Image)
-               ======================================================== */}
-            {isPopoverOpen && (
-              <div 
-                ref={popoverContainerRef}
-                className={`absolute top-full left-0 mt-2 z-50 w-full max-w-[360px] sm:w-[360px] p-4 rounded-xl border shadow-2xl animate-scaleUp transition-colors ${
-                  isLight 
-                    ? 'bg-white border-slate-200 text-slate-900 shadow-slate-300/40' 
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] shadow-black/80'
-                }`}
-                style={{
-                  boxShadow: isLight 
-                    ? '0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1)' 
-                    : '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6)'
-                }}
-                onClick={(e) => e.stopPropagation()}
+        {/* Expandable Visual Calendar Grid */}
+        {showCalendarGrid && (
+          <div className={`p-2.5 rounded-lg border space-y-2 mt-1 animate-fadeIn ${
+            isLight ? 'bg-slate-50/60 border-slate-200' : 'bg-[#041210] border-[rgba(169,191,165,0.18)]'
+          }`}>
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-1 rounded hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
               >
-                {/* Popover Header: < Month Year > */}
-                <div className="flex items-center justify-between pb-3 px-1">
-                  <button
-                    type="button"
-                    onClick={handlePrevMonth}
-                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                      isLight 
-                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' 
-                        : 'bg-[#0D2D2A] hover:bg-[#133F3B] text-[#A9BFA5] hover:text-white'
-                    }`}
-                    aria-label="Previous month"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-
-                  <div className="text-sm sm:text-base font-semibold tracking-tight">
-                    {FULL_MONTH_NAMES[viewMonth]} {viewYear}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleNextMonth}
-                    className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                      isLight 
-                        ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' 
-                        : 'bg-[#0D2D2A] hover:bg-[#133F3B] text-[#A9BFA5] hover:text-white'
-                    }`}
-                    aria-label="Next month"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Weekday Row: Mon Tue Wed Thu Fri Sat Sun */}
-                <div className="grid grid-cols-7 text-center pb-2 pt-1 border-b" style={{
-                  borderColor: isLight ? 'rgba(226, 232, 240, 0.7)' : 'rgba(169, 191, 165, 0.12)'
-                }}>
-                  {WEEKDAYS.map((w) => (
-                    <span
-                      key={w}
-                      className={`text-xs font-medium ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                      }`}
-                    >
-                      {w}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Calendar Days 7-Column Grid with Continuous Range Highlight */}
-                <div className="grid grid-cols-7 gap-y-1 pt-2">
-                  {calendarCells.map((cell, idx) => {
-                    const isStart = isDateSelectedStart(cell.iso);
-                    const isEnd = isDateSelectedEnd(cell.iso);
-                    const inRange = isDateInRange(cell.iso);
-                    const isSelected = isStart || isEnd;
-                    const colIndex = idx % 7; // 0=Mon, 6=Sun
-
-                    // Determine continuous background connector bar
-                    const showRightConnector = isStart && (
-                      (endDate && endDate > startDate) || 
-                      (hoverDate && hoverDate > startDate && selectingStep === 'end')
-                    );
-                    const showLeftConnector = isEnd && (
-                      (startDate && startDate < endDate) || 
-                      (hoverDate && hoverDate < startDate && selectingStep === 'end')
-                    );
-
-                    return (
-                      <div
-                        key={cell.iso}
-                        className="h-9 flex items-center justify-center relative select-none"
-                      >
-                        {/* Background continuous range highlights */}
-                        {inRange && !isSelected && (
-                          <div 
-                            className={`absolute inset-0 pointer-events-none ${
-                              isLight ? 'bg-teal-100/80' : 'bg-teal-950/60'
-                            } ${colIndex === 0 ? 'rounded-l-full' : ''} ${
-                              colIndex === 6 ? 'rounded-r-full' : ''
-                            }`} 
-                          />
-                        )}
-
-                        {showRightConnector && (
-                          <div 
-                            className={`absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none ${
-                              isLight ? 'bg-teal-100/80' : 'bg-teal-950/60'
-                            }`} 
-                          />
-                        )}
-
-                        {showLeftConnector && (
-                          <div 
-                            className={`absolute left-0 top-0 bottom-0 w-1/2 pointer-events-none ${
-                              isLight ? 'bg-teal-100/80' : 'bg-teal-950/60'
-                            }`} 
-                          />
-                        )}
-
-                        {/* Day Number Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleDayClick(cell.iso)}
-                          onMouseEnter={() => {
-                            if (selectingStep === 'end') setHoverDate(cell.iso);
-                          }}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium relative z-10 transition-all cursor-pointer ${
-                            isSelected
-                              ? isLight
-                                ? 'bg-teal-600 text-white font-semibold shadow-sm ring-2 ring-teal-600/30'
-                                : 'bg-teal-500 text-slate-950 font-bold shadow-sm ring-2 ring-teal-400/40'
-                              : inRange
-                              ? isLight 
-                                ? 'text-teal-950 font-semibold' 
-                                : 'text-teal-200 font-semibold'
-                              : cell.isCurrentMonth
-                              ? isLight
-                                ? 'text-slate-800 hover:bg-slate-100 font-normal'
-                                : 'text-[#E8E9D8] hover:bg-[#0D2D2A] font-normal'
-                              : isLight
-                                ? 'text-slate-300 hover:bg-slate-50'
-                                : 'text-[#A9BFA5]/25 hover:bg-[#0D2D2A]/20'
-                          }`}
-                        >
-                          {cell.dayNumber}
-                          {isToday(cell.iso) && !isSelected && (
-                            <span className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-600 dark:bg-teal-400" />
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Popover Footer helper */}
-                <div className="flex items-center justify-between pt-3 mt-2 border-t text-[11px]" style={{
-                  borderColor: isLight ? 'rgba(226, 232, 240, 0.7)' : 'rgba(169, 191, 165, 0.12)'
-                }}>
-                  <span className={isLight ? 'text-slate-500' : 'text-[#A9BFA5]/70'}>
-                    {selectingStep === 'end' ? 'Click end date' : 'Range selected'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsPopoverOpen(false);
-                      setHoverDate(null);
-                    }}
-                    className="text-teal-600 dark:text-teal-400 font-semibold hover:underline cursor-pointer px-1 py-0.5"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Range Duration Summary Badge */}
-          {daysSelectedCount !== null && (
-            <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-medium border ${
-              isLight 
-                ? 'bg-teal-50/70 border-teal-200/80 text-teal-800' 
-                : 'bg-teal-950/30 border-teal-800/40 text-teal-300'
-            }`}>
-              <Check className="w-3.5 h-3.5 shrink-0 text-teal-600 dark:text-teal-400" />
-              <span>
-                <strong>{daysSelectedCount} days</strong> selected ({startDate.slice(5)} → {endDate.slice(5)})
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-xs font-semibold">
+                {FULL_MONTH_NAMES[viewMonth]} {viewYear}
               </span>
-            </div>
-          )}
-
-          {/* Sorting Basis Select */}
-          <div className="space-y-1.5">
-            <label className={`block text-xs font-semibold ${
-              isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
-            }`}>
-              Sort Basis
-            </label>
-            <div className="relative">
-              <select
-                value={sortBasis}
-                onChange={(e) => setSortBasis(e.target.value as SortBasis)}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-sans focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 cursor-pointer appearance-none transition-colors ${
-                  isLight 
-                    ? 'bg-white border-slate-200 text-slate-800' 
-                    : 'bg-[#041210] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
-                }`}
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="p-1 rounded hover:bg-slate-200/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
               >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-                <option value="priority">Priority (High to Low)</option>
-                <option value="value">Deal Value (High to Low)</option>
-                <option value="alphabetical">Alphabetical (A → Z)</option>
-              </select>
-
-              <ChevronDown className={`w-4 h-4 absolute right-3 top-3 pointer-events-none ${
-                isLight ? 'text-slate-400' : 'text-[#A9BFA5]'
-              }`} />
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-          </div>
 
-          {/* Quick Presets (Chips matching Overview & Inbox) */}
-          <div className="pt-1 space-y-2">
-            <span className={`block text-[11px] font-semibold uppercase tracking-wider ${
-              isLight ? 'text-slate-500' : 'text-[#A9BFA5]/80'
-            }`}>
-              Quick Presets
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: 'today', label: 'Today' },
-                { id: '7days', label: 'Last 7 Days' },
-                { id: '30days', label: 'Last 30 Days' },
-                { id: 'thisMonth', label: 'This Month' }
-              ].map(p => {
-                const active = isPresetActive(p.id as any);
+            {/* Weekdays */}
+            <div className="grid grid-cols-7 text-center text-[10px] font-semibold text-slate-400 dark:text-[#A9BFA5]/60">
+              {WEEKDAYS.map(w => <span key={w}>{w[0]}</span>)}
+            </div>
+
+            {/* Day Cells */}
+            <div className="grid grid-cols-7 gap-y-0.5 text-center text-xs">
+              {calendarCells.map((cell) => {
+                const isStart = isDateSelectedStart(cell.iso);
+                const isEnd = isDateSelectedEnd(cell.iso);
+                const inRange = isDateInRange(cell.iso);
+                const isSelected = isStart || isEnd;
+
                 return (
                   <button
-                    key={p.id}
+                    key={cell.iso}
                     type="button"
-                    onClick={() => applyPreset(p.id as any)}
-                    className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-all cursor-pointer ${
-                      active
-                        ? isLight
-                          ? 'bg-teal-50 text-teal-700 border-teal-300 font-semibold shadow-2xs'
-                          : 'bg-[#0D2D2A] border-teal-500/50 text-teal-200 font-semibold'
-                        : isLight
-                          ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
-                          : 'bg-[#041210] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:border-teal-500/50 hover:text-white'
+                    onClick={() => handleDayClick(cell.iso)}
+                    onMouseEnter={() => {
+                      if (selectingStep === 'end') setHoverDate(cell.iso);
+                    }}
+                    className={`h-7 w-7 mx-auto rounded-full text-[11px] font-medium flex items-center justify-center cursor-pointer transition-colors ${
+                      isSelected
+                        ? 'bg-teal-600 text-white font-bold'
+                        : inRange
+                        ? isLight ? 'bg-teal-100/80 text-teal-900' : 'bg-teal-950/70 text-teal-200'
+                        : cell.isCurrentMonth
+                        ? isLight ? 'text-slate-700 hover:bg-slate-200/60' : 'text-[#E8E9D8] hover:bg-[#0D2D2A]'
+                        : isLight ? 'text-slate-300' : 'text-[#A9BFA5]/25'
                     }`}
                   >
-                    {p.label}
+                    {cell.dayNumber}
                   </button>
                 );
               })}
             </div>
           </div>
+        )}
+      </div>
 
+      {/* 3. SELECTED RANGE SUMMARY: subtle line displaying selected date range and total days */}
+      <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium border ${
+        isLight
+          ? 'bg-teal-50/60 border-teal-200/70 text-teal-900'
+          : 'bg-teal-950/30 border-teal-800/40 text-teal-300'
+      }`}>
+        <div className="flex items-center space-x-1.5 truncate">
+          <CalendarIcon className="w-3.5 h-3.5 shrink-0 text-teal-600 dark:text-teal-400" />
+          <span className="truncate text-[11px] sm:text-xs">{formatFriendlyRange()}</span>
         </div>
+        {daysSelectedCount !== null && (
+          <span className="font-semibold shrink-0 text-[11px] tabular-nums ml-2">
+            {daysSelectedCount} {daysSelectedCount === 1 ? 'day' : 'days'}
+          </span>
+        )}
+      </div>
 
-        {/* Modal Footer Actions: Reset, Cancel & Apply */}
-        <div className="flex items-center justify-between pt-6 mt-5 border-t" style={{
-          borderColor: isLight ? 'rgba(226, 232, 240, 0.8)' : 'rgba(169, 191, 165, 0.15)'
-        }}>
+      {/* 4. SORT BASIS: compact dropdown with existing options */}
+      <div className="space-y-1">
+        <label className={`block text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+          Sort basis
+        </label>
+        <div className="relative">
+          <select
+            value={sortBasis}
+            onChange={(e) => setSortBasis(e.target.value as SortBasis)}
+            className={`w-full text-xs px-2.5 py-1.5 pr-8 rounded-lg border appearance-none focus:outline-none transition-colors cursor-pointer font-medium ${
+              isLight
+                ? 'bg-slate-50/80 border-slate-200 text-slate-800 focus:bg-white focus:border-teal-600 focus:ring-1 focus:ring-teal-500/20'
+                : 'bg-[#041210] border-[rgba(169,191,165,0.22)] text-[#E8E9D8] focus:border-teal-400'
+            }`}
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="priority">Priority (High to Low)</option>
+            <option value="value">Deal Value (High to Low)</option>
+            <option value="alphabetical">Alphabetical (A → Z)</option>
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* 5. QUICK PRESETS: small buttons for Today, Last 7 Days, Last 30 Days, and This Month */}
+      <div className="space-y-1.5">
+        <span className={`block text-[10px] font-semibold uppercase tracking-wider ${
+          isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
+        }`}>
+          Quick Presets
+        </span>
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { id: 'today', label: 'Today' },
+            { id: '7days', label: 'Last 7D' },
+            { id: '30days', label: 'Last 30D' },
+            { id: 'thisMonth', label: 'This Month' }
+          ].map((p) => {
+            const active = isPresetActive(p.id as any);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => applyPreset(p.id as any)}
+                className={`py-1 px-1 text-[11px] rounded-md border text-center transition-all cursor-pointer font-medium truncate ${
+                  active
+                    ? isLight
+                      ? 'bg-teal-50 text-teal-700 border-teal-300 font-semibold shadow-2xs'
+                      : 'bg-[#0D2D2A] border-teal-500/50 text-teal-200 font-semibold'
+                    : isLight
+                      ? 'bg-slate-50/80 border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300'
+                      : 'bg-[#041210] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white'
+                }`}
+                title={p.label === 'Last 7D' ? 'Last 7 Days' : p.label === 'Last 30D' ? 'Last 30 Days' : p.label}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 6. FOOTER: small Reset action on the left and Cancel and Apply buttons on the right */}
+      <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-[rgba(169,191,165,0.12)] mt-1">
+        <button
+          type="button"
+          onClick={handleReset}
+          className={`flex items-center space-x-1 text-xs transition-colors cursor-pointer px-2 py-1.5 rounded-md ${
+            isLight
+              ? 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+              : 'text-[#A9BFA5]/70 hover:text-white hover:bg-[#0D2D2A]'
+          }`}
+          title="Reset date range to default"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Reset</span>
+        </button>
+
+        <div className="flex items-center space-x-2">
           <button
             type="button"
-            onClick={handleReset}
-            className={`flex items-center space-x-1.5 text-xs transition-colors cursor-pointer px-2 py-1.5 rounded-lg ${
-              isLight 
-                ? 'text-slate-500 hover:text-slate-800 hover:bg-slate-100' 
-                : 'text-[#A9BFA5]/70 hover:text-white hover:bg-[#0D2D2A]'
+            onClick={onClose}
+            className={`text-xs font-medium transition-colors cursor-pointer px-2.5 py-1.5 rounded-lg border ${
+              isLight
+                ? 'border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:bg-[#0D2D2A]'
             }`}
-            title="Reset date range to default"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
+            Cancel
           </button>
 
-          <div className="flex items-center space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className={`text-xs sm:text-sm font-medium transition-colors cursor-pointer px-3.5 py-2 rounded-lg border ${
-                isLight 
-                  ? 'border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-white' 
-                  : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white hover:bg-[#0D2D2A]'
-              }`}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              id="calendar-apply-btn"
-              onClick={handleApply}
-              className={`text-xs sm:text-sm font-semibold transition-all cursor-pointer px-5 py-2 rounded-lg shadow-sm flex items-center space-x-1.5 ${
-                isLight
-                  ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                  : 'bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold'
-              }`}
-            >
-              <Check className="w-4 h-4" />
-              <span>Apply Range</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            id="calendar-apply-btn"
+            onClick={handleApply}
+            className={`text-xs font-semibold transition-all cursor-pointer px-3.5 py-1.5 rounded-lg shadow-2xs flex items-center space-x-1.5 ${
+              isLight
+                ? 'bg-teal-600 hover:bg-teal-700 text-white'
+                : 'bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold'
+            }`}
+          >
+            <Check className="w-3.5 h-3.5" />
+            <span>Apply</span>
+          </button>
         </div>
-
       </div>
     </div>
   );
