@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { BRAND_NAME } from '../../config/brand';
 
 interface AppTopBarProps {
   activeCategory: NavCategory;
@@ -380,17 +381,18 @@ export default function AppTopBar({
 
                 <div className="max-h-80 overflow-y-auto divide-y divide-[rgba(169,191,165,0.1)]">
                   {/* Group: TODAY */}
-                  <div className="px-3.5 py-1.5 bg-[#051513] text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
+                  <div className="px-3.5 py-1.5 bg-[#051513] text-xs uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
                     TODAY
                   </div>
                   {notifications.filter(n => n.group === 'TODAY').map(notif => (
-                    <div
+                    <button
                       key={notif.id}
+                      type="button"
                       onClick={() => {
                         setNotifMenuOpen(false);
                         onSelectNav(notif.category, notif.sub);
                       }}
-                      className="p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5"
+                      className="w-full text-left p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1.5">
@@ -399,35 +401,36 @@ export default function AppTopBar({
                           )}
                           <span className="font-semibold text-white text-xs">{notif.title}</span>
                         </div>
-                        <span className="text-[10px] text-[#A9BFA5]/60">{notif.time}</span>
+                        <span className="text-xs text-[#A9BFA5]/60">{notif.time}</span>
                       </div>
-                      <p className="text-[11px] text-[#A9BFA5] font-light pl-3">
+                      <p className="text-xs text-[#A9BFA5] font-light pl-3">
                         {notif.detail}
                       </p>
-                    </div>
+                    </button>
                   ))}
 
                   {/* Group: EARLIER */}
-                  <div className="px-3.5 py-1.5 bg-[#051513] text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
+                  <div className="px-3.5 py-1.5 bg-[#051513] text-xs uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
                     EARLIER
                   </div>
                   {notifications.filter(n => n.group === 'EARLIER').map(notif => (
-                    <div
+                    <button
                       key={notif.id}
+                      type="button"
                       onClick={() => {
                         setNotifMenuOpen(false);
                         onSelectNav(notif.category, notif.sub);
                       }}
-                      className="p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5"
+                      className="w-full text-left p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-white text-xs">{notif.title}</span>
-                        <span className="text-[10px] text-[#A9BFA5]/60">{notif.time}</span>
+                        <span className="text-xs text-[#A9BFA5]/60">{notif.time}</span>
                       </div>
-                      <p className="text-[11px] text-[#A9BFA5]/70 font-light">
+                      <p className="text-xs text-[#A9BFA5]/70 font-light">
                         {notif.detail}
                       </p>
-                    </div>
+                    </button>
                   ))}
                 </div>
 
@@ -438,7 +441,7 @@ export default function AppTopBar({
                       setNotifMenuOpen(false);
                       onSelectNav('settings', 'notifications');
                     }}
-                    className="text-[11px] text-emerald-300 hover:underline cursor-pointer"
+                    className="text-xs text-emerald-300 hover:underline cursor-pointer"
                   >
                     Notification settings →
                   </button>
@@ -467,7 +470,7 @@ export default function AppTopBar({
             )}
           </button>
 
-          {/* 4. ◯ Acme ▼ Account Menu (Page 9 spec) */}
+          {/* 4. Account Menu */}
           <div className="relative" ref={accountMenuRef}>
             <button
               type="button"
@@ -479,17 +482,17 @@ export default function AppTopBar({
                   : 'text-[#E8E9D8] bg-[#051513] hover:bg-[#081F1C] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
               }`}
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-[10px] font-black uppercase ${
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-black uppercase ${
                 theme === 'light'
                   ? 'bg-[#E2E8F0] border border-[#94A3B8] text-[#000000]'
                   : 'bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#A9BFA5]'
               }`}>
-                {(currentUser?.workspace || currentUser?.name || 'A')[0]}
+                {(currentUser?.workspace || currentUser?.name || BRAND_NAME)[0]}
               </div>
               <span className={`hidden sm:inline font-mono text-xs font-extrabold ${
                 theme === 'light' ? 'text-[#000000]' : 'text-[#E8E9D8]'
               }`}>
-                {currentUser?.workspace || currentUser?.name || 'Acme'}
+                {currentUser?.workspace || currentUser?.name || BRAND_NAME}
               </span>
               <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
@@ -499,10 +502,10 @@ export default function AppTopBar({
                 {/* User details */}
                 <div className="px-3.5 py-2 border-b border-[rgba(169,191,165,0.15)]">
                   <p className="text-[#E8E9D8] font-semibold text-xs">
-                    {currentUser?.workspace || currentUser?.name || 'Acme Studio'}
+                    {currentUser?.workspace || currentUser?.name || `${BRAND_NAME} Workspace`}
                   </p>
-                  <p className="text-[11px] text-[#A9BFA5]/70 truncate">
-                    {currentUser?.email || 'you@acme.com'} · {currentUser?.role || 'Owner'}
+                  <p className="text-xs text-[#A9BFA5]/70 truncate">
+                    {currentUser?.email || `alex@${BRAND_NAME.toLowerCase()}.com`} · {currentUser?.role || 'Owner'}
                   </p>
                 </div>
 

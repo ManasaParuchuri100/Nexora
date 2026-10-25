@@ -5,15 +5,13 @@ import {
   Paperclip, 
   AlertTriangle, 
   Bot, 
-  User, 
   UserCheck, 
   ChevronDown, 
   ChevronLeft,
   Check, 
-  Flame, 
+  CheckCheck,
   Calendar, 
   Clock, 
-  ExternalLink,
   MessageSquare,
   Sparkles,
   Phone,
@@ -21,18 +19,25 @@ import {
   MapPin,
   CheckCircle2,
   PanelRight,
-  Archive,
-  RefreshCw,
   X,
   FileText,
-  HelpCircle,
-  ShieldCheck,
   Filter,
-  ArrowUpDown,
-  SlidersHorizontal
+  Share2,
+  Globe,
+  Mail,
+  ArrowRight
 } from 'lucide-react';
 import { Lead, SubCategory } from '../../types';
-import { useTheme } from '../../context/ThemeContext';
+import { ConversationItem, useConversations } from '../../data/conversations';
+import { BRAND_NAME } from '../../config/brand';
+import { 
+  Button, 
+  Badge, 
+  SegmentedControl, 
+  Avatar, 
+  ProgressBar, 
+  EmptyState 
+} from '../ui';
 
 interface EngageViewProps {
   activeSubCategory: SubCategory;
@@ -47,53 +52,32 @@ interface EngageViewProps {
 export type InboxFilterTab = 'needs_you' | 'all' | 'ai_handling' | 'closed';
 export type ChannelFilter = 'All' | 'WhatsApp' | 'Instagram' | 'LinkedIn' | 'Website';
 export type SortOption = 'newest' | 'oldest_waiting' | 'score';
+export type InboxSpecialFilter = 'all' | 'overdue-followups' | 'asked-pricing' | 'ready-to-book' | 'waiting-human';
 
-interface ConversationItem {
-  id: string;
-  name: string;
-  company: string;
-  location: string;
-  time: string;
-  timestampRaw?: number;
-  channel: 'WhatsApp' | 'Instagram' | 'LinkedIn' | 'Website';
-  status: 'needs_you' | 'ai_handling' | 'closed';
-  snippet: string;
-  stage: string;
-  score: number;
-  temperature: 'HOT' | 'WARM' | 'COLD';
-  intelPill: string;
-  whyPoints: string[];
-  qualification: {
-    requirement: boolean;
-    budget: string;
-    timeline: string;
-    decisionMaker: boolean;
-  };
-  nextAction: string;
-  aiAlert?: {
-    isPaused: boolean;
-    reason: string;
-    confidence: 'low' | 'medium' | 'high';
-  };
-  messages: Array<{
-    id: string;
-    sender: 'customer' | 'ai' | 'agent';
-    senderName: string;
-    text: string;
-    time: string;
-  }>;
-  assignedTo: string;
-  leadReferenceId?: string;
-  unread?: boolean;
-  // Intent categories synced with Overview "Needs You" section
-  isOverdueFollowUp?: boolean;
-  overdueText?: string;
-  askedForPricing?: boolean;
-  readyToBookCall?: boolean;
-  waitingForHuman?: boolean;
+function getChannelIcon(channel: ConversationItem['channel']) {
+  switch (channel) {
+    case 'WhatsApp':
+      return Phone;
+    case 'Instagram':
+      return Share2;
+    case 'LinkedIn':
+      return Building2;
+    case 'Website':
+    default:
+      return Globe;
+  }
 }
 
-export type InboxSpecialFilter = 'all' | 'overdue-followups' | 'asked-pricing' | 'ready-to-book' | 'waiting-human';
+function getMessageDateGroup(timeStr: string): string {
+  const lower = timeStr.toLowerCase();
+  if (lower.includes('yesterday')) return 'Yesterday';
+  if (lower.includes('friday')) return 'Friday';
+  if (lower.includes('oct 14') || lower.includes('oct 15')) return 'Oct 14, 2026';
+  return 'Today';
+}
+
+const STAGES = ['New', 'Contacted', 'Engaged', 'Qualified', 'Proposal', 'Won', 'Lost'];
+const TEAM_MEMBERS = ['Rahul — Sales', 'Sarah — Solutions', 'Priya — AE', 'You'];
 
 export default function EngageView({
   activeSubCategory,
@@ -104,10 +88,9 @@ export default function EngageView({
   isFirstRun = false,
   onNavigateSettings
 }: EngageViewProps) {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
+  const [conversations, setConversations] = useConversations();
 
-  // Special intent filter state synced with activeSubCategory from Overview Needs You section
+  // Special intent filter state synced with activeSubCategory from Overview
   const [specialFilter, setSpecialFilter] = useState<InboxSpecialFilter>(() => {
     if (activeSubCategory === 'overdue-followups' || activeSubCategory === 'follow-ups') return 'overdue-followups';
     if (activeSubCategory === 'asked-pricing' || activeSubCategory === 'pricing') return 'asked-pricing';
@@ -116,7 +99,7 @@ export default function EngageView({
     return 'all';
   });
 
-  // Top Filter Bar State
+  // Filter tabs
   const [activeTab, setActiveTab] = useState<InboxFilterTab>('needs_you');
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,8 +107,22 @@ export default function EngageView({
   const [assigneeFilter, setAssigneeFilter] = useState<string>('All');
   const [showFilterPopover, setShowFilterPopover] = useState(false);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
+
+  // Selected conversation
+  const [selectedConvoId, setSelectedConvoId] = useState<string>('convo-rahul');
   const [showLeadPanel, setShowLeadPanel] = useState(true);
-  const [dismissedAlerts, setDismissedAlerts] = useState<Record<string, boolean>>({});
+
+  // Composer states
+  const [replyInput, setReplyInput] = useState('');
+  const [composerMode, setComposerMode] = useState<'reply' | 'note'>('reply');
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: string }>>([]);
+
+  // Menus
+  const [showAssignMenu, setShowAssignMenu] = useState(false);
+  const [showSnoozeMenu, setShowSnoozeMenu] = useState(false);
+
+  // Mobile initial view MUST be 'list', not 'chat'
+  const [mobileView, setMobileView] = useState<'list' | 'chat' | 'details'>('list');
 
   // Close filter popover on click outside
   useEffect(() => {
@@ -140,10 +137,7 @@ export default function EngageView({
     }
   }, [showFilterPopover]);
 
-  // Mobile responsive view mode: 'list' | 'chat' | 'details'
-  const [mobileView, setMobileView] = useState<'list' | 'chat' | 'details'>('chat');
-
-  // Sync specialFilter whenever activeSubCategory prop changes
+  // Sync specialFilter whenever activeSubCategory changes
   useEffect(() => {
     if (activeSubCategory === 'overdue-followups' || activeSubCategory === 'follow-ups') {
       setSpecialFilter('overdue-followups');
@@ -156,1923 +150,1173 @@ export default function EngageView({
     }
   }, [activeSubCategory]);
 
-  // Initial Conversations Data with full detail
-  const [conversations, setConversations] = useState<ConversationItem[]>([
-    // 1. Rahul Sharma - Asked for Pricing & Waiting for Human (Aster Labs)
-    {
-      id: 'convo-rahul',
-      name: 'Rahul Sharma',
-      company: 'Aster Labs',
-      location: 'Pune',
-      time: '4m',
-      timestampRaw: Date.now() - 4 * 60 * 1000,
-      channel: 'WhatsApp',
-      status: 'needs_you',
-      waitingForHuman: true,
-      askedForPricing: true,
-      snippet: 'Asked for custom pricing: Enterprise CRM & WhatsApp automation.',
-      stage: 'Qualified',
-      score: 92,
-      temperature: 'HOT',
-      intelPill: 'Aster Labs · Pune · Hot',
-      whyPoints: ['+ asked for pricing twice', '+ clear budget ₹5-8L', '+ requested live call'],
-      qualification: {
-        requirement: true,
-        budget: '₹5-8L',
-        timeline: '30 days',
-        decisionMaker: false
-      },
-      nextAction: 'schedule pricing discovery call',
-      aiAlert: {
-        isPaused: true,
-        reason: 'AI paused: prospect asked for custom pricing. Confidence: low.',
-        confidence: 'low'
-      },
-      messages: [
-        {
-          id: 'm1',
-          sender: 'customer',
-          senderName: 'Rahul',
-          text: 'Hi, I need pricing for enterprise CRM and WhatsApp automation.',
-          time: '10:42 AM'
-        },
-        {
-          id: 'm2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Absolutely Rahul! Could you share your monthly volume and team size so I can calculate your tier?',
-          time: '10:44 AM'
-        },
-        {
-          id: 'm3',
-          sender: 'customer',
-          senderName: 'Rahul',
-          text: 'Can someone speak to me about enterprise pricing for 12 seats?',
-          time: '10:46 AM'
-        }
-      ],
-      assignedTo: 'Rahul — Sales',
-      leadReferenceId: 'lead-rahul-sharma'
-    },
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    const active = conversations.filter(c => c.status !== 'closed');
+    return {
+      needs_you: active.filter(c => c.status === 'needs_you').length,
+      all: active.length,
+      ai_handling: conversations.filter(c => c.status === 'ai_handling').length,
+      closed: conversations.filter(c => c.status === 'closed').length
+    };
+  }, [conversations]);
 
-    // 2. Neha Gupta - Asked for Pricing (Kavya Luxury Interiors)
-    {
-      id: 'convo-neha',
-      name: 'Neha Gupta',
-      company: 'Kavya Luxury Interiors',
-      location: 'New Delhi',
-      time: '15m',
-      timestampRaw: Date.now() - 15 * 60 * 1000,
-      channel: 'Instagram',
-      status: 'needs_you',
-      unread: true,
-      askedForPricing: true,
-      snippet: 'Asked for pricing: Commercial pricing sheet for 5 store locations.',
-      stage: 'Qualified',
-      score: 89,
-      temperature: 'HOT',
-      intelPill: 'Kavya Interiors · Pricing Inquiry',
-      whyPoints: ['+ asked for commercial price sheet', '+ multi-store expansion', '+ verified store owner'],
-      qualification: {
-        requirement: true,
-        budget: '₹4.5L',
-        timeline: '15 days',
-        decisionMaker: true
-      },
-      nextAction: 'send commercial pricing PDF',
-      aiAlert: {
-        isPaused: true,
-        reason: 'AI paused: commercial rate card requested.',
-        confidence: 'medium'
-      },
-      messages: [
-        {
-          id: 'm-n1',
-          sender: 'customer',
-          senderName: 'Neha',
-          text: 'Hi! We love your studio workflows. Could you please send your detailed commercial pricing sheet?',
-          time: '11:15 AM'
-        },
-        {
-          id: 'm-n2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Hello Neha! Our business plans start at ₹45,000/mo. Would you like a customized enterprise quote?',
-          time: '11:17 AM'
-        },
-        {
-          id: 'm-n3',
-          sender: 'customer',
-          senderName: 'Neha',
-          text: 'Yes please, send the full pricing breakdown for our 5 store locations.',
-          time: '11:20 AM'
-        }
-      ],
-      assignedTo: 'Sarah — Solutions',
-      leadReferenceId: 'lead-neha'
-    },
-
-    // 3. Elena Rostova - Overdue Follow-up & Waiting for Human (Nordic Space Design)
-    {
-      id: 'convo-elena',
-      name: 'Elena Rostova',
-      company: 'Nordic Space Design',
-      location: 'Stockholm',
-      time: '2h',
-      timestampRaw: Date.now() - 120 * 60 * 1000,
-      channel: 'WhatsApp',
-      status: 'needs_you',
-      isOverdueFollowUp: true,
-      overdueText: '3 days overdue',
-      waitingForHuman: true,
-      snippet: 'Proposal sent Friday; overdue follow-up on bespoke studio integration.',
-      stage: 'Proposal',
-      score: 95,
-      temperature: 'HOT',
-      intelPill: 'Nordic Design · 3d Overdue Follow-up',
-      whyPoints: ['+ 3 days overdue on proposal follow-up', '+ enterprise budget €12k', '+ founder reviewed proposal'],
-      qualification: {
-        requirement: true,
-        budget: '€12,000',
-        timeline: '14 days',
-        decisionMaker: true
-      },
-      nextAction: 'ping Elena regarding tailored proposal feedback',
-      aiAlert: {
-        isPaused: true,
-        reason: 'AI paused: overdue follow-up on customized commercial contract.',
-        confidence: 'high'
-      },
-      messages: [
-        {
-          id: 'm-e1',
-          sender: 'agent',
-          senderName: 'You',
-          text: 'Hi Elena, I sent over the updated Nordic Space workflow proposal on Friday. Did you get a chance to review?',
-          time: 'Friday 4:30 PM'
-        },
-        {
-          id: 'm-e2',
-          sender: 'customer',
-          senderName: 'Elena',
-          text: 'Hi! Yes, reviewing with our CFO this afternoon. Can we talk at 3 PM CET?',
-          time: '12:05 PM'
-        }
-      ],
-      assignedTo: 'Rahul — Sales',
-      leadReferenceId: 'lead-elena'
-    },
-
-    // 4. Marcus Vance - Ready to Book Call (Apex Velocity)
-    {
-      id: 'convo-marcus',
-      name: 'Marcus Vance',
-      company: 'Apex Velocity',
-      location: 'Singapore',
-      time: '35m',
-      timestampRaw: Date.now() - 35 * 60 * 1000,
-      channel: 'LinkedIn',
-      status: 'needs_you',
-      readyToBookCall: true,
-      snippet: 'Ready to book: Requested demo slot for engineering team of 18.',
-      stage: 'Engaged',
-      score: 87,
-      temperature: 'HOT',
-      intelPill: 'Apex Velocity · Ready to Book Demo',
-      whyPoints: ['+ confirmed engineering budget $10k', '+ ready to schedule walkthrough', '+ 18 engineers'],
-      qualification: {
-        requirement: true,
-        budget: '$10,000/mo',
-        timeline: 'Immediate',
-        decisionMaker: true
-      },
-      nextAction: 'send calendar booking link',
-      aiAlert: {
-        isPaused: true,
-        reason: 'Prospect ready to book: clinical lead requested calendar booking.',
-        confidence: 'high'
-      },
-      messages: [
-        {
-          id: 'm-m1',
-          sender: 'customer',
-          senderName: 'Marcus',
-          text: 'Hi team, our engineering managers checked your system and want a tailored 20-min live demo.',
-          time: '1:12 PM'
-        },
-        {
-          id: 'm-m2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Delighted to hear that Marcus! We have slots open today and tomorrow afternoon.',
-          time: '1:14 PM'
-        },
-        {
-          id: 'm-m3',
-          sender: 'customer',
-          senderName: 'Marcus',
-          text: 'Great, please drop your calendar link here and I will book 3 PM.',
-          time: '1:25 PM'
-        }
-      ],
-      assignedTo: 'Priya — AE',
-      leadReferenceId: 'lead-marcus'
-    },
-
-    // 5. Dr. Ananya Sen - Overdue Follow-up (Nura Wellness)
-    {
-      id: 'convo-ananya',
-      name: 'Dr. Ananya Sen',
-      company: 'Nura Wellness',
-      location: 'Bengaluru',
-      time: '1d',
-      timestampRaw: Date.now() - 24 * 60 * 60 * 1000,
-      channel: 'WhatsApp',
-      status: 'needs_you',
-      isOverdueFollowUp: true,
-      overdueText: '2 days overdue',
-      snippet: 'Pending HIPAA & Indian DPDP compliance verification check.',
-      stage: 'Engaged',
-      score: 79,
-      temperature: 'WARM',
-      intelPill: 'Nura Wellness · 2d Overdue',
-      whyPoints: ['+ clinical compliance questions', '+ 2 clinics in Bengaluru', '+ timeline Q4 rollout'],
-      qualification: {
-        requirement: true,
-        budget: '₹3L',
-        timeline: '45 days',
-        decisionMaker: false
-      },
-      nextAction: 'share DPDP compliance certificate & security whitepaper',
-      aiAlert: {
-        isPaused: true,
-        reason: 'Compliance qualification requires certified officer sign-off.',
-        confidence: 'medium'
-      },
-      messages: [
-        {
-          id: 'm-a1',
-          sender: 'customer',
-          senderName: 'Dr. Ananya',
-          text: 'Hello. Does your WhatsApp automation comply with Indian DPDP Act standards for medical clinics?',
-          time: 'Yesterday'
-        }
-      ],
-      assignedTo: 'Sarah — Solutions',
-      leadReferenceId: 'lead-ananya'
-    },
-
-    // 6. Vikram Mehta - AI Handling (Mehta FinTech)
-    {
-      id: 'convo-vikram',
-      name: 'Vikram Mehta',
-      company: 'Mehta FinTech',
-      location: 'Mumbai',
-      time: '1h',
-      timestampRaw: Date.now() - 60 * 60 * 1000,
-      channel: 'WhatsApp',
-      status: 'ai_handling',
-      snippet: 'AI qualified prospect: ₹10L budget, 60 days timeline, founder lead.',
-      stage: 'Qualified',
-      score: 94,
-      temperature: 'HOT',
-      intelPill: 'Mehta FinTech · AI Automated Qualification',
-      whyPoints: ['+ verified founder', '+ ₹10L budget stated', '+ automated qualification complete'],
-      qualification: {
-        requirement: true,
-        budget: '₹10L',
-        timeline: '60 days',
-        decisionMaker: true
-      },
-      nextAction: 'prepare executive walkthrough for next week',
-      aiAlert: undefined,
-      messages: [
-        {
-          id: 'm-v1',
-          sender: 'customer',
-          senderName: 'Vikram',
-          text: 'Hi, we are building a private wealth advisory and need quiet CRM tools.',
-          time: '12:30 PM'
-        },
-        {
-          id: 'm-v2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Welcome Vikram! We serve leading boutique wealth firms. What team size are you planning for?',
-          time: '12:31 PM'
-        },
-        {
-          id: 'm-v3',
-          sender: 'customer',
-          senderName: 'Vikram',
-          text: 'Around 25 advisors across Mumbai and Surat.',
-          time: '12:35 PM'
-        },
-        {
-          id: 'm-v4',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Perfect. Our Enterprise tier includes end-to-end data residency in Mumbai. I have noted this on your file.',
-          time: '12:36 PM'
-        }
-      ],
-      assignedTo: 'Rahul — Sales',
-      leadReferenceId: 'lead-vikram'
-    },
-
-    // 7. Priya Nair - AI Handling (Studio Form & Light)
-    {
-      id: 'convo-priya',
-      name: 'Priya Nair',
-      company: 'Studio Form & Light',
-      location: 'Kochi',
-      time: '3h',
-      timestampRaw: Date.now() - 180 * 60 * 1000,
-      channel: 'Instagram',
-      status: 'ai_handling',
-      snippet: 'AI answered portfolio syndication queries; scheduled follow-up for Tuesday.',
-      stage: 'Contacted',
-      score: 84,
-      temperature: 'WARM',
-      intelPill: 'Form & Light · Instagram Inquiry',
-      whyPoints: ['+ architectural studio lead', '+ interested in asset syndication', '+ responsive to AI'],
-      qualification: {
-        requirement: true,
-        budget: '₹2.5L',
-        timeline: '30 days',
-        decisionMaker: true
-      },
-      nextAction: 'automated follow-up Tuesday 10 AM',
-      aiAlert: undefined,
-      messages: [
-        {
-          id: 'm-p1',
-          sender: 'customer',
-          senderName: 'Priya',
-          text: 'Hey! Loved your recent post about quiet aesthetics. How does your studio sync work?',
-          time: '10:05 AM'
-        },
-        {
-          id: 'm-p2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Hello Priya! We sync your creative assets across Instagram, LinkedIn, and WhatsApp without manual export steps.',
-          time: '10:07 AM'
-        }
-      ],
-      assignedTo: 'Sarah — Solutions',
-      leadReferenceId: 'lead-priya'
-    },
-
-    // 8. Carlos Mendes - Closed / Resolved (Iberia Mobility)
-    {
-      id: 'convo-carlos',
-      name: 'Carlos Mendes',
-      company: 'Iberia Mobility',
-      location: 'Madrid',
-      time: '1d',
-      timestampRaw: Date.now() - 26 * 60 * 60 * 1000,
-      channel: 'Website',
-      status: 'closed',
-      snippet: 'Contract executed: Signed 12-month enterprise subscription.',
-      stage: 'Won',
-      score: 98,
-      temperature: 'HOT',
-      intelPill: 'Iberia Mobility · Deal Closed',
-      whyPoints: ['+ annual contract signed', '+ €18,000 ARR', '+ onboarded via European datacenter'],
-      qualification: {
-        requirement: true,
-        budget: '€18,000/yr',
-        timeline: 'Closed',
-        decisionMaker: true
-      },
-      nextAction: 'hand off to Customer Success team',
-      aiAlert: undefined,
-      messages: [
-        {
-          id: 'm-c1',
-          sender: 'customer',
-          senderName: 'Carlos',
-          text: 'Docusign completed and countersigned. Looking forward to kick-off!',
-          time: 'Yesterday 5:20 PM'
-        },
-        {
-          id: 'm-c2',
-          sender: 'agent',
-          senderName: 'You',
-          text: 'Thank you Carlos! Your onboarding engineer will reach out at 10:00 AM CET.',
-          time: 'Yesterday 5:25 PM'
-        }
-      ],
-      assignedTo: 'Rahul — Sales',
-      leadReferenceId: 'lead-carlos'
-    },
-
-    // 9. Sophie Dubois - Closed / Resolved (Lumière Atelier)
-    {
-      id: 'convo-sophie',
-      name: 'Sophie Dubois',
-      company: 'Lumière Atelier',
-      location: 'Paris',
-      time: '3d',
-      timestampRaw: Date.now() - 72 * 60 * 60 * 1000,
-      channel: 'Instagram',
-      status: 'closed',
-      snippet: 'Resolved: Self-served starter plan through web checkout.',
-      stage: 'Won',
-      score: 82,
-      temperature: 'WARM',
-      intelPill: 'Lumière Atelier · Starter Checkout',
-      whyPoints: ['+ self-serve starter checkout', '+ €450/mo active', '+ automated onboarding email sent'],
-      qualification: {
-        requirement: true,
-        budget: '€450/mo',
-        timeline: 'Closed',
-        decisionMaker: true
-      },
-      nextAction: 'monitor 30-day usage health',
-      aiAlert: undefined,
-      messages: [
-        {
-          id: 'm-s1',
-          sender: 'customer',
-          senderName: 'Sophie',
-          text: 'Thank you for answering my questions earlier. Upgraded through your link!',
-          time: 'Oct 14'
-        }
-      ],
-      assignedTo: 'Priya — AE',
-      leadReferenceId: 'lead-sophie'
-    },
-
-    // 10. David Chen - AI Handling (Vanguard Architectural Group)
-    {
-      id: 'convo-david',
-      name: 'David Chen',
-      company: 'Vanguard Architectural Group',
-      location: 'Vancouver',
-      time: '4h',
-      timestampRaw: Date.now() - 240 * 60 * 1000,
-      channel: 'Website',
-      status: 'ai_handling',
-      snippet: 'AI shared architectural whitepaper and studio case study.',
-      stage: 'Qualified',
-      score: 91,
-      temperature: 'HOT',
-      intelPill: 'Vanguard Arch · Whitepaper Shared',
-      whyPoints: ['+ downloaded architectural case study', '+ 4 partner studios', '+ budget confirmed $8k/mo'],
-      qualification: {
-        requirement: true,
-        budget: '$8,000/mo',
-        timeline: '30 days',
-        decisionMaker: true
-      },
-      nextAction: 'schedule follow-up with partner group',
-      aiAlert: undefined,
-      messages: [
-        {
-          id: 'm-j1',
-          sender: 'customer',
-          senderName: 'David',
-          text: 'Hello, our architecture team is reviewing quiet CRM workflows for our studio.',
-          time: '9:45 AM'
-        },
-        {
-          id: 'm-j2',
-          sender: 'ai',
-          senderName: 'AI',
-          text: 'Welcome David! We specialize in low-latency asset syndication and client portal generation.',
-          time: '9:47 AM'
-        },
-        {
-          id: 'm-j3',
-          sender: 'customer',
-          senderName: 'David',
-          text: 'Thanks, that documentation helps. Let me circle back with our technical lead.',
-          time: '9:50 AM'
-        }
-      ],
-      assignedTo: 'Sarah — Solutions',
-      leadReferenceId: 'lead-vanguard'
-    }
-  ]);
-
-  // Selected conversation
-  const [selectedConvoId, setSelectedConvoId] = useState<string>('convo-rahul');
-
-  // Active reply text
-  const [replyInput, setReplyInput] = useState('');
-
-  // Assign dropdown state in center panel
-  const [showAssignMenu, setShowAssignMenu] = useState(false);
-
-  // Filtered list with status tab, channel, search, special intent filters, and sorting
+  // Filtered & Sorted conversations
   const filteredConversations = useMemo(() => {
-    let list = conversations.filter(c => {
-      // Special intent filters from Overview Needs You section
+    return conversations.filter(c => {
+      // 1. Tab filter
+      if (activeTab === 'needs_you') {
+        if (c.status !== 'needs_you') return false;
+      } else if (activeTab === 'ai_handling') {
+        if (c.status !== 'ai_handling') return false;
+      } else if (activeTab === 'closed') {
+        if (c.status !== 'closed') return false;
+      } else if (activeTab === 'all') {
+        if (c.status === 'closed') return false;
+      }
+
+      // 2. Special filter from Overview
       if (specialFilter === 'overdue-followups' && !c.isOverdueFollowUp) return false;
       if (specialFilter === 'asked-pricing' && !c.askedForPricing) return false;
       if (specialFilter === 'ready-to-book' && !c.readyToBookCall) return false;
       if (specialFilter === 'waiting-human' && !c.waitingForHuman) return false;
 
-      // Status tab filter
-      if (specialFilter === 'all') {
-        if (activeTab === 'needs_you' && c.status !== 'needs_you') return false;
-        if (activeTab === 'ai_handling' && c.status !== 'ai_handling') return false;
-        if (activeTab === 'closed' && c.status !== 'closed') return false;
-      }
-
-      // Channel filter
+      // 3. Channel filter
       if (channelFilter !== 'All' && c.channel !== channelFilter) return false;
 
-      // Assignee filter
-      if (assigneeFilter !== 'All' && !c.assignedTo.includes(assigneeFilter)) return false;
+      // 4. Assignee filter
+      if (assigneeFilter !== 'All' && !c.assignedTo.toLowerCase().includes(assigneeFilter.toLowerCase())) return false;
 
-      // Search query
+      // 5. Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesName = c.name.toLowerCase().includes(q);
-        const matchesCompany = c.company.toLowerCase().includes(q);
-        const matchesSnippet = c.snippet.toLowerCase().includes(q);
-        if (!matchesName && !matchesCompany && !matchesSnippet) return false;
+        const matchName = c.name.toLowerCase().includes(q);
+        const matchCompany = c.company.toLowerCase().includes(q);
+        const matchSnippet = c.snippet.toLowerCase().includes(q);
+        const matchMsg = c.messages.some(m => m.text.toLowerCase().includes(q));
+        if (!matchName && !matchCompany && !matchSnippet && !matchMsg) return false;
       }
 
       return true;
+    }).sort((a, b) => {
+      if (sortBy === 'oldest_waiting') {
+        const tA = a.timestampRaw || 0;
+        const tB = b.timestampRaw || 0;
+        return tA - tB;
+      }
+      if (sortBy === 'score') {
+        return b.score - a.score;
+      }
+      const tA = a.timestampRaw || 0;
+      const tB = b.timestampRaw || 0;
+      return tB - tA;
     });
+  }, [conversations, activeTab, specialFilter, channelFilter, assigneeFilter, searchQuery, sortBy]);
 
-    // Apply sorting
-    if (sortBy === 'score') {
-      list = [...list].sort((a, b) => b.score - a.score);
-    } else if (sortBy === 'oldest_waiting') {
-      list = [...list].sort((a, b) => (a.timestampRaw || 0) - (b.timestampRaw || 0));
-    } else {
-      // 'newest' default
-      list = [...list].sort((a, b) => (b.timestampRaw || 0) - (a.timestampRaw || 0));
-    }
-
-    return list;
-  }, [conversations, activeTab, channelFilter, searchQuery, specialFilter, sortBy, assigneeFilter]);
-
-  // Current selected conversation
+  // Active selected conversation
   const currentConvo = useMemo(() => {
-    return filteredConversations.find(c => c.id === selectedConvoId) || filteredConversations[0] || conversations[0];
+    return conversations.find(c => c.id === selectedConvoId) || filteredConversations[0] || conversations[0];
   }, [conversations, selectedConvoId, filteredConversations]);
 
-  // Update selected conversation when filter switches
-  useEffect(() => {
-    if (specialFilter !== 'all' && filteredConversations.length > 0) {
-      if (!filteredConversations.some(c => c.id === selectedConvoId)) {
-        setSelectedConvoId(filteredConversations[0].id);
-      }
-    }
-  }, [specialFilter, filteredConversations, selectedConvoId]);
-
-  // Needs you count
-  const needsYouCount = useMemo(() => {
-    return conversations.filter(c => c.status === 'needs_you').length;
-  }, [conversations]);
-
-  // Message history container ref and scroll handling
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const prevConvoIdRef = useRef<string | null>(null);
-  const prevMessageCountRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (!currentConvo) return;
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const isNewConversation = prevConvoIdRef.current !== currentConvo.id;
-    const currentCount = currentConvo.messages.length;
-    const hasNewMessage = currentCount > prevMessageCountRef.current;
-
-    if (isNewConversation) {
-      container.scrollTop = container.scrollHeight;
-      prevConvoIdRef.current = currentConvo.id;
-      prevMessageCountRef.current = currentCount;
-    } else if (hasNewMessage) {
-      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 180;
-      if (isNearBottom) {
-        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-      }
-      prevMessageCountRef.current = currentCount;
-    }
-  }, [currentConvo?.id, currentConvo?.messages]);
-
-  // Handle Send Reply
-  const handleSendReply = (customText?: string) => {
-    const textToSend = (customText || replyInput).trim();
-    if (!textToSend || !currentConvo) return;
-
-    const newMsg = {
-      id: `m-${Date.now()}`,
-      sender: 'agent' as const,
-      senderName: 'You',
-      text: textToSend,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          messages: [...c.messages, newMsg],
-          snippet: textToSend.slice(0, 52) + (textToSend.length > 52 ? '...' : ''),
-          time: 'Just now',
-          timestampRaw: Date.now(),
-          status: 'needs_you'
-        };
-      }
-      return c;
-    }));
-
-    setReplyInput('');
-    if (onNotify) onNotify('Message Sent', `Dispatched reply to ${currentConvo.name} via ${currentConvo.channel}.`);
-    
-    setTimeout(() => {
-      if (messagesContainerRef.current) {
-        messagesContainerRef.current.scrollTo({ top: messagesContainerRef.current.scrollHeight, behavior: 'smooth' });
-      }
-    }, 50);
+  // When selected conversation changes
+  const handleSelectConversation = (id: string) => {
+    setSelectedConvoId(id);
+    setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: false } : c));
+    setMobileView('chat');
   };
 
-  // Handle Take Over
-  const handleTakeOver = () => {
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          status: 'needs_you',
-          aiAlert: {
-            isPaused: true,
-            reason: 'Human agent active: AI auto-responder paused.',
-            confidence: 'low'
-          }
-        };
-      }
-      return c;
-    }));
-    if (onNotify) onNotify('Conversation Taken Over', 'AI paused. You are now actively handling this prospect.');
-  };
+  // Reply handler: logic fix sets status to 'waiting_on_customer', clears waitingForHuman and askedForPricing
+  const handleSendMessage = () => {
+    const trimmed = replyInput.trim();
+    if (!trimmed && attachedFiles.length === 0) return;
 
-  // Handle Hand Back to AI
-  const handleHandBack = () => {
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          status: 'ai_handling',
-          aiAlert: undefined
-        };
-      }
-      return c;
-    }));
-    if (onNotify) onNotify('Handed to AI', 'AI auto-responder has resumed for this conversation.');
-  };
+    const textToSend = trimmed || (attachedFiles.length > 0 ? `Sent attachment: ${attachedFiles.map(f => f.name).join(', ')}` : '');
 
-  // Handle Dismiss AI Alert Banner / Tab
-  const handleDismissAlert = () => {
-    if (!currentConvo) return;
-    setDismissedAlerts(prev => ({ ...prev, [currentConvo.id]: true }));
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id && c.aiAlert) {
-        return {
-          ...c,
-          aiAlert: undefined
-        };
-      }
-      return c;
-    }));
-    if (onNotify) onNotify('Notice Closed', 'AI alert banner dismissed.');
-  };
-
-  // Handle Toggle Closed / Resolved
-  const handleToggleClosed = () => {
-    if (!currentConvo) return;
-    const isNowClosed = currentConvo.status !== 'closed';
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          status: isNowClosed ? 'closed' : 'needs_you'
-        };
-      }
-      return c;
-    }));
-    if (onNotify) {
-      onNotify(
-        isNowClosed ? 'Conversation Resolved' : 'Conversation Reopened',
-        `${currentConvo.name} moved to ${isNowClosed ? 'Closed' : 'Needs Attention'}.`
-      );
-    }
-  };
-
-  // Handle Assign
-  const handleAssign = (agentName: string) => {
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          assignedTo: agentName
-        };
-      }
-      return c;
-    }));
-    setShowAssignMenu(false);
-    if (onNotify) onNotify('Assigned', `Conversation assigned to ${agentName}.`);
-  };
-
-  // Handle Stage Change
-  const handleStageChange = (newStage: string) => {
-    setConversations(prev => prev.map(c => {
-      if (c.id === currentConvo.id) {
-        return {
-          ...c,
-          stage: newStage
-        };
-      }
-      return c;
-    }));
-    if (onNotify) onNotify('Stage Updated', `${currentConvo.name} moved to ${newStage}.`);
-  };
-
-  // Handle Open Lead in workspace drawer
-  const handleOpenLead = () => {
-    if (!onSelectLead || !currentConvo) return;
-    const matchingLead = leads.find(l => 
-      (currentConvo.leadReferenceId && l.id === currentConvo.leadReferenceId) ||
-      l.name.toLowerCase() === currentConvo.name.toLowerCase() ||
-      l.company.toLowerCase() === currentConvo.company.toLowerCase()
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id === currentConvo?.id) {
+          return {
+            ...c,
+            status: 'waiting_on_customer',
+            waitingForHuman: false,
+            askedForPricing: false,
+            snippet: textToSend,
+            unread: false,
+            messages: [
+              ...c.messages,
+              {
+                id: `m-${Date.now()}`,
+                sender: 'agent',
+                senderName: 'You',
+                text: textToSend,
+                time: 'Just now'
+              }
+            ]
+          };
+        }
+        return c;
+      })
     );
 
-    if (matchingLead) {
-      onSelectLead(matchingLead);
+    setReplyInput('');
+    setAttachedFiles([]);
+    if (onNotify) {
+      onNotify('Reply Dispatched', `Message sent to ${currentConvo?.name || 'customer'}.`);
+    }
+  };
+
+  // Attachment helpers
+  const handleAttachFile = () => {
+    if (attachedFiles.some(f => f.name === 'Commercial_Pricing_Sheet.pdf')) {
+      setAttachedFiles(prev => [...prev, { name: 'Technical_Specifications.pdf', size: '850 KB' }]);
     } else {
-      const dynamicLead: Lead = {
-        id: currentConvo.id,
-        name: currentConvo.name,
-        company: currentConvo.company,
-        location: currentConvo.location,
-        email: `${currentConvo.name.toLowerCase().replace(' ', '.')}@${currentConvo.company.toLowerCase().replace(' ', '')}.com`,
-        phone: '+91 98201 44820',
-        title: 'Decision Maker & Operations Lead',
-        source: currentConvo.channel,
-        score: currentConvo.score,
-        temperature: currentConvo.temperature,
-        stage: currentConvo.stage as any,
-        status: currentConvo.stage === 'Qualified' ? 'Qualified' : 'Engaged',
-        value: currentConvo.qualification.budget,
-        budget: currentConvo.qualification.budget,
-        timeline: currentConvo.qualification.timeline,
-        requirement: currentConvo.snippet,
-        assignee: { name: currentConvo.assignedTo, role: 'Sales' },
-        tag: 'Priority',
-        isPriority: currentConvo.temperature === 'HOT',
-        decisionMaker: currentConvo.qualification.decisionMaker,
-        date: 'Today',
-        lastActivity: currentConvo.time
-      };
-      onSelectLead(dynamicLead);
+      setAttachedFiles(prev => [...prev, { name: 'Commercial_Pricing_Sheet.pdf', size: '1.2 MB' }]);
     }
   };
 
-  // Clean initials helper
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
+  const removeAttachment = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Score badge helper (green >= 90, yellow 80-89, red < 80)
-  const getScoreBadge = (score: number) => {
-    if (score >= 90) {
-      return {
-        text: 'text-emerald-700 dark:text-emerald-400',
-        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40',
-        dot: 'bg-emerald-500'
-      };
+  // Suggestion chip: Pricing Deck inserts clean sentence and adds file chip preview
+  const handleInsertPricingDeck = () => {
+    setReplyInput("I've attached our commercial pricing sheet and enterprise tier breakdown for your review.");
+    setAttachedFiles([{ name: 'Commercial_Pricing_Sheet.pdf', size: '1.2 MB' }]);
+  };
+
+  const handleInsertBookCall = () => {
+    setReplyInput("Let's schedule a 20-minute discovery call to walk through your requirements. What time works best for you this week?");
+  };
+
+  const handleInsertProposal = () => {
+    setReplyInput("I've prepared a tailored studio proposal based on your specifications.");
+    setAttachedFiles([{ name: 'Studio_Proposal_Overview.pdf', size: '2.4 MB' }]);
+  };
+
+  // Actions
+  const handleTakeover = () => {
+    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, aiAlert: undefined } : c));
+    if (onNotify) onNotify('Human Takeover', 'AI paused. You now have full manual control.');
+  };
+
+  const handleResumeAI = () => {
+    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? {
+      ...c,
+      status: 'ai_handling',
+      aiAlert: undefined,
+      waitingForHuman: false,
+      askedForPricing: false
+    } : c));
+    if (onNotify) onNotify('AI Resumed', `${BRAND_NAME} autonomous AI resumed handling.`);
+  };
+
+  const handleMarkResolved = () => {
+    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? {
+      ...c,
+      status: 'closed',
+      waitingForHuman: false,
+      askedForPricing: false
+    } : c));
+    if (onNotify) onNotify('Resolved', 'Conversation marked as resolved and moved to Closed.');
+  };
+
+  const handleAssign = (member: string) => {
+    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, assignedTo: member } : c));
+    setShowAssignMenu(false);
+    if (onNotify) onNotify('Assigned', `Conversation assigned to ${member}.`);
+  };
+
+  const handleSnooze = (period: string) => {
+    setShowSnoozeMenu(false);
+    if (onNotify) onNotify('Snoozed', `Conversation snoozed until ${period}.`);
+  };
+
+  const handleStageChange = (newStage: string) => {
+    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, stage: newStage } : c));
+    if (onNotify) onNotify('Stage Updated', `Pipeline stage moved to ${newStage}.`);
+  };
+
+  const handleOpenLead = () => {
+    if (!currentConvo || !onSelectLead) return;
+
+    // 1. Match by leadReferenceId === lead.id
+    let match = currentConvo.leadReferenceId
+      ? leads.find(l => l.id === currentConvo.leadReferenceId)
+      : undefined;
+
+    // 2. Exact email match (if conversation has an email)
+    if (!match && (currentConvo as any).email) {
+      const convoEmail = String((currentConvo as any).email).trim().toLowerCase();
+      match = leads.find(l => l.email && l.email.trim().toLowerCase() === convoEmail);
     }
-    if (score >= 80) {
-      return {
-        text: 'text-amber-700 dark:text-amber-400',
-        bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40',
-        dot: 'bg-amber-500'
-      };
+
+    // 3. BOTH name and company matching (case-insensitive). Never match on company alone.
+    if (!match && currentConvo.name && currentConvo.company) {
+      const cName = currentConvo.name.trim().toLowerCase();
+      const cComp = currentConvo.company.trim().toLowerCase();
+      match = leads.find(l =>
+        l.name.trim().toLowerCase() === cName &&
+        l.company.trim().toLowerCase() === cComp
+      );
     }
-    return {
-      text: 'text-rose-700 dark:text-rose-400',
-      bg: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/40',
-      dot: 'bg-rose-500'
+
+    if (match) {
+      onSelectLead(match);
+      return;
+    }
+
+    // If nothing matches, build a lead from only the fields the conversation really has
+    // (name, company, location, channel as source, score, temperature, stage, qualification budget/timeline/decisionMaker, assignedTo).
+    // Leave email, phone and title undefined. Do not invent them.
+    const builtLead: Lead = {
+      id: currentConvo.leadReferenceId || `lead-${currentConvo.id}`,
+      name: currentConvo.name,
+      company: currentConvo.company,
+      location: currentConvo.location || undefined,
+      source: (currentConvo.channel as any) || 'Direct',
+      score: currentConvo.score ?? 50,
+      temperature: currentConvo.temperature,
+      stage: (currentConvo.stage as any) || 'New',
+      status: (currentConvo.stage as any) || 'New',
+      value: currentConvo.qualification?.budget || '₹0',
+      lastActivity: currentConvo.time || 'Just now',
+      budget: currentConvo.qualification?.budget,
+      timeline: currentConvo.qualification?.timeline,
+      decisionMaker: currentConvo.qualification?.decisionMaker,
+      assignee: currentConvo.assignedTo ? {
+        name: currentConvo.assignedTo,
+        role: 'Sales Representative'
+      } : undefined,
+      email: undefined,
+      phone: undefined,
+      title: undefined
     };
+
+    onSelectLead(builtLead);
   };
 
-  // Channel badge colors
-  const getChannelColor = (channel: string) => {
-    switch (channel) {
-      case 'WhatsApp':
-        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/40';
-      case 'Instagram':
-        return 'text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/40 border-pink-200 dark:border-pink-800/40';
-      case 'LinkedIn':
-        return 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800/40';
-      default:
-        return 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 border-teal-200 dark:border-teal-800/40';
-    }
-  };
+  // Qualification verified count
+  const verifiedCount = useMemo(() => {
+    if (!currentConvo) return 0;
+    let count = 0;
+    if (currentConvo.qualification.requirement) count++;
+    if (currentConvo.qualification.budget && currentConvo.qualification.budget !== 'Unspecified') count++;
+    if (currentConvo.qualification.timeline && currentConvo.qualification.timeline !== 'Unknown') count++;
+    if (currentConvo.qualification.decisionMaker) count++;
+    return count;
+  }, [currentConvo]);
+
+  // First-run empty state
+  if (isFirstRun) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6 bg-canvas">
+        <EmptyState
+          icon={<MessageSquare className="w-8 h-8 text-brand" />}
+          title="No active conversations"
+          description="Connect a channel to begin receiving WhatsApp, Instagram, or Website leads."
+          action={
+            <Button variant="primary" size="sm" onClick={onNavigateSettings}>
+              Connect channel
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  const specialFilterLabel = 
+    specialFilter === 'waiting-human' ? 'Waiting for human' :
+    specialFilter === 'overdue-followups' ? 'Overdue follow-ups' :
+    specialFilter === 'asked-pricing' ? 'Asked for pricing' :
+    specialFilter === 'ready-to-book' ? 'Ready to book a call' : '';
 
   return (
-    <div className={`w-full flex-1 min-h-0 flex flex-col gap-3 animate-fadeIn overflow-hidden select-text ${
-      isLight ? 'text-slate-900' : 'text-[#E8E9D8]'
-    }`}>
+    <div className="flex-1 min-h-0 flex flex-row overflow-hidden bg-canvas text-ink select-text">
       
-      {/* First-Run Empty State (when isFirstRun is active) */}
-      {isFirstRun && (
-        <div className={`p-8 sm:p-12 rounded-xl border text-center space-y-4 max-w-lg mx-auto my-6 animate-fadeIn shadow-sm ${
-          isLight
-            ? 'bg-white border-slate-200'
-            : 'bg-[#061816] border-teal-500/30'
-        }`}>
-          <div className="w-12 h-12 rounded-full bg-teal-50 border border-teal-200/60 dark:bg-teal-950/40 dark:border-teal-800/40 flex items-center justify-center mx-auto text-teal-600 dark:text-teal-400">
-            <MessageSquare className="w-6 h-6" />
-          </div>
-          <div className="space-y-1.5">
-            <h3 className={`text-xl font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-              No conversations yet
-            </h3>
-            <p className={`text-xs max-w-sm mx-auto leading-relaxed ${
-              isLight ? 'text-slate-500' : 'text-[#A9BFA5]'
-            }`}>
-              When customers message your connected WhatsApp, Instagram, or Website channels, conversations flow into this unified inbox.
-            </p>
-          </div>
-          <div>
-            <button
-              type="button"
-              id="inbox-connect-channel-btn"
-              onClick={() => {
-                if (onNavigateSettings) onNavigateSettings();
-                else onNavigateSub('conversation');
-              }}
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-xs"
-            >
-              <span>Connect Channels in Settings</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          UNIFIED THREE-PANEL WORKSPACE (Full Height)
-          - Left Panel: Conversations list, search, tabs, filters, sorting
-          - Center Panel: Active conversation workspace
-          - Right Panel: Prospect details & qualification (collapsible)
-         ======================================================== */}
-      <div className={`flex flex-col lg:flex-row flex-1 min-h-0 w-full rounded-xl border overflow-hidden transition-colors ${
-        isLight
-          ? 'bg-white border-slate-200/90 shadow-2xs'
-          : 'bg-[#071C1A] border-[rgba(169,191,165,0.18)] shadow-md'
+      {/* =========================================================================
+          PANEL 1: CONVERSATION LIST (LEFT)
+          ========================================================================= */}
+      <div className={`w-full md:w-80 lg:w-96 shrink-0 border-r border-line bg-surface flex flex-col h-full ${
+        mobileView === 'list' ? 'flex' : 'hidden md:flex'
       }`}>
         
-        {/* ========================================================
-            PANEL 1: CONVERSATION LIST (LEFT COLUMN)
-           ======================================================== */}
-        <div className={`${
-          mobileView === 'list' ? 'flex' : 'hidden'
-        } lg:flex w-full lg:w-[310px] xl:w-[330px] shrink-0 h-full min-h-0 border-b lg:border-b-0 lg:border-r flex-col overflow-hidden transition-colors ${
-          isLight
-            ? 'bg-white border-slate-200/90'
-            : 'bg-[#051614] border-[rgba(169,191,165,0.18)]'
-        }`}>
-          
-          {/* Conversations Panel Header & Controls */}
-          <div className={`p-3 border-b space-y-2.5 shrink-0 ${
-            isLight
-              ? 'bg-slate-50/70 border-slate-200/80'
-              : 'bg-[#041210] border-[rgba(169,191,165,0.14)]'
-          }`}>
-            
-            {/* Conversations Title Row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <h1 className={`text-sm font-bold tracking-tight ${
-                  isLight ? 'text-slate-900' : 'text-white'
-                }`}>
-                  Conversations
-                </h1>
-                <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-semibold ${
-                  isLight ? 'bg-slate-200/70 text-slate-700' : 'bg-slate-800 text-slate-300'
-                }`}>
-                  {filteredConversations.length}
+        {/* Top Header: Tabs */}
+        <div className="p-3 pb-2 border-b border-line-subtle space-y-2">
+          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-surface-raised border border-line-subtle text-xs font-medium">
+            {[
+              { id: 'needs_you', label: 'Needs you', count: tabCounts.needs_you },
+              { id: 'all', label: 'All', count: tabCounts.all },
+              { id: 'ai_handling', label: 'AI', count: tabCounts.ai_handling },
+              { id: 'closed', label: 'Resolved', count: tabCounts.closed }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id as InboxFilterTab);
+                  setSpecialFilter('all');
+                }}
+                className={`flex-1 min-h-7! rounded-md! py-1 px-1.5 flex items-center justify-center transition-colors cursor-pointer text-xs focus-visible:outline-none ${
+                  activeTab === tab.id && specialFilter === 'all'
+                    ? 'bg-surface text-ink font-semibold shadow-xs'
+                    : 'bg-transparent text-ink-3 hover:text-ink'
+                }`}
+              >
+                <span className="truncate">{tab.label}</span>
+                <span className="ml-1 text-xs tabular-nums font-semibold px-1 py-0.2 rounded-full bg-surface-raised text-ink-3">
+                  {tab.count}
                 </span>
-              </div>
+              </button>
+            ))}
+          </div>
 
-              {needsYouCount > 0 ? (
-                <span className="text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40 px-2 py-0.5 rounded-full shrink-0">
-                  {needsYouCount} pending
-                </span>
-              ) : (
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1">
-                  <Check className="w-3 h-3" />
-                  <span>Caught up</span>
-                </span>
+          {/* Search bar + filter popover button */}
+          <div className="flex items-center gap-1.5 relative">
+            <div className="relative flex-1">
+              <Search className="w-3.5 h-3.5 text-ink-3 absolute left-2.5 top-2.5 pointer-events-none" />
+              <input
+                type="text"
+                aria-label="Search conversations"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg bg-surface border border-line-subtle text-ink placeholder:text-ink-3 focus-visible:outline-none focus:border-brand"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-2 text-ink-3 hover:text-ink cursor-pointer p-0.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               )}
             </div>
 
-            {/* Search Box + Secondary Filter Popover Trigger */}
-            <div className="flex items-center space-x-1.5 relative">
-              <div className="relative flex-1 min-w-0">
-                <input
-                  type="text"
-                  placeholder="Search conversations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full text-xs px-2.5 py-1.5 pl-8 pr-7 rounded-lg border focus:outline-none transition-all ${
-                    isLight
-                      ? 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-teal-600 focus:ring-1 focus:ring-teal-500/20 shadow-2xs'
-                      : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-white placeholder-[#A9BFA5]/50 focus:border-teal-400'
-                  }`}
-                />
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2 pointer-events-none" />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+            <button
+              type="button"
+              aria-label="Filter conversations"
+              onClick={() => setShowFilterPopover(prev => !prev)}
+              className={`p-1.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                channelFilter !== 'All' || assigneeFilter !== 'All' || sortBy !== 'newest'
+                  ? 'bg-brand-soft border-brand text-brand font-semibold'
+                  : 'bg-surface border-line-subtle text-ink-2 hover:bg-surface-hover'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+            </button>
 
-              {/* Single Filter Icon Button that opens Secondary Filters Popover */}
-              <div className="relative" ref={filterPopoverRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowFilterPopover(!showFilterPopover)}
-                  className={`p-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer relative shrink-0 ${
-                    showFilterPopover || channelFilter !== 'All' || sortBy !== 'newest' || assigneeFilter !== 'All'
-                      ? 'bg-teal-50 text-teal-700 border-teal-300 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800'
-                      : isLight
-                      ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-[#A9BFA5] hover:text-white'
-                  }`}
-                  title="Filter & sort conversations"
-                  aria-label="Filter & sort conversations"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  {(channelFilter !== 'All' || sortBy !== 'newest' || assigneeFilter !== 'All') && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-600 absolute -top-0.5 -right-0.5 ring-1 ring-white dark:ring-black" />
-                  )}
-                </button>
-
-                {/* Secondary Filters Popover */}
-                {showFilterPopover && (
-                  <div className={`absolute right-0 mt-1.5 w-56 rounded-xl border shadow-xl p-3 z-40 text-xs space-y-3 animate-fadeIn ${
-                    isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#051816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                  }`}>
-                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
-                      <span className="font-semibold text-xs text-slate-700 dark:text-slate-200">Filters & Sort</span>
-                      {(channelFilter !== 'All' || sortBy !== 'newest' || assigneeFilter !== 'All') && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setChannelFilter('All');
-                            setSortBy('newest');
-                            setAssigneeFilter('All');
-                          }}
-                          className="text-[11px] text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
-                        >
-                          Reset
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Channel */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Channel</label>
-                      <select
-                        value={channelFilter}
-                        onChange={(e) => setChannelFilter(e.target.value as ChannelFilter)}
-                        className={`w-full text-xs p-1.5 rounded-md border focus:outline-none cursor-pointer ${
-                          isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-white'
-                        }`}
-                      >
-                        <option value="All">All Channels</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="Website">Website</option>
-                      </select>
-                    </div>
-
-                    {/* Sort Order */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Sort By</label>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        className={`w-full text-xs p-1.5 rounded-md border focus:outline-none cursor-pointer ${
-                          isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-white'
-                        }`}
-                      >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest_waiting">Oldest waiting</option>
-                        <option value="score">Priority score</option>
-                      </select>
-                    </div>
-
-                    {/* Assignee */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-medium uppercase tracking-wider text-slate-400">Assignee</label>
-                      <select
-                        value={assigneeFilter}
-                        onChange={(e) => setAssigneeFilter(e.target.value)}
-                        className={`w-full text-xs p-1.5 rounded-md border focus:outline-none cursor-pointer ${
-                          isLight ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-white'
-                        }`}
-                      >
-                        <option value="All">All Assignees</option>
-                        <option value="Rahul">Rahul — Sales</option>
-                        <option value="Sarah">Sarah — Solutions</option>
-                        <option value="Priya">Priya — AE</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Status Filter Tabs */}
-            <div className={`flex items-center space-x-1 p-0.5 rounded-lg border text-xs font-medium w-full ${
-              isLight
-                ? 'bg-slate-200/60 border-slate-200/80'
-                : 'bg-[#030E0C] border-[rgba(169,191,165,0.16)]'
-            }`}>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('needs_you');
-                  setSpecialFilter('all');
-                }}
-                className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center text-[11px] ${
-                  activeTab === 'needs_you' && specialFilter === 'all'
-                    ? isLight
-                      ? 'bg-white text-slate-900 font-semibold shadow-2xs'
-                      : 'bg-[#0E2C26] text-white font-semibold border border-teal-500/30'
-                    : isLight
-                      ? 'text-slate-600 hover:text-slate-900'
-                      : 'text-[#A9BFA5] hover:text-white'
-                }`}
-              >
-                <span>Needs You</span>
-                {needsYouCount > 0 && (
-                  <span className={`text-[9px] px-1 py-0.2 rounded-full font-bold ml-1 ${
-                    activeTab === 'needs_you'
-                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200'
-                      : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                  }`}>
-                    {needsYouCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('all');
-                  setSpecialFilter('all');
-                }}
-                className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center text-[11px] ${
-                  activeTab === 'all' && specialFilter === 'all'
-                    ? isLight
-                      ? 'bg-white text-slate-900 font-semibold shadow-2xs'
-                      : 'bg-[#0E2C26] text-white font-semibold border border-teal-500/30'
-                    : isLight
-                      ? 'text-slate-600 hover:text-slate-900'
-                      : 'text-[#A9BFA5] hover:text-white'
-                }`}
-              >
-                <span>All ({conversations.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('ai_handling');
-                  setSpecialFilter('all');
-                }}
-                className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center text-[11px] flex items-center justify-center space-x-1 ${
-                  activeTab === 'ai_handling' && specialFilter === 'all'
-                    ? isLight
-                      ? 'bg-white text-slate-900 font-semibold shadow-2xs'
-                      : 'bg-[#0E2C26] text-white font-semibold border border-teal-500/30'
-                    : isLight
-                      ? 'text-slate-600 hover:text-slate-900'
-                      : 'text-[#A9BFA5] hover:text-white'
-                }`}
-              >
-                <Bot className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                <span>AI</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('closed');
-                  setSpecialFilter('all');
-                }}
-                className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center text-[11px] ${
-                  activeTab === 'closed' && specialFilter === 'all'
-                    ? isLight
-                      ? 'bg-white text-slate-900 font-semibold shadow-2xs'
-                      : 'bg-[#0E2C26] text-white font-semibold border border-teal-500/30'
-                    : isLight
-                      ? 'text-slate-600 hover:text-slate-900'
-                      : 'text-[#A9BFA5] hover:text-white'
-                }`}
-              >
-                <span>Closed</span>
-              </button>
-            </div>
-
-            {/* Special Intent Announcement Banner (if navigated from Overview) */}
-            {specialFilter !== 'all' && (
-              <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-[11px] font-medium dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-800/60">
-                <span className="truncate">
-                  {specialFilter === 'overdue-followups' && '⚠️ Overdue Follow-ups'}
-                  {specialFilter === 'asked-pricing' && '💰 Asked for Pricing'}
-                  {specialFilter === 'ready-to-book' && '📅 Ready to Book'}
-                  {specialFilter === 'waiting-human' && '🔴 Waiting for Human'}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSpecialFilter('all')}
-                  className="ml-1 text-amber-800 hover:text-red-700 dark:text-amber-300 dark:hover:text-red-400 cursor-pointer font-bold text-xs"
-                  title="Clear filter"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Scrollable Conversation List Items */}
-          <div className={`divide-y flex-1 min-h-0 overflow-y-auto ${
-            isLight ? 'divide-slate-100' : 'divide-[rgba(169,191,165,0.08)]'
-          }`}>
-            {filteredConversations.length > 0 ? (
-              filteredConversations.map(convo => {
-                const isSelected = convo.id === currentConvo?.id;
-                const isClosed = convo.status === 'closed';
-
-                // Single compact status indicator dot
-                const statusDot = (() => {
-                  if (convo.isOverdueFollowUp) {
-                    return { className: 'bg-amber-500 ring-2 ring-amber-500/20', title: convo.overdueText || 'Overdue' };
-                  }
-                  if (convo.waitingForHuman) {
-                    return { className: 'bg-rose-500 ring-2 ring-rose-500/20', title: 'Waiting for human' };
-                  }
-                  if (convo.status === 'needs_you') {
-                    return { className: 'bg-amber-500 ring-2 ring-amber-500/20', title: 'Needs attention' };
-                  }
-                  if (isClosed) {
-                    return { className: 'bg-slate-400', title: 'Resolved' };
-                  }
-                  return { className: 'bg-teal-500 ring-2 ring-teal-500/20', title: 'AI handling' };
-                })();
-
-                return (
-                  <div
-                    key={convo.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-selected={isSelected}
-                    onClick={() => {
-                      setSelectedConvoId(convo.id);
-                      setMobileView('chat');
-                      if (convo.unread) {
-                        setConversations(prev => prev.map(c => c.id === convo.id ? { ...c, unread: false } : c));
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedConvoId(convo.id);
-                        setMobileView('chat');
-                      }
-                    }}
-                    className={`px-3.5 py-2.5 transition-colors cursor-pointer relative outline-none border-l-2 ${
-                      isSelected
-                        ? isLight
-                          ? 'bg-teal-50/70 border-l-teal-600'
-                          : 'bg-[#0B2522] border-l-teal-400'
-                        : isLight
-                          ? 'border-l-transparent hover:bg-slate-50'
-                          : 'border-l-transparent hover:bg-[#081F1C]'
-                    } ${isClosed ? 'opacity-75' : ''}`}
-                  >
-                    {/* Top Row: Name + single compact status indicator + Time */}
-                    <div className="flex items-center justify-between min-w-0">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot.className}`} title={statusDot.title} />
-                        <span className={`text-xs truncate ${
-                          isSelected || convo.unread
-                            ? 'font-bold text-slate-900 dark:text-white'
-                            : 'font-medium text-slate-800 dark:text-[#E8E9D8]'
-                        }`}>
-                          {convo.name}
-                        </span>
-                        {convo.unread && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" title="Unread" />
-                        )}
-                      </div>
-
-                      <span className={`text-[11px] font-mono tabular-nums shrink-0 ml-2 ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                      }`}>
-                        {convo.time}
-                      </span>
-                    </div>
-
-                    {/* Sub Row: Company & Channel */}
-                    <div className="flex items-center space-x-1.5 mt-0.5 text-[11px] text-slate-500 dark:text-[#A9BFA5]">
-                      <span className="truncate max-w-[140px]">{convo.company}</span>
-                      <span className="opacity-40">·</span>
-                      <span className="font-medium text-slate-600 dark:text-[#E8E9D8]/80">{convo.channel}</span>
-                    </div>
-
-                    {/* Message Preview Snippet (Cleanly truncated, no redundant bottom badges) */}
-                    <p className={`text-xs truncate mt-1 leading-snug ${
-                      isLight ? 'text-slate-500' : 'text-[#A9BFA5]/75'
-                    }`}>
-                      {convo.snippet}
-                    </p>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="p-8 text-center space-y-2">
-                <p className="text-xs text-slate-400 dark:text-[#A9BFA5]/60">
-                  No conversations match filters.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setChannelFilter('All');
-                    setAssigneeFilter('All');
-                    setActiveTab('all');
-                    setSpecialFilter('all');
-                  }}
-                  className="text-xs text-teal-600 dark:text-teal-400 hover:underline font-medium cursor-pointer"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        {/* ========================================================
-            PANEL 2: CONVERSATION WORKSPACE (CENTER COLUMN - FOCUS)
-           ======================================================== */}
-        <div className={`${
-          mobileView === 'chat' ? 'flex' : 'hidden'
-        } lg:flex flex-1 min-w-0 min-h-0 h-full flex-col overflow-hidden transition-colors ${
-          isLight ? 'bg-slate-50/30' : 'bg-[#071C1A]'
-        }`}>
-          
-          {currentConvo ? (
-            <>
-              {/* Conversation Workspace Header */}
-              <div className={`px-4 sm:px-5 py-2.5 border-b flex items-center justify-between shrink-0 transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#051614] border-[rgba(169,191,165,0.18)]'
-              }`}>
-                <div className="flex items-center space-x-3 min-w-0">
-                  {/* Mobile Back Button */}
-                  <button
-                    type="button"
-                    onClick={() => setMobileView('list')}
-                    className="lg:hidden p-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer mr-0.5"
-                    title="Back to list"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-700 font-bold border border-teal-200/70 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40 flex items-center justify-center text-xs shrink-0">
-                    {getInitials(currentConvo.name)}
-                  </div>
-                  
-                  <div className="min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <h2 className={`font-semibold text-sm truncate ${
-                        isLight ? 'text-slate-900' : 'text-white'
-                      }`}>
-                        {currentConvo.name}
-                      </h2>
-                      <span className="text-slate-300 dark:text-slate-700">·</span>
-                      <span className={`text-xs truncate ${
-                        isLight ? 'text-slate-500' : 'text-[#A9BFA5]'
-                      }`}>
-                        {currentConvo.company}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center space-x-2 text-[11px] text-slate-500 dark:text-[#A9BFA5]/80">
-                      <span className={`font-medium ${
-                        currentConvo.channel === 'WhatsApp' ? 'text-emerald-600 dark:text-emerald-400' :
-                        currentConvo.channel === 'Instagram' ? 'text-pink-600 dark:text-pink-400' :
-                        currentConvo.channel === 'LinkedIn' ? 'text-sky-600 dark:text-sky-400' :
-                        'text-teal-600 dark:text-teal-400'
-                      }`}>
-                        {currentConvo.channel}
-                      </span>
-                      <span className="text-slate-300 dark:text-slate-700">·</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        <span>Connected</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Header Action Buttons */}
-                <div className="flex items-center space-x-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleToggleClosed}
-                    className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
-                      isLight
-                        ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:bg-[#0B2522]'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>{currentConvo.status === 'closed' ? 'Reopen' : 'Mark Resolved'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.innerWidth < 1024) {
-                        setMobileView('details');
-                      } else {
-                        setShowLeadPanel(prev => !prev);
-                      }
-                    }}
-                    title={showLeadPanel ? "Hide Prospect Details" : "Show Prospect Details"}
-                    className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer flex items-center justify-center ${
-                      showLeadPanel
-                        ? isLight
-                          ? 'bg-slate-100 border-slate-300 text-slate-800'
-                          : 'bg-[#0B2522] border-[rgba(169,191,165,0.3)] text-white'
-                        : isLight
-                          ? 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                          : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-[#A9BFA5] hover:text-white'
-                    }`}
-                  >
-                    <PanelRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Status Banner: AI Pause & Human Takeover Notice */}
-              {currentConvo.aiAlert && currentConvo.aiAlert.isPaused && !dismissedAlerts[currentConvo.id] && (
-                <div className={`relative border-b px-4 sm:px-5 py-2.5 space-y-2 text-xs shrink-0 transition-colors animate-fadeIn ${
-                  isLight
-                    ? 'bg-amber-50/90 border-amber-200 text-amber-900'
-                    : 'bg-[#1A180E] border-amber-500/40 text-amber-200'
-                }`}>
-                  {/* Top-right cross button */}
-                  <button
-                    type="button"
-                    onClick={handleDismissAlert}
-                    className={`absolute top-2.5 right-3 p-1 rounded-md transition-colors cursor-pointer ${
-                      isLight
-                        ? 'text-amber-800/70 hover:text-amber-950 hover:bg-amber-100/80'
-                        : 'text-amber-300/70 hover:text-amber-100 hover:bg-amber-900/40'
-                    }`}
-                    title="Close notice"
-                    aria-label="Close notification"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="flex items-start space-x-2 pr-7">
-                    <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-xs leading-snug">{currentConvo.aiAlert.reason}</p>
-                      <p className={`text-[11px] mt-0.5 leading-normal ${
-                        isLight ? 'text-amber-700/90' : 'text-amber-300/80'
-                      }`}>
-                        Automated AI responses paused. Human intervention recommended.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center flex-wrap gap-2 pt-1 border-t border-amber-200/70 dark:border-amber-800/50">
-                    <button
-                      type="button"
-                      onClick={handleTakeOver}
-                      className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-md text-xs cursor-pointer transition-colors"
-                    >
-                      Take Over Conversation
-                    </button>
-
-                    {/* Assign Dropdown */}
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowAssignMenu(!showAssignMenu)}
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer flex items-center space-x-1 border ${
-                          isLight
-                            ? 'bg-white border-amber-300 text-amber-900 hover:bg-amber-50'
-                            : 'bg-[#0B2522] border-amber-500/50 text-amber-200'
-                        }`}
-                      >
-                        <span>Assign ({currentConvo.assignedTo.split('—')[0].trim()})</span>
-                        <ChevronDown className="w-3 h-3 ml-0.5" />
-                      </button>
-
-                      {showAssignMenu && (
-                        <div className={`absolute left-0 mt-1 w-44 rounded-lg border shadow-xl py-1 z-30 text-xs font-medium ${
-                          isLight
-                            ? 'bg-white border-slate-200 text-slate-800'
-                            : 'bg-[#041210] border-[rgba(169,191,165,0.25)] text-white'
-                        }`}>
-                          {['Rahul — Sales', 'Sarah — Solutions', 'Priya — AE'].map(agent => (
-                            <button
-                              key={agent}
-                              type="button"
-                              onClick={() => handleAssign(agent)}
-                              className="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-[#071F1C] transition-colors"
-                            >
-                              {agent}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleHandBack}
-                      className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer transition-colors border ${
-                        isLight
-                          ? 'bg-white border-amber-300 text-amber-800 hover:bg-amber-50'
-                          : 'bg-[#0B2522] border-amber-500/50 text-amber-200'
-                      }`}
-                    >
-                      Let AI Continue
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Conversation Timeline */}
+            {/* Filter Popover */}
+            {showFilterPopover && (
               <div 
-                ref={messagesContainerRef}
-                className="flex-1 min-h-0 p-4 sm:p-5 space-y-3 overflow-y-auto"
+                ref={filterPopoverRef}
+                className="absolute right-0 top-full mt-1.5 w-64 p-3 bg-surface border border-line rounded-xl shadow-pop z-50 text-xs space-y-3 animate-fadeIn"
               >
-                {/* Date Separator */}
-                <div className="flex items-center justify-center py-1">
-                  <span className={`text-[11px] font-medium ${
-                    isLight ? 'text-slate-400' : 'text-[#A9BFA5]/50'
-                  }`}>
-                    Today
-                  </span>
+                <div className="flex items-center justify-between pb-1.5 border-b border-line-subtle">
+                  <span className="font-semibold text-ink">Filters & Sorting</span>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setChannelFilter('All');
+                      setAssigneeFilter('All');
+                      setSortBy('newest');
+                    }}
+                    className="text-xs text-brand hover:underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
                 </div>
 
-                {/* Messages Sequence */}
-                <div className="space-y-2">
-                  {currentConvo.messages.map((msg, idx) => {
-                    const isCustomer = msg.sender === 'customer';
-                    const isAi = msg.sender === 'ai';
-                    const prevMsg = idx > 0 ? currentConvo.messages[idx - 1] : null;
-                    const isSameSenderAsPrev = prevMsg && prevMsg.sender === msg.sender;
+                {/* Channel Filter */}
+                <div className="space-y-1">
+                  <label className="text-ink-3 font-medium block">Channel</label>
+                  <select
+                    value={channelFilter}
+                    onChange={e => setChannelFilter(e.target.value as ChannelFilter)}
+                    className="w-full bg-surface border border-line-subtle rounded-md px-2 py-1 text-xs text-ink cursor-pointer"
+                  >
+                    {['All', 'WhatsApp', 'Instagram', 'LinkedIn', 'Website'].map(ch => (
+                      <option key={ch} value={ch}>{ch}</option>
+                    ))}
+                  </select>
+                </div>
 
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'} text-xs ${
-                          isSameSenderAsPrev ? 'mt-1' : 'mt-2.5'
-                        }`}
-                      >
-                        {!isSameSenderAsPrev && (
-                          <div className={`flex items-center space-x-1.5 text-[11px] mb-1 px-1 ${
-                            isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                          }`}>
-                            {isCustomer ? (
-                              <span className={`font-semibold ${isLight ? 'text-slate-700' : 'text-white'}`}>
-                                {currentConvo.name}
-                              </span>
-                            ) : isAi ? (
-                              <span className="text-teal-600 dark:text-teal-400 font-semibold flex items-center space-x-1">
-                                <Bot className="w-3 h-3" />
-                                <span>Nexora AI</span>
-                              </span>
-                            ) : (
-                              <span className="text-teal-600 dark:text-teal-300 font-semibold flex items-center space-x-1">
-                                <UserCheck className="w-3 h-3" />
-                                <span>You</span>
-                              </span>
-                            )}
-                            <span>·</span>
-                            <span className="text-[10px] font-mono">{msg.time}</span>
-                          </div>
-                        )}
+                {/* Assignee Filter */}
+                <div className="space-y-1">
+                  <label className="text-ink-3 font-medium block">Assignee</label>
+                  <select
+                    value={assigneeFilter}
+                    onChange={e => setAssigneeFilter(e.target.value)}
+                    className="w-full bg-surface border border-line-subtle rounded-md px-2 py-1 text-xs text-ink cursor-pointer"
+                  >
+                    <option value="All">All assignees</option>
+                    {TEAM_MEMBERS.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
 
-                        <div
-                          className={`px-3.5 py-2.5 leading-relaxed max-w-[85%] sm:max-w-[70%] text-xs sm:text-[13px] rounded-xl ${
-                            isCustomer 
-                              ? isLight
-                                ? 'bg-slate-100 text-slate-800 rounded-tl-sm'
-                                : 'bg-slate-800/90 text-slate-100 rounded-tl-sm'
-                              : isAi 
-                              ? isLight
-                                ? 'bg-teal-50/90 text-teal-950 border border-teal-200/60 rounded-tr-sm'
-                                : 'bg-[#0E2C26] border border-teal-500/30 text-teal-50 rounded-tr-sm'
-                              : 'bg-teal-600 text-white dark:bg-teal-700 rounded-tr-sm'
-                          }`}
-                        >
-                          {msg.text}
-                          {isSameSenderAsPrev && (
-                            <div className="text-[9px] font-mono text-right opacity-60 mt-1">
-                              {msg.time}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                {/* Sort Option */}
+                <div className="space-y-1">
+                  <label className="text-ink-3 font-medium block">Sort by</label>
+                  <select
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as SortOption)}
+                    className="w-full bg-surface border border-line-subtle rounded-md px-2 py-1 text-xs text-ink cursor-pointer"
+                  >
+                    <option value="newest">Newest message</option>
+                    <option value="oldest_waiting">Oldest waiting</option>
+                    <option value="score">Lead score (High to low)</option>
+                  </select>
                 </div>
               </div>
-
-              {/* Suggestions & Reply Composer (Fixed at Bottom) */}
-              <div className={`border-t p-3 space-y-2 shrink-0 transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#051614] border-[rgba(169,191,165,0.18)]'
-              }`}>
-                
-                {/* Compact Suggestion Chips with Minimal Borders */}
-                <div className="flex items-center space-x-1.5 text-xs overflow-x-auto pb-0.5 scrollbar-none">
-                  <span className={`text-[10px] font-semibold mr-0.5 flex items-center space-x-1 shrink-0 ${
-                    isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                  }`}>
-                    <Sparkles className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                    <span>Suggestions:</span>
-                  </span>
-                  
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReplyInput(`Here is our enterprise pricing monograph and feature matrix for ${currentConvo.company}: [Download PDF]`);
-                    }}
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer shrink-0 ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-700'
-                        : 'bg-[#071F1C] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:border-teal-400 hover:text-white'
-                    }`}
-                  >
-                    Pricing Deck
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReplyInput('I would be delighted to set up a 20-minute tailored walkthrough. Would tomorrow at 11:30 AM or 3:00 PM work for you?');
-                    }}
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer shrink-0 ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-700'
-                        : 'bg-[#071F1C] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:border-teal-400 hover:text-white'
-                    }`}
-                  >
-                    Offer Call Slot
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReplyInput('Thank you! Could you share the name and email of your primary technical lead so we can loop them in?');
-                    }}
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer shrink-0 ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-700'
-                        : 'bg-[#071F1C] border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:border-teal-400 hover:text-white'
-                    }`}
-                  >
-                    Ask for Tech Lead
-                  </button>
-                </div>
-
-                {/* Input Composer Box */}
-                <div className="flex items-center space-x-2">
-                  <div className="flex-1 relative flex items-center">
-                    <input
-                      type="text"
-                      placeholder={`Reply to ${currentConvo.name}...`}
-                      value={replyInput}
-                      onChange={(e) => setReplyInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSendReply();
-                      }}
-                      className={`w-full text-xs sm:text-sm px-3 py-2 pr-9 rounded-lg border focus:outline-none transition-colors ${
-                        isLight
-                          ? 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-teal-600 focus:ring-1 focus:ring-teal-500/20'
-                          : 'bg-[#071F1C] border-[rgba(169,191,165,0.25)] text-white placeholder-[#A9BFA5]/50 focus:border-teal-400'
-                      }`}
-                    />
-                    <button
-                      type="button"
-                      title="Attach file"
-                      className="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer"
-                    >
-                      <Paperclip className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSendReply()}
-                    disabled={!replyInput.trim()}
-                    className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-40 flex items-center space-x-1.5 shrink-0 shadow-2xs"
-                  >
-                    <span>Send</span>
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Composer Status Sub-bar */}
-                <div className={`flex items-center justify-between text-[11px] pt-0.5 ${
-                  isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                }`}>
-                  <span className="flex items-center space-x-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      currentConvo.aiAlert?.isPaused ? 'bg-amber-500' : 'bg-emerald-500'
-                    }`} />
-                    <span>
-                      Direct reply · {currentConvo.aiAlert?.isPaused ? 'AI paused' : 'AI active'}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleHandBack}
-                    className="text-teal-600 dark:text-teal-400 hover:underline cursor-pointer font-medium"
-                  >
-                    Hand back to AI
-                  </button>
-                </div>
-
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center p-8 text-center text-xs text-slate-400 dark:text-[#A9BFA5]/60">
-              Select a conversation to start messaging.
-            </div>
-          )}
-
+            )}
+          </div>
         </div>
 
-        {/* ========================================================
-            PANEL 3: PROSPECT DETAILS (RIGHT COLUMN - COLLAPSIBLE)
-           ======================================================== */}
-        {showLeadPanel && currentConvo && (
-          <div className={`${
-            mobileView === 'details' ? 'flex' : 'hidden lg:flex'
-          } w-full lg:w-[280px] xl:w-[300px] shrink-0 h-full min-h-0 border-t lg:border-t-0 lg:border-l flex flex-col overflow-hidden transition-colors ${
-            isLight
-              ? 'bg-slate-50/40 border-slate-200/90'
-              : 'bg-[#051614] border-[rgba(169,191,165,0.18)]'
-          }`}>
-            
-            {/* Header: Title & Synced status */}
-            <div className={`px-4 py-2.5 border-b flex items-center justify-between shrink-0 ${
-              isLight ? 'border-slate-200/80 bg-white' : 'border-[rgba(169,191,165,0.12)] bg-[#051614]'
-            }`}>
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setMobileView('chat')}
-                  className="lg:hidden p-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer mr-0.5"
-                  title="Back to chat"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className={`text-xs font-semibold tracking-tight ${
-                  isLight ? 'text-slate-800' : 'text-white'
-                }`}>
-                  Prospect Details
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>Synced</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Scrollable Dossier Content - 3 clean groups: Contact, Deal, Qualification */}
-            <div className="p-4 space-y-4 flex-1 min-h-0 overflow-y-auto">
-              
-              {/* Group 1: Contact Information & Pipeline Stage */}
-              <div className="space-y-2.5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className={`text-sm font-bold leading-tight ${
-                      isLight ? 'text-slate-900' : 'text-white'
-                    }`}>
-                      {currentConvo.name}
-                    </h3>
-                    <p className={`text-xs mt-0.5 ${
-                      isLight ? 'text-slate-500' : 'text-[#A9BFA5]'
-                    }`}>
-                      {currentConvo.company} · {currentConvo.location}
-                    </p>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold border tabular-nums ${getScoreBadge(currentConvo.score).bg}`}>
-                    Score {currentConvo.score}
-                  </span>
-                </div>
-
-                {/* Pipeline Stage Inline Selector */}
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <span className={`text-[11px] ${
-                    isLight ? 'text-slate-500' : 'text-[#A9BFA5]/70'
-                  }`}>
-                    Stage:
-                  </span>
-                  <div className="relative">
-                    <select
-                      value={currentConvo.stage}
-                      onChange={(e) => handleStageChange(e.target.value)}
-                      className={`text-xs px-2 py-1 rounded-md border focus:outline-none cursor-pointer pr-5 appearance-none font-medium ${
-                        isLight
-                          ? 'bg-white border-slate-200 text-slate-800 focus:border-teal-600 shadow-2xs'
-                          : 'bg-[#041210] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                      }`}
-                    >
-                      <option value="New">New</option>
-                      <option value="Engaged">Engaged</option>
-                      <option value="Qualified">Qualified</option>
-                      <option value="Contacted">Contacted</option>
-                      <option value="Proposal">Proposal</option>
-                      <option value="Won">Won</option>
-                      <option value="Lost">Lost</option>
-                    </select>
-                    <ChevronDown className="w-2.5 h-2.5 text-slate-400 absolute right-1.5 top-2.5 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Group 2: Deal Parameters (Budget and Timeline aligned without oversized cards) */}
-              <div className="py-2.5 border-y border-slate-100 dark:border-slate-800/60 space-y-2">
-                <span className={`text-[10px] uppercase font-bold tracking-wider block ${
-                  isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                }`}>
-                  Deal
-                </span>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 dark:text-[#A9BFA5]/60 block font-medium">Budget</span>
-                    <span className="font-semibold text-slate-800 dark:text-white">{currentConvo.qualification.budget}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 dark:text-[#A9BFA5]/60 block font-medium">Timeline</span>
-                    <span className="font-semibold text-slate-800 dark:text-white">{currentConvo.qualification.timeline}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Group 3: Qualification Criteria Checklist */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] uppercase font-bold tracking-wider block ${
-                    isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                  }`}>
-                    Qualification
-                  </span>
-                  <span className={`text-xs font-semibold tabular-nums ${
-                    [currentConvo.qualification.requirement, Boolean(currentConvo.qualification.budget), Boolean(currentConvo.qualification.timeline), currentConvo.qualification.decisionMaker].filter(Boolean).length === 4
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-amber-600 dark:text-amber-400'
-                  }`}>
-                    {[currentConvo.qualification.requirement, Boolean(currentConvo.qualification.budget), Boolean(currentConvo.qualification.timeline), currentConvo.qualification.decisionMaker].filter(Boolean).length}/4 verified
-                  </span>
-                </div>
-                
-                <div className="space-y-1.5 text-xs">
-                  <div className={`flex items-center space-x-2 ${
-                    currentConvo.qualification.requirement ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-[#A9BFA5]/60'
-                  }`}>
-                    {currentConvo.qualification.requirement ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    ) : (
-                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-[rgba(169,191,165,0.3)] inline-block shrink-0" />
-                    )}
-                    <span>Requirement identified</span>
-                  </div>
-
-                  <div className={`flex items-center space-x-2 ${
-                    currentConvo.qualification.budget ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-[#A9BFA5]/60'
-                  }`}>
-                    {currentConvo.qualification.budget ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    ) : (
-                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-[rgba(169,191,165,0.3)] inline-block shrink-0" />
-                    )}
-                    <span>Budget confirmed</span>
-                  </div>
-
-                  <div className={`flex items-center space-x-2 ${
-                    currentConvo.qualification.timeline ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-[#A9BFA5]/60'
-                  }`}>
-                    {currentConvo.qualification.timeline ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    ) : (
-                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-[rgba(169,191,165,0.3)] inline-block shrink-0" />
-                    )}
-                    <span>Timeline defined</span>
-                  </div>
-
-                  <div className={`flex items-center space-x-2 ${
-                    currentConvo.qualification.decisionMaker ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-[#A9BFA5]/60'
-                  }`}>
-                    {currentConvo.qualification.decisionMaker ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    ) : (
-                      <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-[rgba(169,191,165,0.3)] inline-block shrink-0" />
-                    )}
-                    <span>Direct decision maker</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Condensed Recommended Action */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 text-xs">
-                <span className={`text-[10px] uppercase font-bold tracking-wider block mb-0.5 ${
-                  isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                }`}>
-                  Recommended Action
-                </span>
-                <p className={`font-medium capitalize ${
-                  isLight ? 'text-slate-800' : 'text-[#E8E9D8]'
-                }`}>
-                  {currentConvo.nextAction}
-                </p>
-                <p className={`text-[11px] ${
-                  isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                }`}>
-                  Assigned: {currentConvo.assignedTo}
-                </p>
-              </div>
-
-            </div>
-
-            {/* Compact Bottom Action Area */}
-            <div className={`p-3 border-t space-y-1.5 shrink-0 ${
-              isLight
-                ? 'bg-white border-slate-200/90'
-                : 'bg-[#051614] border-[rgba(169,191,165,0.12)]'
-            }`}>
+        {/* Removable Filter Chip for Overview-driven filters */}
+        {specialFilter !== 'all' && (
+          <div className="px-3 pt-2">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-brand-soft text-brand text-xs rounded-lg border border-line-subtle">
+              <span className="truncate">Filtered: {specialFilterLabel}</span>
               <button
                 type="button"
-                onClick={handleOpenLead}
-                className="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors cursor-pointer text-center flex items-center justify-center space-x-1.5 text-xs shadow-2xs"
+                aria-label="Clear filter"
+                onClick={() => setSpecialFilter('all')}
+                className="hover:opacity-70 cursor-pointer shrink-0 ml-1.5"
               >
-                <span>Open Lead Profile</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (onNotify) onNotify('Follow-up Scheduled', `Follow-up task created for ${currentConvo.name}.`);
-                }}
-                className={`w-full py-2 rounded-lg border font-medium transition-colors cursor-pointer text-center text-xs ${
-                  isLight
-                    ? 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                    : 'bg-[#041210] hover:bg-[#071C1A] text-[#A9BFA5] hover:text-[#E8E9D8] border-[rgba(169,191,165,0.2)]'
-                }`}
-              >
-                Schedule Follow-up
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
-
           </div>
         )}
 
+        {/* Conversation List Rows */}
+        <div className="flex-1 overflow-y-auto divide-y divide-line-subtle p-2 space-y-1">
+          {filteredConversations.length > 0 ? (
+            filteredConversations.map((convo) => {
+              const isSelected = convo.id === currentConvo?.id;
+              const ChannelIcon = getChannelIcon(convo.channel);
+              const lastMsg = convo.messages[convo.messages.length - 1];
+              const tagLabel = convo.status === 'ai_handling' || lastMsg?.sender === 'ai' 
+                ? 'AI' 
+                : convo.status === 'waiting_on_customer' || lastMsg?.sender === 'agent'
+                ? 'You'
+                : null;
+
+              const statusTitle = convo.status === 'needs_you' 
+                ? 'Needs human attention' 
+                : convo.status === 'ai_handling' 
+                ? 'Handled by AI' 
+                : convo.status === 'waiting_on_customer'
+                ? 'Waiting on customer reply'
+                : 'Resolved';
+
+              return (
+                <button
+                  key={convo.id}
+                  type="button"
+                  onClick={() => handleSelectConversation(convo.id)}
+                  className={`w-full min-h-16! rounded-lg! p-3 text-left transition-colors cursor-pointer border flex flex-col gap-1.5 focus-visible:outline-none ${
+                    isSelected
+                      ? 'bg-brand-soft border-brand/40 shadow-xs'
+                      : 'bg-surface border-transparent hover:bg-surface-hover hover:border-line-subtle'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      
+                      {/* Avatar with Channel Icon Badge */}
+                      <div className="relative shrink-0">
+                        <Avatar name={convo.name} size="md" />
+                        <div 
+                          className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-surface border border-line-subtle flex items-center justify-center text-ink-3 shadow-2xs"
+                          title={convo.channel}
+                        >
+                          <ChannelIcon className="w-2.5 h-2.5" />
+                        </div>
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-sm truncate ${convo.unread ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
+                            {convo.name}
+                          </span>
+                          {convo.unread && (
+                            <span className="w-2 h-2 rounded-full bg-brand shrink-0" title="Unread" />
+                          )}
+                        </div>
+                        <span className="text-xs text-ink-3 truncate block">
+                          {convo.company}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs text-ink-3 tabular-nums font-mono">
+                        {convo.time}
+                      </span>
+                      <span 
+                        className={`w-2 h-2 rounded-full ${
+                          convo.status === 'needs_you'
+                            ? 'bg-danger'
+                            : convo.status === 'ai_handling'
+                            ? 'bg-info'
+                            : convo.status === 'waiting_on_customer'
+                            ? 'bg-brand'
+                            : 'bg-line-subtle'
+                        }`} 
+                        title={statusTitle} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* One-line snippet at text-sm */}
+                  <p className="text-sm text-ink-3 truncate leading-snug">
+                    {convo.snippet}
+                  </p>
+
+                  {/* Bottom tags & Rose waiting chip */}
+                  <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+                    {convo.waitingForHuman && (
+                      <Badge tone="danger" size="sm">
+                        Waiting {convo.time || '18m'}
+                      </Badge>
+                    )}
+                    {tagLabel && (
+                      <Badge tone={tagLabel === 'AI' ? 'info' : 'neutral'} size="sm">
+                        {tagLabel}
+                      </Badge>
+                    )}
+                    {convo.askedForPricing && (
+                      <Badge tone="brand" size="sm">
+                        Pricing
+                      </Badge>
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          ) : (
+            <div className="py-12 px-4 text-center">
+              <EmptyState
+                icon={<MessageSquare className="w-6 h-6 text-ink-3" />}
+                title="No conversations found"
+                description="Try clearing your search query or adjusting your filters."
+                action={
+                  searchQuery || channelFilter !== 'All' ? (
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={() => {
+                        setSearchQuery('');
+                        setChannelFilter('All');
+                        setSpecialFilter('all');
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  ) : null
+                }
+              />
+            </div>
+          )}
+        </div>
+
       </div>
+
+      {/* =========================================================================
+          PANEL 2: CONVERSATION WORKSPACE (CENTRE)
+          ========================================================================= */}
+      <div className={`flex-1 min-w-0 flex flex-col h-full bg-surface ${
+        mobileView === 'chat' ? 'flex' : 'hidden md:flex'
+      }`}>
+        {currentConvo ? (
+          <>
+            {/* Conversation Header */}
+            <div className="p-3 sm:px-4 border-b border-line-subtle flex items-center justify-between gap-3 shrink-0 bg-surface">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {/* Mobile back button */}
+                <button
+                  type="button"
+                  aria-label="Back to conversations"
+                  onClick={() => setMobileView('list')}
+                  className="md:hidden p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+
+                <Avatar name={currentConvo.name} size="md" />
+
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-ink truncate">
+                      {currentConvo.name} · {currentConvo.company}
+                    </span>
+                    <Badge tone="brand" size="sm">{currentConvo.stage}</Badge>
+                    <Badge tone={currentConvo.score >= 90 ? 'success' : currentConvo.score >= 80 ? 'warning' : 'danger'} size="sm">
+                      Score {currentConvo.score}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-ink-3">
+                    {(() => {
+                      const Icon = getChannelIcon(currentConvo.channel);
+                      return (
+                        <span className="flex items-center gap-1">
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{currentConvo.channel}</span>
+                        </span>
+                      );
+                    })()}
+                    <span>·</span>
+                    <span>Assigned: {currentConvo.assignedTo}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-1.5 shrink-0 relative">
+                {/* Assign Dropdown */}
+                <div className="relative">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setShowAssignMenu(prev => !prev);
+                      setShowSnoozeMenu(false);
+                    }}
+                    leadingIcon={<UserCheck className="w-3.5 h-3.5" />}
+                  >
+                    <span className="hidden sm:inline">Assign</span>
+                  </Button>
+
+                  {showAssignMenu && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-surface border border-line rounded-xl shadow-pop py-1 z-50 text-xs animate-fadeIn">
+                      <div className="px-3 py-1 font-semibold text-ink-3 uppercase text-xs tracking-wider">
+                        Assign to
+                      </div>
+                      {TEAM_MEMBERS.map(member => (
+                        <button
+                          key={member}
+                          type="button"
+                          onClick={() => handleAssign(member)}
+                          className="w-full px-3 py-1.5 text-left text-ink hover:bg-surface-hover transition-colors flex items-center justify-between cursor-pointer"
+                        >
+                          <span className="truncate">{member}</span>
+                          {currentConvo.assignedTo === member && (
+                            <Check className="w-3.5 h-3.5 text-brand" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Snooze Dropdown */}
+                <div className="relative">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setShowSnoozeMenu(prev => !prev);
+                      setShowAssignMenu(false);
+                    }}
+                    leadingIcon={<Clock className="w-3.5 h-3.5" />}
+                  >
+                    <span className="hidden sm:inline">Snooze</span>
+                  </Button>
+
+                  {showSnoozeMenu && (
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-surface border border-line rounded-xl shadow-pop py-1 z-50 text-xs animate-fadeIn">
+                      <div className="px-3 py-1 font-semibold text-ink-3 uppercase text-xs tracking-wider">
+                        Snooze conversation
+                      </div>
+                      {[
+                        { id: 'today', label: 'Later today (4h)' },
+                        { id: 'tomorrow', label: 'Tomorrow (9 AM)' },
+                        { id: 'next_week', label: 'Next week (Mon)' }
+                      ].map(sn => (
+                        <button
+                          key={sn.id}
+                          type="button"
+                          onClick={() => handleSnooze(sn.label)}
+                          className="w-full px-3 py-1.5 text-left text-ink hover:bg-surface-hover transition-colors cursor-pointer"
+                        >
+                          {sn.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mark Resolved */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleMarkResolved}
+                  leadingIcon={<CheckCircle2 className="w-3.5 h-3.5 text-ok" />}
+                >
+                  <span className="hidden sm:inline">Resolve</span>
+                </Button>
+
+                {/* Toggle details panel */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (window.innerWidth < 768) {
+                      setMobileView('details');
+                    } else {
+                      setShowLeadPanel(prev => !prev);
+                    }
+                  }}
+                  aria-label={showLeadPanel ? 'Hide details' : 'Show details'}
+                >
+                  <PanelRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* AI Paused Banner: Calm info style with Sparkles */}
+            {currentConvo.aiAlert?.isPaused && currentConvo.status === 'needs_you' && (
+              <div className="mx-4 mt-3 p-3.5 rounded-xl bg-info-soft border border-line-subtle text-ink flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-surface flex items-center justify-center text-info shrink-0">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-semibold text-ink">
+                      {currentConvo.aiAlert.reason || 'AI response paused to allow human review.'}
+                    </h5>
+                    <p className="text-xs text-ink-3">
+                      Confidence score: {currentConvo.aiAlert.confidence}. Manual handoff active.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="primary" size="sm" onClick={handleTakeover}>
+                    Take over
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => setShowAssignMenu(true)}>
+                    Assign
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleResumeAI}>
+                    Let AI continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Messages Stream */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+              {currentConvo.messages.map((m, index) => {
+                const prevMsg = currentConvo.messages[index - 1];
+                const currentDay = getMessageDateGroup(m.time);
+                const prevDay = prevMsg ? getMessageDateGroup(prevMsg.time) : null;
+                const showSeparator = !prevDay || currentDay !== prevDay;
+
+                const isAgent = m.sender === 'agent';
+                const isAI = m.sender === 'ai';
+
+                return (
+                  <React.Fragment key={m.id}>
+                    {showSeparator && (
+                      <div className="flex items-center justify-center my-3">
+                        <span className="text-xs text-ink-3 font-medium px-2.5 py-0.5 rounded-full bg-surface-raised border border-line-subtle">
+                          {currentDay}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className={`flex gap-3 ${isAgent ? 'justify-end' : 'justify-start'}`}>
+                      {!isAgent && (
+                        <div className="shrink-0 mt-0.5">
+                          {isAI ? (
+                            <div className="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center">
+                              <Bot className="w-4 h-4" />
+                            </div>
+                          ) : (
+                            <Avatar name={m.senderName || currentConvo.name} size="sm" />
+                          )}
+                        </div>
+                      )}
+
+                      <div className={`space-y-1 max-w-[80%] ${isAgent ? 'items-end' : 'items-start'}`}>
+                        <div className="flex items-center gap-2 px-1 text-xs text-ink-3">
+                          <span className="font-semibold text-ink">
+                            {isAI ? `${BRAND_NAME} AI` : m.senderName}
+                          </span>
+                          <span>{m.time}</span>
+                        </div>
+
+                        <div className={`rounded-2xl p-3 text-sm leading-relaxed border ${
+                          isAgent
+                            ? 'bg-brand-soft text-ink border-brand/20'
+                            : isAI
+                            ? 'bg-surface text-ink border-line-subtle'
+                            : 'bg-surface-raised text-ink border-line-subtle'
+                        }`}>
+                          <p className="whitespace-pre-wrap">{m.text}</p>
+                        </div>
+
+                        {/* Delivery ticks on your messages */}
+                        {isAgent && (
+                          <div className="flex items-center justify-end gap-1 px-1 text-xs text-ink-3">
+                            <span>Delivered</span>
+                            <CheckCheck className="w-3.5 h-3.5 text-brand" />
+                          </div>
+                        )}
+                      </div>
+
+                      {isAgent && (
+                        <div className="shrink-0 mt-0.5">
+                          <Avatar name="You" size="sm" />
+                        </div>
+                      )}
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
+            {/* Composer */}
+            <div className="p-3 sm:p-4 border-t border-line-subtle bg-surface space-y-2.5 shrink-0">
+              
+              {/* Context-Aware Suggestion Chips Toolbar */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+                <span className="text-xs text-ink-3 uppercase tracking-wider shrink-0 font-semibold">
+                  Quick chips:
+                </span>
+                
+                {/* Pricing Deck chip: inserts clean sentence + file chip preview */}
+                <button
+                  type="button"
+                  onClick={handleInsertPricingDeck}
+                  className="px-2.5 py-1 rounded-lg border border-line-subtle bg-surface hover:bg-surface-hover text-ink transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1.5"
+                >
+                  <FileText className="w-3.5 h-3.5 text-brand" />
+                  <span>Pricing Sheet</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleInsertBookCall}
+                  className="px-2.5 py-1 rounded-lg border border-line-subtle bg-surface hover:bg-surface-hover text-ink transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-ok" />
+                  <span>Book Call</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleInsertProposal}
+                  className="px-2.5 py-1 rounded-lg border border-line-subtle bg-surface hover:bg-surface-hover text-ink transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-brand" />
+                  <span>Proposal Overview</span>
+                </button>
+              </div>
+
+              {/* Attached file chips preview */}
+              {attachedFiles.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {attachedFiles.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-raised border border-line-subtle text-xs text-ink"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-brand" />
+                      <span className="font-medium truncate max-w-[160px]">{file.name}</span>
+                      <span className="text-ink-3">({file.size})</span>
+                      <button
+                        type="button"
+                        aria-label="Remove attachment"
+                        onClick={() => removeAttachment(idx)}
+                        className="text-ink-3 hover:text-danger cursor-pointer ml-1"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Textarea Input Container */}
+              <div className={`border border-line rounded-xl overflow-hidden focus-within:border-brand transition-colors ${
+                composerMode === 'note' ? 'bg-surface-raised' : 'bg-surface'
+              }`}>
+                <textarea
+                  rows={2}
+                  aria-label={composerMode === 'note' ? 'Internal note message' : 'Message reply'}
+                  value={replyInput}
+                  onChange={e => setReplyInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder={
+                    composerMode === 'note'
+                      ? 'Add internal note (only visible to team members)...'
+                      : `Type a message to ${currentConvo.name} (Enter to send, Shift+Enter for new line)...`
+                  }
+                  className="w-full p-3 text-sm bg-transparent text-ink placeholder:text-ink-3 resize-none focus-visible:outline-none"
+                />
+
+                <div className="px-3 py-2 border-t border-line-subtle flex items-center justify-between gap-3 bg-surface">
+                  <div className="flex items-center gap-2">
+                    {/* Reply / Internal Note toggle */}
+                    <SegmentedControl
+                      options={[
+                        { id: 'reply', label: 'Reply' },
+                        { id: 'note', label: 'Note' }
+                      ]}
+                      value={composerMode}
+                      onChange={val => setComposerMode(val as 'reply' | 'note')}
+                      size="sm"
+                    />
+
+                    {/* Attach button */}
+                    <button
+                      type="button"
+                      aria-label="Attach file"
+                      onClick={handleAttachFile}
+                      className="p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer transition-colors"
+                      title="Attach file"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </button>
+
+                    <span className="text-xs text-ink-3 hidden sm:inline">
+                      {composerMode === 'reply' ? `Replying via ${currentConvo.channel}` : 'Internal team note'}
+                    </span>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSendMessage}
+                    disabled={!replyInput.trim() && attachedFiles.length === 0}
+                    leadingIcon={<Send className="w-3.5 h-3.5" />}
+                  >
+                    Send
+                  </Button>
+                </div>
+              </div>
+
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <EmptyState
+              title="No conversation selected"
+              description="Choose a conversation from the left panel to review messages and draft replies."
+            />
+          </div>
+        )}
+      </div>
+
+      {/* =========================================================================
+          PANEL 3: PROSPECT DETAILS (RIGHT)
+          ========================================================================= */}
+      {showLeadPanel && currentConvo && (
+        <div className={`w-full md:w-80 shrink-0 border-l border-line bg-surface flex flex-col h-full overflow-y-auto ${
+          mobileView === 'details' ? 'flex' : 'hidden lg:flex'
+        }`}>
+          
+          {/* Header */}
+          <div className="p-4 border-b border-line-subtle flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Back to conversation"
+                onClick={() => setMobileView('chat')}
+                className="lg:hidden p-1 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <h3 className="font-semibold text-sm text-ink">Details</h3>
+            </div>
+            <button
+              type="button"
+              aria-label="Close details"
+              onClick={() => {
+                if (window.innerWidth < 1024) setMobileView('chat');
+                else setShowLeadPanel(false);
+              }}
+              className="p-1 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="p-4 space-y-5 text-xs">
+            
+            {/* 1. Contact Info */}
+            <div className="space-y-2.5">
+              <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
+                Contact
+              </span>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-ink">
+                  <Phone className="w-3.5 h-3.5 text-ink-3 shrink-0" />
+                  <span className="truncate">+91 98201 44820</span>
+                </div>
+                <div className="flex items-center gap-2 text-ink">
+                  <Mail className="w-3.5 h-3.5 text-ink-3 shrink-0" />
+                  <span className="truncate">{currentConvo.name.toLowerCase().replace(/\s+/g, '.')}@example.com</span>
+                </div>
+                <div className="flex items-center gap-2 text-ink">
+                  <MapPin className="w-3.5 h-3.5 text-ink-3 shrink-0" />
+                  <span className="truncate">{currentConvo.location}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Pipeline Stage Selector */}
+            <div className="space-y-1.5 pt-3 border-t border-line-subtle">
+              <label className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
+                Stage
+              </label>
+              <select
+                value={currentConvo.stage}
+                onChange={e => handleStageChange(e.target.value)}
+                className="w-full bg-surface border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink font-medium cursor-pointer focus-visible:outline-none focus:border-brand"
+              >
+                {STAGES.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Deal Summary */}
+            <div className="space-y-2.5 pt-3 border-t border-line-subtle">
+              <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
+                Deal
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-0.5">
+                  <span className="text-xs text-ink-3">Budget</span>
+                  <p className="text-sm font-semibold text-ink">{currentConvo.qualification.budget}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-xs text-ink-3">Timeline</span>
+                  <p className="text-sm font-semibold text-ink">{currentConvo.qualification.timeline}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Qualification Checklist with "n of 4 verified" progress */}
+            <div className="space-y-2.5 pt-3 border-t border-line-subtle">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider">
+                  Qualification
+                </span>
+                <span className="text-xs font-medium text-ink-2">
+                  {verifiedCount} of 4 verified
+                </span>
+              </div>
+
+              <ProgressBar 
+                value={(verifiedCount / 4) * 100} 
+                size="sm" 
+                tone={verifiedCount >= 3 ? 'ok' : 'brand'} 
+              />
+
+              <div className="space-y-2 pt-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${currentConvo.qualification.requirement ? 'text-ok' : 'text-ink-3'}`} />
+                  <span className={currentConvo.qualification.requirement ? 'text-ink font-medium' : 'text-ink-3'}>
+                    Specific requirement verified
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${currentConvo.qualification.budget && currentConvo.qualification.budget !== 'Unspecified' ? 'text-ok' : 'text-ink-3'}`} />
+                  <span className={currentConvo.qualification.budget ? 'text-ink font-medium' : 'text-ink-3'}>
+                    Budget allocated ({currentConvo.qualification.budget})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${currentConvo.qualification.timeline && currentConvo.qualification.timeline !== 'Unknown' ? 'text-ok' : 'text-ink-3'}`} />
+                  <span className={currentConvo.qualification.timeline ? 'text-ink font-medium' : 'text-ink-3'}>
+                    Target timeline stated ({currentConvo.qualification.timeline})
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${currentConvo.qualification.decisionMaker ? 'text-ok' : 'text-ink-3'}`} />
+                  <span className={currentConvo.qualification.decisionMaker ? 'text-ink font-medium' : 'text-ink-3'}>
+                    Key decision maker engaged
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. AI "Why this score" list from existing whyPoints field */}
+            {currentConvo.whyPoints && currentConvo.whyPoints.length > 0 && (
+              <div className="space-y-2 pt-3 border-t border-line-subtle">
+                <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
+                  Why this score ({currentConvo.score})
+                </span>
+                <ul className="space-y-1.5 text-xs text-ink-2">
+                  {currentConvo.whyPoints.map((pt, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+                      <span>{pt.replace(/^\+\s*/, '')}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* 6. Next action & Lead Profile CTAs */}
+            <div className="space-y-2 pt-4 border-t border-line-subtle">
+              <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
+                Next action
+              </span>
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                className="w-full justify-between"
+                onClick={() => {
+                  if (onNotify) onNotify('Action Queued', currentConvo.nextAction);
+                }}
+              >
+                <span className="truncate">{currentConvo.nextAction}</span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              </Button>
+
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleOpenLead}
+                >
+                  Lead profile
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (onNotify) onNotify('Follow-up Scheduled', `Follow-up queued for ${currentConvo.name}.`);
+                  }}
+                >
+                  Schedule
+                </Button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

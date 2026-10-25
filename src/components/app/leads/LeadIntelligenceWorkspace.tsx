@@ -8,34 +8,38 @@ import {
   RotateCw, 
   Plus, 
   Lock, 
-  AlertTriangle,
   Bot, 
   User, 
   Check,
-  Calendar,
   Clock,
   Building2,
   Mail,
   Phone,
-  MapPin,
   Flame,
   CheckCircle2,
-  Tag as TagIcon,
-  ChevronRight,
-  ExternalLink,
-  ChevronDown
+  AlertCircle,
+  HelpCircle
 } from 'lucide-react';
 import { 
   Lead, 
   LeadTemperature, 
   LeadHandlingMode, 
-  LeadMessage, 
   LeadTimelineEvent, 
   LeadFollowUp,
+  LeadStage,
   NavCategory,
   SubCategory
 } from '../../../types';
 import { useTheme } from '../../../context/ThemeContext';
+import { useConversations, ConversationItem } from '../../../data/conversations';
+import { 
+  deriveTemperature, 
+  deriveQualification, 
+  deriveScoreSignals, 
+  stageToStatus 
+} from '../../../lib/leadIntel';
+import { formatRelative } from '../../../lib/time';
+import { BRAND_NAME } from '../../../config/brand';
 
 interface LeadIntelligenceWorkspaceProps {
   lead: Lead | null;
@@ -45,7 +49,7 @@ interface LeadIntelligenceWorkspaceProps {
   onNotify?: (title: string, desc: string) => void;
 }
 
-export function getChannelBadge(source: string) {
+export function getChannelBadge(source?: string) {
   const s = (source || '').toLowerCase();
   if (s.includes('whatsapp')) {
     return { 
@@ -77,16 +81,62 @@ export function getChannelBadge(source: string) {
   };
 }
 
+const STAGE_OPTIONS: LeadStage[] = [
+  'New',
+  'Engaged',
+  'Qualified',
+  'Contacted',
+  'Proposal',
+  'Won',
+  'Lost'
+];
+
 export default function LeadIntelligenceWorkspace({
   lead,
   onClose,
   onUpdateLead,
-  onNavigate,
+  onNavigate: _onNavigate,
   onNotify
 }: LeadIntelligenceWorkspaceProps) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Synced reactive conversations store
+  const [conversations, setConversations] = useConversations();
+
+  // Sub-tabs: 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes'
+  type WorkspaceSubTab = 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes';
+  const [activeSubTab, setActiveSubTab] = useState<WorkspaceSubTab>('qualification');
+
+  // Reply text input
+  const [replyText, setReplyText] = useState('');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+  // Handling mode: AI or HUMAN
+  const [handlingMode, setHandlingMode] = useState<LeadHandlingMode>(lead?.handlingMode || 'AI');
+
+  // Activity timeline
+  const [timelineEvents, setTimelineEvents] = useState<LeadTimelineEvent[]>(lead?.timelineEvents || []);
+
+  // Follow-ups
+  const [followUps, setFollowUps] = useState<LeadFollowUp[]>(lead?.followUps || []);
+  const [showAddFollowUp, setShowAddFollowUp] = useState(false);
+  const [newFollowUpText, setNewFollowUpText] = useState('');
+  const [newFollowUpTime, setNewFollowUpTime] = useState('Tomorrow — 11:00 AM');
+
+  // Internal Notes
+  const [notes, setNotes] = useState<string[]>(lead?.internalNotes || []);
+  const [newNote, setNewNote] = useState('');
+
+  // Tags
+  const [tags, setTags] = useState<string[]>(lead?.tags || []);
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTagInput, setNewTagInput] = useState('');
+
+  // AI Summary
+  const [aiSummary, setAiSummary] = useState<string>(lead?.conversationSummary || '');
+  const [isRegeneratingSummary, setIsRegeneratingSummary] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -99,230 +149,142 @@ export default function LeadIntelligenceWorkspace({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // ALL hooks must be declared above this early return
   if (!lead) return null;
 
-  // Intelligence derivation
-  const isHot = lead.score >= 85 || lead.temperature === 'HOT' || lead.isPriority;
-  const isWarm = (lead.score >= 65 && lead.score < 85) || lead.temperature === 'WARM';
-  const temperature: LeadTemperature = lead.temperature || (isHot ? 'HOT' : isWarm ? 'WARM' : 'COLD');
-
-  const intentLevel = lead.intentLevel || (isHot ? 'High purchase intent' : isWarm ? 'Evaluating alternatives' : 'Information gathering');
-  const aiRecommendation = lead.aiRecommendation || (isHot ? 'Schedule a sales discovery call within 24 hours' : 'Send product comparison deck & follow-up sequence');
-
-  // Contact & Business details
-  const phone = lead.phone || '+91 98201 44820';
-  const jobTitle = lead.title || (lead.name === 'Rahul Sharma' ? 'VP of Marketing & Growth' : 'Head of Growth & Operations');
-  const location = lead.location || (lead.name.includes('Rahul') ? 'Pune, India' : 'San Francisco, CA');
-  const companySize = lead.companySize || '25 - 50 employees';
-  const budget = lead.budget || lead.value || '₹5L – ₹8L ($10,000)';
-  const timeline = lead.timeline || 'Within 30 days';
-  const requirement = lead.requirement || (lead.description || 'Omnichannel lead management and WhatsApp automated workflows with human handoff.');
-  const preferredChannel = lead.preferredChannel || (lead.source.includes('WhatsApp') ? 'WhatsApp' : lead.source);
-  const decisionMaker = lead.decisionMaker !== undefined ? lead.decisionMaker : true;
-
-  // Sub-tabs: 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes'
-  type WorkspaceSubTab = 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes';
-  const [activeSubTab, setActiveSubTab] = useState<WorkspaceSubTab>('qualification');
-
-  // Conversation history
-  const [messages, setMessages] = useState<LeadMessage[]>(lead.messages || [
-    {
-      id: 'm-1',
-      sender: 'customer',
-      senderName: lead.name,
-      text: `Hi, I wanted to know more about your Tecavy OS solution for ${lead.company}.`,
-      time: '10:42 AM',
-      channel: lead.source
-    },
-    {
-      id: 'm-2',
-      sender: 'ai',
-      senderName: 'Tecavy AI Assistant',
-      text: "Absolutely! I can help with that. Could you tell me a little about what you're looking to automate?",
-      time: '10:44 AM'
-    },
-    {
-      id: 'm-3',
-      sender: 'customer',
-      senderName: lead.name,
-      text: 'We need lead management, WhatsApp automation, and quick escalation when high-ticket prospects reply.',
-      time: '10:46 AM',
-      channel: lead.source
-    },
-    {
-      id: 'm-4',
-      sender: 'ai',
-      senderName: 'Tecavy AI Assistant',
-      text: 'That sounds like a great fit. What is your expected implementation timeline and budget range?',
-      time: '10:48 AM'
-    },
-    {
-      id: 'm-5',
-      sender: 'customer',
-      senderName: lead.name,
-      text: `We are looking to implement within 30 days. Budget allocated is around ${budget}. Could we see pricing and have a call with your solutions team?`,
-      time: '10:50 AM',
-      channel: lead.source
-    }
-  ]);
-
-  // Reply text input
-  const [replyText, setReplyText] = useState('');
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
-
-  // Handling mode: AI or HUMAN
-  const [handlingMode, setHandlingMode] = useState<LeadHandlingMode>(lead.handlingMode || (isHot ? 'HUMAN' : 'AI'));
-
-  // Activity timeline
-  const [timelineEvents, setTimelineEvents] = useState<LeadTimelineEvent[]>(lead.timelineEvents || [
-    {
-      id: 't-1',
-      time: '10:42 AM',
-      title: `Lead captured from ${lead.source}`,
-      description: 'Captured via October Lead Generation Campaign (Instagram Ad → WhatsApp DM)',
-      type: 'campaign'
-    },
-    {
-      id: 't-2',
-      time: '10:44 AM',
-      title: 'AI initial auto-response engaged',
-      description: 'Dispatched automated qualifier sequence and workflow discovery questions',
-      type: 'ai_action'
-    },
-    {
-      id: 't-3',
-      time: '10:47 AM',
-      title: 'Requirement identified',
-      description: 'Prospect confirmed requirement: Lead management & WhatsApp automated funnel',
-      type: 'qualification'
-    },
-    {
-      id: 't-4',
-      time: '10:49 AM',
-      title: 'Lead classified as HOT (Score 92/100)',
-      description: 'High intent algorithm triggered based on budget and timeline match',
-      type: 'qualification'
-    },
-    {
-      id: 't-5',
-      time: '10:51 AM',
-      title: `Budget confirmed (${budget})`,
-      description: 'Prospect stated explicit enterprise allocation ready for Q3/Q4 implementation',
-      type: 'qualification'
-    },
-    {
-      id: 't-6',
-      time: '10:53 AM',
-      title: 'AI recommended human handoff & sales call',
-      description: 'Confidence 96%. Recommended 20-min tailored solution discovery call',
-      type: 'handoff'
-    },
-    {
-      id: 't-7',
-      time: '11:05 AM',
-      title: `Assigned to ${lead.assignee?.name || 'Rahul — Sales'}`,
-      description: 'Routing complete. Direct notification dispatched to account executive',
-      type: 'assignment'
-    }
-  ]);
-
-  // Follow-ups
-  const [followUps, setFollowUps] = useState<LeadFollowUp[]>(lead.followUps || [
-    {
-      id: 'f-1',
-      title: 'Follow up regarding CRM & WhatsApp implementation discovery call',
-      dueTime: 'Tomorrow — 11:00 AM',
-      type: 'upcoming',
-      isCompleted: false
-    },
-    {
-      id: 'f-2',
-      title: 'Pricing sheet and architecture blueprint dispatched via WhatsApp',
-      dueTime: 'Yesterday — 4:30 PM',
-      type: 'previous',
-      isCompleted: true
-    }
-  ]);
-  const [showAddFollowUp, setShowAddFollowUp] = useState(false);
-  const [newFollowUpText, setNewFollowUpText] = useState('');
-  const [newFollowUpTime, setNewFollowUpTime] = useState('Tomorrow — 11:00 AM');
-
-  // Internal Notes
-  const [notes, setNotes] = useState<string[]>(lead.internalNotes || [
-    'Client is specifically interested in WhatsApp automation and human escalation. Mention enterprise pricing during the discovery call.',
-    'Decision maker has reviewed competitor solutions. Highlight Tecavy OS real-time routing latency.'
-  ]);
-  const [newNote, setNewNote] = useState('');
-
-  // Tags
-  const [tags, setTags] = useState<string[]>(lead.tags || ['HOT', 'CRM', 'WhatsApp', 'Enterprise', 'High Intent', 'Decision Maker']);
-  const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTagInput, setNewTagInput] = useState('');
-
-  // AI Summary
-  const [aiSummary, setAiSummary] = useState<string>(
-    lead.conversationSummary || 
-    `${lead.name} from ${lead.company} is actively evaluating Tecavy for omnichannel lead management and WhatsApp automation. They have a clearly specified requirement, an approved budget of ${budget}, and require implementation within 30 days. They are the primary decision maker and have explicitly requested a solutions discovery call and pricing.`
+  // Unify conversation thread with useConversations()
+  const matchedConvo = conversations.find(
+    (c) => c.leadReferenceId === lead.id || c.id === lead.id
   );
-  const [isRegeneratingSummary, setIsRegeneratingSummary] = useState(false);
+  const conversationMessages = matchedConvo?.messages || [];
 
-  // Status handler
-  const handleStatusChange = (newStatus: Lead['status']) => {
+  // Intelligence derivation
+  const temperature: LeadTemperature = deriveTemperature(
+    lead.score,
+    lead.temperatureOverride
+  );
+  const qualificationChecks = deriveQualification(lead, matchedConvo);
+  const scoreSignals = deriveScoreSignals(lead, matchedConvo);
+
+  const intentLevel =
+    lead.intentLevel ||
+    (temperature === 'HOT'
+      ? 'High purchase intent'
+      : temperature === 'WARM'
+      ? 'Evaluating alternatives'
+      : 'Information gathering');
+
+  const aiRecommendation =
+    lead.aiRecommendation ||
+    (temperature === 'HOT'
+      ? 'Schedule a sales discovery call'
+      : 'Send product overview & follow-up sequence');
+
+  // Stage change handler (Single source of truth)
+  const handleStageChange = (newStage: LeadStage) => {
+    const newStatus = stageToStatus(newStage);
+    const now = new Date();
+    const newTimelineEvt: LeadTimelineEvent = {
+      id: `t-${Date.now()}`,
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      at: now.toISOString(),
+      title: `Stage updated to ${newStage}`,
+      description: `Pipeline status mapped to ${newStatus}`,
+      type: 'status_change'
+    };
+    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
+    setTimelineEvents(updatedTimeline);
+
     const updated: Lead = {
       ...lead,
+      stage: newStage,
       status: newStatus,
-      stage: newStatus === 'Won' ? 'Deal closed' :
-             newStatus === 'Proposal' ? 'Offer sent' :
-             newStatus === 'Qualified' ? 'Negotiation' : 'Contacted'
+      timelineEvents: updatedTimeline
     };
     onUpdateLead(updated);
-    if (onNotify) onNotify('Status Updated', `Lead status updated to ${newStatus}.`);
+    if (onNotify) {
+      onNotify('Stage Updated', `Lead stage changed to ${newStage}.`);
+    }
   };
 
-  // Temperature handler
+  // Temperature change handler (Stores override without changing score)
   const handleTemperatureChange = (newTemp: LeadTemperature) => {
-    const newScore = newTemp === 'HOT' ? Math.max(88, lead.score) : newTemp === 'WARM' ? 72 : 54;
+    // If clicking same as current override, reset override to undefined
+    const nextOverride = lead.temperatureOverride === newTemp ? undefined : newTemp;
+    const now = new Date();
+    const newTimelineEvt: LeadTimelineEvent = {
+      id: `t-${Date.now()}`,
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      at: now.toISOString(),
+      title: nextOverride ? `Temperature overridden to ${newTemp}` : 'Temperature reset to calculated',
+      type: 'qualification'
+    };
+    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
+    setTimelineEvents(updatedTimeline);
+
     const updated: Lead = {
       ...lead,
-      temperature: newTemp,
-      score: newScore,
-      isPriority: newTemp === 'HOT'
+      temperatureOverride: nextOverride,
+      temperature: deriveTemperature(lead.score, nextOverride),
+      timelineEvents: updatedTimeline
     };
     onUpdateLead(updated);
-    if (onNotify) onNotify('Temperature Changed', `Lead flagged as ${newTemp} (${newScore}/100).`);
+    if (onNotify) {
+      onNotify(
+        'Temperature Updated',
+        nextOverride ? `Lead temperature overridden to ${newTemp}.` : 'Temperature reset to calculated.'
+      );
+    }
   };
 
-  // Send message
+  // Send message to unified thread
   const handleSendMessage = () => {
     if (!replyText.trim()) return;
-    const newMsg: LeadMessage = {
-      id: `m-${Date.now()}`,
-      sender: handlingMode === 'AI' ? 'ai' : 'human',
-      senderName: handlingMode === 'AI' ? 'Tecavy AI' : (lead.assignee?.name || 'Rahul — Sales'),
-      text: replyText.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    const updatedMsgs = [...messages, newMsg];
-    setMessages(updatedMsgs);
-    setReplyText('');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const isoAt = now.toISOString();
 
-    const newTimelineEvent: LeadTimelineEvent = {
+    if (matchedConvo) {
+      const newMsg: ConversationItem['messages'][number] = {
+        id: `msg-${Date.now()}`,
+        sender: 'agent',
+        senderName: lead.assignee?.name || 'Agent',
+        text: replyText.trim(),
+        time: timeStr
+      };
+
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === matchedConvo.id
+            ? {
+                ...c,
+                messages: [...c.messages, newMsg],
+                time: 'Just now',
+                timestampRaw: Date.now()
+              }
+            : c
+        )
+      );
+    }
+
+    const newTimelineEvt: LeadTimelineEvent = {
       id: `t-${Date.now()}`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: timeStr,
+      at: isoAt,
       title: `${handlingMode === 'AI' ? 'AI' : 'Agent'} sent reply`,
-      description: newMsg.text.slice(0, 60) + '...',
+      description: replyText.trim().slice(0, 70) + (replyText.length > 70 ? '...' : ''),
       type: 'message'
     };
-    const updatedTimeline = [...timelineEvents, newTimelineEvent];
+    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
     setTimelineEvents(updatedTimeline);
 
     onUpdateLead({
       ...lead,
-      messages: updatedMsgs,
       timelineEvents: updatedTimeline,
       lastActivity: 'Just now'
     });
 
+    setReplyText('');
     setTimeout(() => {
       chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 50);
@@ -333,11 +295,11 @@ export default function LeadIntelligenceWorkspace({
     setIsAiGenerating(true);
     setTimeout(() => {
       setReplyText(
-        `Hi ${lead.name}, thanks for confirming! I have shared our Enterprise overview and pricing sheet. Would tomorrow at 11:30 AM or 3:00 PM IST work for a 20-minute tailored walkthrough with our solution architect?`
+        `Hi ${lead.name}, thanks for confirming! I have shared our platform overview. Would tomorrow at 11:30 AM or 3:00 PM work for a tailored walkthrough?`
       );
       setIsAiGenerating(false);
       setActiveSubTab('conversation');
-    }, 450);
+    }, 400);
   };
 
   // Toggle Human Handoff
@@ -345,14 +307,16 @@ export default function LeadIntelligenceWorkspace({
     const nextMode: LeadHandlingMode = handlingMode === 'AI' ? 'HUMAN' : 'AI';
     setHandlingMode(nextMode);
 
+    const now = new Date();
     const newTimelineEvent: LeadTimelineEvent = {
       id: `t-${Date.now()}`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      at: now.toISOString(),
       title: nextMode === 'HUMAN' ? 'Human agent took over conversation' : 'Conversation handed back to AI',
       description: `Handling mode switched to ${nextMode}`,
       type: 'handoff'
     };
-    const updatedTimeline = [...timelineEvents, newTimelineEvent];
+    const updatedTimeline = [newTimelineEvent, ...timelineEvents];
     setTimelineEvents(updatedTimeline);
 
     onUpdateLead({
@@ -373,46 +337,115 @@ export default function LeadIntelligenceWorkspace({
   const handleRegenerateSummary = () => {
     setIsRegeneratingSummary(true);
     setTimeout(() => {
-      setAiSummary(
-        `High purchase intent lead: ${lead.name} (${jobTitle} at ${lead.company}) is evaluating Tecavy OS for omnichannel lead intake and WhatsApp automation. Implementation deadline is strictly within 30 days, supported by an allocated budget of ${budget}. Decision maker verified. Recommended: immediate discovery call.`
-      );
+      const generated = `${lead.name} from ${lead.company} is actively evaluating our solution. Score: ${lead.score}/100 with ${temperature} intent. ${
+        lead.budget ? `Budget: ${lead.budget}. ` : ''
+      }${lead.timeline ? `Timeline: ${lead.timeline}. ` : ''}Recommended action: ${aiRecommendation}.`;
+      setAiSummary(generated);
       setIsRegeneratingSummary(false);
-      if (onNotify) onNotify('Summary Refreshed', 'AI intelligence summary updated with latest signals.');
-    }, 600);
+      onUpdateLead({ ...lead, conversationSummary: generated });
+      if (onNotify) onNotify('Summary Refreshed', 'AI intelligence summary updated.');
+    }, 450);
   };
 
   // Add follow-up
   const handleAddFollowUp = () => {
     if (!newFollowUpText.trim()) return;
+    const now = new Date();
     const newFollowUp: LeadFollowUp = {
       id: `f-${Date.now()}`,
       title: newFollowUpText.trim(),
       dueTime: newFollowUpTime,
+      dueAt: now.toISOString(),
+      kind: 'task',
       type: 'upcoming',
       isCompleted: false
     };
     const updated = [newFollowUp, ...followUps];
     setFollowUps(updated);
+
+    const newTimelineEvt: LeadTimelineEvent = {
+      id: `t-${Date.now()}`,
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      at: now.toISOString(),
+      title: `Follow-up task scheduled: ${newFollowUp.title}`,
+      type: 'follow_up'
+    };
+    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
+    setTimelineEvents(updatedTimeline);
+
     setNewFollowUpText('');
     setShowAddFollowUp(false);
-    onUpdateLead({ ...lead, followUps: updated });
+    onUpdateLead({
+      ...lead,
+      followUps: updated,
+      timelineEvents: updatedTimeline
+    });
     if (onNotify) onNotify('Follow-up Added', `Scheduled: ${newFollowUp.title}`);
   };
 
   // Toggle follow-up completed
   const handleToggleFollowUp = (id: string) => {
-    const updated = followUps.map(f => f.id === id ? { ...f, isCompleted: !f.isCompleted } : f);
+    const targetItem = followUps.find((f) => f.id === id);
+    const now = new Date();
+    const willComplete = targetItem ? !targetItem.isCompleted : false;
+
+    const updated = followUps.map((f) =>
+      f.id === id
+        ? {
+            ...f,
+            isCompleted: willComplete,
+            completedAt: willComplete ? now.toISOString() : undefined
+          }
+        : f
+    );
     setFollowUps(updated);
-    onUpdateLead({ ...lead, followUps: updated });
+
+    if (targetItem) {
+      const newTimelineEvt: LeadTimelineEvent = {
+        id: `t-${Date.now()}`,
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        at: now.toISOString(),
+        title: willComplete
+          ? `Follow-up completed: ${targetItem.title}`
+          : `Follow-up reopened: ${targetItem.title}`,
+        type: 'follow_up'
+      };
+      const updatedTimeline = [newTimelineEvt, ...timelineEvents];
+      setTimelineEvents(updatedTimeline);
+      onUpdateLead({
+        ...lead,
+        followUps: updated,
+        timelineEvents: updatedTimeline
+      });
+    } else {
+      onUpdateLead({ ...lead, followUps: updated });
+    }
   };
 
   // Add internal note
   const handleAddNote = () => {
     if (!newNote.trim()) return;
+    const now = new Date();
     const updated = [newNote.trim(), ...notes];
     setNotes(updated);
+
+    const newTimelineEvt: LeadTimelineEvent = {
+      id: `t-${Date.now()}`,
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      at: now.toISOString(),
+      title: 'Internal note added',
+      description: newNote.trim().slice(0, 60),
+      type: 'ai_action'
+    };
+    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
+    setTimelineEvents(updatedTimeline);
+
     setNewNote('');
-    onUpdateLead({ ...lead, internalNotes: updated });
+    onUpdateLead({
+      ...lead,
+      internalNotes: updated,
+      timelineEvents: updatedTimeline
+    });
     if (onNotify) onNotify('Note Added', 'Internal note saved.');
   };
 
@@ -431,13 +464,19 @@ export default function LeadIntelligenceWorkspace({
 
   // Remove tag
   const handleRemoveTag = (tagToRemove: string) => {
-    const updated = tags.filter(t => t !== tagToRemove);
+    const updated = tags.filter((t) => t !== tagToRemove);
     setTags(updated);
     onUpdateLead({ ...lead, tags: updated });
   };
 
-  const channelBadge = getChannelBadge(lead.source);
-  const initials = lead.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const channelBadge = getChannelBadge(lead.preferredChannel || lead.source);
+  const initials = lead.name
+    .split(' ')
+    .map((n) => n[0])
+    .filter(Boolean)
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'LD';
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex justify-end animate-fadeIn">
@@ -457,7 +496,6 @@ export default function LeadIntelligenceWorkspace({
         
         {/* ========================================================
             PERSISTENT HEADER: LEAD OVERVIEW & ACTIONS
-            Identical across all 5 tabs
            ======================================================== */}
         <div className={`px-6 py-4 border-b flex flex-col gap-3 shrink-0 transition-colors ${
           isLight
@@ -490,6 +528,9 @@ export default function LeadIntelligenceWorkspace({
                   }`}>
                     <span>{temperature === 'HOT' ? '🔥 HOT' : temperature === 'WARM' ? '🟠 WARM' : '⚪ COLD'}</span>
                     <span className="tabular-nums font-mono">{lead.score}/100</span>
+                    {lead.temperatureOverride && (
+                      <span className="text-[10px] opacity-75">(override)</span>
+                    )}
                   </span>
 
                   {/* Channel Badge */}
@@ -505,37 +546,38 @@ export default function LeadIntelligenceWorkspace({
                     {lead.company}
                   </span>
                   <span>·</span>
-                  <span>{jobTitle}</span>
+                  <span>{lead.title || <span className="italic text-slate-400">Not provided</span>}</span>
                   <span>·</span>
-                  <span>{location}</span>
+                  <span>{lead.location || <span className="italic text-slate-400">Not provided</span>}</span>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions: Status, Temp, Handoff, Close */}
+            {/* Quick Actions: Stage Selector (single source of truth), Temp Override, Handoff, Close */}
             <div className="flex items-center space-x-2 shrink-0">
-              {/* Status Selector */}
+              {/* Stage Selector */}
               <select
-                value={lead.status}
-                onChange={(e) => handleStatusChange(e.target.value as Lead['status'])}
+                id="lead-stage-select"
+                aria-label="Update Lead Stage"
+                value={lead.stage || 'New'}
+                onChange={(e) => handleStageChange(e.target.value as LeadStage)}
                 className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer focus:outline-none focus:border-teal-600 ${
                   isLight
                     ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 shadow-2xs'
                     : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:bg-[#0B2522]'
                 }`}
-                title="Update Pipeline Status"
               >
-                <option value="New">Status: New</option>
-                <option value="Engaged">Status: Engaged</option>
-                <option value="Qualified">Status: Qualified</option>
-                <option value="Contacted">Status: Contacted</option>
-                <option value="Proposal">Status: Proposal</option>
-                <option value="Won">Status: Won</option>
-                <option value="Lost">Status: Lost</option>
+                {STAGE_OPTIONS.map((stg) => (
+                  <option key={stg} value={stg}>
+                    Stage: {stg}
+                  </option>
+                ))}
               </select>
 
               {/* Temperature Selector */}
               <select
+                id="lead-temp-select"
+                aria-label="Override Lead Temperature"
                 value={temperature}
                 onChange={(e) => handleTemperatureChange(e.target.value as LeadTemperature)}
                 className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer focus:outline-none focus:border-teal-600 ${
@@ -543,7 +585,6 @@ export default function LeadIntelligenceWorkspace({
                     ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 shadow-2xs'
                     : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:bg-[#0B2522]'
                 }`}
-                title="Change Lead Temperature"
               >
                 <option value="HOT">🔥 HOT</option>
                 <option value="WARM">🟠 WARM</option>
@@ -571,12 +612,12 @@ export default function LeadIntelligenceWorkspace({
               <button
                 type="button"
                 onClick={onClose}
+                aria-label="Close Lead Profile"
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   isLight
                     ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
                     : 'text-[#A9BFA5] hover:text-white hover:bg-[#0D2D2A]'
                 }`}
-                title="Close Lead Profile (Esc)"
               >
                 <X className="w-5 h-5" strokeWidth={2} />
               </button>
@@ -592,7 +633,7 @@ export default function LeadIntelligenceWorkspace({
                 isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
               }`}>Budget</span>
               <span className={`font-semibold tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {budget}
+                {lead.budget || lead.value || <span className="italic font-normal text-slate-400">Not provided</span>}
               </span>
             </div>
             <div>
@@ -600,23 +641,33 @@ export default function LeadIntelligenceWorkspace({
                 isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
               }`}>Timeline</span>
               <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {timeline}
+                {lead.timeline || <span className="italic font-normal text-slate-400">Not provided</span>}
               </span>
             </div>
             <div>
               <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                 isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
               }`}>Decision Maker</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                ✓ Verified Approver
-              </span>
+              {lead.decisionMaker === true ? (
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  ✓ Verified Approver
+                </span>
+              ) : lead.decisionMaker === false ? (
+                <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  Requires approval
+                </span>
+              ) : (
+                <span className="italic font-normal text-slate-400">
+                  Not determined
+                </span>
+              )}
             </div>
             <div>
               <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                 isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
               }`}>Assigned Owner</span>
               <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {lead.assignee?.name || 'Rahul — Sales'}
+                {lead.assignee?.name || <span className="italic font-normal text-slate-400">Unassigned</span>}
               </span>
             </div>
           </div>
@@ -624,7 +675,6 @@ export default function LeadIntelligenceWorkspace({
 
         {/* ========================================================
             STANDARDIZED FIVE-TAB NAVIGATION BAR
-            Consistent styling matching Inbox and Overview
            ======================================================== */}
         <div className={`border-b px-6 flex items-center space-x-1 sm:space-x-2 overflow-x-auto shrink-0 select-none scrollbar-none transition-colors ${
           isLight
@@ -667,7 +717,7 @@ export default function LeadIntelligenceWorkspace({
                 ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200'
                 : isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
             }`}>
-              {messages.length}
+              {conversationMessages.length}
             </span>
           </button>
 
@@ -735,7 +785,7 @@ export default function LeadIntelligenceWorkspace({
         </div>
 
         {/* ========================================================
-            SUB-TAB CONTENT CONTAINER (Scrollable with bottom clearance)
+            SUB-TAB CONTENT CONTAINER
            ======================================================== */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6 pb-24">
           
@@ -768,22 +818,29 @@ export default function LeadIntelligenceWorkspace({
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 text-xs">
-                    <span className={`px-3 py-1.5 rounded-lg border font-medium ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200 text-slate-700'
-                        : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                    }`}>
-                      Confidence: <strong className="tabular-nums">96%</strong>
-                    </span>
-                    <span className={`px-3 py-1.5 rounded-lg border font-medium ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200 text-slate-700'
-                        : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                    }`}>
-                      Readiness: <strong className="text-emerald-600 dark:text-emerald-400">Immediate</strong>
-                    </span>
-                  </div>
+                  {/* Confidence & Readiness badges (shown only if provided) */}
+                  {(lead.aiConfidence !== undefined || lead.purchaseReadiness !== undefined) && (
+                    <div className="flex items-center space-x-2 text-xs">
+                      {lead.aiConfidence !== undefined && (
+                        <span className={`px-3 py-1.5 rounded-lg border font-medium ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-200 text-slate-700'
+                            : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                        }`}>
+                          Confidence: <strong className="tabular-nums">{lead.aiConfidence}</strong>
+                        </span>
+                      )}
+                      {lead.purchaseReadiness !== undefined && (
+                        <span className={`px-3 py-1.5 rounded-lg border font-medium ${
+                          isLight
+                            ? 'bg-slate-50 border-slate-200 text-slate-700'
+                            : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                        }`}>
+                          Readiness: <strong className="text-emerald-600 dark:text-emerald-400">{lead.purchaseReadiness}</strong>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* AI Conversation Summary */}
@@ -807,12 +864,67 @@ export default function LeadIntelligenceWorkspace({
                   <p className={`text-sm leading-relaxed font-normal ${
                     isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
                   }`}>
-                    {aiSummary}
+                    {aiSummary || lead.description || (
+                      <span className="italic text-slate-400">No summary generated yet. Click regenerate to create one from lead signals.</span>
+                    )}
                   </p>
                 </div>
               </div>
 
-              {/* Card 2: Why This Lead is Qualified */}
+              {/* Card 2: Qualification Checklist (5 Criteria) */}
+              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
+                isLight
+                  ? 'bg-white border-slate-200/90'
+                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-bold uppercase tracking-wider block ${
+                    isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                  }`}>
+                    Qualification Criteria
+                  </span>
+                  <span className="text-xs font-mono text-slate-400 dark:text-[#A9BFA5]/70">
+                    {qualificationChecks.filter(c => c.status === 'verified').length} of {qualificationChecks.length} verified
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 text-xs">
+                  {qualificationChecks.map((check) => (
+                    <div
+                      key={check.key}
+                      className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${
+                        check.status === 'verified'
+                          ? isLight
+                            ? 'bg-emerald-50/50 border-emerald-200/60 text-slate-800'
+                            : 'bg-emerald-950/20 border-emerald-800/40 text-emerald-200'
+                          : check.status === 'missing'
+                          ? isLight
+                            ? 'bg-rose-50/50 border-rose-200/60 text-slate-800'
+                            : 'bg-rose-950/20 border-rose-800/40 text-rose-200'
+                          : isLight
+                          ? 'bg-slate-50 border-slate-200/60 text-slate-600'
+                          : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)] text-[#A9BFA5]'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        {check.status === 'verified' ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        ) : check.status === 'missing' ? (
+                          <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                        ) : (
+                          <HelpCircle className="w-4 h-4 text-slate-400 shrink-0" />
+                        )}
+                        <span className="font-semibold">{check.label}</span>
+                      </div>
+                      <span className="text-xs truncate max-w-[240px] text-right font-medium">
+                        {check.detail}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card 3: Why This Lead is Qualified (Signals) */}
               <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
                 isLight
                   ? 'bg-white border-slate-200/90'
@@ -824,35 +936,31 @@ export default function LeadIntelligenceWorkspace({
                   Why this lead is qualified
                 </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Requirement clearly identified</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Budget mentioned ({budget})</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Decision maker identified</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Timeline identified (&lt;30 days)</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Asked for enterprise pricing</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                    <span>Requested a discovery call</span>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  {scoreSignals.map((signal, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#071C1A]"
+                    >
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span className={`truncate font-medium ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                          {signal.label}
+                        </span>
+                      </div>
+                      <span className={`font-mono font-semibold tabular-nums ml-2 shrink-0 ${
+                        signal.points >= 0
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      }`}>
+                        {signal.points >= 0 ? `+${signal.points}` : signal.points}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Card 3: Recommended Next Action */}
+              {/* Card 4: Recommended Next Action */}
               <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
                 isLight
                   ? 'bg-amber-50/70 border-amber-200/90'
@@ -866,17 +974,14 @@ export default function LeadIntelligenceWorkspace({
                 </div>
 
                 <div>
-                  <h3 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <h3 className={`text-base sm:text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {aiRecommendation}
                   </h3>
-                  <p className={`text-xs mt-1 leading-relaxed ${
-                    isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
-                  }`}>
-                    Reason: The prospect has high purchase intent, explicit budget allocated, and requested pricing and live support.
-                  </p>
-                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mt-1">
-                    Suggested Timing: <strong>Within 24 hours</strong>
-                  </p>
+                  {lead.timeline && (
+                    <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mt-1">
+                      Expected Timeline: <strong>{lead.timeline}</strong>
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-3 pt-2">
@@ -885,18 +990,16 @@ export default function LeadIntelligenceWorkspace({
                     onClick={() => {
                       setActiveSubTab('notes');
                       setShowAddFollowUp(true);
-                      if (onNotify) onNotify('Discovery Call Queued', 'Ready to schedule discovery call with Rahul.');
+                      if (onNotify) onNotify('Follow-up Task', `Follow-up queued for ${lead.name}.`);
                     }}
                     className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
                   >
-                    Accept & Schedule Call
+                    Schedule Follow-up
                   </button>
+
                   <button
                     type="button"
-                    onClick={() => {
-                      setActiveSubTab('conversation');
-                      handleGenerateAiReply();
-                    }}
+                    onClick={handleGenerateAiReply}
                     className={`px-4 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
                       isLight
                         ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
@@ -912,7 +1015,7 @@ export default function LeadIntelligenceWorkspace({
           )}
 
           {/* ========================================================
-              TAB 2: CONVERSATION
+              TAB 2: CONVERSATION (UNIFIED WITH useConversations)
              ======================================================== */}
           {activeSubTab === 'conversation' && (
             <div className="space-y-4 max-w-3xl">
@@ -925,7 +1028,8 @@ export default function LeadIntelligenceWorkspace({
               }`}>
                 <div className="flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
-                  <span className="font-semibold">{channelBadge.name} ({phone})</span>
+                  <span className="font-semibold">{channelBadge.name}</span>
+                  {lead.phone && <span className="text-slate-400">({lead.phone})</span>}
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className={isLight ? 'text-slate-500 font-medium' : 'text-[#A9BFA5]'}>
@@ -948,58 +1052,67 @@ export default function LeadIntelligenceWorkspace({
                   : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
               }`}>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
-                  {messages.map((msg, idx) => {
-                    const isCustomer = msg.sender === 'customer';
-                    const isAi = msg.sender === 'ai';
-                    return (
-                      <div 
-                        key={msg.id}
-                        className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
-                      >
-                        <div className={`flex items-center space-x-1.5 mb-1 text-[11px] px-1 ${
-                          isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
-                        }`}>
-                          {isCustomer ? (
-                            <>
-                              <User className="w-3 h-3" />
-                              <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
-                                {msg.senderName}
-                              </span>
-                            </>
-                          ) : isAi ? (
-                            <>
-                              <Bot className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                              <span className="font-semibold text-teal-600 dark:text-teal-400">Tecavy AI</span>
-                            </>
-                          ) : (
-                            <>
-                              <UserCheck className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                              <span className="font-semibold text-sky-600 dark:text-sky-300">Agent ({msg.senderName})</span>
-                            </>
-                          )}
-                          <span>·</span>
-                          <span className="text-[10px] font-mono tabular-nums">{msg.time}</span>
-                        </div>
+                  {conversationMessages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 dark:text-slate-500">
+                      <MessageSquare className="w-10 h-10 mb-2 stroke-[1.5] opacity-50" />
+                      <p className="text-sm font-medium">No conversation messages yet</p>
+                      <p className="text-xs mt-1 max-w-xs">
+                        Messages sent here or received in Inbox will be synchronized with this lead.
+                      </p>
+                    </div>
+                  ) : (
+                    conversationMessages.map((msg) => {
+                      const isCustomer = msg.sender === 'customer';
+                      const isAi = msg.sender === 'ai';
+                      return (
+                        <div 
+                          key={msg.id}
+                          className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
+                        >
+                          <div className={`flex items-center space-x-1.5 mb-1 text-[11px] px-1 ${
+                            isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
+                          }`}>
+                            {isCustomer ? (
+                              <>
+                                <User className="w-3 h-3" />
+                                <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                                  {msg.senderName}
+                                </span>
+                              </>
+                            ) : isAi ? (
+                              <>
+                                <Bot className="w-3 h-3 text-teal-600 dark:text-teal-400" />
+                                <span className="font-semibold text-teal-600 dark:text-teal-400">{BRAND_NAME} AI</span>
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                                <span className="font-semibold text-sky-600 dark:text-sky-300">Agent ({msg.senderName})</span>
+                              </>
+                            )}
+                            <span>·</span>
+                            <span className="text-[10px] font-mono tabular-nums">{msg.time}</span>
+                          </div>
 
-                        {/* Bubble matched to Inbox */}
-                        <div className={`p-3.5 text-xs max-w-[82%] sm:max-w-[75%] leading-relaxed shadow-xs ${
-                          isCustomer
-                            ? isLight
-                              ? 'bg-slate-100 text-slate-800 border border-slate-200/70 rounded-2xl rounded-tl-sm'
-                              : 'bg-[#0B2522] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] rounded-2xl rounded-tl-sm'
-                            : isAi
-                            ? isLight
-                              ? 'bg-teal-50/90 text-teal-950 border border-teal-200/60 rounded-2xl rounded-tr-sm'
-                              : 'bg-[#0E2C26] border border-emerald-500/25 text-emerald-50 rounded-2xl rounded-tr-sm'
-                            : isLight
+                          <div className={`p-3.5 text-xs max-w-[82%] sm:max-w-[75%] leading-relaxed shadow-xs ${
+                            isCustomer
+                              ? isLight
+                                ? 'bg-slate-100 text-slate-800 border border-slate-200/70 rounded-2xl rounded-tl-sm'
+                                : 'bg-[#0B2522] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] rounded-2xl rounded-tl-sm'
+                              : isAi
+                              ? isLight
+                                ? 'bg-teal-50/90 text-teal-950 border border-teal-200/60 rounded-2xl rounded-tr-sm'
+                                : 'bg-[#0E2C26] border border-emerald-500/25 text-emerald-50 rounded-2xl rounded-tr-sm'
+                              : isLight
                               ? 'bg-slate-900 text-white rounded-2xl rounded-tr-sm'
                               : 'bg-[#0D2D38] border border-sky-500/30 text-sky-50 rounded-2xl rounded-tr-sm'
-                        }`}>
-                          {msg.text}
+                          }`}>
+                            {msg.text}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                   <div ref={chatBottomRef} />
                 </div>
 
@@ -1049,10 +1162,10 @@ export default function LeadIntelligenceWorkspace({
                       type="button"
                       onClick={handleSendMessage}
                       disabled={!replyText.trim()}
-                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-40 flex items-center space-x-1.5"
+                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 cursor-pointer disabled:opacity-40 transition-colors shadow-xs"
                     >
-                      <span>Send</span>
                       <Send className="w-3.5 h-3.5" />
+                      <span>Send</span>
                     </button>
                   </div>
                 </div>
@@ -1090,25 +1203,35 @@ export default function LeadIntelligenceWorkspace({
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Job Title</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>{jobTitle}</span>
+                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
+                      {lead.title || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Email Address</span>
-                    <a href={`mailto:${lead.email}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
-                      <span>{lead.email}</span>
-                    </a>
+                    {lead.email ? (
+                      <a href={`mailto:${lead.email}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
+                        <Mail className="w-3.5 h-3.5 shrink-0" />
+                        <span>{lead.email}</span>
+                      </a>
+                    ) : (
+                      <span className="italic text-slate-400">Not provided</span>
+                    )}
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Phone Number</span>
-                    <a href={`tel:${phone}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
-                      <Phone className="w-3.5 h-3.5 shrink-0" />
-                      <span>{phone}</span>
-                    </a>
+                    {lead.phone ? (
+                      <a href={`tel:${lead.phone}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
+                        <Phone className="w-3.5 h-3.5 shrink-0" />
+                        <span>{lead.phone}</span>
+                      </a>
+                    ) : (
+                      <span className="italic text-slate-400">Not provided</span>
+                    )}
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
@@ -1120,19 +1243,23 @@ export default function LeadIntelligenceWorkspace({
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Company Size</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>{companySize}</span>
+                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
+                      {lead.companySize || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Location</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>{location}</span>
+                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
+                      {lead.location || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Preferred Channel</span>
-                    <span className="text-teal-600 dark:text-teal-400 font-semibold">{preferredChannel}</span>
+                    <span className="text-teal-600 dark:text-teal-400 font-semibold">{channelBadge.name}</span>
                   </div>
                 </div>
               </div>
@@ -1159,7 +1286,9 @@ export default function LeadIntelligenceWorkspace({
                         ? 'bg-slate-50 border-slate-200/80 text-slate-800'
                         : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)] text-[#E8E9D8]'
                     }`}>
-                      {requirement}
+                      {lead.requirement || lead.description || (
+                        <span className="italic text-slate-400">Not provided</span>
+                      )}
                     </p>
                   </div>
 
@@ -1168,19 +1297,29 @@ export default function LeadIntelligenceWorkspace({
                       <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                         isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                       }`}>Budget Allocated</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">{budget}</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
+                        {lead.budget || lead.value || <span className="italic text-slate-400 font-normal">Not provided</span>}
+                      </span>
                     </div>
                     <div>
                       <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                         isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                       }`}>Expected Timeline</span>
-                      <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>{timeline}</span>
+                      <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                        {lead.timeline || <span className="italic text-slate-400 font-normal">Not provided</span>}
+                      </span>
                     </div>
                     <div>
                       <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                         isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                       }`}>Decision Maker</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{decisionMaker ? '✓ Yes (Verified)' : 'Influencer'}</span>
+                      {lead.decisionMaker === true ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Yes (Verified)</span>
+                      ) : lead.decisionMaker === false ? (
+                        <span className="text-rose-600 dark:text-rose-400 font-semibold">Requires approval</span>
+                      ) : (
+                        <span className="italic text-slate-400">Not determined</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1195,7 +1334,7 @@ export default function LeadIntelligenceWorkspace({
                 <span className={`text-xs font-bold uppercase tracking-wider block ${
                   isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
                 }`}>
-                  Lead Source & Campaign Attribution
+                  Lead Source & Attribution
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -1209,26 +1348,36 @@ export default function LeadIntelligenceWorkspace({
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Campaign Name</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>October Lead Generation Campaign</span>
+                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
+                      {lead.campaignAttribution?.campaignName || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>First Touch</span>
-                    <span className={isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}>Instagram Sponsored Story</span>
+                    <span className={isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}>
+                      {lead.campaignAttribution?.firstTouch || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
                   <div>
                     <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
                       isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
                     }`}>Last Touch</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">WhatsApp Inbound Message</span>
+                    <span className={isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}>
+                      {lead.campaignAttribution?.lastTouch || lead.lastActivity || <span className="italic text-slate-400">Not provided</span>}
+                    </span>
                   </div>
-                  <div className="sm:col-span-2">
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-                    }`}>Creative / Ad Title</span>
-                    <span className={`font-medium ${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'}`}>“AI-powered CRM for growing businesses”</span>
-                  </div>
+                  {lead.campaignAttribution?.adName && (
+                    <div className="sm:col-span-2">
+                      <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
+                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                      }`}>Creative / Ad Name</span>
+                      <span className={`font-medium ${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'}`}>
+                        {lead.campaignAttribution.adName}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1258,47 +1407,54 @@ export default function LeadIntelligenceWorkspace({
                   </span>
                 </div>
 
-                <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-200 dark:before:bg-slate-800">
-                  {timelineEvents.map((evt) => (
-                    <div key={evt.id} className="flex items-start space-x-3.5 relative pl-1">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[10px] shadow-2xs ${
-                        evt.type === 'message'
-                          ? 'bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/40'
-                          : evt.type === 'ai_action'
-                          ? 'bg-teal-50 text-teal-600 border border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40'
-                          : evt.type === 'qualification'
-                          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
-                          : evt.type === 'handoff'
-                          ? 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
-                          : 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40'
-                      }`}>
-                        {evt.type === 'message' ? <MessageSquare className="w-3 h-3" /> :
-                         evt.type === 'ai_action' ? <Bot className="w-3 h-3" /> :
-                         evt.type === 'qualification' ? <Check className="w-3 h-3" /> :
-                         evt.type === 'handoff' ? <UserCheck className="w-3 h-3" /> :
-                         <Clock className="w-3 h-3" />}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-[#E8E9D8]'}`}>
-                            {evt.title}
-                          </span>
-                          <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-slate-500 shrink-0">
-                            {evt.time}
-                          </span>
+                {timelineEvents.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400 dark:text-slate-500">
+                    <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 stroke-[1.5]" />
+                    <p className="text-xs font-medium">No activity events recorded yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-200 dark:before:bg-slate-800">
+                    {timelineEvents.map((evt) => (
+                      <div key={evt.id} className="flex items-start space-x-3.5 relative pl-1">
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[10px] shadow-2xs ${
+                          evt.type === 'message'
+                            ? 'bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/40'
+                            : evt.type === 'ai_action'
+                            ? 'bg-teal-50 text-teal-600 border border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40'
+                            : evt.type === 'qualification'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
+                            : evt.type === 'handoff'
+                            ? 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
+                            : 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40'
+                        }`}>
+                          {evt.type === 'message' ? <MessageSquare className="w-3 h-3" /> :
+                           evt.type === 'ai_action' ? <Bot className="w-3 h-3" /> :
+                           evt.type === 'qualification' ? <Check className="w-3 h-3" /> :
+                           evt.type === 'handoff' ? <UserCheck className="w-3 h-3" /> :
+                           <Clock className="w-3 h-3" />}
                         </div>
-                        {evt.description && (
-                          <p className={`text-xs font-normal mt-0.5 leading-relaxed ${
-                            isLight ? 'text-slate-500' : 'text-[#A9BFA5]/75'
-                          }`}>
-                            {evt.description}
-                          </p>
-                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-[#E8E9D8]'}`}>
+                              {evt.title}
+                            </span>
+                            <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-slate-500 shrink-0">
+                              {evt.at ? formatRelative(evt.at) : evt.time}
+                            </span>
+                          </div>
+                          {evt.description && (
+                            <p className={`text-xs font-normal mt-0.5 leading-relaxed ${
+                              isLight ? 'text-slate-500' : 'text-[#A9BFA5]/75'
+                            }`}>
+                              {evt.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1339,7 +1495,7 @@ export default function LeadIntelligenceWorkspace({
                   }`}>
                     <input
                       type="text"
-                      placeholder="e.g. Schedule discovery call regarding CRM implementation..."
+                      placeholder="e.g. Schedule discovery call regarding requirements..."
                       value={newFollowUpText}
                       onChange={(e) => setNewFollowUpText(e.target.value)}
                       className={`w-full text-xs px-3 py-2 rounded-lg border focus:outline-none focus:border-teal-600 ${
@@ -1383,51 +1539,55 @@ export default function LeadIntelligenceWorkspace({
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  {followUps.map((item) => (
-                    <div 
-                      key={item.id}
-                      className={`p-3.5 rounded-lg border text-xs flex items-start justify-between gap-3 transition-colors ${
-                        item.isCompleted 
-                          ? isLight
-                            ? 'bg-slate-50 border-slate-200/60 opacity-60'
-                            : 'bg-[#061816] border-[rgba(169,191,165,0.1)] opacity-60'
-                          : isLight
-                          ? 'bg-white border-slate-200/90 shadow-2xs'
-                          : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)]'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleFollowUp(item.id)}
-                          className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center cursor-pointer transition-colors border ${
-                            item.isCompleted 
-                              ? 'bg-teal-600 border-teal-600 text-white' 
-                              : isLight
-                              ? 'border-slate-300 hover:border-teal-600'
-                              : 'border-[#A9BFA5]/50 hover:border-white'
-                          }`}
-                          aria-label={item.isCompleted ? "Mark incomplete" : "Mark complete"}
-                        >
-                          {item.isCompleted && <Check className="w-3 h-3 stroke-[2.5]" />}
-                        </button>
-                        <div>
-                          <p className={`font-medium leading-snug ${
-                            item.isCompleted 
-                              ? 'line-through text-slate-400 dark:text-[#A9BFA5]' 
-                              : isLight ? 'text-slate-800' : 'text-[#E8E9D8]'
-                          }`}>
-                            {item.title}
-                          </p>
-                          <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-[#A9BFA5]/70 mt-0.5 block">
-                            {item.dueTime}
-                          </span>
+                {followUps.length === 0 ? (
+                  <p className="text-xs text-slate-400 py-3 text-center">No scheduled follow-ups.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {followUps.map((item) => (
+                      <div 
+                        key={item.id}
+                        className={`p-3.5 rounded-lg border text-xs flex items-start justify-between gap-3 transition-colors ${
+                          item.isCompleted 
+                            ? isLight
+                              ? 'bg-slate-50 border-slate-200/60 opacity-60'
+                              : 'bg-[#061816] border-[rgba(169,191,165,0.1)] opacity-60'
+                            : isLight
+                            ? 'bg-white border-slate-200/90 shadow-2xs'
+                            : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)]'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFollowUp(item.id)}
+                            className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center cursor-pointer transition-colors border ${
+                              item.isCompleted 
+                                ? 'bg-teal-600 border-teal-600 text-white' 
+                                : isLight
+                                ? 'border-slate-300 hover:border-teal-600'
+                                : 'border-[#A9BFA5]/50 hover:border-white'
+                            }`}
+                            aria-label={item.isCompleted ? "Mark incomplete" : "Mark complete"}
+                          >
+                            {item.isCompleted && <Check className="w-3 h-3 stroke-[2.5]" />}
+                          </button>
+                          <div>
+                            <p className={`font-medium leading-snug ${
+                              item.isCompleted 
+                                ? 'line-through text-slate-400 dark:text-[#A9BFA5]' 
+                                : isLight ? 'text-slate-800' : 'text-[#E8E9D8]'
+                            }`}>
+                              {item.title}
+                            </p>
+                            <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-[#A9BFA5]/70 mt-0.5 block">
+                              {item.dueTime}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Card 2: Internal Notes */}
@@ -1446,50 +1606,58 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <span className="text-[11px] font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-2.5 py-0.5 rounded-md">
-                    Internal Team Only — Not visible to customer
+                    Internal Team Only
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Add an internal note for sales or solutions engineering..."
+                <div className="space-y-2.5">
+                  <div className="flex items-start space-x-2">
+                    <textarea
+                      placeholder="Add an internal note or context about this prospect..."
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleAddNote(); }}
-                      className={`flex-1 text-xs px-3.5 py-2.5 rounded-lg border transition-colors focus:outline-none focus:border-teal-600 ${
+                      rows={2}
+                      className={`flex-1 text-xs p-3 rounded-lg border resize-none focus:outline-none focus:border-teal-600 ${
                         isLight
-                          ? 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white placeholder:text-slate-400'
-                          : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] placeholder:text-[#A9BFA5]/50'
+                          ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400'
+                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] placeholder:text-[#A9BFA5]/50'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={handleAddNote}
                       disabled={!newNote.trim()}
-                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+                      className="px-3.5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors shrink-0 shadow-xs"
                     >
-                      Save Note
+                      Add Note
                     </button>
                   </div>
 
-                  {notes.map((n, i) => (
-                    <div 
-                      key={i} 
-                      className={`p-3.5 rounded-lg border text-xs leading-relaxed font-normal ${
-                        isLight
-                          ? 'bg-amber-50/70 border-amber-200/80 text-amber-950'
-                          : 'bg-[#18160E] border-amber-500/25 text-amber-200'
-                      }`}
-                    >
-                      {n}
+                  {notes.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-3 text-center">No internal notes yet.</p>
+                  ) : (
+                    <div className="space-y-2 pt-2">
+                      {notes.map((note, idx) => (
+                        <div 
+                          key={idx}
+                          className={`p-3 rounded-lg border text-xs leading-relaxed ${
+                            isLight
+                              ? 'bg-slate-50 border-slate-200/80 text-slate-700'
+                              : 'bg-[#071C1A] border-[rgba(169,191,165,0.18)] text-[#E8E9D8]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1 text-[11px] text-slate-400">
+                            <span className="font-semibold text-teal-600 dark:text-teal-400">Team Note</span>
+                          </div>
+                          <p>{note}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
-              {/* Card 3: Tags & Labels */}
+              {/* Card 3: Lead Tags */}
               <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
                 isLight
                   ? 'bg-white border-slate-200/90'
@@ -1499,37 +1667,38 @@ export default function LeadIntelligenceWorkspace({
                   <span className={`text-xs font-bold uppercase tracking-wider ${
                     isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
                   }`}>
-                    Tags & Labels
+                    Lead Tags
                   </span>
                   {!isAddingTag && (
                     <button
                       type="button"
                       onClick={() => setIsAddingTag(true)}
-                      className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center space-x-1 cursor-pointer"
                     >
-                      + Add Tag
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Tag</span>
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex items-center flex-wrap gap-2">
                   {tags.map((tag) => (
                     <span 
                       key={tag}
-                      className={`inline-flex items-center space-x-1.5 text-xs px-2.5 py-1 rounded-md border font-medium ${
+                      className={`text-xs px-2.5 py-1 rounded-md border font-medium flex items-center space-x-1.5 ${
                         isLight
                           ? 'bg-slate-100 border-slate-200 text-slate-800'
-                          : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                          : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
                       }`}
                     >
                       <span>{tag}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="text-slate-400 hover:text-rose-600 dark:text-[#A9BFA5]/60 dark:hover:text-rose-400 ml-1 cursor-pointer"
-                        title="Remove tag"
+                        className="hover:text-rose-500 cursor-pointer ml-1"
+                        aria-label={`Remove tag ${tag}`}
                       >
-                        ×
+                        <X className="w-3 h-3" />
                       </button>
                     </span>
                   ))}
@@ -1539,14 +1708,14 @@ export default function LeadIntelligenceWorkspace({
                   <div className="flex items-center space-x-2 pt-2">
                     <input
                       type="text"
-                      placeholder="New tag label..."
+                      placeholder="Tag label..."
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleAddTag(); }}
                       className={`text-xs px-3 py-1.5 rounded-lg border focus:outline-none focus:border-teal-600 ${
                         isLight
                           ? 'bg-white border-slate-200 text-slate-900'
-                          : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
                       }`}
                     />
                     <button
@@ -1576,7 +1745,6 @@ export default function LeadIntelligenceWorkspace({
 
         {/* ========================================================
             STANDARDIZED PERSISTENT BOTTOM ACTION BAR
-            Anchored consistently across all 5 tabs
            ======================================================== */}
         <div className={`border-t px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 transition-colors shadow-sm ${
           isLight
@@ -1585,7 +1753,7 @@ export default function LeadIntelligenceWorkspace({
         }`}>
           <div className="flex items-center space-x-2.5 text-xs">
             <span>
-              Assigned: <strong className={isLight ? 'text-slate-900' : 'text-white'}>{lead.assignee?.name || 'Rahul — Sales'}</strong>
+              Assigned: <strong className={isLight ? 'text-slate-900' : 'text-white'}>{lead.assignee?.name || <span className="italic font-normal text-slate-400">Unassigned</span>}</strong>
             </span>
             <span>·</span>
             <span className={handlingMode === 'HUMAN' ? 'text-amber-600 dark:text-amber-300 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-medium'}>
@@ -1620,7 +1788,7 @@ export default function LeadIntelligenceWorkspace({
               className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
                 isLight
                   ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                  : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
+                : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
               }`}
             >
               Follow-up
@@ -1642,7 +1810,7 @@ export default function LeadIntelligenceWorkspace({
               type="button"
               onClick={() => {
                 setActiveSubTab('qualification');
-                if (onNotify) onNotify('Discovery Call Queued', 'Discovery call invite scheduled for tomorrow 11:00 AM.');
+                if (onNotify) onNotify('Discovery Call Queued', 'Discovery call invite ready to dispatch.');
               }}
               className="px-4 py-2 text-xs font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition-colors cursor-pointer"
             >

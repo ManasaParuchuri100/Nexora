@@ -37,13 +37,15 @@ export default function LeadDetailModal({
   const { theme } = useTheme();
   const isLight = theme === 'light';
 
-  if (!lead) return null;
-
   const [notes, setNotes] = useState('');
   const [showAiDraft, setShowAiDraft] = useState(false);
   const [aiDraftMessage, setAiDraftMessage] = useState(
-    `Hello ${lead.name},\n\nWe have reviewed ${lead.company}'s requirements for ${lead.description || 'platform automation'}. TECAVY can orchestrate your pipeline with zero latency and full multichannel controls.\n\nWould tomorrow at 11:30 AM IST suit for a tailored platform walkthrough?`
+    lead
+      ? `Hello ${lead.name},\n\nWe have reviewed ${lead.company}'s requirements for ${lead.description || 'platform automation'}. TECAVY can orchestrate your pipeline with zero latency and full multichannel controls.\n\nWould tomorrow at 11:30 AM IST suit for a tailored platform walkthrough?`
+      : ''
   );
+
+  if (!lead) return null;
 
   const handleStageChange = (newStage: LeadStage) => {
     const updated: Lead = {

@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         // Ignore storage access errors
       }
     }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

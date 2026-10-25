@@ -41,6 +41,7 @@ import CommandPalette from './app/CommandPalette';
 import SettingsModal from './app/SettingsModal';
 import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
 import { UserSession } from './AuthModal';
+import { BRAND_NAME } from '../config/brand';
 
 interface NexoraAppProps {
   initialMode?: 'login' | 'signup' | 'forgot';
@@ -189,7 +190,12 @@ export default function NexoraApp({
   };
 
   const handleUpdateLead = (updatedLead: Lead) => {
-    setLeads(leads.map(l => l.id === updatedLead.id ? updatedLead : l));
+    setLeads(prev => {
+      if (!prev.some(l => l.id === updatedLead.id)) {
+        return [updatedLead, ...prev];
+      }
+      return prev.map(l => l.id === updatedLead.id ? updatedLead : l);
+    });
   };
 
   const handleTriggerQuickAction = (action: 'campaign' | 'content' | 'lead' | 'schedule') => {
@@ -197,6 +203,12 @@ export default function NexoraApp({
   };
 
   const handleSelectLead = (lead: Lead) => {
+    setLeads(prev => {
+      if (!prev.some(l => l.id === lead.id)) {
+        return [lead, ...prev];
+      }
+      return prev;
+    });
     setSelectedLead(lead);
     setActiveModal('lead-details');
   };
@@ -270,6 +282,9 @@ export default function NexoraApp({
           showToast(val ? 'Demo Workspace Active' : 'Live Workspace', val ? 'Showing simulated sample data.' : 'Switched to live production workspace.');
         }}
         onOpenHelp={() => setIsHelpOpen(true)}
+        userName={currentUser?.name || 'Alex'}
+        userRole={currentUser?.role || 'Owner'}
+        workspaceName={currentUser?.workspace || `${BRAND_NAME} Workspace`}
       />
 
       {/* Main Workspace Frame */}
@@ -299,38 +314,40 @@ export default function NexoraApp({
             {/* Dynamic Main Workspace Content (Constant navigation & page views) */}
             <main className={`flex-1 w-full flex flex-col relative ${isInbox ? 'min-h-0 overflow-hidden' : 'min-h-[calc(100vh-65px)]'}`}>
               
-              {/* Mode Switch Banner for First-Run vs Demo Data */}
-              <div className={`${
-                isLight 
-                  ? 'bg-white border-b border-slate-200 text-slate-600' 
-                  : 'bg-[#051513] border-b border-[rgba(169,191,165,0.18)] text-[#A9BFA5]'
-              } px-6 py-2 flex items-center justify-between text-xs font-mono shrink-0`}>
-                <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${isFirstRun ? 'bg-amber-400' : 'bg-emerald-500'}`} />
-                  <span className={`${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'} font-medium`}>
-                    {isFirstRun ? 'First-Run Mode (Image 6 Empty States)' : 'Demo Mode (Preloaded Leads & WhatsApp)'}
-                  </span>
+              {/* Mode Switch Banner for First-Run vs Demo Data - Only visible in DEV mode */}
+              {import.meta.env.DEV && (
+                <div className={`${
+                  isLight 
+                    ? 'bg-white border-b border-slate-200 text-slate-600' 
+                    : 'bg-[#051513] border-b border-[rgba(169,191,165,0.18)] text-[#A9BFA5]'
+                } px-6 py-2 flex items-center justify-between text-xs font-mono shrink-0`}>
+                  <div className="flex items-center space-x-2">
+                    <span className={`w-2 h-2 rounded-full ${isFirstRun ? 'bg-amber-400' : 'bg-emerald-500'}`} />
+                    <span className={`${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'} font-medium`}>
+                      {isFirstRun ? 'First-Run Mode (Empty States)' : 'Demo Mode (Sample Data)'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    id="toggle-first-run-mode-btn"
+                    onClick={() => {
+                      const nextState = !isFirstRun;
+                      setIsFirstRun(nextState);
+                      showToast(
+                        nextState ? 'First-Run Mode' : 'Demo Mode',
+                        nextState ? 'Displaying initial empty state views.' : 'Loaded sample leads, metrics, and conversations.'
+                      );
+                    }}
+                    className={`px-2.5 py-1 text-xs rounded transition-colors cursor-pointer ${
+                      isLight
+                        ? 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 shadow-2xs'
+                        : 'bg-[#0D2D2A] hover:bg-[#133F3B] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+                    }`}
+                  >
+                    {isFirstRun ? 'Switch to Demo Data' : 'View Empty States'}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  id="toggle-first-run-mode-btn"
-                  onClick={() => {
-                    const nextState = !isFirstRun;
-                    setIsFirstRun(nextState);
-                    showToast(
-                      nextState ? 'First-Run Mode' : 'Demo Mode Active',
-                      nextState ? 'Displaying empty state screens from Image 6.' : 'Loaded active leads, metrics, and conversations.'
-                    );
-                  }}
-                  className={`px-2.5 py-1 text-[11px] rounded transition-colors cursor-pointer ${
-                    isLight
-                      ? 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 shadow-2xs'
-                      : 'bg-[#0D2D2A] hover:bg-[#133F3B] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
-                  }`}
-                >
-                  {isFirstRun ? '⚡ Switch to Demo Sample Data' : '✦ View First-Run Empty States'}
-                </button>
-              </div>
+              )}
 
               <div className={
                 isInbox
@@ -348,6 +365,7 @@ export default function NexoraApp({
                 onSelectLead={handleSelectLead}
                 onTriggerQuickAction={handleTriggerQuickAction}
                 isFirstRun={isFirstRun}
+                userName={currentUser?.name}
               />
             )}
 
@@ -462,6 +480,7 @@ export default function NexoraApp({
           {/* Lead Intelligence Workspace Drawer (Slide-over keeps main view & navigation constant!) */}
           {selectedLead && (
             <LeadIntelligenceWorkspace
+              key={selectedLead.id}
               lead={selectedLead}
               onClose={() => {
                 setSelectedLead(null);
@@ -517,12 +536,14 @@ export default function NexoraApp({
             <div className="space-y-5">
               <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.2)] pb-3">
                 <span className="serif text-xl font-light text-white">Help & Documentation</span>
-                <button type="button" onClick={() => setIsHelpOpen(false)} className="text-[#A9BFA5] hover:text-white">✕</button>
+                <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="Close help" className="text-[#A9BFA5] hover:text-white p-1 cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
               <div className="space-y-3">
                 <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
-                  <h4 className="font-semibold text-white mb-1">Tecavy OS Architecture</h4>
-                  <p className="text-[11px] text-[#A9BFA5] font-light">Learn how autonomous WhatsApp qualifiers and human escalation work in one loop.</p>
+                  <h4 className="font-semibold text-white mb-1">{BRAND_NAME} OS Architecture</h4>
+                  <p className="text-xs text-[#A9BFA5] font-light">Learn how autonomous WhatsApp qualifiers and human escalation work in one loop.</p>
                 </div>
                 <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
                   <h4 className="font-semibold text-white mb-1">Keyboard Shortcuts</h4>

@@ -10,20 +10,18 @@ import {
   Wand2, 
   X,
   HelpCircle,
-  ChevronDown,
-  Building,
+  ChevronsUpDown,
   Check,
-  Plus,
-  Radio,
-  Calendar,
-  Layers
+  Plus
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
+import { BRAND_NAME } from '../../config/brand';
+import { useInboxCounts } from '../../data/conversations';
+import { Avatar, Badge } from '../ui';
 
 interface SubItemConfig {
   id: SubCategory;
   label: string;
-  isLast?: boolean;
 }
 
 interface NavItemConfig {
@@ -31,7 +29,6 @@ interface NavItemConfig {
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   isStandalone?: boolean;
-  badgeCount?: number;
   subItems?: SubItemConfig[];
 }
 
@@ -46,8 +43,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
     id: 'inbox',
     label: 'Inbox',
     icon: InboxIcon,
-    isStandalone: true,
-    badgeCount: 3
+    isStandalone: true
   },
   {
     id: 'leads',
@@ -62,7 +58,7 @@ export const NAV_ITEMS: NavItemConfig[] = [
     subItems: [
       { id: 'create', label: 'Create' },
       { id: 'schedule', label: 'Schedule' },
-      { id: 'library', label: 'Library', isLast: true }
+      { id: 'library', label: 'Library' }
     ]
   },
   {
@@ -89,6 +85,9 @@ interface AppSidebarProps {
   isDemoWorkspace?: boolean;
   onToggleDemoWorkspace?: (isDemo: boolean) => void;
   onOpenHelp?: () => void;
+  userName?: string;
+  userRole?: string;
+  workspaceName?: string;
 }
 
 export default function AppSidebar({
@@ -100,15 +99,18 @@ export default function AppSidebar({
   onLogout,
   isDemoWorkspace = false,
   onToggleDemoWorkspace,
-  onOpenHelp
+  onOpenHelp,
+  userName = 'Alex Rivera',
+  userRole = 'Owner',
+  workspaceName = `${BRAND_NAME} Workspace`
 }: AppSidebarProps) {
-  // Workspace Switcher State
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
-  const [currentWorkspace, setCurrentWorkspace] = useState('Acme Studio');
+  const [currentWorkspace, setCurrentWorkspace] = useState(workspaceName);
+  const inboxCounts = useInboxCounts();
 
   const workspaces = [
-    { id: 'ws-1', name: 'Acme Studio', role: 'Owner' },
-    { id: 'ws-2', name: 'Acme Retail Hub', role: 'Admin' },
+    { id: 'ws-1', name: workspaceName || `${BRAND_NAME} Workspace`, role: userRole || 'Owner' },
+    { id: 'ws-2', name: `${BRAND_NAME} Retail Hub`, role: 'Admin' },
     { id: 'ws-3', name: 'Sterling Creative', role: 'Viewer' }
   ];
 
@@ -139,107 +141,117 @@ export default function AppSidebar({
   };
 
   const renderNavContent = () => (
-    <div className="flex flex-col h-full bg-[#F1F5F9] select-none text-[#334155]">
+    <div className="flex flex-col h-full bg-surface select-none text-ink">
       
-      {/* 1. BRAND & WORKSPACE SWITCHER */}
-      <div className="px-5 py-4 border-b-2 border-[#CBD5E1] bg-[#FFFFFF] shadow-xs">
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => onSelectNav('overview', 'overview')}
-            className="group flex items-baseline space-x-2 text-left focus:outline-none cursor-pointer"
-          >
-            <span className="font-mono text-xl font-black tracking-wider text-black transition-colors uppercase" style={{ color: '#000000' }}>
-              TECAVY
-            </span>
-            <span className="inline-block w-1.5 h-1.5 bg-[#0891B2] rounded-full opacity-100" />
-          </button>
+      {/* 1. BRAND HEADER */}
+      <div className="flex items-center justify-between px-4 py-3.5 border-b border-line-subtle">
+        <button
+          type="button"
+          onClick={() => onSelectNav('overview', 'overview')}
+          className="flex items-center gap-2.5 text-left focus-visible:outline-none cursor-pointer group"
+        >
+          <div className="w-7 h-7 rounded-lg bg-brand text-on-brand flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+            {BRAND_NAME.charAt(0)}
+          </div>
+          <span className="font-semibold text-base tracking-tight text-ink group-hover:text-brand transition-colors">
+            {BRAND_NAME}
+          </span>
+        </button>
 
-          {/* Close button on mobile */}
-          <button
-            type="button"
-            onClick={onCloseMobile}
-            className="md:hidden text-black hover:text-black p-1 focus:outline-none cursor-pointer"
-            style={{ color: '#000000' }}
-            aria-label="Close navigation"
-          >
-            <X className="w-5 h-5 text-black stroke-[2.5]" style={{ color: '#000000' }} />
-          </button>
-        </div>
-
-        {/* Workspace Switcher Button */}
-        <div className="relative mt-2.5">
-          <button
-            type="button"
-            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-[6px] bg-[#FFFFFF] border-2 border-[#CBD5E1] hover:border-[#94A3B8] hover:bg-white text-xs font-mono text-black font-black shadow-xs transition-colors cursor-pointer"
-            style={{ color: '#000000' }}
-          >
-            <div className="flex items-center space-x-2 truncate">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-              <span className="truncate font-black text-black" style={{ color: '#000000' }}>{currentWorkspace}</span>
-              {isDemoWorkspace && (
-                <span className="text-[9px] px-1.5 py-0.2 bg-[#FEF3C7] text-black border border-[#F59E0B] rounded-[2px] font-black" style={{ color: '#000000' }}>
-                  Demo
-                </span>
-              )}
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-black stroke-[2.5] shrink-0 ml-1" style={{ color: '#000000' }} />
-          </button>
-
-          {/* Workspace Switcher Dropdown */}
-          {isWorkspaceMenuOpen && (
-            <div className="absolute left-0 right-0 mt-1 bg-[#FFFFFF] border-2 border-[#CBD5E1] shadow-2xl rounded-[6px] py-1 text-xs font-mono z-50 animate-fadeIn text-[#000000]">
-              <div className="px-3 py-1 text-[10px] uppercase text-[#000000] tracking-wider font-black">
-                Workspaces
-              </div>
-              {workspaces.map(ws => (
-                <button
-                  key={ws.id}
-                  type="button"
-                  onClick={() => {
-                    setCurrentWorkspace(ws.name);
-                    setIsWorkspaceMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#F1F5F9] text-left transition-colors text-[#000000] font-bold"
-                >
-                  <span className="truncate">{ws.name}</span>
-                  {currentWorkspace === ws.name && (
-                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
-                  )}
-                </button>
-              ))}
-
-              <div className="border-t border-[#E2E8F0] my-1" />
-
-              {/* Demo workspace toggle */}
-              <div className="px-3 py-1.5 flex items-center justify-between text-[#000000]">
-                <span className="text-[11px] font-bold">Demo workspace</span>
-                <input
-                  type="checkbox"
-                  checked={isDemoWorkspace}
-                  onChange={(e) => {
-                    if (onToggleDemoWorkspace) onToggleDemoWorkspace(e.target.checked);
-                  }}
-                  className="accent-[#0891B2] cursor-pointer"
-                />
-              </div>
-
-              <div className="border-t border-[#E2E8F0] my-1" />
-              <button
-                type="button"
-                onClick={() => setIsWorkspaceMenuOpen(false)}
-                className="w-full px-3 py-1.5 text-left text-[11px] text-[#0891B2] hover:bg-[#F1F5F9] transition-colors font-black"
-              >
-                + New workspace
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Close button on mobile */}
+        <button
+          type="button"
+          onClick={onCloseMobile}
+          className="md:hidden p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
+          aria-label="Close navigation"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* 2. MAIN NAVIGATION (10 Items Spec) */}
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+      {/* 2. WORKSPACE SWITCHER */}
+      <div className="px-3 py-2.5 border-b border-line-subtle relative">
+        <button
+          type="button"
+          onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
+          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar name={currentWorkspace} size="sm" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-medium text-ink truncate">
+                  {currentWorkspace}
+                </span>
+                {isDemoWorkspace && (
+                  <Badge tone="warning" size="sm">Demo</Badge>
+                )}
+              </div>
+              <span className="text-xs text-ink-3 block leading-tight truncate">
+                {userRole}
+              </span>
+            </div>
+          </div>
+          <ChevronsUpDown className="w-4 h-4 text-ink-3 shrink-0 ml-1" />
+        </button>
+
+        {/* Workspace Switcher Dropdown */}
+        {isWorkspaceMenuOpen && (
+          <div className="absolute left-3 right-3 top-full mt-1 bg-surface border border-line rounded-xl shadow-pop py-1.5 z-50 text-sm animate-fadeIn">
+            <div className="px-3 py-1 text-xs font-medium text-ink-3">
+              Workspaces
+            </div>
+            {workspaces.map(ws => (
+              <button
+                key={ws.id}
+                type="button"
+                onClick={() => {
+                  setCurrentWorkspace(ws.name);
+                  setIsWorkspaceMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 text-sm text-ink hover:bg-surface-hover transition-colors text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span className="truncate font-medium">{ws.name}</span>
+                  <span className="text-xs text-ink-3">({ws.role})</span>
+                </div>
+                {currentWorkspace === ws.name && (
+                  <Check className="w-4 h-4 text-brand shrink-0" />
+                )}
+              </button>
+            ))}
+
+            <div className="border-t border-line-subtle my-1.5" />
+
+            {/* Demo workspace toggle */}
+            <label className="px-3 py-1.5 flex items-center justify-between text-xs text-ink cursor-pointer hover:bg-surface-hover">
+              <span className="font-medium">Demo workspace</span>
+              <input
+                type="checkbox"
+                checked={isDemoWorkspace}
+                onChange={(e) => {
+                  if (onToggleDemoWorkspace) onToggleDemoWorkspace(e.target.checked);
+                }}
+                className="accent-brand cursor-pointer"
+              />
+            </label>
+
+            <div className="border-t border-line-subtle my-1.5" />
+
+            <button
+              type="button"
+              onClick={() => setIsWorkspaceMenuOpen(false)}
+              className="w-full px-3 py-1.5 text-left text-xs font-medium text-brand hover:bg-surface-hover transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New workspace</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 3. MAIN NAVIGATION */}
+      <nav className="flex-1 py-3 px-3 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isCategoryActive = activeCategory === item.id || 
@@ -248,41 +260,37 @@ export default function AppSidebar({
           const hasSub = !!(item.subItems && item.subItems.length > 0);
 
           return (
-            <div key={item.id} className="relative group">
-              {/* Category Header Button */}
+            <div key={item.id} className="space-y-0.5">
               <button
                 type="button"
                 id={`sidebar-nav-${item.id}`}
                 onClick={() => handleCategoryClick(item)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-[6px] text-xs uppercase tracking-widest transition-all duration-150 cursor-pointer focus:outline-none text-left border ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
                   isCategoryActive
-                    ? 'text-[#0F172A] bg-[#FFFFFF] border-[#CBD5E1] border-l-4 border-l-[#0891B2] font-bold shadow-xs'
-                    : 'text-[#334155] bg-transparent border-transparent hover:text-[#0F172A] hover:bg-[#FFFFFF] hover:border-[#CBD5E1] font-semibold'
+                    ? 'bg-brand-soft text-brand font-semibold'
+                    : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
                 }`}
               >
-                <div className="flex items-center space-x-2.5 truncate">
+                <div className="flex items-center gap-2.5 truncate">
                   <Icon 
-                    className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                      isCategoryActive ? 'text-[#0891B2]' : 'text-[#475569] group-hover:text-[#0F172A]'
+                    className={`w-4 h-4 shrink-0 transition-colors ${
+                      isCategoryActive ? 'text-brand' : 'text-ink-3'
                     }`}
-                    strokeWidth={isCategoryActive ? 2 : 1.75}
                   />
-                  <span className="font-mono text-[11px] tracking-widest font-bold">
-                    {item.label}
-                  </span>
+                  <span className="truncate">{item.label}</span>
                 </div>
 
-                {/* Badge count for Inbox (Page 6: Inbox badge shows conversations that need a human) */}
-                {item.id === 'inbox' && (
-                  <span className="px-2 py-0.2 rounded-full text-[10px] font-mono font-bold bg-[#FEF3C7] text-[#92400E] border border-[#FCD34D]">
-                    3
+                {/* Inbox badge showing live needsYou count from store; hidden when 0 */}
+                {item.id === 'inbox' && inboxCounts.needsYou > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-warn-soft text-warn tabular-nums shrink-0">
+                    {inboxCounts.needsYou}
                   </span>
                 )}
               </button>
 
-              {/* Sub-Items Tree List (Content is always expanded per Page 6 spec) */}
+              {/* Sub-Items List */}
               {hasSub && (
-                <div className="pl-5 pr-1 py-1 space-y-0.5 animate-fadeIn">
+                <div className="ml-4 pl-3 border-l border-line-subtle space-y-0.5 py-0.5">
                   {item.subItems?.map((sub) => {
                     const isSubActive = isCategoryActive && (
                       activeSubCategory === sub.id ||
@@ -297,15 +305,12 @@ export default function AppSidebar({
                         type="button"
                         id={`sidebar-subnav-${item.id}-${sub.id}`}
                         onClick={(e) => handleSubItemClick(item.id, sub.id, e)}
-                        className={`w-full flex items-center px-2.5 py-1.5 rounded-[4px] text-xs font-mono transition-all duration-150 cursor-pointer focus:outline-none text-left border ${
+                        className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors cursor-pointer text-left focus-visible:outline-none ${
                           isSubActive
-                            ? 'text-[#0F172A] font-bold bg-[#FFFFFF] border-[#CBD5E1] border-l-3 border-l-[#0891B2] shadow-2xs'
-                            : 'text-[#475569] border-transparent hover:text-[#0F172A] hover:bg-[#FFFFFF] hover:border-[#CBD5E1] font-semibold'
+                            ? 'bg-brand-soft text-brand font-medium'
+                            : 'text-ink-3 hover:text-ink hover:bg-surface-hover'
                         }`}
                       >
-                        <span className="text-[#94A3B8] mr-2 text-[10px] select-none font-mono">
-                          {sub.isLast ? '└' : '├'}
-                        </span>
                         <span className="truncate">{sub.label}</span>
                       </button>
                     );
@@ -317,41 +322,65 @@ export default function AppSidebar({
         })}
       </nav>
 
-      {/* 3. SIDEBAR FOOTER (Settings & Help per Page 6 & 7) */}
-      <div className="p-3 border-t-2 border-[#CBD5E1] bg-[#FFFFFF] space-y-2 shadow-xs">
+      {/* 4. SIDEBAR FOOTER (Settings, Help, User Card) */}
+      <div className="p-3 border-t border-line-subtle space-y-1">
         
         {/* Settings button */}
         <button
           type="button"
+          id="sidebar-nav-settings"
           onClick={() => {
             onSelectNav('settings', 'business');
             onCloseMobile();
           }}
-          className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[6px] text-xs uppercase tracking-widest font-mono transition-colors cursor-pointer border-2 ${
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'settings'
-              ? 'text-black bg-[#FFFFFF] border-[#CBD5E1] border-l-4 border-l-[#0891B2] font-black shadow-xs'
-              : 'text-black bg-[#FFFFFF] border-[#CBD5E1] hover:text-black hover:bg-white hover:border-[#94A3B8] font-black shadow-xs'
+              ? 'bg-brand-soft text-brand font-semibold'
+              : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
           }`}
-          style={{ color: '#000000' }}
         >
-          <Settings className="w-4 h-4 text-black stroke-[2.5]" style={{ color: '#000000' }} />
-          <span className="font-black text-[11px] text-black" style={{ color: '#000000' }}>Settings</span>
+          <Settings className={`w-4 h-4 shrink-0 ${activeCategory === 'settings' ? 'text-brand' : 'text-ink-3'}`} />
+          <span>Settings</span>
         </button>
 
         {/* Help button */}
         <button
           type="button"
+          id="sidebar-nav-help"
           onClick={() => {
             if (onOpenHelp) onOpenHelp();
             else onSelectNav('settings', 'business');
             onCloseMobile();
           }}
-          className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[6px] text-xs uppercase tracking-widest font-mono text-black bg-[#FFFFFF] border-2 border-[#CBD5E1] hover:text-black hover:bg-white hover:border-[#94A3B8] font-black shadow-xs transition-colors cursor-pointer"
-          style={{ color: '#000000' }}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
         >
-          <HelpCircle className="w-4 h-4 text-black stroke-[2.5]" style={{ color: '#000000' }} />
-          <span className="font-black text-[11px] text-black" style={{ color: '#000000' }}>Help</span>
+          <HelpCircle className="w-4 h-4 shrink-0 text-ink-3" />
+          <span>Help</span>
         </button>
+
+        {/* User Card */}
+        <div className="pt-2 border-t border-line-subtle mt-2 flex items-center justify-between px-2 py-1.5 rounded-lg bg-surface-raised">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Avatar name={userName} size="sm" />
+            <div className="min-w-0">
+              <span className="text-xs font-semibold text-ink truncate block">
+                {userName}
+              </span>
+              <span className="text-[11px] text-ink-3 truncate block leading-tight">
+                {userRole}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="p-1.5 rounded-lg text-ink-3 hover:text-danger hover:bg-danger-soft transition-colors cursor-pointer shrink-0"
+            title="Log out"
+            aria-label="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
 
       </div>
 
@@ -363,7 +392,7 @@ export default function AppSidebar({
       {/* Desktop Fixed Sidebar (w-60 / 240px wide) */}
       <aside 
         id="app-desktop-sidebar"
-        className="hidden md:block fixed top-0 left-0 bottom-0 w-60 z-30 border-r border-[#CBD5E1] bg-[#F1F5F9]"
+        className="hidden md:block fixed top-0 left-0 bottom-0 w-60 z-30 border-r border-line bg-surface"
       >
         {renderNavContent()}
       </aside>
@@ -371,11 +400,11 @@ export default function AppSidebar({
       {/* Mobile Drawer */}
       {isOpenMobile && (
         <div 
-          className="md:hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm transition-opacity"
+          className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity"
           onClick={onCloseMobile}
         >
           <div 
-            className="w-72 max-w-[85vw] h-full border-r border-[rgba(169,191,165,0.2)] shadow-2xl animate-slideRight"
+            className="w-72 max-w-[85vw] h-full border-r border-line shadow-pop animate-slideRight"
             onClick={(e) => e.stopPropagation()}
           >
             {renderNavContent()}

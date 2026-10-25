@@ -12,6 +12,8 @@ import InfoModal from './components/InfoModal';
 import AuthModal, { UserSession } from './components/AuthModal';
 import OnboardingFlow, { OnboardingData } from './components/OnboardingFlow';
 
+import { BRAND_NAME } from './config/brand';
+
 export default function App() {
   const [inApp, setInApp] = useState(true);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -19,9 +21,9 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [isFirstRun, setIsFirstRun] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserSession | null>({
-    name: 'Acme Studio',
-    email: 'you@acme.com',
-    workspace: 'Acme Studio',
+    name: 'Alex Rivera',
+    email: 'alex@company.com',
+    workspace: `${BRAND_NAME} Workspace`,
     role: 'Owner'
   });
   const [modalType, setModalType] = useState<'contact' | 'privacy' | 'terms' | null>(null);

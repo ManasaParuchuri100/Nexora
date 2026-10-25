@@ -1,5 +1,40 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+
+  --color-ink: var(--text-primary);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-muted);
+
+  --color-line: var(--border);
+  --color-line-subtle: var(--border-subtle);
+
+  --color-brand: var(--primary);
+  --color-text-brand: var(--primary);
+  --color-on-brand: var(--primary-foreground);
+  --color-brand-soft: var(--accent-subtle);
+
+  --color-ok: var(--success);
+  --color-ok-soft: var(--success-background);
+  --color-warn: var(--warning);
+  --color-warn-soft: var(--warning-background);
+  --color-danger: var(--error);
+  --color-danger-soft: var(--error-background);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-background);
+  --color-hot: var(--status-hot);
+  --color-hot-soft: var(--status-hot-bg);
+}
+
+@theme {
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --shadow-pop: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
 /* ==========================================================================
    GLOBAL SEMANTIC COLOR SYSTEM & WCAG 2.2 ACCESSIBILITY TOKENS
    Maintains existing visual identity while enforcing accessible contrast (AA/AAA).
@@ -34,15 +69,15 @@
   --border-strong: rgba(148, 163, 184, 0.52);
 
   /* 5. Primary Actions & Accents */
-  --primary: #22D3EE;           /* Cyan-400 */
-  --primary-hover: #67E8F9;     /* Cyan-300 */
-  --primary-active: #06B6D4;    /* Cyan-500 */
-  --primary-foreground: #070B14;/* Ratio against #22D3EE: 10.5:1 */
+  --primary: #2DD4BF;           /* Teal-400 */
+  --primary-hover: #5EEAD4;     /* Teal-300 */
+  --primary-active: #14B8A6;    /* Teal-500 */
+  --primary-foreground: #042F2E;/* Teal-950 */
   --accent: var(--primary);
   --accent-hover: var(--primary-hover);
   --accent-active: var(--primary-active);
   --accent-foreground: var(--primary-foreground);
-  --accent-subtle: rgba(34, 211, 238, 0.14);
+  --accent-subtle: rgba(45, 212, 191, 0.14);
 
   /* 6. Secondary Actions */
   --secondary: #1E293B;
@@ -94,10 +129,10 @@
   --info-foreground: #38BDF8;
 
   /* 8. Interactive Focus Indicator */
-  --focus-ring: #22D3EE;
+  --focus-ring: #2DD4BF;
 
   /* 9. Geometry Foundations */
-  --radius-card: 10px;
+  --radius-card: 12px;
   --radius-control: 8px;
   --control-height: 40px;
 }
@@ -136,15 +171,15 @@
   --border-strong: #94A3B8;     /* Slate-400 */
 
   /* 5. Primary Actions & Accents */
-  --primary: #0891B2;           /* Cyan-600 */
-  --primary-hover: #0E7490;     /* Cyan-700 */
-  --primary-active: #155E75;    /* Cyan-800 */
-  --primary-foreground: #FFFFFF;/* Ratio against #0891B2: 4.6:1 (AA) */
+  --primary: #0F766E;           /* Teal-700 */
+  --primary-hover: #115E59;     /* Teal-800 */
+  --primary-active: #134E4A;    /* Teal-900 */
+  --primary-foreground: #FFFFFF;/* White */
   --accent: var(--primary);
   --accent-hover: var(--primary-hover);
   --accent-active: var(--primary-active);
   --accent-foreground: var(--primary-foreground);
-  --accent-subtle: rgba(8, 145, 178, 0.12);
+  --accent-subtle: rgba(15, 118, 110, 0.12);
 
   /* 6. Secondary Actions */
   --secondary: #E2E8F0;
@@ -195,8 +230,11 @@
   --info-background: #E0F2FE;   /* Sky-100 */
   --info-foreground: #0369A1;
 
-  /* 8. Interactive Focus Indicator */
-  --focus-ring: #0891B2;
+  /* 8. Interactive Focus Indicator & Geometry */
+  --focus-ring: #0F766E;
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --control-height: 40px;
 }
 
 /* ==========================================================================

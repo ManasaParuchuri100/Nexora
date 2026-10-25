@@ -351,7 +351,7 @@ export default function DateRangeCalendarModal({
       <div className="space-y-1.5">
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+            <label className={`block text-xs font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
               Start date
             </label>
             <input
@@ -373,7 +373,7 @@ export default function DateRangeCalendarModal({
           </div>
 
           <div>
-            <label className={`block text-[11px] font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+            <label className={`block text-xs font-semibold mb-1 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
               End date
             </label>
             <input
@@ -401,7 +401,7 @@ export default function DateRangeCalendarModal({
           <button
             type="button"
             onClick={() => setShowCalendarGrid(prev => !prev)}
-            className="text-[10px] text-teal-600 dark:text-teal-400 font-medium hover:underline cursor-pointer flex items-center space-x-1"
+            className="text-xs text-teal-600 dark:text-teal-400 font-medium hover:underline cursor-pointer flex items-center space-x-1"
           >
             <span>{showCalendarGrid ? 'Hide Calendar Grid' : 'Show Calendar Grid'}</span>
             <ChevronDown className={`w-3 h-3 transition-transform ${showCalendarGrid ? 'rotate-180' : ''}`} />
@@ -435,7 +435,7 @@ export default function DateRangeCalendarModal({
             </div>
 
             {/* Weekdays */}
-            <div className="grid grid-cols-7 text-center text-[10px] font-semibold text-slate-400 dark:text-[#A9BFA5]/60">
+            <div className="grid grid-cols-7 text-center text-xs font-semibold text-slate-400 dark:text-[#A9BFA5]/60">
               {WEEKDAYS.map(w => <span key={w}>{w[0]}</span>)}
             </div>
 
@@ -455,7 +455,7 @@ export default function DateRangeCalendarModal({
                     onMouseEnter={() => {
                       if (selectingStep === 'end') setHoverDate(cell.iso);
                     }}
-                    className={`h-7 w-7 mx-auto rounded-full text-[11px] font-medium flex items-center justify-center cursor-pointer transition-colors ${
+                    className={`h-7 w-7 mx-auto rounded-full text-xs font-medium flex items-center justify-center cursor-pointer transition-colors ${
                       isSelected
                         ? 'bg-teal-600 text-white font-bold'
                         : inRange
@@ -476,7 +476,7 @@ export default function DateRangeCalendarModal({
 
       {/* 4. SORT BASIS: compact dropdown with existing options */}
       <div className="space-y-1">
-        <label className={`block text-[11px] font-semibold ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+        <label className={`block text-xs font-semibold ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
           Sort basis
         </label>
         <div className="relative">

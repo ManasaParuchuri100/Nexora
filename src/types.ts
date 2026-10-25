@@ -116,16 +116,18 @@ export interface LeadAssignee {
 
 export interface LeadMessage {
   id: string;
-  sender: 'customer' | 'ai' | 'human';
+  sender: 'customer' | 'ai' | 'human' | 'agent';
   senderName: string;
   text: string;
   time: string;
+  at?: string;
   channel?: string;
 }
 
 export interface LeadTimelineEvent {
   id: string;
   time: string;
+  at?: string;
   title: string;
   description?: string;
   type: 'message' | 'ai_action' | 'qualification' | 'assignment' | 'status_change' | 'follow_up' | 'handoff' | 'campaign';
@@ -135,6 +137,9 @@ export interface LeadFollowUp {
   id: string;
   title: string;
   dueTime: string;
+  dueAt?: string;
+  kind?: 'call' | 'email' | 'message' | 'task';
+  completedAt?: string;
   isCompleted: boolean;
   type: 'upcoming' | 'previous';
 }
@@ -148,13 +153,15 @@ export interface CampaignAttribution {
   status?: string;
 }
 
+export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Converted' | 'Engaged' | 'Won' | 'Lost';
+
 export interface Lead {
   id: string;
   name: string;
   company: string;
-  email: string;
+  email?: string;
   source: 'Organic Search' | 'LinkedIn' | 'Referral' | 'X (Twitter)' | 'Newsletter' | 'Product Hunt' | 'Instagram' | 'Website' | 'WhatsApp' | 'Campaign' | 'Manual';
-  status: 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Converted' | 'Engaged' | 'Won' | 'Lost';
+  status: LeadStatus;
   value: string;
   lastActivity: string;
   score: number;
@@ -177,9 +184,10 @@ export interface Lead {
   preferredChannel?: string;
   companySize?: string;
   temperature?: LeadTemperature;
+  temperatureOverride?: LeadTemperature;
   intentLevel?: string;
   purchaseReadiness?: string;
-  aiConfidence?: string;
+  aiConfidence?: string | number;
   aiRecommendation?: string;
   qualificationChecks?: string[];
   conversationSummary?: string;
@@ -192,6 +200,8 @@ export interface Lead {
   humanAttentionRequired?: boolean;
   campaignAttribution?: CampaignAttribution;
 }
+
+export type LeadRecord = Lead;
 
 export interface TrendingTopic {
   id: string;
