@@ -42,6 +42,7 @@ import { formatRelative } from '../../../lib/time';
 import { BRAND_NAME } from '../../../config/brand';
 
 interface LeadIntelligenceWorkspaceProps {
+  key?: React.Key | string | number;
   lead: Lead | null;
   onClose: () => void;
   onUpdateLead: (updated: Lead) => void;

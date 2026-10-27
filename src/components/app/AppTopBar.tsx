@@ -166,11 +166,13 @@ export default function AppTopBar({
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 
-  const formatCategoryTitle = (cat: NavCategory) => {
+  const formatCategoryTitle = (cat: NavCategory, sub?: SubCategory) => {
+    if (cat === 'leads' && sub === 'follow-ups') return 'Follow-ups';
     switch (cat) {
       case 'overview': return 'Overview';
       case 'inbox': return 'Inbox';
       case 'leads': return 'Leads';
+      case 'agent': return 'Engagement agent';
       case 'content': return 'Content';
       case 'campaigns': return 'Campaigns';
       case 'analytics': return 'Analytics';
@@ -208,14 +210,14 @@ export default function AppTopBar({
           }`} aria-label="Breadcrumb">
             <button
               type="button"
-              onClick={() => onSelectNav(activeCategory)}
+              onClick={() => onSelectNav(activeCategory, activeSubCategory)}
               className={`px-3.5 py-1.5 rounded-[6px] uppercase tracking-wider transition-all cursor-pointer font-extrabold ${
                 theme === 'light'
                   ? 'bg-[#FFFFFF] border-2 border-[#CBD5E1] text-[#000000] hover:bg-white hover:border-[#94A3B8] shadow-xs'
                   : 'bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:border-[#A9BFA5]'
               }`}
             >
-              {formatCategoryTitle(activeCategory)}
+              {formatCategoryTitle(activeCategory, activeSubCategory)}
             </button>
 
             {currentRecordTitle && (

@@ -40,6 +40,7 @@ import ActionModals from './app/ActionModals';
 import CommandPalette from './app/CommandPalette';
 import SettingsModal from './app/SettingsModal';
 import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
+import AgentView from './app/AgentView';
 import { UserSession } from './AuthModal';
 import { BRAND_NAME } from '../config/brand';
 
@@ -149,6 +150,8 @@ export default function NexoraApp({
         ? 'inbox'
         : targetCategory === 'leads'
         ? 'all-leads'
+        : targetCategory === 'agent'
+        ? 'default'
         : targetCategory === 'content'
         ? 'create'
         : targetCategory === 'campaigns'
@@ -395,6 +398,11 @@ export default function NexoraApp({
                 onNotify={showToast}
                 isFirstRun={isFirstRun}
               />
+            )}
+
+            {/* Engagement Agent */}
+            {activeCategory === 'agent' && (
+              <AgentView onNavigate={handleSelectNav} />
             )}
 
             {/* 4. CONTENT (Create, Schedule, Library) */}

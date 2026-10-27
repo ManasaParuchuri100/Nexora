@@ -152,24 +152,33 @@ export default function CommandPalette({
             <span className="text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold block">
               PAGES
             </span>
-            <div 
-              onClick={() => {
-                onClose();
-                onSelectNav('inbox', 'inbox');
-              }}
-              className="p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer text-xs"
-            >
-              Inbox › Needs you
-            </div>
-            <div 
-              onClick={() => {
-                onClose();
-                onSelectNav('leads', 'follow-ups');
-              }}
-              className="p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer text-xs"
-            >
-              Leads › Follow-ups
-            </div>
+            {[
+              { label: 'Overview', category: 'overview' as const, sub: 'overview' as const },
+              { label: 'Inbox', category: 'inbox' as const, sub: 'inbox' as const },
+              { label: 'Leads', category: 'leads' as const, sub: 'all-leads' as const },
+              { label: 'Follow-ups', category: 'leads' as const, sub: 'follow-ups' as const },
+              { label: 'Engagement agent', category: 'agent' as const, sub: 'default' as const },
+              { label: 'Content studio', category: 'content' as const, sub: 'create' as const },
+              { label: 'Schedule', category: 'content' as const, sub: 'schedule' as const },
+              { label: 'Library', category: 'content' as const, sub: 'library' as const },
+              { label: 'Campaigns', category: 'campaigns' as const, sub: 'campaign-list' as const },
+              { label: 'Analytics', category: 'analytics' as const, sub: 'overview' as const },
+            ]
+              .filter(p => !query.trim() || p.label.toLowerCase().includes(query.toLowerCase()))
+              .map(page => (
+                <button
+                  key={page.label}
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onSelectNav(page.category, page.sub);
+                  }}
+                  className="w-full text-left p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer text-xs flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+                >
+                  <span className="text-[#E8E9D8]">{page.label}</span>
+                  <span className="text-[#A9BFA5]/60 text-[10px]">Jump to page</span>
+                </button>
+              ))}
           </div>
 
         </div>

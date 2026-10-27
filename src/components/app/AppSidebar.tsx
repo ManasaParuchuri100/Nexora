@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  Compass, 
+  LayoutDashboard,
   Inbox as InboxIcon, 
   Users, 
+  Clock,
+  Sparkles,
+  Wand2,
+  CalendarDays,
+  Library,
   Megaphone, 
   BarChart3, 
   Settings, 
   LogOut, 
-  Wand2, 
   X,
   HelpCircle,
   ChevronsUpDown,
@@ -15,65 +19,118 @@ import {
   Plus
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
-import { BRAND_NAME } from '../../config/brand';
+import { BRAND_NAME, BRAND_COMPANY, BRAND_TAGLINE } from '../../config/brand';
 import { useInboxCounts } from '../../data/conversations';
-import { Avatar, Badge } from '../ui';
+import { Avatar } from '../ui';
 
-interface SubItemConfig {
-  id: SubCategory;
-  label: string;
-}
-
-interface NavItemConfig {
-  id: NavCategory;
+export interface NavSectionItem {
+  key: string;
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  isStandalone?: boolean;
-  subItems?: SubItemConfig[];
+  category: NavCategory;
+  sub: SubCategory;
+  isActive: (activeCategory: NavCategory, activeSubCategory: SubCategory) => boolean;
 }
 
-export const NAV_ITEMS: NavItemConfig[] = [
+export interface NavSection {
+  title: string;
+  items: NavSectionItem[];
+}
+
+export const NAV_SECTIONS: NavSection[] = [
   {
-    id: 'overview',
-    label: 'Overview',
-    icon: Compass,
-    isStandalone: true
+    title: 'Workspace',
+    items: [
+      {
+        key: 'overview',
+        label: 'Overview',
+        icon: LayoutDashboard,
+        category: 'overview',
+        sub: 'overview',
+        isActive: (cat) => cat === 'overview',
+      },
+      {
+        key: 'inbox',
+        label: 'Inbox',
+        icon: InboxIcon,
+        category: 'inbox',
+        sub: 'inbox',
+        isActive: (cat) => cat === 'inbox' || cat === 'engage',
+      },
+      {
+        key: 'leads',
+        label: 'Leads',
+        icon: Users,
+        category: 'leads',
+        sub: 'all-leads',
+        isActive: (cat, sub) => cat === 'leads' && sub !== 'follow-ups',
+      },
+      {
+        key: 'follow-ups',
+        label: 'Follow-ups',
+        icon: Clock,
+        category: 'leads',
+        sub: 'follow-ups',
+        isActive: (cat, sub) => cat === 'leads' && sub === 'follow-ups',
+      },
+    ],
   },
   {
-    id: 'inbox',
-    label: 'Inbox',
-    icon: InboxIcon,
-    isStandalone: true
+    title: 'AI & Marketing',
+    items: [
+      {
+        key: 'agent',
+        label: 'Engagement Agent',
+        icon: Sparkles,
+        category: 'agent',
+        sub: 'default',
+        isActive: (cat) => cat === 'agent',
+      },
+      {
+        key: 'content',
+        label: 'Content Studio',
+        icon: Wand2,
+        category: 'content',
+        sub: 'create',
+        isActive: (cat, sub) => cat === 'content' && (sub === 'create' || sub === 'ai-content'),
+      },
+      {
+        key: 'schedule',
+        label: 'Schedule',
+        icon: CalendarDays,
+        category: 'content',
+        sub: 'schedule',
+        isActive: (cat, sub) => cat === 'content' && (sub === 'schedule' || sub === 'social-posts'),
+      },
+      {
+        key: 'library',
+        label: 'Library',
+        icon: Library,
+        category: 'content',
+        sub: 'library',
+        isActive: (cat, sub) => cat === 'content' && (sub === 'library' || sub === 'content-library' || sub === 'generated-assets'),
+      },
+      {
+        key: 'campaigns',
+        label: 'Campaigns',
+        icon: Megaphone,
+        category: 'campaigns',
+        sub: 'campaign-list',
+        isActive: (cat) => cat === 'campaigns',
+      },
+      {
+        key: 'analytics',
+        label: 'Analytics',
+        icon: BarChart3,
+        category: 'analytics',
+        sub: 'overview',
+        isActive: (cat) => cat === 'analytics',
+      },
+    ],
   },
-  {
-    id: 'leads',
-    label: 'Leads',
-    icon: Users,
-    isStandalone: true
-  },
-  {
-    id: 'content',
-    label: 'Content',
-    icon: Wand2,
-    subItems: [
-      { id: 'create', label: 'Create' },
-      { id: 'schedule', label: 'Schedule' },
-      { id: 'library', label: 'Library' }
-    ]
-  },
-  {
-    id: 'campaigns',
-    label: 'Campaigns',
-    icon: Megaphone,
-    isStandalone: true
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    isStandalone: true
-  }
 ];
+
+export const NAV_ITEMS = NAV_SECTIONS.flatMap(s => s.items);
 
 interface AppSidebarProps {
   activeCategory: NavCategory;
@@ -114,47 +171,27 @@ export default function AppSidebar({
     { id: 'ws-3', name: 'Sterling Creative', role: 'Viewer' }
   ];
 
-  const handleCategoryClick = (item: NavItemConfig) => {
-    if (item.isStandalone) {
-      const targetSub = 
-        item.id === 'overview' ? 'overview' :
-        item.id === 'inbox' ? 'inbox' :
-        item.id === 'leads' ? 'all-leads' :
-        item.id === 'campaigns' ? 'campaign-list' :
-        item.id === 'analytics' ? 'overview' : 'default';
-      
-      onSelectNav(item.id, targetSub as SubCategory);
-      onCloseMobile();
-      return;
-    }
-
-    if (item.subItems && item.subItems.length > 0) {
-      onSelectNav(item.id, item.subItems[0].id);
-      onCloseMobile();
-    }
-  };
-
-  const handleSubItemClick = (category: NavCategory, subCategory: SubCategory, e: React.MouseEvent) => {
-    e.stopPropagation();
-    onSelectNav(category, subCategory);
-    onCloseMobile();
-  };
-
   const renderNavContent = () => (
     <div className="flex flex-col h-full bg-surface select-none text-ink">
       
-      {/* 1. BRAND HEADER */}
-      <div className="flex items-center justify-between px-4 py-3.5 border-b border-line-subtle">
+      {/* 1. BRAND HEADER (Three lines, no logo square) */}
+      <div className="flex items-start justify-between px-4 py-4 border-b border-line-subtle">
         <button
           type="button"
-          onClick={() => onSelectNav('overview', 'overview')}
-          className="flex items-center gap-2.5 text-left focus-visible:outline-none cursor-pointer group"
+          onClick={() => {
+            onSelectNav('overview', 'overview');
+            onCloseMobile();
+          }}
+          className="text-left focus-visible:outline-none cursor-pointer flex flex-col group"
         >
-          <div className="w-7 h-7 rounded-lg bg-brand text-on-brand flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-            {BRAND_NAME.charAt(0)}
-          </div>
-          <span className="font-semibold text-base tracking-tight text-ink group-hover:text-brand transition-colors">
-            {BRAND_NAME}
+          <span className="text-xs font-semibold tracking-[0.2em] text-brand uppercase">
+            {BRAND_COMPANY}
+          </span>
+          <span className="text-3xl font-extrabold tracking-tight text-ink uppercase">
+            {BRAND_NAME}<span className="text-brand">.</span>
+          </span>
+          <span className="text-xs tracking-widest text-ink-3 uppercase">
+            {BRAND_TAGLINE}
           </span>
         </button>
 
@@ -169,31 +206,28 @@ export default function AppSidebar({
         </button>
       </div>
 
-      {/* 2. WORKSPACE SWITCHER */}
-      <div className="px-3 py-2.5 border-b border-line-subtle relative">
-        <button
-          type="button"
-          onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-          className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <Avatar name={currentWorkspace} size="sm" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-medium text-ink truncate">
+      {/* 2. WORKSPACE CARD */}
+      <div className="p-3 border-b border-line-subtle relative">
+        <div className="rounded-xl border border-line bg-surface p-3">
+          <button
+            type="button"
+            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
+            className="w-full flex items-center justify-between transition-colors cursor-pointer text-left focus-visible:outline-none"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Avatar name={currentWorkspace} size="md" className="rounded-lg" />
+              <div className="min-w-0">
+                <span className="text-sm font-semibold text-ink truncate block">
                   {currentWorkspace}
                 </span>
-                {isDemoWorkspace && (
-                  <Badge tone="warning" size="sm">Demo</Badge>
-                )}
+                <span className="text-xs text-ink-3 block leading-tight truncate">
+                  {isDemoWorkspace ? 'Demo workspace' : userRole}
+                </span>
               </div>
-              <span className="text-xs text-ink-3 block leading-tight truncate">
-                {userRole}
-              </span>
             </div>
-          </div>
-          <ChevronsUpDown className="w-4 h-4 text-ink-3 shrink-0 ml-1" />
-        </button>
+            <ChevronsUpDown className="w-4 h-4 text-ink-3 shrink-0 ml-1" />
+          </button>
+        </div>
 
         {/* Workspace Switcher Dropdown */}
         {isWorkspaceMenuOpen && (
@@ -250,76 +284,58 @@ export default function AppSidebar({
         )}
       </div>
 
-      {/* 3. MAIN NAVIGATION */}
-      <nav className="flex-1 py-3 px-3 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isCategoryActive = activeCategory === item.id || 
-            (item.id === 'inbox' && activeCategory === 'engage') || 
-            (item.id === 'engage' && activeCategory === 'inbox');
-          const hasSub = !!(item.subItems && item.subItems.length > 0);
-
-          return (
-            <div key={item.id} className="space-y-0.5">
-              <button
-                type="button"
-                id={`sidebar-nav-${item.id}`}
-                onClick={() => handleCategoryClick(item)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
-                  isCategoryActive
-                    ? 'bg-brand-soft text-brand font-semibold'
-                    : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 truncate">
-                  <Icon 
-                    className={`w-4 h-4 shrink-0 transition-colors ${
-                      isCategoryActive ? 'text-brand' : 'text-ink-3'
-                    }`}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </div>
-
-                {/* Inbox badge showing live needsYou count from store; hidden when 0 */}
-                {item.id === 'inbox' && inboxCounts.needsYou > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-warn-soft text-warn tabular-nums shrink-0">
-                    {inboxCounts.needsYou}
-                  </span>
-                )}
-              </button>
-
-              {/* Sub-Items List */}
-              {hasSub && (
-                <div className="ml-4 pl-3 border-l border-line-subtle space-y-0.5 py-0.5">
-                  {item.subItems?.map((sub) => {
-                    const isSubActive = isCategoryActive && (
-                      activeSubCategory === sub.id ||
-                      (sub.id === 'create' && activeSubCategory === 'ai-content') ||
-                      (sub.id === 'schedule' && activeSubCategory === 'social-posts') ||
-                      (sub.id === 'library' && (activeSubCategory === 'content-library' || activeSubCategory === 'generated-assets'))
-                    );
-
-                    return (
-                      <button
-                        key={sub.id}
-                        type="button"
-                        id={`sidebar-subnav-${item.id}-${sub.id}`}
-                        onClick={(e) => handleSubItemClick(item.id, sub.id, e)}
-                        className={`w-full flex items-center px-2.5 py-1.5 rounded-lg text-sm transition-colors cursor-pointer text-left focus-visible:outline-none ${
-                          isSubActive
-                            ? 'bg-brand-soft text-brand font-medium'
-                            : 'text-ink-3 hover:text-ink hover:bg-surface-hover'
-                        }`}
-                      >
-                        <span className="truncate">{sub.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+      {/* 3. MAIN NAVIGATION (Grouped sections) */}
+      <nav className="flex-1 py-2 px-3 overflow-y-auto">
+        {NAV_SECTIONS.map((section, sIndex) => (
+          <div key={section.title}>
+            <div className={`text-xs font-semibold uppercase tracking-wider text-ink-3 px-3 ${sIndex === 0 ? 'mt-2 mb-1' : 'mt-5 mb-1'}`}>
+              {section.title}
             </div>
-          );
-        })}
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = item.isActive(activeCategory, activeSubCategory);
+
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    id={`sidebar-nav-${item.key}`}
+                    onClick={() => {
+                      onSelectNav(item.category, item.sub);
+                      onCloseMobile();
+                    }}
+                    aria-current={active ? 'page' : undefined}
+                    className={`w-full flex items-center justify-between h-10 rounded-xl px-3 gap-3 text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
+                      active
+                        ? 'bg-brand-soft text-brand font-semibold'
+                        : 'text-ink-2 hover:bg-surface-hover'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 truncate">
+                      <Icon 
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          active ? 'text-brand' : 'text-ink-3'
+                        }`}
+                      />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+
+                    {/* Inbox badge */}
+                    {item.key === 'inbox' && inboxCounts.needsYou > 0 && (
+                      <span
+                        className="bg-brand text-on-brand rounded-md min-w-5 px-1.5 text-xs font-semibold tabular-nums flex items-center justify-center shrink-0"
+                        aria-label={`${inboxCounts.needsYou} conversations need you`}
+                      >
+                        {inboxCounts.needsYou}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* 4. SIDEBAR FOOTER (Settings, Help, User Card) */}
@@ -333,6 +349,7 @@ export default function AppSidebar({
             onSelectNav('settings', 'business');
             onCloseMobile();
           }}
+          aria-current={activeCategory === 'settings' ? 'page' : undefined}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'settings'
               ? 'bg-brand-soft text-brand font-semibold'

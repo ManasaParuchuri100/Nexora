@@ -24,6 +24,7 @@ export type NavCategory =
   | 'inbox'
   | 'engage' // backwards-compatible alias for inbox
   | 'leads'
+  | 'agent'
   | 'content'
   | 'campaigns'
   | 'analytics'
