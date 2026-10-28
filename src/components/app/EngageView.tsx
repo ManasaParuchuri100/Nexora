@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Lead, SubCategory } from '../../types';
 import { ConversationItem, useConversations } from '../../data/conversations';
+import { useFollowUps, getBucket } from '../../data/followUps';
 import { BRAND_NAME } from '../../config/brand';
 import { 
   Button, 
@@ -89,6 +90,18 @@ export default function EngageView({
   onNavigateSettings
 }: EngageViewProps) {
   const [conversations, setConversations] = useConversations();
+  const followUps = useFollowUps();
+
+  const overdueLeadIds = useMemo(() => {
+    const set = new Set<string>();
+    const now = new Date();
+    for (const t of followUps) {
+      if (getBucket(t, now) === 'overdue') {
+        set.add(t.leadId);
+      }
+    }
+    return set;
+  }, [followUps]);
 
   // Special intent filter state synced with activeSubCategory from Overview
   const [specialFilter, setSpecialFilter] = useState<InboxSpecialFilter>(() => {
@@ -176,7 +189,9 @@ export default function EngageView({
       }
 
       // 2. Special filter from Overview
-      if (specialFilter === 'overdue-followups' && !c.isOverdueFollowUp) return false;
+      if (specialFilter === 'overdue-followups') {
+        if (!c.leadReferenceId || !overdueLeadIds.has(c.leadReferenceId)) return false;
+      }
       if (specialFilter === 'asked-pricing' && !c.askedForPricing) return false;
       if (specialFilter === 'ready-to-book' && !c.readyToBookCall) return false;
       if (specialFilter === 'waiting-human' && !c.waitingForHuman) return false;
@@ -211,7 +226,7 @@ export default function EngageView({
       const tB = b.timestampRaw || 0;
       return tB - tA;
     });
-  }, [conversations, activeTab, specialFilter, channelFilter, assigneeFilter, searchQuery, sortBy]);
+  }, [conversations, activeTab, specialFilter, channelFilter, assigneeFilter, searchQuery, sortBy, overdueLeadIds]);
 
   // Active selected conversation
   const currentConvo = useMemo(() => {

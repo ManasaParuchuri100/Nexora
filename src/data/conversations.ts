@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { computeFollowUpCounts, getOverdueLeadIdSet } from './followUps';
 
 export interface ConversationItem {
   id: string;
@@ -182,7 +183,7 @@ export function createInitialConversations(): ConversationItem[] {
       whyPoints: ['+ 3 days overdue on proposal follow-up', '+ enterprise budget €12k', '+ founder reviewed proposal'],
       qualification: {
         requirement: true,
-        budget: '€12,000',
+        budget: '₹8.5L',
         timeline: '14 days',
         decisionMaker: true
       },
@@ -231,7 +232,7 @@ export function createInitialConversations(): ConversationItem[] {
       whyPoints: ['+ confirmed engineering budget $10k', '+ ready to schedule walkthrough', '+ 18 engineers'],
       qualification: {
         requirement: true,
-        budget: '$10,000/mo',
+        budget: '₹7.5L',
         timeline: 'Immediate',
         decisionMaker: true
       },
@@ -380,7 +381,7 @@ export function createInitialConversations(): ConversationItem[] {
       channel: 'Instagram',
       status: 'ai_handling',
       snippet: 'AI answered portfolio syndication queries; scheduled follow-up for Tuesday.',
-      stage: 'Contacted',
+      stage: 'Engaged',
       score: 84,
       temperature: 'WARM',
       intelPill: 'Form & Light · Instagram Inquiry',
@@ -431,7 +432,7 @@ export function createInitialConversations(): ConversationItem[] {
       whyPoints: ['+ annual contract signed', '+ €18,000 ARR', '+ onboarded via European datacenter'],
       qualification: {
         requirement: true,
-        budget: '€18,000/yr',
+        budget: '₹12L',
         timeline: 'Closed',
         decisionMaker: true
       },
@@ -475,7 +476,7 @@ export function createInitialConversations(): ConversationItem[] {
       whyPoints: ['+ self-serve starter checkout', '+ €450/mo active', '+ automated onboarding email sent'],
       qualification: {
         requirement: true,
-        budget: '€450/mo',
+        budget: '₹1.8L',
         timeline: 'Closed',
         decisionMaker: true
       },
@@ -512,7 +513,7 @@ export function createInitialConversations(): ConversationItem[] {
       whyPoints: ['+ downloaded architectural case study', '+ 4 partner studios', '+ budget confirmed $8k/mo'],
       qualification: {
         requirement: true,
-        budget: '$8,000/mo',
+        budget: '₹6.5L',
         timeline: '30 days',
         decisionMaker: true
       },
@@ -619,17 +620,9 @@ export function computeInboxCounts(conversations: ConversationItem[] = conversat
     }
   }
 
-  const overdueList = active.filter(c => Boolean(c.isOverdueFollowUp));
-  const overdueFollowUps = overdueList.length;
-
-  let oldestOverdueDays = 0;
-  if (overdueList.length > 0) {
-    const days = overdueList.map(c => {
-      const match = c.overdueText?.match(/(\d+)/);
-      return match ? parseInt(match[1], 10) : 1;
-    });
-    oldestOverdueDays = Math.max(1, ...days);
-  }
+  const overdueFollowUpCounts = computeFollowUpCounts();
+  const overdueFollowUps = overdueFollowUpCounts.overdue;
+  const oldestOverdueDays = overdueFollowUpCounts.oldestOverdueDays;
 
   const askedForPricing = active.filter(c => Boolean(c.askedForPricing)).length;
   const readyToBook = active.filter(c => Boolean(c.readyToBookCall)).length;

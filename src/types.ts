@@ -200,6 +200,10 @@ export interface Lead {
   handlingMode?: LeadHandlingMode;
   humanAttentionRequired?: boolean;
   campaignAttribution?: CampaignAttribution;
+  amount?: number;
+  createdAt?: string;
+  lastActivityAt?: string;
+  lostReason?: string;
 }
 
 export type LeadRecord = Lead;

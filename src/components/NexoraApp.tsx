@@ -43,6 +43,9 @@ import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
 import AgentView from './app/AgentView';
 import { UserSession } from './AuthModal';
 import { BRAND_NAME } from '../config/brand';
+import { setGlobalConversations, useConversations } from '../data/conversations';
+import { getFollowUpsForLead, deleteFollowUp, restoreFollowUp, FollowUp } from '../data/followUps';
+import { assertDataIntegrity } from '../lib/pipeline';
 
 interface NexoraAppProps {
   initialMode?: 'login' | 'signup' | 'forgot';
@@ -83,18 +86,36 @@ export default function NexoraApp({
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // Toast Notification
-  const [toastMessage, setToastMessage] = useState<{ title: string; desc: string } | null>(null);
+  // Toast Notification with optional undo action
+  const [toastMessage, setToastMessage] = useState<{
+    title: string;
+    desc: string;
+    action?: { label: string; onClick: () => void };
+  } | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = (title: string, desc: string) => {
+  const showToast = (
+    title: string,
+    desc: string,
+    action?: { label: string; onClick: () => void },
+    duration = 4000
+  ) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToastMessage({ title, desc });
+    setToastMessage({ title, desc, action });
     toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
       toastTimerRef.current = null;
-    }, 4000);
+    }, duration);
   };
+
+  // Live conversations store for cross-tab sync and integrity checks
+  const [conversations] = useConversations();
+
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      assertDataIntegrity(leads, conversations);
+    }
+  }, []);
 
   // Keyboard shortcut for command palette (⌘K)
   useEffect(() => {
@@ -214,6 +235,42 @@ export default function NexoraApp({
     });
     setSelectedLead(lead);
     setActiveModal('lead-details');
+  };
+
+  const handleDeleteLeads = (ids: string[]) => {
+    if (!ids.length) return;
+    const deletedLeadsList = leads.filter(l => ids.includes(l.id));
+    const deletedConvosList = conversations.filter(c => ids.includes(c.id) || (c.leadReferenceId && ids.includes(c.leadReferenceId)));
+    const deletedTasksList = ids.flatMap(id => getFollowUpsForLead(id));
+
+    // Remove leads
+    setLeads(prev => prev.filter(l => !ids.includes(l.id)));
+    // Remove linked conversations
+    setGlobalConversations(prev => prev.filter(c => !ids.includes(c.id) && (!c.leadReferenceId || !ids.includes(c.leadReferenceId))));
+    // Delete follow-up tasks
+    ids.forEach(id => {
+      getFollowUpsForLead(id).forEach(task => deleteFollowUp(task.id));
+    });
+
+    // 8-second Undo toast
+    showToast(
+      'Leads Deleted',
+      `Removed ${ids.length} lead${ids.length > 1 ? 's' : ''}.`,
+      {
+        label: 'Undo',
+        onClick: () => {
+          setLeads(prev => [...deletedLeadsList, ...prev]);
+          setGlobalConversations(prev => [...deletedConvosList, ...prev]);
+          deletedTasksList.forEach(t => restoreFollowUp(t));
+          showToast('Restored', `Restored ${ids.length} lead${ids.length > 1 ? 's' : ''}.`);
+        }
+      },
+      8000
+    );
+  };
+
+  const handleNavigateInbox = (lead: Lead) => {
+    handleSelectNav('inbox', 'inbox');
   };
 
   const handleAddLead = (newLead: Lead) => {
@@ -395,6 +452,8 @@ export default function NexoraApp({
                 onSelectLead={handleSelectLead}
                 onAddLeadModal={() => setActiveModal('lead')}
                 onUpdateLead={handleUpdateLead}
+                onDeleteLeads={handleDeleteLeads}
+                onNavigateInbox={handleNavigateInbox}
                 onNotify={showToast}
                 isFirstRun={isFirstRun}
               />
@@ -629,6 +688,19 @@ export default function NexoraApp({
             <p className="text-xs text-[#E8E9D8]/90 leading-relaxed">
               {toastMessage.desc}
             </p>
+            {toastMessage.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  toastMessage.action?.onClick();
+                  if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                  setToastMessage(null);
+                }}
+                className="mt-2 text-xs font-semibold px-2.5 py-1 rounded bg-[#0D2D2A] text-[#A9BFA5] hover:text-white border border-[rgba(169,191,165,0.3)] hover:bg-[#133F3B] cursor-pointer transition-colors"
+              >
+                {toastMessage.action.label}
+              </button>
+            )}
           </div>
           <button
             type="button"

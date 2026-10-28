@@ -21,6 +21,7 @@ import {
 import { NavCategory, SubCategory } from '../../types';
 import { BRAND_NAME, BRAND_COMPANY, BRAND_TAGLINE } from '../../config/brand';
 import { useInboxCounts } from '../../data/conversations';
+import { useFollowUpCounts } from '../../data/followUps';
 import { Avatar } from '../ui';
 
 export interface NavSectionItem {
@@ -164,6 +165,7 @@ export default function AppSidebar({
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState(workspaceName);
   const inboxCounts = useInboxCounts();
+  const followUpCounts = useFollowUpCounts();
 
   const workspaces = [
     { id: 'ws-1', name: workspaceName || `${BRAND_NAME} Workspace`, role: userRole || 'Owner' },
@@ -328,6 +330,16 @@ export default function AppSidebar({
                         aria-label={`${inboxCounts.needsYou} conversations need you`}
                       >
                         {inboxCounts.needsYou}
+                      </span>
+                    )}
+
+                    {/* Follow-ups overdue badge */}
+                    {item.key === 'follow-ups' && followUpCounts.overdue > 0 && (
+                      <span
+                        className="bg-danger text-on-danger rounded-md min-w-5 px-1.5 text-xs font-semibold tabular-nums flex items-center justify-center shrink-0"
+                        aria-label={`${followUpCounts.overdue} overdue follow-ups`}
+                      >
+                        {followUpCounts.overdue}
                       </span>
                     )}
                   </button>

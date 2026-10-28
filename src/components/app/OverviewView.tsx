@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { StatMetric, Lead, Campaign, TrendingTopic, NavCategory, SubCategory } from '../../types';
 import { useInboxCounts, getTopPricingConversation } from '../../data/conversations';
+import { useFollowUpCounts } from '../../data/followUps';
 import { BRAND_NAME } from '../../config/brand';
 import DateRangeCalendarModal, { DateRangeSelection } from './DateRangeCalendarModal';
 import { 
@@ -98,6 +99,7 @@ export default function OverviewView({
   userName = 'Alex'
 }: OverviewViewProps) {
   const inboxCounts = useInboxCounts();
+  const followUpCounts = useFollowUpCounts();
   const topPricing = getTopPricingConversation();
 
   // Date filters: Today, 7 days, 30 days, Custom
@@ -393,12 +395,12 @@ export default function OverviewView({
     },
     {
       id: 'needs-you-row-2',
-      show: inboxCounts.overdueFollowUps > 0,
-      title: `${inboxCounts.overdueFollowUps} follow-up${inboxCounts.overdueFollowUps === 1 ? '' : 's'} overdue`,
-      detail: `Oldest is ${inboxCounts.oldestOverdueDays} day${inboxCounts.oldestOverdueDays === 1 ? '' : 's'} overdue`,
+      show: followUpCounts.overdue > 0,
+      title: `${followUpCounts.overdue} follow-up${followUpCounts.overdue === 1 ? '' : 's'} overdue`,
+      detail: `Oldest is ${followUpCounts.oldestOverdueDays} day${followUpCounts.oldestOverdueDays === 1 ? '' : 's'} overdue`,
       icon: AlertTriangle,
       iconBg: 'bg-warn-soft text-warn',
-      onClick: () => onNavigate('inbox', 'overdue-followups')
+      onClick: () => onNavigate('leads', 'follow-ups')
     },
     {
       id: 'needs-you-row-3',
@@ -682,12 +684,12 @@ export default function OverviewView({
             {/* Follow-ups */}
             <StatCard
               label="Follow-ups"
-              value={stats.followUps}
+              value={followUpCounts.open}
               icon={<Clock className="w-4 h-4 text-warn" />}
               delta={stats.followDelta}
               periodText={stats.periodText}
-              hint={inboxCounts.overdueFollowUps > 0 ? `${inboxCounts.overdueFollowUps} overdue` : 'All on track'}
-              sparklineData={[8, 6, 7, 9, 6, 8, stats.followUps]}
+              hint={followUpCounts.overdue > 0 ? `${followUpCounts.overdue} overdue` : 'All on track'}
+              sparklineData={[8, 6, 7, 9, 6, 8, followUpCounts.open]}
               onClick={() => onNavigate('leads', 'follow-ups')}
             />
 
