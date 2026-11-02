@@ -28,13 +28,13 @@ export interface CardHeaderProps {
 
 export function CardHeader({ title, description, action, className = '' }: CardHeaderProps) {
   return (
-    <div className={`px-5 sm:px-[22px] pt-5 sm:pt-[22px] pb-4 flex items-start justify-between gap-4 ${className}`}>
-      <div className="min-w-0 space-y-1">
-        <h3 className="font-display text-[15px] font-bold text-ink tracking-[-0.02em] truncate">
+    <div className={`px-[22px] pt-[22px] pb-4 flex items-center justify-between gap-3 ${className}`}>
+      <div className="min-w-0">
+        <h3 className="font-display text-[15px] font-bold text-ink tracking-[-0.3px] truncate">
           {title}
         </h3>
         {description && (
-          <p className="text-[11.5px] text-ink-3">
+          <p className="text-[11px] leading-[1.65] text-ink-3 mt-1">
             {description}
           </p>
         )}

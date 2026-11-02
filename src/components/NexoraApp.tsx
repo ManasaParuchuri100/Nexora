@@ -41,6 +41,7 @@ import CommandPalette from './app/CommandPalette';
 import SettingsModal from './app/SettingsModal';
 import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
 import AgentView from './app/AgentView';
+import { PageHeader } from './ui';
 import { UserSession } from './AuthModal';
 import { BRAND_NAME } from '../config/brand';
 import { setGlobalConversations, useConversations } from '../data/conversations';
@@ -358,37 +359,10 @@ export default function NexoraApp({
             {/* Dynamic Main Workspace Content (Constant navigation & page views) */}
             <main className={`flex-1 w-full flex flex-col relative ${isInbox ? 'min-h-0 overflow-hidden' : 'min-h-[calc(100vh-65px)]'}`}>
               
-              {/* Mode Switch Banner for First-Run vs Demo Data - Only visible in DEV mode */}
-              {import.meta.env.DEV && (
-                <div className="bg-surface-raised border-b border-line text-ink-3 px-6 sm:px-10 py-1.5 flex items-center justify-between text-[11px] shrink-0">
-                  <div className="flex items-center space-x-2">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isFirstRun ? 'bg-warn' : 'bg-ok'}`} />
-                    <span className="text-ink-2 font-medium">
-                      {isFirstRun ? 'First-Run Mode (Empty States)' : 'Demo Mode (Sample Data)'}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    id="toggle-first-run-mode-btn"
-                    onClick={() => {
-                      const nextState = !isFirstRun;
-                      setIsFirstRun(nextState);
-                      showToast(
-                        nextState ? 'First-Run Mode' : 'Demo Mode',
-                        nextState ? 'Displaying initial empty state views.' : 'Loaded sample leads, metrics, and conversations.'
-                      );
-                    }}
-                    className="min-h-0! px-2 py-0.5 text-[11px] font-semibold text-brand hover:underline cursor-pointer"
-                  >
-                    {isFirstRun ? 'Switch to Demo Data' : 'View Empty States'}
-                  </button>
-                </div>
-              )}
-
               <div className={
                 isInbox
-                  ? "w-full px-3 sm:px-4 py-2 sm:py-3 flex-1 min-h-0 flex flex-col overflow-hidden"
-                  : "max-w-[1430px] w-full mx-auto px-4 sm:px-8 lg:px-10 pt-7 sm:pt-9 pb-24"
+                  ? "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[37px] pb-6 flex-1 min-h-0 flex flex-col overflow-hidden"
+                  : "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[37px] pb-[90px]"
               }>
             {/* 1. OVERVIEW */}
             {activeCategory === 'overview' && (
@@ -407,6 +381,18 @@ export default function NexoraApp({
 
             {/* 2. INBOX (Views, Conversation) */}
             {(activeCategory === 'inbox' || activeCategory === 'engage') && (
+              <>
+              <PageHeader
+                eyebrow="Workspace / Inbox"
+                title="Inbox"
+                subtitle="One conversation, one lead record, one clear owner."
+                className="shrink-0"
+                actions={
+                  <button type="button" className="nx-btn" onClick={() => handleSelectNav('settings', 'channels')}>
+                    Manage channels
+                  </button>
+                }
+              />
               <EngageView
                 activeSubCategory={activeSubCategory}
                 leads={leads}
@@ -416,6 +402,7 @@ export default function NexoraApp({
                 isFirstRun={isFirstRun}
                 onNavigateSettings={() => handleSelectNav('settings', 'channels')}
               />
+              </>
             )}
 
             {/* 3. LEADS (All Leads table, Pipeline board, Follow-ups) */}
@@ -517,6 +504,32 @@ export default function NexoraApp({
                 campaigns={campaigns}
                 onTriggerQuickAction={handleTriggerQuickAction}
               />
+            )}
+
+            {!isInbox && (
+              <div className="nx-footerhint flex items-center gap-2 flex-wrap">
+                <span>{`TECAVY ${BRAND_NAME.toUpperCase()}`} · {isFirstRun ? 'First-run workspace' : 'Sample workspace data'}</span>
+                {import.meta.env.DEV && (
+                  <>
+                    <span>·</span>
+                    <button
+                      type="button"
+                      id="toggle-first-run-mode-btn"
+                      onClick={() => {
+                        const nextState = !isFirstRun;
+                        setIsFirstRun(nextState);
+                        showToast(
+                          nextState ? 'First-run mode' : 'Demo mode',
+                          nextState ? 'Displaying initial empty state views.' : 'Loaded sample leads, metrics, and conversations.'
+                        );
+                      }}
+                      className="min-h-0! underline underline-offset-2 hover:text-brand cursor-pointer"
+                    >
+                      {isFirstRun ? 'Show demo data' : 'View empty states'}
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
 

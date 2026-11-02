@@ -17,19 +17,19 @@ export function PageHeader({
   className = '',
 }: PageHeaderProps) {
   return (
-    <div className={`flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-5 mb-[22px] ${className}`}>
+    <div className={`flex flex-col sm:flex-row sm:items-start justify-between gap-5 mb-[26px] ${className}`}>
       <div className="min-w-0">
-        {eyebrow && <div className="eyebrow mb-2">{eyebrow}</div>}
-        <h1 className="text-[24px] sm:text-[28px] leading-[1.25] font-extrabold tracking-[-0.04em] text-ink">
+        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+        <h1 className="text-[28px] leading-[1.25] font-bold tracking-[-1.1px] text-ink mt-2 mb-1.5">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-[13px] text-ink-3 mt-1.5 leading-relaxed">
+          <p className="text-[13px] leading-[1.65] text-ink-3 m-0">
             {subtitle}
           </p>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2.5 flex-wrap shrink-0">{actions}</div>}
+      {actions && <div className="flex items-center gap-[9px] flex-wrap">{actions}</div>}
     </div>
   );
 }

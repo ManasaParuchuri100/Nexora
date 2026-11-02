@@ -21,13 +21,13 @@ export function SegmentedControl<T extends string = string>({
   className = '',
   size = 'sm',
 }: SegmentedControlProps<T>) {
-  const containerPadding = size === 'sm' ? 'p-0.5' : 'p-1';
-  const buttonPadding = size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-sm';
+  const containerPadding = '';
+  const buttonPadding = size === 'sm' ? 'px-3 py-[7px] text-[12px]' : 'px-3 py-2 text-[13px]';
 
   return (
     <div
       role="group"
-      className={`inline-flex items-center rounded-lg bg-surface-raised border border-line-subtle ${containerPadding} ${className}`}
+      className={`inline-flex items-center gap-[5px] flex-wrap ${containerPadding} ${className}`}
     >
       {options.map((option) => {
         const isSelected = option.id === value;
@@ -38,17 +38,17 @@ export function SegmentedControl<T extends string = string>({
             role="button"
             aria-pressed={isSelected}
             onClick={() => onChange(option.id)}
-            className={`min-h-[38px] sm:min-h-7! rounded-md! font-medium transition-all cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${buttonPadding} ${
+            className={`min-h-[38px] sm:min-h-0! rounded-[7px]! font-bold transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${buttonPadding} ${
               isSelected
-                ? 'bg-surface text-ink font-semibold shadow-xs'
-                : 'bg-transparent text-ink-3 hover:text-ink'
+                ? 'bg-brand-soft text-brand'
+                : 'bg-transparent text-[#718196] hover:text-ink hover:bg-surface-hover'
             }`}
           >
             <span>{option.label}</span>
             {typeof option.count === 'number' && (
               <span
-                className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
-                  isSelected ? 'bg-surface-raised text-ink' : 'bg-surface text-ink-3'
+                className={`text-[10px] tabular-nums font-bold ${
+                  isSelected ? 'text-brand' : 'text-ink-3'
                 }`}
               >
                 {option.count}

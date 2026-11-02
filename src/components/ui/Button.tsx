@@ -34,8 +34,8 @@ export function Button({
 }: ButtonProps) {
   // Use Tailwind important modifier (e.g. min-h-8!, rounded-lg!) to override index.css button rules
   const sizeClasses = size === 'sm'
-    ? 'min-h-[44px] sm:min-h-8! sm:h-8 px-2.5 text-[11.5px] font-bold gap-1.5'
-    : 'min-h-[44px] sm:min-h-[38px]! sm:h-[38px] px-3.5 text-[13px] font-bold gap-2';
+    ? 'min-h-[44px] sm:min-h-[30px]! sm:h-[30px] px-2.5 text-[11px] font-bold gap-1.5'
+    : 'min-h-[44px] sm:min-h-[39px]! sm:h-[39px] px-3.5 text-[13px] font-bold gap-2';
 
   let variantClasses = '';
   switch (variant) {

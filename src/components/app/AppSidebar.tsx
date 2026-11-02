@@ -177,7 +177,7 @@ export default function AppSidebar({
     <div className="flex flex-col h-full bg-surface select-none text-ink">
       
       {/* 1. BRAND HEADER (Three lines, no logo square) */}
-      <div className="flex items-start justify-between px-[27px] pt-[26px] pb-[22px]">
+      <div className="flex items-start justify-between px-[27px] pt-[26px] pb-[27px]">
         <button
           type="button"
           onClick={() => {
@@ -186,13 +186,13 @@ export default function AppSidebar({
           }}
           className="text-left focus-visible:outline-none cursor-pointer flex flex-col group"
         >
-          <span className="text-[9px] font-extrabold tracking-[0.33em] text-brand uppercase">
+          <span className="text-[9px] leading-none font-extrabold tracking-[3px] text-brand uppercase">
             {BRAND_COMPANY}
           </span>
-          <span className="font-display text-[25px] leading-none font-extrabold tracking-[-0.05em] text-ink uppercase mt-1.5">
+          <span className="font-display text-[25px] leading-[35px] font-extrabold tracking-[-1.2px] text-ink uppercase mt-1">
             {BRAND_NAME}<span className="text-brand">.</span>
           </span>
-          <span className="text-[9px] tracking-[0.22em] text-ink-3 uppercase mt-1.5">
+          <span className="text-[9px] tracking-[2px] text-ink-3 uppercase">
             {BRAND_TAGLINE}
           </span>
         </button>
@@ -209,7 +209,7 @@ export default function AppSidebar({
       </div>
 
       {/* 2. WORKSPACE CARD */}
-      <div className="px-[17px] pb-3 relative">
+      <div className="px-[17px] pb-5 relative">
         <div className="rounded-[10px] border border-line bg-surface p-[11px] hover:border-line-strong transition-colors">
           <button
             type="button"
@@ -292,10 +292,10 @@ export default function AppSidebar({
       <nav className="flex-1 pb-3 px-[14px] overflow-y-auto">
         {NAV_SECTIONS.map((section, sIndex) => (
           <div key={section.title}>
-            <div className={`text-[9px] font-extrabold uppercase tracking-[0.2em] text-muted-decor px-[13px] pb-[7px] ${sIndex === 0 ? 'pt-3.5' : 'pt-5'}`}>
+            <div className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor px-[13px] pt-[14px] pb-[7px]">
               {section.title}
             </div>
-            <div className="space-y-px">
+            <div>
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = item.isActive(activeCategory, activeSubCategory);
@@ -310,7 +310,7 @@ export default function AppSidebar({
                       onCloseMobile();
                     }}
                     aria-current={active ? 'page' : undefined}
-                    className={`w-full flex items-center justify-between h-10 min-h-10! rounded-[9px]! px-[13px] gap-3 text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+                    className={`w-full flex items-center justify-between h-[44px] min-h-[44px]! my-px rounded-[9px]! px-[13px] gap-3 text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
                       active
                         ? 'bg-brand-soft text-brand'
                         : 'text-ink-2 hover:bg-surface-hover hover:text-ink'
@@ -365,7 +365,7 @@ export default function AppSidebar({
             onCloseMobile();
           }}
           aria-current={activeCategory === 'settings' ? 'page' : undefined}
-          className={`w-full flex items-center gap-[11px] px-[13px] h-10 min-h-10! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+          className={`w-full flex items-center gap-[11px] px-[13px] h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'settings'
               ? 'bg-brand-soft text-brand'
               : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
@@ -384,7 +384,7 @@ export default function AppSidebar({
             else onSelectNav('settings', 'business');
             onCloseMobile();
           }}
-          className="w-full flex items-center gap-[11px] px-[13px] h-10 min-h-10! rounded-[9px]! text-[13px] font-semibold text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
+          className="w-full flex items-center gap-[11px] px-[13px] h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
         >
           <HelpCircle strokeWidth={1.8} className="w-[17px] h-[17px] shrink-0 text-ink-3" />
           <span>Help</span>

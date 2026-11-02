@@ -106,6 +106,7 @@ export default function OverviewView({
   const [datePreset, setDatePreset] = useState<'today' | '7d' | '30d' | 'custom'>('7d');
   const [showRecommendation, setShowRecommendation] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
   const [customRange, setCustomRange] = useState<DateRangeSelection>(getDefaultCustomRange);
 
   // First name greeting
@@ -424,560 +425,363 @@ export default function OverviewView({
 
   const isSuggestionVisible = Boolean(topPricing && showRecommendation);
 
+  const rangeLabel =
+    datePreset === 'today'
+      ? 'Today'
+      : datePreset === '7d'
+      ? 'Last 7 days'
+      : datePreset === '30d'
+      ? 'Last 30 days'
+      : `${customRange.startDate.slice(5)} – ${customRange.endDate.slice(5)}`;
+
+  // Qualified-demand bars (relative heights, scaled to the selected window)
+  const demandBars = useMemo(() => {
+    const base = [28, 45, 38, 58, 27, 47, 78];
+    const shift = datePreset === 'today' ? 6 : datePreset === '30d' ? -4 : 0;
+    return base.map((h, i) => Math.max(12, Math.min(96, h + (i % 2 === 0 ? shift : -shift))));
+  }, [datePreset]);
+
+  const contacted = Math.max(stats.wonLeads + 1, Math.round(stats.qualifiedLeads * 0.62));
+  const journey: Array<[string, number]> = [
+    ['New', stats.newLeads],
+    ['Engaged', stats.engagedLeads],
+    ['Qualified', stats.qualifiedLeads],
+    ['Contacted', contacted],
+    ['Won', stats.wonLeads],
+  ];
+
+  const deltaText = (d: { value: string; trend: 'up' | 'down' }) =>
+    `${d.trend === 'up' ? '↑' : '↓'} ${d.value} ${stats.periodText}`;
+
+  const metricCards = [
+    {
+      id: 'metric-new-leads',
+      label: 'New leads',
+      value: stats.newLeads,
+      delta: deltaText(stats.newDelta),
+      tone: stats.newDelta.trend === 'up' ? '' : 'down',
+      onClick: () => onNavigate('leads', 'all-leads'),
+    },
+    {
+      id: 'metric-qualified',
+      label: 'Newly qualified',
+      value: stats.qualifiedLeads,
+      delta: deltaText(stats.qualDelta),
+      tone: stats.qualDelta.trend === 'up' ? '' : 'down',
+      onClick: () => onNavigate('leads', 'pipeline'),
+    },
+    {
+      id: 'metric-won',
+      label: 'Won deals',
+      value: stats.wonLeads,
+      delta: deltaText(stats.wonDelta),
+      tone: stats.wonDelta.trend === 'up' ? '' : 'down',
+      onClick: () => onNavigate('analytics', 'overview'),
+    },
+    {
+      id: 'metric-follow-ups',
+      label: 'Follow-ups due',
+      value: followUpCounts.open,
+      delta: followUpCounts.overdue > 0 ? `${followUpCounts.overdue} overdue` : 'All on track',
+      tone: '',
+      onClick: () => onNavigate('leads', 'follow-ups'),
+    },
+  ];
+
+  const rowActionLabels = ['Review conversations', 'Review follow-ups', 'Send pricing', 'Book the call'];
+  const rowTone = (iconBg: string) =>
+    iconBg.includes('danger') ? 'red' : iconBg.includes('warn') ? 'amber' : iconBg.includes('ok') ? 'green' : '';
+
+  const formatClock = (ts: number) =>
+    new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  const recentActivity = filteredActivities.slice(0, 4);
+
   return (
-    <div className="space-y-6 pb-12 select-text text-ink animate-fadeIn">
-      
-      {/* 1. PAGE HEADER with Dynamic Greeting, Subtitle, and Date Controls */}
+    <div className="select-text text-ink animate-fadeIn">
+
+      {/* Page header */}
       <PageHeader
         eyebrow="Workspace / Overview"
-        title={getGreeting()}
-        subtitle={subtitle}
+        title={`${getGreeting()}.`}
+        subtitle="A clear view of what needs attention and what is driving growth."
         actions={
-          <div className="flex items-center gap-2 flex-wrap">
-            <SegmentedControl
-              options={[
-                { id: 'today', label: 'Today' },
-                { id: '7d', label: '7 days' },
-                { id: '30d', label: '30 days' },
-              ]}
-              value={datePreset === 'custom' ? ('' as any) : datePreset}
-              onChange={(val) => {
-                setDatePreset(val);
-                setIsCalendarOpen(false);
-              }}
-              size="sm"
-            />
-            <Button
+          <div className="relative flex items-center gap-[9px]">
+            {!isFirstRun && <span className="nx-demo">Demo data</span>}
+            <button
+              type="button"
               id="custom-date-btn"
-              variant={datePreset === 'custom' ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => {
-                setDatePreset('custom');
-                setIsCalendarOpen(prev => !prev);
-              }}
-              leadingIcon={<CalendarIcon className="w-3.5 h-3.5" />}
+              className="nx-btn"
+              onClick={() => setIsRangeMenuOpen(v => !v)}
+              aria-haspopup="menu"
+              aria-expanded={isRangeMenuOpen}
             >
-              {datePreset === 'custom' 
-                ? `Custom (${customRange.startDate.slice(5)} - ${customRange.endDate.slice(5)})` 
-                : 'Custom'}
-            </Button>
+              {rangeLabel} ▾
+            </button>
+            {isRangeMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-[12px] shadow-pop py-1.5 z-40 animate-fadeIn"
+              >
+                {([
+                  ['today', 'Today'],
+                  ['7d', 'Last 7 days'],
+                  ['30d', 'Last 30 days'],
+                  ['custom', 'Custom range…'],
+                ] as const).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsRangeMenuOpen(false);
+                      if (id === 'custom') {
+                        setDatePreset('custom');
+                        setIsCalendarOpen(true);
+                      } else {
+                        setDatePreset(id);
+                        setIsCalendarOpen(false);
+                      }
+                    }}
+                    className={`w-full min-h-0! rounded-none! text-left px-3.5 py-2 text-[13px] hover:bg-surface-hover cursor-pointer ${
+                      datePreset === id ? 'text-brand font-bold' : 'text-ink'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         }
       />
 
-      {/* 2. FIRST-RUN MODE: Replace dashboard with 3-step setup checklist */}
       {isFirstRun ? (
-        <Card className="max-w-xl mx-auto my-8">
-          <CardHeader
-            title={`Get started with ${BRAND_NAME}`}
-            description="Complete these three quick steps to activate your autonomous sales engine."
-          />
-          <div className="p-4 sm:p-5 divide-y divide-line-subtle space-y-4">
-            
-            {/* Step 1: Connect Channel */}
-            <div className="flex items-center justify-between gap-4 pt-4 first:pt-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center font-bold text-xs shrink-0">
-                  1
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-semibold text-ink">Connect a channel</h4>
-                  <p className="text-xs text-ink-3 truncate">Link WhatsApp or Instagram to capture inquiries.</p>
-                </div>
-              </div>
-              <Button 
-                variant="primary" 
-                size="sm" 
-                onClick={() => onNavigate('settings', 'channels')}
-                className="shrink-0"
-              >
-                Connect channel
-              </Button>
+        /* First-run: setup checklist */
+        <section className="nx-panel nx-pad max-w-[860px]">
+          <div className="nx-sectionhead">
+            <div>
+              <h2>Get started with {BRAND_NAME}</h2>
+              <p>Three quick steps to a useful, controlled Engagement Agent.</p>
             </div>
-
-            {/* Step 2: Add First Lead */}
-            <div className="flex items-center justify-between gap-4 pt-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-surface-raised text-ink-2 flex items-center justify-center font-bold text-xs shrink-0">
-                  2
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-semibold text-ink">Add your first lead</h4>
-                  <p className="text-xs text-ink-3 truncate">Import or create a prospect to verify qualification.</p>
-                </div>
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (onTriggerQuickAction) onTriggerQuickAction('lead');
-                  else onNavigate('leads', 'all-leads');
-                }}
-                className="shrink-0"
-              >
-                Add lead
-              </Button>
-            </div>
-
-            {/* Step 3: Invite Teammate */}
-            <div className="flex items-center justify-between gap-4 pt-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-surface-raised text-ink-2 flex items-center justify-center font-bold text-xs shrink-0">
-                  3
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-semibold text-ink">Invite a teammate</h4>
-                  <p className="text-xs text-ink-3 truncate">Collaborate on hot leads and handoffs in the inbox.</p>
-                </div>
-              </div>
-              <Button 
-                variant="secondary" 
-                size="sm" 
-                onClick={() => onNavigate('settings', 'business')}
-                className="shrink-0"
-              >
-                Invite teammate
-              </Button>
-            </div>
-
           </div>
-        </Card>
-      ) : (
-        <>
-          {/* 3. NEEDS YOU (7/12) & SUGGESTED NEXT STEP (5/12) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            {/* Needs You Card */}
-            <Card className={isSuggestionVisible ? 'lg:col-span-7' : 'lg:col-span-12'}>
-              <CardHeader
-                title="Needs you"
-                description="Conversations requiring human takeover, follow-ups, or custom responses"
-              />
-              <div className="p-3 sm:p-4 space-y-1.5">
-                {needsYouRows.length > 0 ? (
-                  needsYouRows.map((row) => {
-                    const Icon = row.icon;
-                    return (
-                      <button
-                        key={row.id}
-                        id={row.id}
-                        type="button"
-                        onClick={row.onClick}
-                        className="w-full min-h-12! rounded-lg! flex items-center justify-between p-3 rounded-lg hover:bg-surface-hover transition-colors text-left group cursor-pointer focus-visible:outline-none"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${row.iconBg}`}>
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="text-sm font-medium text-ink block truncate group-hover:text-brand transition-colors">
-                              {row.title}
-                            </span>
-                            {row.detail && (
-                              <span className="text-xs text-ink-3 block truncate">
-                                {row.detail}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1 text-xs font-semibold text-brand shrink-0 group-hover:translate-x-0.5 transition-transform ml-2">
-                          <span>Open</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <EmptyState
-                    icon={<Check className="w-6 h-6 text-ok" />}
-                    title="You're all caught up"
-                    description="No conversations currently require human intervention."
-                  />
-                )}
+          {[
+            ['1', 'Connect a channel', 'Link WhatsApp or Instagram to capture enquiries.', 'Connect channel', true, () => onNavigate('settings', 'channels')],
+            ['2', 'Add your first lead', 'Import or create a prospect to verify qualification.', 'Add lead', false, () => (onTriggerQuickAction ? onTriggerQuickAction('lead') : onNavigate('leads', 'all-leads'))],
+            ['3', 'Invite a teammate', 'Collaborate on hot leads and handoffs in the inbox.', 'Invite teammate', false, () => onNavigate('settings', 'team')],
+          ].map(([n, title, desc, cta, primary, go]) => (
+            <div key={n as string} className="nx-row">
+              <div className="nx-alerticon font-bold">{n as string}</div>
+              <div className="flex-1 min-w-0">
+                <strong>{title as string}</strong>
+                <p>{desc as string}</p>
               </div>
-            </Card>
+              <button type="button" className={`nx-btn sm ${primary ? 'primary' : ''}`} onClick={go as () => void}>
+                {cta as string} →
+              </button>
+            </div>
+          ))}
+        </section>
+      ) : (
+        <div className="grid gap-[17px]">
 
-            {/* Suggested Next Step Card */}
-            {isSuggestionVisible && topPricing && (
-              <Card className="lg:col-span-5 flex flex-col justify-between">
-                <div>
-                  <div className="p-4 sm:p-5 pb-3 flex items-start justify-between gap-3 border-b border-line-subtle">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
-                        <Sparkles className="w-4 h-4" />
+          {/* Needs your attention */}
+          <section className="nx-panel nx-pad">
+            <div className="nx-sectionhead">
+              <div>
+                <h2>Needs your attention</h2>
+                <p>Resolve urgent work before reviewing performance.</p>
+              </div>
+            </div>
+            {needsYouRows.length > 0 ? (
+              <div className="border-t border-line">
+                {needsYouRows.map((row, i) => {
+                  const Icon = row.icon;
+                  return (
+                    <div key={row.id} id={row.id} className="nx-row">
+                      <div className={`nx-alerticon ${rowTone(row.iconBg)}`}>
+                        <Icon className="w-4 h-4" strokeWidth={2} />
                       </div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-brand">
-                        Suggested next step
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <strong>{row.title}</strong>
+                        <p className="truncate">{row.detail}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className={`nx-btn sm ${i === 0 ? 'primary' : ''}`}
+                        onClick={row.onClick}
+                      >
+                        {rowActionLabels[Number(row.id.slice(-1)) - 1] || 'Review'} →
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      aria-label="Dismiss recommendation"
-                      onClick={() => setShowRecommendation(false)}
-                      className="p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="p-4 sm:p-5 space-y-2">
-                    <p className="text-sm font-semibold text-ink leading-snug">
-                      {topPricing.company} asked about pricing and wants to start in {topPricing.qualification?.timeline || '30 days'}.
-                    </p>
-                    <p className="text-xs text-ink-3 leading-relaxed">
-                      Next step: {topPricing.nextAction || 'Schedule a discovery call'}
-                    </p>
-                  </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="nx-row border-t border-line">
+                <div className="nx-alerticon green"><Check className="w-4 h-4" /></div>
+                <div className="flex-1">
+                  <strong>You're all caught up</strong>
+                  <p>No conversations currently need a person.</p>
                 </div>
+              </div>
+            )}
+          </section>
 
-                <div className="p-4 sm:p-5 pt-0 flex items-center gap-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
+          {/* Recommendation */}
+          {isSuggestionVisible && topPricing && (
+            <div className="nx-insight">
+              <div className="nx-spark"><Sparkles className="w-[18px] h-[18px]" /></div>
+              <div className="flex-1 min-w-0">
+                <span className="eyebrow">{BRAND_NAME} recommends · Needs approval</span>
+                <h3>
+                  {topPricing.company} asked about pricing and wants to start in {topPricing.qualification?.timeline || '30 days'}
+                </h3>
+                <p>
+                  Next step: {topPricing.nextAction || 'Schedule a discovery call'}. Review the lead and draft before sending anything.
+                </p>
+                <div className="flex gap-[9px] mt-[13px] flex-wrap">
+                  <button
+                    type="button"
+                    className="nx-btn sm primary"
                     onClick={() => {
                       const match = leads.find(l => l.company.toLowerCase().includes(topPricing.company.toLowerCase()) || l.id === topPricing.leadReferenceId) || leads[0];
                       if (match) onSelectLead(match);
                     }}
                   >
-                    Review lead
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onNavigate('inbox', 'asked-pricing')}
-                  >
+                    Review lead →
+                  </button>
+                  <button type="button" className="nx-btn sm" onClick={() => onNavigate('inbox', 'asked-pricing')}>
                     Open conversation
-                  </Button>
+                  </button>
+                  <button type="button" className="nx-btn sm ghost" onClick={() => setShowRecommendation(false)}>
+                    Not now
+                  </button>
                 </div>
-              </Card>
-            )}
-
-          </div>
-
-          {/* 4. FOUR STAT CARDS */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* New Leads */}
-            <StatCard
-              label="New leads"
-              value={stats.newLeads}
-              icon={<Users className="w-4 h-4 text-brand" />}
-              delta={stats.newDelta}
-              periodText={stats.periodText}
-              hint="Total inquiries captured"
-              sparklineData={[14, 18, 16, 22, 20, 25, stats.newLeads]}
-              onClick={() => onNavigate('leads', 'all-leads')}
-            />
-
-            {/* Qualified */}
-            <StatCard
-              label="Qualified"
-              value={stats.qualifiedLeads}
-              icon={<CheckCircle2 className="w-4 h-4 text-ok" />}
-              delta={stats.qualDelta}
-              periodText={stats.periodText}
-              hint={`${Math.round((stats.qualifiedLeads / stats.newLeads) * 100)}% qualification rate`}
-              sparklineData={[5, 7, 6, 8, 9, 10, stats.qualifiedLeads]}
-              onClick={() => onNavigate('leads', 'pipeline')}
-            />
-
-            {/* Follow-ups */}
-            <StatCard
-              label="Follow-ups"
-              value={followUpCounts.open}
-              icon={<Clock className="w-4 h-4 text-warn" />}
-              delta={stats.followDelta}
-              periodText={stats.periodText}
-              hint={followUpCounts.overdue > 0 ? `${followUpCounts.overdue} overdue` : 'All on track'}
-              sparklineData={[8, 6, 7, 9, 6, 8, followUpCounts.open]}
-              onClick={() => onNavigate('leads', 'follow-ups')}
-            />
-
-            {/* Won Deals */}
-            <StatCard
-              label="Won deals"
-              value={stats.wonLeads}
-              icon={<Trophy className="w-4 h-4 text-brand" />}
-              delta={stats.wonDelta}
-              periodText={stats.periodText}
-              hint={`₹${(stats.wonLeads * 1.2).toFixed(1)}L revenue closed`}
-              sparklineData={[1, 2, 2, 3, 2, 3, stats.wonLeads]}
-              onClick={() => onNavigate('analytics', 'overview')}
-            />
-
-          </div>
-
-          {/* 5. LEAD FUNNEL & CHANNELS */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            
-            {/* Lead Funnel (~50%) */}
-            <Card className="lg:col-span-6">
-              <CardHeader
-                title="Lead funnel"
-                description={`${Math.round((stats.wonLeads / stats.newLeads) * 100)}% of new leads become customers`}
-              />
-              <div className="p-4 sm:p-5 space-y-3.5">
-                
-                {/* Stage 1: New */}
-                <div 
-                  onClick={() => onNavigate('leads', 'pipeline')}
-                  className="space-y-1.5 cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-ink group-hover:text-brand transition-colors">New</span>
-                    <span className="text-ink-3 tabular-nums font-mono">{stats.newLeads} (100%)</span>
-                  </div>
-                  <ProgressBar value={100} size="sm" tone="brand" />
-                </div>
-
-                {/* Stage 2: Engaged */}
-                <div 
-                  onClick={() => onNavigate('leads', 'pipeline')}
-                  className="space-y-1.5 cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-ink group-hover:text-brand transition-colors">Engaged</span>
-                    <span className="text-ink-3 tabular-nums font-mono">
-                      {stats.engagedLeads} ({Math.round((stats.engagedLeads / stats.newLeads) * 100)}%)
-                    </span>
-                  </div>
-                  <ProgressBar 
-                    value={Math.round((stats.engagedLeads / stats.newLeads) * 100)} 
-                    size="sm" 
-                    tone="brand" 
-                  />
-                </div>
-
-                {/* Stage 3: Qualified */}
-                <div 
-                  onClick={() => onNavigate('leads', 'pipeline')}
-                  className="space-y-1.5 cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-ink group-hover:text-brand transition-colors">Qualified</span>
-                    <span className="text-ink-3 tabular-nums font-mono">
-                      {stats.qualifiedLeads} ({Math.round((stats.qualifiedLeads / stats.newLeads) * 100)}%)
-                    </span>
-                  </div>
-                  <ProgressBar 
-                    value={Math.round((stats.qualifiedLeads / stats.newLeads) * 100)} 
-                    size="sm" 
-                    tone="brand" 
-                  />
-                </div>
-
-                {/* Stage 4: Won (reflects REAL ratio, not 25%!) */}
-                <div 
-                  onClick={() => onNavigate('leads', 'pipeline')}
-                  className="space-y-1.5 cursor-pointer group"
-                >
-                  <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-ink group-hover:text-brand transition-colors">Won</span>
-                    <span className="text-ink-3 tabular-nums font-mono">
-                      {stats.wonLeads} ({Math.round((stats.wonLeads / stats.newLeads) * 100)}%)
-                    </span>
-                  </div>
-                  <ProgressBar 
-                    value={Math.round((stats.wonLeads / stats.newLeads) * 100)} 
-                    size="sm" 
-                    tone="ok" 
-                  />
-                </div>
-
               </div>
-            </Card>
-
-            {/* Channels (~50%) */}
-            <Card className="lg:col-span-6">
-              <CardHeader
-                title="Channels"
-                description="Lead volume and qualification rate by source"
-              />
-              <div className="p-4 sm:p-5 divide-y divide-line-subtle">
-                
-                {/* WhatsApp */}
-                <div 
-                  onClick={() => onNavigate('leads', 'all-leads')}
-                  className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-7 h-7 rounded-lg bg-ok-soft text-ok flex items-center justify-center shrink-0">
-                      <Phone className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-medium">
-                        <span className="text-ink group-hover:text-brand transition-colors">WhatsApp</span>
-                        <span className="text-ink-3 tabular-nums">{Math.round(stats.newLeads * 0.48)} leads</span>
-                      </div>
-                      <ProgressBar value={48} size="sm" tone="ok" />
-                    </div>
-                  </div>
-                  <Badge tone="success" size="sm" className="shrink-0">
-                    43% qualified
-                  </Badge>
-                </div>
-
-                {/* Instagram */}
-                <div 
-                  onClick={() => onNavigate('leads', 'all-leads')}
-                  className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-7 h-7 rounded-lg bg-hot-soft text-hot flex items-center justify-center shrink-0">
-                      <Share2 className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-medium">
-                        <span className="text-ink group-hover:text-brand transition-colors">Instagram</span>
-                        <span className="text-ink-3 tabular-nums">{Math.round(stats.newLeads * 0.31)} leads</span>
-                      </div>
-                      <ProgressBar value={31} size="sm" tone="hot" />
-                    </div>
-                  </div>
-                  <Badge tone="warning" size="sm" className="shrink-0">
-                    30% qualified
-                  </Badge>
-                </div>
-
-                {/* Website */}
-                <div 
-                  onClick={() => onNavigate('leads', 'all-leads')}
-                  className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-7 h-7 rounded-lg bg-info-soft text-info flex items-center justify-center shrink-0">
-                      <Globe className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-medium">
-                        <span className="text-ink group-hover:text-brand transition-colors">Website</span>
-                        <span className="text-ink-3 tabular-nums">{Math.round(stats.newLeads * 0.14)} leads</span>
-                      </div>
-                      <ProgressBar value={14} size="sm" tone="info" />
-                    </div>
-                  </div>
-                  <Badge tone="neutral" size="sm" className="shrink-0">
-                    22% qualified
-                  </Badge>
-                </div>
-
-                {/* LinkedIn */}
-                <div 
-                  onClick={() => onNavigate('leads', 'all-leads')}
-                  className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-7 h-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
-                      <Building2 className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center justify-between text-xs font-medium">
-                        <span className="text-ink group-hover:text-brand transition-colors">LinkedIn</span>
-                        <span className="text-ink-3 tabular-nums">{Math.max(1, Math.round(stats.newLeads * 0.07))} leads</span>
-                      </div>
-                      <ProgressBar value={7} size="sm" tone="brand" />
-                    </div>
-                  </div>
-                  <Badge tone="success" size="sm" className="shrink-0">
-                    45% qualified
-                  </Badge>
-                </div>
-
-              </div>
-            </Card>
-
-          </div>
-
-          {/* 6. RECENT ACTIVITY (Grouped by Day, Lucide Icon in Tinted Circle, Score Badge for Leads) */}
-          <Card>
-            <CardHeader
-              title="Recent activity"
-              description="Chronological log of customer events, qualification updates, and campaign milestones"
-              action={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onNavigate('analytics', 'overview')}
-                  trailingIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                >
-                  View all
-                </Button>
-              }
-            />
-
-            <div className="p-4 sm:p-5 space-y-4">
-              {groupedActivities.length > 0 ? (
-                groupedActivities.map(({ group, items }) => (
-                  <div key={group} className="space-y-2">
-                    <div className="text-xs font-semibold text-ink-3 uppercase tracking-wider">
-                      {group}
-                    </div>
-
-                    <div className="divide-y divide-line-subtle border border-line-subtle rounded-xl overflow-hidden bg-surface">
-                      {items.map((act) => {
-                        const Icon = act.icon;
-                        const isLeadEvent = act.category === 'leads' && typeof act.score === 'number';
-
-                        return (
-                          <button
-                            key={act.id}
-                            type="button"
-                            onClick={() => onNavigate(act.category, act.subCategory)}
-                            className="w-full flex items-center justify-between p-3 hover:bg-surface-hover transition-colors text-left group cursor-pointer focus-visible:outline-none min-h-12!"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${act.iconBg}`}>
-                                <Icon className="w-3.5 h-3.5" />
-                              </div>
-                              <span className="text-sm font-medium text-ink group-hover:text-brand transition-colors truncate">
-                                {act.description}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2.5 shrink-0 ml-3">
-                              {isLeadEvent && (
-                                <Badge 
-                                  tone={act.score! >= 90 ? 'success' : act.score! >= 80 ? 'warning' : 'danger'} 
-                                  size="sm"
-                                >
-                                  Score {act.score}
-                                </Badge>
-                              )}
-                              <span className="text-xs text-ink-3 tabular-nums">
-                                {act.relativeTime}
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <EmptyState
-                  title="No activity in this period"
-                  description="Try selecting a wider date range to see past customer conversations and events."
-                  action={
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setDatePreset('30d');
-                        setIsCalendarOpen(false);
-                      }}
-                    >
-                      Adjust date range
-                    </Button>
-                  }
-                />
-              )}
+              <span className="nx-tag amber hidden sm:inline-flex">High intent</span>
             </div>
-          </Card>
-        </>
+          )}
+
+          {/* Metrics */}
+          <div className="nx-grid nx-metrics">
+            {metricCards.map(m => (
+              <button key={m.id} id={m.id} type="button" onClick={m.onClick} className="nx-panel nx-metric min-h-[121px]! rounded-[15px]!">
+                <div className="nx-label">{m.label}</div>
+                <div className="nx-number tabular-nums">{m.value}</div>
+                <div className={`nx-delta ${m.tone}`}>{m.delta}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* Demand chart + next best actions */}
+          <div className="nx-grid nx-two">
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Are we creating qualified demand?</h2>
+                  <p>Newly qualified leads · {rangeLabel.toLowerCase()}</p>
+                </div>
+              </div>
+              <div className="nx-chart">
+                {demandBars.map((h, i) => (
+                  <div key={i} className="nx-bar" data-label={['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]} style={{ height: `${h}%` }} />
+                ))}
+              </div>
+              <div className="text-[11px] text-ink-3 mt-[31px]">Qualification trend based on sample data.</div>
+            </section>
+
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Next best actions</h2>
+                  <p>Recommended tasks, not automatic changes.</p>
+                </div>
+              </div>
+              <div className="border-t border-line">
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Lead recovery</span>
+                  <h3>Reconnect with dormant leads</h3>
+                  <p>{Math.max(3, Math.round(stats.newLeads / 2))} previous enquiries may be ready for a follow-up.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('leads', 'follow-ups')}>Review opportunity →</button>
+                </div>
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Pricing</span>
+                  <h3>Answer pricing questions</h3>
+                  <p>{inboxCounts.askedForPricing} lead{inboxCounts.askedForPricing === 1 ? '' : 's'} asked about pricing and are waiting for a quote.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('inbox', 'asked-pricing')}>Open conversations →</button>
+                </div>
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Campaigns</span>
+                  <h3>Plan your next campaign</h3>
+                  <p>Turn this week's qualified demand into a re-engagement campaign.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('campaigns', 'campaign-list')}>Open campaigns →</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Lead journey + recent activity */}
+          <div className="nx-grid nx-two">
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Lead journey</h2>
+                  <p>Click a stage to explore its leads.</p>
+                </div>
+              </div>
+              <div className="nx-funnel">
+                {journey.map(([name, value]) => (
+                  <div
+                    key={name}
+                    className="nx-funnelrow"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => onNavigate('leads', 'pipeline')}
+                    onKeyDown={e => { if (e.key === 'Enter') onNavigate('leads', 'pipeline'); }}
+                  >
+                    <span>{name}</span>
+                    <div className="nx-track">
+                      <div className="nx-fill" style={{ width: `${Math.max(4, Math.round((value / stats.newLeads) * 100))}%` }} />
+                    </div>
+                    <b className="tabular-nums">{value}</b>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Recent activity</h2>
+                  <p>A traceable record of agent and human actions.</p>
+                </div>
+              </div>
+              <div className="border-t border-line">
+                {recentActivity.length > 0 ? (
+                  recentActivity.map(act => (
+                    <button
+                      key={act.id}
+                      type="button"
+                      onClick={() => onNavigate(act.category, act.subCategory)}
+                      className="nx-actioncard block w-full text-left min-h-0! rounded-none! cursor-pointer hover:text-brand"
+                    >
+                      <b className="tabular-nums">{formatClock(act.timestamp)}</b> · {act.description}
+                    </button>
+                  ))
+                ) : (
+                  <div className="nx-actioncard text-ink-3">No activity in this period.</div>
+                )}
+              </div>
+              <button type="button" className="nx-link mt-1" onClick={() => onNavigate('analytics', 'overview')}>
+                View activity log →
+              </button>
+            </section>
+          </div>
+        </div>
       )}
 
-      {/* Date Range & Calendar Selection Popover Dropdown */}
+      {/* Custom date range popover */}
       <DateRangeCalendarModal
         isOpen={isCalendarOpen}
         anchorId="custom-date-btn"
@@ -987,7 +791,6 @@ export default function OverviewView({
         onClose={() => setIsCalendarOpen(false)}
         onApply={handleApplyCalendarSelection}
       />
-
     </div>
   );
 }

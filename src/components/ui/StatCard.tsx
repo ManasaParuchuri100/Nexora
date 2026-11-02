@@ -32,7 +32,7 @@ export function StatCard({
   const content = (
     <div className="px-5 sm:px-[22px] py-5 flex flex-col justify-between h-full gap-2.5 min-h-[121px]">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11.5px] font-medium text-ink-3">
+        <span className="text-[11px] text-ink-3">
           {label}
         </span>
         {icon && (
@@ -43,7 +43,7 @@ export function StatCard({
       </div>
 
       <div className="flex items-baseline justify-between gap-2">
-        <span className="font-display text-[29px] leading-none font-extrabold tracking-[-0.04em] text-ink tabular-nums">
+        <span className="font-display text-[29px] leading-none font-extrabold tracking-[-1.1px] text-ink tabular-nums">
           {value}
         </span>
         {sparklineData && sparklineData.length > 1 && (
@@ -58,7 +58,7 @@ export function StatCard({
         {delta && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
-              className={`inline-flex items-center text-[11px] font-bold tabular-nums ${
+              className={`inline-flex items-center text-[10px] font-bold tabular-nums ${
                 delta.trend === 'up'
                   ? 'text-ok'
                   : delta.trend === 'down'
@@ -68,11 +68,11 @@ export function StatCard({
             >
               {delta.trend === 'up' ? '↑' : delta.trend === 'down' ? '↓' : '→'} {delta.value}
             </span>
-            <span className="text-ink-3 text-[11px]">{periodText}</span>
+            <span className="text-ink-3 text-[10px]">{periodText}</span>
           </div>
         )}
         {hint && (
-          <p className="text-[11px] text-ink-3 truncate">
+          <p className="text-[10px] text-ink-3 truncate">
             {hint}
           </p>
         )}

@@ -446,18 +446,18 @@ export default function EngageView({
     specialFilter === 'ready-to-book' ? 'Ready to book a call' : '';
 
   return (
-    <div className="flex-1 min-h-0 flex flex-row overflow-hidden bg-canvas text-ink select-text">
+    <div className="nx-panel flex-1 min-h-[560px] flex flex-row overflow-hidden text-ink select-text">
       
       {/* =========================================================================
           PANEL 1: CONVERSATION LIST (LEFT)
           ========================================================================= */}
-      <div className={`w-full md:w-80 lg:w-96 shrink-0 border-r border-line bg-surface flex flex-col h-full ${
+      <div className={`w-full md:w-[280px] shrink-0 border-r border-line bg-surface flex flex-col h-full ${
         mobileView === 'list' ? 'flex' : 'hidden md:flex'
       }`}>
         
         {/* Top Header: Tabs */}
-        <div className="p-3 pb-2 border-b border-line-subtle space-y-2">
-          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-surface-raised border border-line-subtle text-xs font-medium">
+        <div className="p-[15px] border-b border-line space-y-2.5">
+          <div className="flex items-center gap-[5px] flex-wrap">
             {[
               { id: 'needs_you', label: 'Needs you', count: tabCounts.needs_you },
               { id: 'all', label: 'All', count: tabCounts.all },
@@ -471,14 +471,14 @@ export default function EngageView({
                   setActiveTab(tab.id as InboxFilterTab);
                   setSpecialFilter('all');
                 }}
-                className={`flex-1 min-h-7! rounded-md! py-1 px-1.5 flex items-center justify-center transition-colors cursor-pointer text-xs focus-visible:outline-none ${
+                className={`min-h-0! rounded-[7px]! py-2 px-3 flex items-center gap-1.5 transition-colors cursor-pointer text-[13px] font-bold focus-visible:outline-none ${
                   activeTab === tab.id && specialFilter === 'all'
-                    ? 'bg-surface text-ink font-semibold shadow-xs'
-                    : 'bg-transparent text-ink-3 hover:text-ink'
+                    ? 'bg-brand-soft text-brand'
+                    : 'bg-transparent text-[#718196] hover:text-ink'
                 }`}
               >
                 <span className="truncate">{tab.label}</span>
-                <span className="ml-1 text-xs tabular-nums font-semibold px-1 py-0.2 rounded-full bg-surface-raised text-ink-3">
+                <span className="text-[10px] tabular-nums font-bold opacity-80">
                   {tab.count}
                 </span>
               </button>
@@ -608,7 +608,7 @@ export default function EngageView({
         )}
 
         {/* Conversation List Rows */}
-        <div className="flex-1 overflow-y-auto divide-y divide-line-subtle p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto">
           {filteredConversations.length > 0 ? (
             filteredConversations.map((convo) => {
               const isSelected = convo.id === currentConvo?.id;
@@ -633,10 +633,10 @@ export default function EngageView({
                   key={convo.id}
                   type="button"
                   onClick={() => handleSelectConversation(convo.id)}
-                  className={`w-full min-h-16! rounded-lg! p-3 text-left transition-colors cursor-pointer border flex flex-col gap-1.5 focus-visible:outline-none ${
+                  className={`w-full min-h-0! rounded-none! py-[15px] pr-[15px] text-left transition-colors cursor-pointer border-b border-line flex flex-col gap-[7px] focus-visible:outline-none ${
                     isSelected
-                      ? 'bg-brand-soft border-brand/40 shadow-xs'
-                      : 'bg-surface border-transparent hover:bg-surface-hover hover:border-line-subtle'
+                      ? 'bg-[#EFF8F7] dark-selected border-l-[3px] border-l-brand pl-3'
+                      : 'bg-surface hover:bg-surface-hover pl-[15px] border-l-0'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -655,21 +655,21 @@ export default function EngageView({
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-sm truncate ${convo.unread ? 'font-bold text-ink' : 'font-medium text-ink'}`}>
+                          <span className={`text-[13px] truncate font-bold text-ink`}>
                             {convo.name}
                           </span>
                           {convo.unread && (
                             <span className="w-2 h-2 rounded-full bg-brand shrink-0" title="Unread" />
                           )}
                         </div>
-                        <span className="text-xs text-ink-3 truncate block">
+                        <span className="text-[10px] text-ink-3 truncate block">
                           {convo.company}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-xs text-ink-3 tabular-nums font-mono">
+                      <span className="text-[10px] text-ink-3 tabular-nums">
                         {convo.time}
                       </span>
                       <span 
@@ -688,7 +688,7 @@ export default function EngageView({
                   </div>
 
                   {/* One-line snippet at text-sm */}
-                  <p className="text-sm text-ink-3 truncate leading-snug">
+                  <p className="text-[11px] text-ink-3 truncate leading-snug m-0">
                     {convo.snippet}
                   </p>
 
@@ -750,7 +750,7 @@ export default function EngageView({
         {currentConvo ? (
           <>
             {/* Conversation Header */}
-            <div className="p-3 sm:px-4 border-b border-line-subtle flex items-center justify-between gap-3 shrink-0 bg-surface">
+            <div className="px-5 py-[17px] border-b border-line flex items-center justify-between gap-3 shrink-0 bg-surface">
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Mobile back button */}
                 <button
@@ -762,19 +762,19 @@ export default function EngageView({
                   <ChevronLeft className="w-5 h-5" />
                 </button>
 
-                <Avatar name={currentConvo.name} size="md" />
-
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-ink truncate">
-                      {currentConvo.name} · {currentConvo.company}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[13px] font-bold text-ink truncate">
+                      {currentConvo.name}
                     </span>
-                    <Badge tone="brand" size="sm">{currentConvo.stage}</Badge>
-                    <Badge tone={currentConvo.score >= 90 ? 'success' : currentConvo.score >= 80 ? 'warning' : 'danger'} size="sm">
+                    <span className="nx-tag teal hidden xl:inline-flex">{currentConvo.stage}</span>
+                    <span className={`nx-tag hidden xl:inline-flex ${currentConvo.score >= 90 ? 'green' : currentConvo.score >= 80 ? 'amber' : 'red'}`}>
                       Score {currentConvo.score}
-                    </Badge>
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-ink-3">
+                  <div className="flex items-center gap-1.5 text-[10px] text-ink-3 mt-[5px] whitespace-nowrap">
+                    <span className="truncate">{currentConvo.company}</span>
+                    <span>·</span>
                     {(() => {
                       const Icon = getChannelIcon(currentConvo.channel);
                       return (
@@ -785,7 +785,7 @@ export default function EngageView({
                       );
                     })()}
                     <span>·</span>
-                    <span>Assigned: {currentConvo.assignedTo}</span>
+                    <span className="hidden 2xl:inline truncate">Assigned: {currentConvo.assignedTo}</span>
                   </div>
                 </div>
               </div>
@@ -895,22 +895,12 @@ export default function EngageView({
 
             {/* AI Paused Banner: Calm info style with Sparkles */}
             {currentConvo.aiAlert?.isPaused && currentConvo.status === 'needs_you' && (
-              <div className="mx-4 mt-3 p-3.5 rounded-xl bg-info-soft border border-line-subtle text-ink flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-surface flex items-center justify-center text-info shrink-0">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-semibold text-ink">
-                      {currentConvo.aiAlert.reason || 'AI response paused to allow human review.'}
-                    </h5>
-                    <p className="text-xs text-ink-3">
-                      Confidence score: {currentConvo.aiAlert.confidence}. Manual handoff active.
-                    </p>
-                  </div>
+              <div className="nx-handoff px-[19px] py-3 text-[11px] animate-fadeIn shrink-0">
+                <b>Human requested · AI paused</b>
+                <div className="mt-1">
+                  {currentConvo.aiAlert.reason || 'The customer needs a person before this thread can continue.'}
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 mt-[9px] flex-wrap">
                   <Button variant="primary" size="sm" onClick={handleTakeover}>
                     Take over
                   </Button>
@@ -925,7 +915,7 @@ export default function EngageView({
             )}
 
             {/* Messages Stream */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            <div className="flex-1 overflow-y-auto p-[22px] space-y-[18px] nx-messages">
               {currentConvo.messages.map((m, index) => {
                 const prevMsg = currentConvo.messages[index - 1];
                 const currentDay = getMessageDateGroup(m.time);
@@ -939,7 +929,7 @@ export default function EngageView({
                   <React.Fragment key={m.id}>
                     {showSeparator && (
                       <div className="flex items-center justify-center my-3">
-                        <span className="text-xs text-ink-3 font-medium px-2.5 py-0.5 rounded-full bg-surface-raised border border-line-subtle">
+                        <span className="text-[10px] text-ink-3">
                           {currentDay}
                         </span>
                       </div>
@@ -959,21 +949,11 @@ export default function EngageView({
                       )}
 
                       <div className={`space-y-1 max-w-[80%] ${isAgent ? 'items-end' : 'items-start'}`}>
-                        <div className="flex items-center gap-2 px-1 text-xs text-ink-3">
-                          <span className="font-semibold text-ink">
-                            {isAI ? `${BRAND_NAME} AI` : m.senderName}
-                          </span>
-                          <span>{m.time}</span>
-                        </div>
-
-                        <div className={`rounded-2xl p-3 text-sm leading-relaxed border ${
-                          isAgent
-                            ? 'bg-brand-soft text-ink border-brand/20'
-                            : isAI
-                            ? 'bg-surface text-ink border-line-subtle'
-                            : 'bg-surface-raised text-ink border-line-subtle'
-                        }`}>
-                          <p className="whitespace-pre-wrap">{m.text}</p>
+                        <div className={`nx-bubble ${isAgent || isAI ? 'mine' : ''}`}>
+                          <p className="whitespace-pre-wrap m-0 leading-[1.6]">{m.text}</p>
+                          <small>
+                            {isAI ? `✧ ${BRAND_NAME} AI` : m.senderName} · {m.time}
+                          </small>
                         </div>
 
                         {/* Delivery ticks on your messages */}
@@ -1138,7 +1118,7 @@ export default function EngageView({
           PANEL 3: PROSPECT DETAILS (RIGHT)
           ========================================================================= */}
       {showLeadPanel && currentConvo && (
-        <div className={`w-full md:w-80 shrink-0 border-l border-line bg-surface flex flex-col h-full overflow-y-auto ${
+        <div className={`w-full md:w-[268px] shrink-0 border-l border-line bg-surface flex flex-col h-full overflow-y-auto ${
           mobileView === 'details' ? 'flex' : 'hidden lg:flex'
         }`}>
           
@@ -1153,7 +1133,7 @@ export default function EngageView({
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <h3 className="font-semibold text-sm text-ink">Details</h3>
+              <h3 className="font-display font-bold text-[15px] tracking-[-0.3px] text-ink">Lead intelligence</h3>
             </div>
             <button
               type="button"

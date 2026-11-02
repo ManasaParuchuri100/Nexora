@@ -908,8 +908,8 @@ export default function LeadsView({
          ======================================================== */}
       <PageHeader
         eyebrow={topTab === 'leads' ? 'Workspace / Leads' : 'Workspace / Leads / Follow-ups'}
-        title={topTab === 'leads' ? "Leads" : "Follow-ups"}
-        subtitle={topTab === 'leads' ? "Every prospect across your channels" : "Tasks that keep deals moving"}
+        title={topTab === 'leads' ? "Leads & qualification" : "Follow-ups"}
+        subtitle={topTab === 'leads' ? "Manage every enquiry through one consistent pipeline." : "Recover conversations without sending unwanted messages."}
         actions={
           <div className="flex items-center gap-3">
             <SegmentedControl<'leads' | 'follow-ups'>
@@ -1780,11 +1780,11 @@ export default function LeadsView({
                               <div className="flex items-center gap-3">
                                 <Avatar name={lead.company || lead.name} size="md" />
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-ink truncate text-sm">
+                                  <p className="font-bold text-ink truncate text-[13px] leading-tight m-0">
                                     {lead.company || lead.name}
                                   </p>
                                   {hasSeparateContactName ? (
-                                    <p className="text-xs text-ink-3 truncate">
+                                    <p className="text-[10px] text-ink-3 truncate leading-tight mt-0.5 mb-0">
                                       {lead.name}
                                     </p>
                                   ) : (

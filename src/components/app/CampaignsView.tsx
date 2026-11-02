@@ -1,3 +1,4 @@
+import { PageHeader } from '../ui';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Plus, 
@@ -381,33 +382,54 @@ export default function CampaignsView({
      VIEW ROUTE: 1. CAMPAIGNS LANDING VIEW
      ========================================================================= */
   return (
-    <div className="space-y-12 py-4 animate-fadeIn text-[#E8E9D8]">
+    <div className="space-y-[18px] animate-fadeIn text-ink">
       {/* 1. Header */}
-      <section className="border-b border-[rgba(169,191,165,0.2)] pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-mono block mb-2">
-            WORKSPACE // STRATEGY & ORCHESTRATION
-          </span>
-          <h1 className="serif text-4xl sm:text-5xl font-light text-[#E8E9D8] tracking-tight">
-            Campaigns
-          </h1>
-          <p className="mt-3 text-xs sm:text-sm text-[#A9BFA5]/80 font-light leading-relaxed max-w-xl">
-            Plan, launch, and manage campaigns from one place.
-          </p>
-        </div>
-
-        {/* Primary Action Button */}
-        <div>
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer focus:outline-none flex items-center space-x-2"
-          >
-            <Plus className="w-3.5 h-3.5 text-current" />
-            <span>Create New Campaign</span>
+      <PageHeader
+        eyebrow="Marketing / Campaigns"
+        title="Campaigns"
+        subtitle="Plan, create, approve and measure connected marketing activity."
+        actions={
+          <button type="button" className="nx-btn primary" onClick={handleOpenCreate}>
+            + New campaign
           </button>
+        }
+      />
+
+      {!isFirstRun && (
+        <div className="nx-grid nx-thirds">
+          {[
+            {
+              label: 'Active campaigns',
+              value: campaigns.filter(c => c.status === 'Active').length,
+              delta: `${campaigns.filter(c => c.status === 'Scheduled' || c.status === 'Planning').length} planned next`,
+              tab: 'Active' as const,
+            },
+            {
+              label: 'Draft campaigns',
+              value: campaigns.filter(c => c.status === 'Draft').length,
+              delta: 'Waiting for review and approval',
+              tab: 'Draft' as const,
+            },
+            {
+              label: 'Leads generated',
+              value: campaigns.reduce((sum, c) => sum + (c.leads || 0), 0),
+              delta: 'Across attributed campaigns',
+              tab: 'All' as const,
+            },
+          ].map(m => (
+            <button
+              key={m.label}
+              type="button"
+              onClick={() => setStatusFilter(m.tab)}
+              className="nx-panel nx-metric min-h-[121px]! rounded-[15px]!"
+            >
+              <div className="nx-label">{m.label}</div>
+              <div className="nx-number tabular-nums">{m.value}</div>
+              <div className="nx-delta">{m.delta}</div>
+            </button>
+          ))}
         </div>
-      </section>
+      )}
 
       {/* First-Run Empty State (Image 6 spec) */}
       {isFirstRun && (
@@ -439,7 +461,7 @@ export default function CampaignsView({
 
       {/* 2. Top Filter and Search Row */}
       <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b ${isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.15)]'} text-xs`}>
-        <div className="flex items-center space-x-5 uppercase tracking-widest font-mono text-[11px] overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-[5px] overflow-x-auto pb-1 sm:pb-0">
           {(['All', 'Active', 'Planning', 'Draft', 'Completed'] as const).map(tab => {
             const count = tab === 'All' 
               ? campaigns.length 
@@ -451,22 +473,12 @@ export default function CampaignsView({
                 key={tab}
                 type="button"
                 onClick={() => setStatusFilter(tab)}
-                className={`pb-1 border-b transition-colors cursor-pointer whitespace-nowrap flex items-center space-x-1.5 ${
-                  isSelected 
-                    ? isLight 
-                      ? 'text-[#122420] border-[#143630] font-semibold' 
-                      : 'text-[#E8E9D8] border-[#A9BFA5] font-medium' 
-                    : isLight 
-                      ? 'text-[#3E6A5E] border-transparent hover:text-[#122420]' 
-                      : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
+                className={`min-h-0! rounded-[7px]! px-3 py-2 text-[13px] font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  isSelected ? 'bg-brand-soft text-brand' : 'text-[#718196] hover:text-ink'
                 }`}
               >
                 <span>{tab}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                  isSelected 
-                    ? isLight ? 'bg-[#143630] text-white font-medium' : 'bg-[#0D2D2A] text-[#A9BFA5]' 
-                    : isLight ? 'bg-[#EDF3EA] text-[#3E6A5E]' : 'text-[#A9BFA5]/40'
-                }`}>
+                <span className="text-[10px] tabular-nums opacity-80">
                   {count}
                 </span>
               </button>
@@ -484,7 +496,7 @@ export default function CampaignsView({
               isLight 
                 ? 'bg-white border-[#D0DDD0] text-[#122420] placeholder-[#668877] focus:border-[#244B40]' 
                 : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)] text-[#E8E9D8] placeholder-[#A9BFA5]/40 focus:border-[#A9BFA5]'
-            } text-xs px-3 py-1.5 pl-8 pr-7 rounded-[2px] border focus:outline-none font-light w-full sm:w-72 transition-colors`}
+            } text-[13px] px-3 py-2 pl-8 pr-7 border focus:outline-none w-full sm:w-72 transition-colors`}
           />
           <Search className={`w-3.5 h-3.5 absolute left-2.5 top-2.5 pointer-events-none ${isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]/50'}`} />
           {search && (
@@ -947,14 +959,8 @@ export default function CampaignsView({
 
                 {/* Status */}
                 <div className="col-span-2">
-                  <span className={`inline-block text-[10px] uppercase tracking-widest px-2.5 py-0.5 border font-mono rounded-[2px] ${
-                    campaign.status === 'Active' 
-                      ? isLight ? 'text-[#15803D] border-[#86EFAC] bg-[#F0FDF4]' : 'text-emerald-400 border-emerald-500/30 bg-emerald-950/30'
-                      : campaign.status === 'Planning'
-                      ? isLight ? 'text-[#0369A1] border-[#BAE6FD] bg-[#F0F9FF]' : 'text-sky-400 border-sky-500/30 bg-sky-950/30'
-                      : campaign.status === 'Completed'
-                      ? isLight ? 'text-[#143630] border-[#D0DDD0] bg-[#EDF3EA]' : 'text-[#E8E9D8] border-[#A9BFA5]/40 bg-[#0D2D2A]/60'
-                      : isLight ? 'text-[#3E6A5E] border-[#D0DDD0] bg-[#F8F9F5]' : 'text-[#A9BFA5] border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
+                  <span className={`nx-tag ${
+                    campaign.status === 'Active' ? 'green' : campaign.status === 'Planning' || campaign.status === 'Scheduled' ? 'teal' : campaign.status === 'Draft' ? 'amber' : ''
                   }`}>
                     {campaign.status}
                   </span>

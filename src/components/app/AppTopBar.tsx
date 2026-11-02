@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
-import { BRAND_NAME } from '../../config/brand';
+import { BRAND_NAME, BRAND_COMPANY } from '../../config/brand';
 
 interface AppTopBarProps {
   activeCategory: NavCategory;
@@ -165,8 +165,8 @@ export default function AppTopBar({
       case 'overview': return 'Overview';
       case 'inbox': return 'Inbox';
       case 'leads': return 'Leads';
-      case 'agent': return 'Engagement agent';
-      case 'content': return 'Content';
+      case 'agent': return 'Engagement Agent';
+      case 'content': return 'Content Studio';
       case 'campaigns': return 'Campaigns';
       case 'analytics': return 'Analytics';
       case 'settings': return 'Settings';
@@ -175,7 +175,7 @@ export default function AppTopBar({
   };
 
   const iconBtn =
-    'inline-flex items-center justify-center w-9 h-9 min-h-9! rounded-[9px]! border border-line bg-surface text-ink-2 hover:bg-surface-hover hover:text-ink transition-colors cursor-pointer focus-visible:outline-none';
+    'inline-flex items-center justify-center w-[35px] h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface text-ink-2 hover:bg-surface-hover hover:text-ink transition-colors cursor-pointer focus-visible:outline-none';
   const menuPanel =
     'absolute right-0 mt-2 bg-surface border border-line rounded-[13px] shadow-pop z-50 animate-fadeIn text-sm text-ink overflow-hidden';
   const menuItem =
@@ -184,7 +184,7 @@ export default function AppTopBar({
 
   return (
     <header className="sticky top-0 z-20 w-full h-14 sm:h-[67px] shrink-0 border-b border-line bg-surface/95 backdrop-blur-md select-none">
-      <div className="h-full px-3 sm:px-8 lg:px-10 flex items-center justify-between gap-3 sm:gap-4">
+      <div className="h-full px-3 sm:px-6 lg:px-[39px] flex items-center justify-between gap-3 sm:gap-4">
 
         {/* Left: Mobile menu + breadcrumb */}
         <div className="flex items-center gap-3 min-w-0">
@@ -197,19 +197,19 @@ export default function AppTopBar({
             <Menu className="w-5 h-5" />
           </button>
 
-          <nav className="hidden sm:flex items-center gap-2.5 text-[12px] text-ink-3 min-w-0" aria-label="Breadcrumb">
-            <span>{BRAND_NAME} workspace</span>
-            <span className="text-line-strong">/</span>
+          <nav className="hidden sm:flex items-center text-[12px] text-[#8391A3] min-w-0" aria-label="Breadcrumb">
+            <span>{BRAND_COMPANY} workspace</span>
+            <span className="mx-2.5">/</span>
             <button
               type="button"
               onClick={() => onSelectNav(activeCategory, activeSubCategory)}
-              className="min-h-0! font-semibold text-ink hover:text-brand transition-colors cursor-pointer truncate"
+              className="min-h-0! font-bold text-ink hover:text-brand transition-colors cursor-pointer truncate"
             >
               {formatCategoryTitle(activeCategory, activeSubCategory)}
             </button>
             {currentRecordTitle && (
               <>
-                <span className="text-ink-3">/</span>
+                <span className="mx-2.5">/</span>
                 <span className="font-semibold text-ink truncate max-w-[140px] sm:max-w-[260px]">
                   {currentRecordTitle}
                 </span>
@@ -219,16 +219,16 @@ export default function AppTopBar({
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-[11px]">
 
           <button
             type="button"
             id="topbar-search-button"
             onClick={onOpenQuickSearch}
-            className="flex items-center gap-2 h-9 min-h-9! rounded-[9px]! border border-line bg-surface-raised text-ink-3 hover:text-ink-2 hover:border-line-strong transition-colors px-3 sm:pl-3.5 sm:pr-2.5 sm:min-w-[220px] cursor-pointer"
+            className="flex items-center gap-2 h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface-raised text-[#8592A4] hover:border-line-strong transition-colors px-2.5 sm:px-[15px] sm:min-w-[215px] cursor-pointer"
             title="Search workspace (⌘K or Ctrl+K)"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-[13px] flex-1 text-left">Search</span>
             <kbd className={`hidden sm:inline ${kbd}`}>⌘K</kbd>
           </button>
@@ -239,9 +239,9 @@ export default function AppTopBar({
               type="button"
               id="topbar-new-button"
               onClick={() => setNewMenuOpen(!newMenuOpen)}
-              className="inline-flex items-center gap-1.5 h-9 min-h-9! rounded-[9px]! px-2.5 sm:px-3.5 bg-brand text-on-brand text-[13px] font-semibold hover:bg-brand-hover transition-colors cursor-pointer"
+              className="nx-btn primary sm h-[35px] sm:h-auto"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
               <span className="hidden sm:inline">New</span>
             </button>
 
@@ -371,16 +371,13 @@ export default function AppTopBar({
               type="button"
               id="topbar-user-menu"
               onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-              className="flex items-center gap-2 h-9 min-h-9! rounded-[9px]! pl-1 pr-2 hover:bg-surface-hover transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-[35px] min-h-[35px]! rounded-[9px]! pl-0.5 pr-1.5 hover:bg-surface-hover transition-colors cursor-pointer"
               aria-label="Account menu"
             >
-              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-xs font-bold uppercase">
-                {(currentUser?.workspace || currentUser?.name || BRAND_NAME)[0]}
+              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-[13px] font-extrabold uppercase">
+                {(currentUser?.name || currentUser?.workspace || BRAND_NAME).split(/\s+/).map(w => w[0]).slice(0, 2).join('')}
               </span>
-              <span className="hidden lg:inline text-[13px] font-semibold text-ink max-w-[140px] truncate">
-                {currentUser?.workspace || currentUser?.name || BRAND_NAME}
-              </span>
-              <ChevronDown className="w-3.5 h-3.5 text-ink-3" />
+                            <ChevronDown className="w-3.5 h-3.5 text-ink-3" />
             </button>
 
             {accountMenuOpen && (
