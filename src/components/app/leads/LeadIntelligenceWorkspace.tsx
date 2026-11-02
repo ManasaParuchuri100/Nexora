@@ -18,7 +18,9 @@ import {
   Flame,
   CheckCircle2,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { 
   Lead, 
@@ -55,30 +57,30 @@ export function getChannelBadge(source?: string) {
   if (s.includes('whatsapp')) {
     return { 
       name: 'WhatsApp', 
-      badge: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-950/60 dark:border-emerald-800/40' 
+      badge: 'text-ok bg-ok-soft border-transparent' 
     };
   }
   if (s.includes('instagram')) {
     return { 
       name: 'Instagram', 
-      badge: 'text-pink-700 bg-pink-50 border-pink-200 dark:text-pink-300 dark:bg-pink-950/60 dark:border-pink-800/40' 
+      badge: 'text-pink-700 bg-pink-50 border-pink-200' 
     };
   }
   if (s.includes('linkedin')) {
     return { 
       name: 'LinkedIn', 
-      badge: 'text-sky-700 bg-sky-50 border-sky-200 dark:text-sky-300 dark:bg-sky-950/60 dark:border-sky-800/40' 
+      badge: 'text-info bg-info-soft border-sky-200' 
     };
   }
   if (s.includes('website')) {
     return { 
       name: 'Website', 
-      badge: 'text-teal-700 bg-teal-50 border-teal-200 dark:text-teal-300 dark:bg-teal-950/60 dark:border-teal-800/40' 
+      badge: 'text-brand bg-brand-soft border-brand/30' 
     };
   }
   return { 
     name: source || 'Direct', 
-    badge: 'text-slate-700 bg-slate-100 border-slate-200 dark:text-[#A9BFA5] dark:bg-[#0D2D2A] dark:border-[rgba(169,191,165,0.3)]' 
+    badge: 'text-ink-2 bg-surface-raised border-line' 
   };
 }
 
@@ -109,6 +111,24 @@ export default function LeadIntelligenceWorkspace({
   // Sub-tabs: 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes'
   type WorkspaceSubTab = 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes';
   const [activeSubTab, setActiveSubTab] = useState<WorkspaceSubTab>('qualification');
+  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nexora_lead_rail_collapsed') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleRail = () => {
+    setIsRailCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('nexora_lead_rail_collapsed', next ? '1' : '0');
+      } catch {
+        // storage unavailable — keep in-memory state only
+      }
+      return next;
+    });
+  };
 
   // Reply text input
   const [replyText, setReplyText] = useState('');
@@ -479,539 +499,304 @@ export default function LeadIntelligenceWorkspace({
     .substring(0, 2)
     .toUpperCase() || 'LD';
 
+  const navItems: Array<{
+    id: WorkspaceSubTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+    count?: number;
+  }> = [
+    { id: 'qualification', label: 'AI qualification', icon: Sparkles },
+    { id: 'conversation', label: 'Conversation', icon: MessageSquare, count: conversationMessages.length },
+    { id: 'info', label: 'Lead info & source', icon: Building2 },
+    { id: 'timeline', label: 'Activity timeline', icon: Clock, count: timelineEvents.length },
+    { id: 'notes', label: 'Follow-ups & notes', icon: Lock, count: followUps.length },
+  ];
+
+  const tempTag = temperature === 'HOT' ? 'red' : temperature === 'WARM' ? 'amber' : '';
+  const verifiedCount = qualificationChecks.filter(c => c.status === 'verified').length;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex justify-end animate-fadeIn">
-      {/* 1. Backdrop (Clicking outside closes drawer) */}
-      <div 
-        className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-[2px] transition-opacity cursor-pointer"
+    <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-overlay backdrop-blur-[2px] cursor-pointer animate-fadeIn"
         onClick={onClose}
         aria-label="Close lead profile"
       />
 
-      {/* 2. Slide-over Workspace Drawer Panel */}
-      <div className={`relative w-full max-w-4xl lg:max-w-4xl xl:max-w-5xl h-full flex flex-col z-10 transition-colors shadow-2xl select-text ${
-        isLight
-          ? 'bg-slate-50 text-slate-900 border-l border-slate-200'
-          : 'bg-[#071C1A] text-[#E8E9D8] border-l border-[rgba(169,191,165,0.25)]'
-      }`}>
-        
-        {/* ========================================================
-            PERSISTENT HEADER: LEAD OVERVIEW & ACTIONS
-           ======================================================== */}
-        <div className={`px-6 py-4 border-b flex flex-col gap-3 shrink-0 transition-colors ${
-          isLight
-            ? 'bg-white border-slate-200/90'
-            : 'bg-[#061816] border-[rgba(169,191,165,0.18)]'
-        }`}>
+      {/* Drawer */}
+      <div className="nx-drawer relative w-full max-w-[960px] h-full flex flex-col z-10 bg-surface text-ink select-text animate-fadeIn">
+
+        {/* Header */}
+        <div className="px-[27px] pt-[24px] pb-5 border-b border-line shrink-0">
           <div className="flex items-start justify-between gap-4">
-            
-            {/* Lead Identity & Badges */}
-            <div className="flex items-center space-x-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-full bg-teal-50 text-teal-700 font-bold border border-teal-200/80 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40 flex items-center justify-center text-sm shrink-0 shadow-xs">
+            <div className="flex items-start gap-3.5 min-w-0">
+              <div className="w-[46px] h-[46px] rounded-[12px] grid place-items-center bg-avatar text-avatar-ink font-extrabold text-[15px] shrink-0 mt-1">
                 {initials}
               </div>
-
               <div className="min-w-0">
-                <div className="flex items-center space-x-2.5 flex-wrap gap-y-1">
-                  <h1 className={`text-xl font-bold tracking-tight truncate ${
-                    isLight ? 'text-slate-900' : 'text-white'
-                  }`}>
-                    {lead.name}
-                  </h1>
-                  
-                  {/* Score & Temperature Badge */}
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border tabular-nums flex items-center space-x-1 ${
-                    temperature === 'HOT' 
-                      ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/50 dark:border-rose-800/60 dark:text-rose-300' 
-                      : temperature === 'WARM' 
-                      ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/50 dark:border-amber-800/60 dark:text-amber-300' 
-                      : 'bg-slate-100 border-slate-200 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
-                  }`}>
-                    <span>{temperature === 'HOT' ? '🔥 HOT' : temperature === 'WARM' ? '🟠 WARM' : '⚪ COLD'}</span>
-                    <span className="tabular-nums font-mono">{lead.score}/100</span>
-                    {lead.temperatureOverride && (
-                      <span className="text-[10px] opacity-75">(override)</span>
-                    )}
-                  </span>
-
-                  {/* Channel Badge */}
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md border ${channelBadge.badge}`}>
-                    {channelBadge.name}
-                  </span>
-                </div>
-
-                <div className={`flex items-center space-x-2 text-xs mt-1 truncate ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]'
-                }`}>
-                  <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'}`}>
-                    {lead.company}
-                  </span>
-                  <span>·</span>
-                  <span>{lead.title || <span className="italic text-slate-400">Not provided</span>}</span>
-                  <span>·</span>
-                  <span>{lead.location || <span className="italic text-slate-400">Not provided</span>}</span>
-                </div>
+                <span className="eyebrow">Lead details</span>
+                <h1 className="text-[26px] leading-[1.2] font-bold tracking-[-1px] text-ink mt-1 mb-1 truncate">{lead.name}</h1>
+                <p className="text-[13px] text-ink-3 m-0 truncate">
+                  {lead.company}
+                  {lead.title ? ` · ${lead.title}` : ''}
+                  {lead.location ? ` · ${lead.location}` : ''}
+                  {` · ${channelBadge.name}`}
+                </p>
               </div>
             </div>
 
-            {/* Quick Actions: Stage Selector (single source of truth), Temp Override, Handoff, Close */}
-            <div className="flex items-center space-x-2 shrink-0">
-              {/* Stage Selector */}
+            <div className="flex items-center gap-2 shrink-0">
               <select
                 id="lead-stage-select"
-                aria-label="Update Lead Stage"
+                aria-label="Update lead stage"
                 value={lead.stage || 'New'}
                 onChange={(e) => handleStageChange(e.target.value as LeadStage)}
-                className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer focus:outline-none focus:border-teal-600 ${
-                  isLight
-                    ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 shadow-2xs'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:bg-[#0B2522]'
-                }`}
+                className="hidden md:block text-[12px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
               >
                 {STAGE_OPTIONS.map((stg) => (
-                  <option key={stg} value={stg}>
-                    Stage: {stg}
-                  </option>
+                  <option key={stg} value={stg}>Stage: {stg}</option>
                 ))}
               </select>
-
-              {/* Temperature Selector */}
               <select
                 id="lead-temp-select"
-                aria-label="Override Lead Temperature"
+                aria-label="Override lead temperature"
                 value={temperature}
                 onChange={(e) => handleTemperatureChange(e.target.value as LeadTemperature)}
-                className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer focus:outline-none focus:border-teal-600 ${
-                  isLight
-                    ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 shadow-2xs'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:bg-[#0B2522]'
-                }`}
+                className="hidden md:block text-[12px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
               >
-                <option value="HOT">🔥 HOT</option>
-                <option value="WARM">🟠 WARM</option>
-                <option value="COLD">🔵 COLD</option>
+                <option value="HOT">Hot</option>
+                <option value="WARM">Warm</option>
+                <option value="COLD">Cold</option>
               </select>
-
-              {/* Human Handoff Toggle */}
-              <button
-                type="button"
-                onClick={handleToggleHandoff}
-                className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors cursor-pointer flex items-center space-x-1.5 ${
-                  handlingMode === 'HUMAN' 
-                    ? 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-500/20 dark:border-amber-500/50 dark:text-amber-200' 
-                    : isLight
-                    ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#A9BFA5] hover:text-[#E8E9D8]'
-                }`}
-                title="Toggle AI handling vs Human handling"
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{handlingMode === 'HUMAN' ? 'Human Handled' : 'AI Handled'}</span>
-              </button>
-
-              {/* Close Button */}
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close Lead Profile"
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  isLight
-                    ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                    : 'text-[#A9BFA5] hover:text-white hover:bg-[#0D2D2A]'
-                }`}
+                aria-label="Close lead profile"
+                className="w-[35px] h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface text-ink-2 grid place-items-center hover:bg-surface-hover cursor-pointer"
               >
-                <X className="w-5 h-5" strokeWidth={2} />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Persistent Metadata Row: Budget · Timeline · Decision Maker · Assigned Owner */}
-          <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t text-xs ${
-            isLight ? 'border-slate-100 text-slate-600' : 'border-[rgba(169,191,165,0.12)] text-[#A9BFA5]'
-          }`}>
-            <div>
-              <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-              }`}>Budget</span>
-              <span className={`font-semibold tabular-nums ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {lead.budget || lead.value || <span className="italic font-normal text-slate-400">Not provided</span>}
-              </span>
-            </div>
-            <div>
-              <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-              }`}>Timeline</span>
-              <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {lead.timeline || <span className="italic font-normal text-slate-400">Not provided</span>}
-              </span>
-            </div>
-            <div>
-              <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-              }`}>Decision Maker</span>
-              {lead.decisionMaker === true ? (
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  ✓ Verified Approver
-                </span>
-              ) : lead.decisionMaker === false ? (
-                <span className="font-semibold text-rose-600 dark:text-rose-400">
-                  Requires approval
-                </span>
-              ) : (
-                <span className="italic font-normal text-slate-400">
-                  Not determined
-                </span>
-              )}
-            </div>
-            <div>
-              <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
-              }`}>Assigned Owner</span>
-              <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                {lead.assignee?.name || <span className="italic font-normal text-slate-400">Unassigned</span>}
-              </span>
-            </div>
+          <div className="flex items-center gap-[7px] flex-wrap mt-4">
+            <span className="nx-tag">{lead.stage || 'New'}</span>
+            <span className={`nx-tag ${tempTag}`}>
+              {temperature === 'HOT' ? 'Hot' : temperature === 'WARM' ? 'Warm' : 'Cold'} · {lead.score}/100
+              {lead.temperatureOverride ? ' · override' : ''}
+            </span>
+            <span className="nx-tag teal">{handlingMode === 'HUMAN' ? 'Human owned' : 'AI owned'}</span>
+            <span className="nx-tag">{channelBadge.name}</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 mt-[18px] pt-4 border-t border-line">
+            {[
+              ['Budget', lead.budget || lead.value || null, ''],
+              ['Timeline', lead.timeline || null, ''],
+              [
+                'Decision maker',
+                lead.decisionMaker === true ? 'Verified approver' : lead.decisionMaker === false ? 'Requires approval' : null,
+                lead.decisionMaker === true ? 'text-ok' : lead.decisionMaker === false ? 'text-danger' : '',
+              ],
+              ['Owner', lead.assignee?.name || null, ''],
+            ].map(([label, value, tone]) => (
+              <div key={label as string} className="min-w-0">
+                <div className="text-[11px] text-ink-3">{label as string}</div>
+                <div className={`text-[13px] font-bold mt-1 truncate ${value ? (tone as string) || 'text-ink' : 'text-ink-3 font-normal'}`}>
+                  {(value as string) || 'Not provided'}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* ========================================================
-            STANDARDIZED FIVE-TAB NAVIGATION BAR
-           ======================================================== */}
-        <div className={`border-b px-6 flex items-center space-x-1 sm:space-x-2 overflow-x-auto shrink-0 select-none scrollbar-none transition-colors ${
-          isLight
-            ? 'bg-white border-slate-200/90'
-            : 'bg-[#051513] border-[rgba(169,191,165,0.15)]'
-        }`}>
-          
-          {/* Tab 1: AI Qualification */}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('qualification')}
-            className={`py-3 px-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'qualification'
-                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50/40 dark:bg-teal-950/20'
-                : isLight
-                ? 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50'
-                : 'text-[#A9BFA5]/70 border-transparent hover:text-white hover:bg-[#0D2D2A]/10'
+        {/* Body: vertical, collapsible section rail + content */}
+        <div className="flex-1 min-h-0 flex">
+          <nav
+            aria-label="Lead sections"
+            className={`shrink-0 border-r border-line bg-surface flex flex-col py-3 transition-[width] duration-200 ${
+              isRailCollapsed ? 'w-[64px] px-[10px]' : 'w-[214px] px-[12px]'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-            <span>AI Qualification</span>
-          </button>
+            <div className={`flex items-center mb-1.5 ${isRailCollapsed ? 'justify-center' : 'justify-between pl-[11px]'}`}>
+              {!isRailCollapsed && (
+                <span className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
+              )}
+              <button
+                type="button"
+                onClick={toggleRail}
+                aria-label={isRailCollapsed ? 'Expand sections' : 'Collapse sections'}
+                aria-expanded={!isRailCollapsed}
+                title={isRailCollapsed ? 'Expand sections' : 'Collapse sections'}
+                className="w-[30px] h-[30px] min-h-[30px]! rounded-[8px]! grid place-items-center text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
+              >
+                {isRailCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              </button>
+            </div>
 
-          {/* Tab 2: Conversation */}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('conversation')}
-            className={`py-3 px-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'conversation'
-                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50/40 dark:bg-teal-950/20'
-                : isLight
-                ? 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50'
-                : 'text-[#A9BFA5]/70 border-transparent hover:text-white hover:bg-[#0D2D2A]/10'
-            }`}
-          >
-            <MessageSquare className="w-4 h-4 shrink-0" />
-            <span>Conversation</span>
-            <span className={`text-[11px] px-1.5 py-0.2 rounded-full tabular-nums font-mono ${
-              activeSubTab === 'conversation'
-                ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200'
-                : isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
-            }`}>
-              {conversationMessages.length}
-            </span>
-          </button>
+            {navItems.map(item => {
+              const Icon = item.icon;
+              const active = activeSubTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveSubTab(item.id)}
+                  aria-current={active ? 'page' : undefined}
+                  title={isRailCollapsed ? item.label : undefined}
+                  className={`relative w-full flex items-center h-[42px] min-h-[42px]! my-px rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer ${
+                    isRailCollapsed ? 'justify-center px-0' : 'gap-[11px] px-[11px]'
+                  } ${active ? 'bg-brand-soft text-brand' : 'text-ink-2 hover:bg-surface-hover hover:text-ink'}`}
+                >
+                  <Icon strokeWidth={1.8} className={`w-[17px] h-[17px] shrink-0 ${active ? 'text-brand' : 'text-ink-3'}`} />
+                  {!isRailCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+                  {typeof item.count === 'number' && item.count > 0 && (
+                    isRailCollapsed ? (
+                      <span className="absolute top-[7px] right-[7px] w-[7px] h-[7px] rounded-full bg-brand" />
+                    ) : (
+                      <span className={`text-[10px] font-bold tabular-nums rounded-[5px] px-1.5 py-px ${active ? 'bg-brand text-on-brand' : 'bg-surface-raised text-ink-3'}`}>
+                        {item.count}
+                      </span>
+                    )
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-          {/* Tab 3: Lead Info & Source */}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('info')}
-            className={`py-3 px-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'info'
-                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50/40 dark:bg-teal-950/20'
-                : isLight
-                ? 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50'
-                : 'text-[#A9BFA5]/70 border-transparent hover:text-white hover:bg-[#0D2D2A]/10'
-            }`}
-          >
-            <Building2 className="w-4 h-4 shrink-0" />
-            <span>Lead Info & Source</span>
-          </button>
+        <div className="flex-1 min-w-0 overflow-y-auto bg-canvas px-[27px] py-[24px] space-y-[15px]">
 
-          {/* Tab 4: Activity Timeline */}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('timeline')}
-            className={`py-3 px-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'timeline'
-                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50/40 dark:bg-teal-950/20'
-                : isLight
-                ? 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50'
-                : 'text-[#A9BFA5]/70 border-transparent hover:text-white hover:bg-[#0D2D2A]/10'
-            }`}
-          >
-            <Clock className="w-4 h-4 shrink-0" />
-            <span>Activity Timeline</span>
-            <span className={`text-[11px] px-1.5 py-0.2 rounded-full tabular-nums font-mono ${
-              activeSubTab === 'timeline'
-                ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200'
-                : isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
-            }`}>
-              {timelineEvents.length}
-            </span>
-          </button>
-
-          {/* Tab 5: Follow-ups & Notes */}
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('notes')}
-            className={`py-3 px-3.5 text-xs font-semibold flex items-center space-x-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeSubTab === 'notes'
-                ? 'text-teal-600 dark:text-teal-400 border-teal-600 dark:border-teal-400 bg-teal-50/40 dark:bg-teal-950/20'
-                : isLight
-                ? 'text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50'
-                : 'text-[#A9BFA5]/70 border-transparent hover:text-white hover:bg-[#0D2D2A]/10'
-            }`}
-          >
-            <Lock className="w-4 h-4 shrink-0 text-amber-500" />
-            <span>Follow-ups & Notes</span>
-            <span className={`text-[11px] px-1.5 py-0.2 rounded-full tabular-nums font-mono ${
-              activeSubTab === 'notes'
-                ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-200'
-                : isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
-            }`}>
-              {followUps.length}
-            </span>
-          </button>
-        </div>
-
-        {/* ========================================================
-            SUB-TAB CONTENT CONTAINER
-           ======================================================== */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6 pb-24">
-          
           {/* ========================================================
               TAB 1: AI QUALIFICATION
              ======================================================== */}
           {activeSubTab === 'qualification' && (
-            <div className="space-y-6 max-w-3xl">
-              
-              {/* Card 1: Score & Assessment Hero */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
-                      AI Lead Intelligence Assessment
-                    </span>
-                    <div className="flex items-baseline space-x-3 mt-1">
-                      <span className={`text-4xl font-extrabold tabular-nums tracking-tight ${
-                        isLight ? 'text-slate-900' : 'text-white'
-                      }`}>
-                        {lead.score} <span className="text-xl font-normal text-slate-400">/ 100</span>
-                      </span>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/50 dark:border-rose-800/60 dark:text-rose-300">
-                        🔥 {intentLevel}
-                      </span>
-                    </div>
-                  </div>
+            <div className="space-y-[15px]">
 
-                  {/* Confidence & Readiness badges (shown only if provided) */}
-                  {(lead.aiConfidence !== undefined || lead.purchaseReadiness !== undefined) && (
-                    <div className="flex items-center space-x-2 text-xs">
-                      {lead.aiConfidence !== undefined && (
-                        <span className={`px-3 py-1.5 rounded-lg border font-medium ${
-                          isLight
-                            ? 'bg-slate-50 border-slate-200 text-slate-700'
-                            : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                        }`}>
-                          Confidence: <strong className="tabular-nums">{lead.aiConfidence}</strong>
-                        </span>
-                      )}
-                      {lead.purchaseReadiness !== undefined && (
-                        <span className={`px-3 py-1.5 rounded-lg border font-medium ${
-                          isLight
-                            ? 'bg-slate-50 border-slate-200 text-slate-700'
-                            : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                        }`}>
-                          Readiness: <strong className="text-emerald-600 dark:text-emerald-400">{lead.purchaseReadiness}</strong>
-                        </span>
-                      )}
-                    </div>
-                  )}
+              {/* Score & summary */}
+              <section className="nx-panel nx-pad">
+                <div className="nx-sectionhead">
+                  <div>
+                    <h2>AI qualification</h2>
+                    <p>Score is based on stated requirements, intent and engagement signals.</p>
+                  </div>
+                  <span className={`nx-tag ${tempTag}`}>{intentLevel.replace(/🔥\s*/g, '')}</span>
                 </div>
 
-                {/* AI Conversation Summary */}
-                <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold uppercase tracking-wider ${
-                      isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
-                    }`}>
-                      AI Conversation Summary
-                    </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display text-[29px] font-extrabold tracking-[-1.1px] text-ink tabular-nums">{lead.score}</span>
+                  <span className="text-[14px] text-ink-3">/ 100</span>
+                </div>
+                <div className="nx-progress mt-2.5"><div style={{ width: `${Math.min(100, Math.max(0, lead.score))}%` }} /></div>
+
+                {(lead.aiConfidence !== undefined || lead.purchaseReadiness !== undefined) && (
+                  <div className="mt-3">
+                    {lead.aiConfidence !== undefined && (
+                      <div className="nx-kv"><span>Confidence</span><b>{lead.aiConfidence}</b></div>
+                    )}
+                    {lead.purchaseReadiness !== undefined && (
+                      <div className="nx-kv"><span>Readiness</span><b className="text-ok">{lead.purchaseReadiness}</b></div>
+                    )}
+                  </div>
+                )}
+
+                <div className="nx-split" />
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-display text-[13px] font-bold text-ink m-0">Conversation summary</h3>
+                  <button
+                    type="button"
+                    onClick={handleRegenerateSummary}
+                    disabled={isRegeneratingSummary}
+                    className="nx-link text-[11px] inline-flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <RotateCw className={`w-3.5 h-3.5 ${isRegeneratingSummary ? 'animate-spin' : ''}`} />
+                    {isRegeneratingSummary ? 'Regenerating…' : 'Regenerate'}
+                  </button>
+                </div>
+                <p className="text-[12px] text-ink-2 mt-2 mb-0">
+                  {aiSummary || lead.description || (
+                    <span className="text-ink-3">No summary yet. Regenerate to create one from lead signals.</span>
+                  )}
+                </p>
+              </section>
+
+              {/* Qualification criteria */}
+              <section className="nx-panel nx-pad">
+                <div className="nx-sectionhead">
+                  <div>
+                    <h2>Qualification criteria</h2>
+                    <p>{verifiedCount} of {qualificationChecks.length} verified</p>
+                  </div>
+                </div>
+                <div className="border-t border-line">
+                  {qualificationChecks.map((check) => (
+                    <div key={check.key} className="nx-row">
+                      <div className={`nx-alerticon ${check.status === 'verified' ? 'green' : check.status === 'missing' ? 'red' : ''}`}>
+                        {check.status === 'verified' ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : check.status === 'missing' ? (
+                          <AlertCircle className="w-4 h-4" />
+                        ) : (
+                          <HelpCircle className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <strong>{check.label}</strong>
+                        <p className="truncate">{check.detail}</p>
+                      </div>
+                      <span className={`nx-tag ${check.status === 'verified' ? 'green' : check.status === 'missing' ? 'red' : ''}`}>
+                        {check.status === 'verified' ? 'Verified' : check.status === 'missing' ? 'Missing' : 'Unknown'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Score signals */}
+              <section className="nx-panel nx-pad">
+                <div className="nx-sectionhead">
+                  <div>
+                    <h2>Why this lead is qualified</h2>
+                    <p>Each signal's contribution to the score.</p>
+                  </div>
+                </div>
+                <div className="border-t border-line pt-1">
+                  {scoreSignals.map((signal, idx) => (
+                    <div key={idx} className="nx-kv">
+                      <span>{signal.label}</span>
+                      <b className={`tabular-nums ${signal.points >= 0 ? 'text-ok' : 'text-danger'}`}>
+                        {signal.points >= 0 ? `+${signal.points}` : signal.points}
+                      </b>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Recommended next action */}
+              <div className="nx-insight">
+                <div className="nx-spark"><Sparkles className="w-[18px] h-[18px]" /></div>
+                <div className="flex-1 min-w-0">
+                  <span className="eyebrow">Next best action</span>
+                  <h3>{aiRecommendation}</h3>
+                  {lead.timeline && <p>Expected timeline: {lead.timeline}</p>}
+                  <div className="flex gap-[9px] mt-[13px] flex-wrap">
                     <button
                       type="button"
-                      onClick={handleRegenerateSummary}
-                      disabled={isRegeneratingSummary}
-                      className="text-xs text-teal-600 dark:text-teal-400 hover:underline flex items-center space-x-1.5 cursor-pointer font-medium disabled:opacity-50"
+                      className="nx-btn sm primary"
+                      onClick={() => {
+                        setActiveSubTab('notes');
+                        setShowAddFollowUp(true);
+                        if (onNotify) onNotify('Follow-up task', `Follow-up queued for ${lead.name}.`);
+                      }}
                     >
-                      <RotateCw className={`w-3.5 h-3.5 ${isRegeneratingSummary ? 'animate-spin' : ''}`} />
-                      <span>{isRegeneratingSummary ? 'Regenerating...' : 'Regenerate'}</span>
+                      Schedule follow-up →
+                    </button>
+                    <button type="button" className="nx-btn sm" onClick={handleGenerateAiReply}>
+                      Draft with AI
                     </button>
                   </div>
-                  <p className={`text-sm leading-relaxed font-normal ${
-                    isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
-                  }`}>
-                    {aiSummary || lead.description || (
-                      <span className="italic text-slate-400">No summary generated yet. Click regenerate to create one from lead signals.</span>
-                    )}
-                  </p>
                 </div>
               </div>
-
-              {/* Card 2: Qualification Checklist (5 Criteria) */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold uppercase tracking-wider block ${
-                    isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
-                  }`}>
-                    Qualification Criteria
-                  </span>
-                  <span className="text-xs font-mono text-slate-400 dark:text-[#A9BFA5]/70">
-                    {qualificationChecks.filter(c => c.status === 'verified').length} of {qualificationChecks.length} verified
-                  </span>
-                </div>
-
-                <div className="space-y-2.5 text-xs">
-                  {qualificationChecks.map((check) => (
-                    <div
-                      key={check.key}
-                      className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${
-                        check.status === 'verified'
-                          ? isLight
-                            ? 'bg-emerald-50/50 border-emerald-200/60 text-slate-800'
-                            : 'bg-emerald-950/20 border-emerald-800/40 text-emerald-200'
-                          : check.status === 'missing'
-                          ? isLight
-                            ? 'bg-rose-50/50 border-rose-200/60 text-slate-800'
-                            : 'bg-rose-950/20 border-rose-800/40 text-rose-200'
-                          : isLight
-                          ? 'bg-slate-50 border-slate-200/60 text-slate-600'
-                          : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)] text-[#A9BFA5]'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-2.5 min-w-0">
-                        {check.status === 'verified' ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        ) : check.status === 'missing' ? (
-                          <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                        ) : (
-                          <HelpCircle className="w-4 h-4 text-slate-400 shrink-0" />
-                        )}
-                        <span className="font-semibold">{check.label}</span>
-                      </div>
-                      <span className="text-xs truncate max-w-[240px] text-right font-medium">
-                        {check.detail}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Card 3: Why This Lead is Qualified (Signals) */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
-              }`}>
-                <span className={`text-xs font-bold uppercase tracking-wider block ${
-                  isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
-                }`}>
-                  Why this lead is qualified
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {scoreSignals.map((signal, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#071C1A]"
-                    >
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span className={`truncate font-medium ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                          {signal.label}
-                        </span>
-                      </div>
-                      <span className={`font-mono font-semibold tabular-nums ml-2 shrink-0 ${
-                        signal.points >= 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }`}>
-                        {signal.points >= 0 ? `+${signal.points}` : signal.points}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Card 4: Recommended Next Action */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-amber-50/70 border-amber-200/90'
-                  : 'bg-[#18160E] border-amber-500/30'
-              }`}>
-                <div className="flex items-center space-x-2">
-                  <Flame className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                    Recommended Next Action
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className={`text-base sm:text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                    {aiRecommendation}
-                  </h3>
-                  {lead.timeline && (
-                    <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mt-1">
-                      Expected Timeline: <strong>{lead.timeline}</strong>
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveSubTab('notes');
-                      setShowAddFollowUp(true);
-                      if (onNotify) onNotify('Follow-up Task', `Follow-up queued for ${lead.name}.`);
-                    }}
-                    className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
-                  >
-                    Schedule Follow-up
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleGenerateAiReply}
-                    className={`px-4 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                      isLight
-                        ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                        : 'bg-[#071F1C] border-[rgba(169,191,165,0.3)] text-white hover:bg-[#0B2522]'
-                    }`}
-                  >
-                    Draft AI Follow-up
-                  </button>
-                </div>
-              </div>
-
             </div>
           )}
 
@@ -1019,27 +804,25 @@ export default function LeadIntelligenceWorkspace({
               TAB 2: CONVERSATION (UNIFIED WITH useConversations)
              ======================================================== */}
           {activeSubTab === 'conversation' && (
-            <div className="space-y-4 max-w-3xl">
+            <div className="space-y-4">
               
               {/* Channel & Mode banner */}
-              <div className={`flex items-center justify-between p-3.5 rounded-xl border text-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90 text-slate-700 shadow-xs'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+              <div className={`flex items-center justify-between p-3.5 rounded-[13px] border text-xs transition-colors ${
+                'bg-surface border-line text-ink-2 '
               }`}>
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 " />
                   <span className="font-semibold">{channelBadge.name}</span>
-                  {lead.phone && <span className="text-slate-400">({lead.phone})</span>}
+                  {lead.phone && <span className="text-ink-3">({lead.phone})</span>}
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className={isLight ? 'text-slate-500 font-medium' : 'text-[#A9BFA5]'}>
+                  <span className={'text-ink-3 font-medium'}>
                     Mode: {handlingMode === 'HUMAN' ? '👤 Human Handled' : '🤖 AI Handled'}
                   </span>
                   <button
                     type="button"
                     onClick={handleToggleHandoff}
-                    className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-brand hover:underline cursor-pointer"
                   >
                     {handlingMode === 'HUMAN' ? 'Return to AI' : 'Take Over'}
                   </button>
@@ -1047,14 +830,12 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Chat Thread Container */}
-              <div className={`border rounded-xl flex flex-col h-[520px] shadow-xs overflow-hidden transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`border rounded-[13px] flex flex-col h-[520px]  overflow-hidden transition-colors ${
+                'bg-surface border-line'
               }`}>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
                   {conversationMessages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 dark:text-slate-500">
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-ink-3">
                       <MessageSquare className="w-10 h-10 mb-2 stroke-[1.5] opacity-50" />
                       <p className="text-sm font-medium">No conversation messages yet</p>
                       <p className="text-xs mt-1 max-w-xs">
@@ -1071,42 +852,36 @@ export default function LeadIntelligenceWorkspace({
                           className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
                         >
                           <div className={`flex items-center space-x-1.5 mb-1 text-[11px] px-1 ${
-                            isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
+                            'text-ink-3'
                           }`}>
                             {isCustomer ? (
                               <>
                                 <User className="w-3 h-3" />
-                                <span className={`font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                                <span className={`font-semibold ${'text-ink'}`}>
                                   {msg.senderName}
                                 </span>
                               </>
                             ) : isAi ? (
                               <>
-                                <Bot className="w-3 h-3 text-teal-600 dark:text-teal-400" />
-                                <span className="font-semibold text-teal-600 dark:text-teal-400">{BRAND_NAME} AI</span>
+                                <Bot className="w-3 h-3 text-brand" />
+                                <span className="font-semibold text-brand">{BRAND_NAME} AI</span>
                               </>
                             ) : (
                               <>
-                                <UserCheck className="w-3 h-3 text-sky-600 dark:text-sky-400" />
-                                <span className="font-semibold text-sky-600 dark:text-sky-300">Agent ({msg.senderName})</span>
+                                <UserCheck className="w-3 h-3 text-info" />
+                                <span className="font-semibold text-info">Agent ({msg.senderName})</span>
                               </>
                             )}
                             <span>·</span>
                             <span className="text-[10px] font-mono tabular-nums">{msg.time}</span>
                           </div>
 
-                          <div className={`p-3.5 text-xs max-w-[82%] sm:max-w-[75%] leading-relaxed shadow-xs ${
+                          <div className={`p-3.5 text-xs max-w-[82%] sm:max-w-[75%] leading-relaxed  ${
                             isCustomer
-                              ? isLight
-                                ? 'bg-slate-100 text-slate-800 border border-slate-200/70 rounded-2xl rounded-tl-sm'
-                                : 'bg-[#0B2522] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] rounded-2xl rounded-tl-sm'
+                              ? 'bg-surface-raised text-ink border border-line rounded-2xl rounded-tl-sm'
                               : isAi
-                              ? isLight
-                                ? 'bg-teal-50/90 text-teal-950 border border-teal-200/60 rounded-2xl rounded-tr-sm'
-                                : 'bg-[#0E2C26] border border-emerald-500/25 text-emerald-50 rounded-2xl rounded-tr-sm'
-                              : isLight
-                              ? 'bg-slate-900 text-white rounded-2xl rounded-tr-sm'
-                              : 'bg-[#0D2D38] border border-sky-500/30 text-sky-50 rounded-2xl rounded-tr-sm'
+                              ? 'bg-brand-soft text-teal-950 border border-brand/30 rounded-2xl rounded-tr-sm'
+                              : 'bg-slate-900 text-white rounded-2xl rounded-tr-sm'
                           }`}>
                             {msg.text}
                           </div>
@@ -1119,16 +894,14 @@ export default function LeadIntelligenceWorkspace({
 
                 {/* Reply Toolbar & Composer */}
                 <div className={`p-3.5 border-t space-y-2.5 transition-colors ${
-                  isLight
-                    ? 'bg-slate-50/80 border-slate-200/80'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)]'
+                  'bg-surface-raised border-line'
                 }`}>
                   <div className="flex items-center justify-between">
                     <button
                       type="button"
                       onClick={handleGenerateAiReply}
                       disabled={isAiGenerating}
-                      className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                      className="text-xs font-semibold text-brand hover:underline flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <Sparkles className={`w-3.5 h-3.5 ${isAiGenerating ? 'animate-spin' : ''}`} />
                       <span>{isAiGenerating ? 'Generating response...' : 'Generate AI Reply'}</span>
@@ -1138,7 +911,7 @@ export default function LeadIntelligenceWorkspace({
                       type="button"
                       onClick={handleToggleHandoff}
                       className={`text-xs font-medium cursor-pointer ${
-                        isLight ? 'text-slate-500 hover:text-slate-800' : 'text-[#A9BFA5] hover:text-white'
+                        'text-ink-3 hover:text-ink'
                       }`}
                     >
                       {handlingMode === 'AI' ? 'Take Over Conversation →' : 'Hand Back to AI 🤖'}
@@ -1153,17 +926,15 @@ export default function LeadIntelligenceWorkspace({
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
-                      className={`flex-1 text-xs px-3.5 py-2.5 rounded-lg border transition-colors focus:outline-none focus:border-teal-600 ${
-                        isLight
-                          ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400'
-                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] placeholder:text-[#A9BFA5]/50'
+                      className={`flex-1 text-xs px-3.5 py-2.5 rounded-lg border transition-colors focus:outline-none focus:border-brand/30 ${
+                        'bg-surface border-line text-ink placeholder:text-ink-3'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={handleSendMessage}
                       disabled={!replyText.trim()}
-                      className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 cursor-pointer disabled:opacity-40 transition-colors shadow-xs"
+                      className="px-4 py-2.5 bg-brand hover:bg-brand-hover text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 cursor-pointer disabled:opacity-40 transition-colors "
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>Send</span>
@@ -1179,147 +950,141 @@ export default function LeadIntelligenceWorkspace({
               TAB 3: LEAD INFO & SOURCE
              ======================================================== */}
           {activeSubTab === 'info' && (
-            <div className="space-y-6 max-w-3xl">
+            <div className="space-y-6">
               
               {/* Card 1: Contact Information */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <span className={`text-xs font-bold uppercase tracking-wider block ${
-                  isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                  'text-ink-2'
                 }`}>
                   Contact Information
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Full Name</span>
-                    <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>{lead.name}</span>
+                    <span className={`font-semibold ${'text-ink'}`}>{lead.name}</span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Job Title</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
-                      {lead.title || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink font-medium'}>
+                      {lead.title || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Email Address</span>
                     {lead.email ? (
-                      <a href={`mailto:${lead.email}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
+                      <a href={`mailto:${lead.email}`} className="text-brand font-medium hover:underline flex items-center space-x-1">
                         <Mail className="w-3.5 h-3.5 shrink-0" />
                         <span>{lead.email}</span>
                       </a>
                     ) : (
-                      <span className="italic text-slate-400">Not provided</span>
+                      <span className="italic text-ink-3">Not provided</span>
                     )}
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Phone Number</span>
                     {lead.phone ? (
-                      <a href={`tel:${lead.phone}`} className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center space-x-1">
+                      <a href={`tel:${lead.phone}`} className="text-brand font-medium hover:underline flex items-center space-x-1">
                         <Phone className="w-3.5 h-3.5 shrink-0" />
                         <span>{lead.phone}</span>
                       </a>
                     ) : (
-                      <span className="italic text-slate-400">Not provided</span>
+                      <span className="italic text-ink-3">Not provided</span>
                     )}
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Company</span>
-                    <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>{lead.company}</span>
+                    <span className={`font-semibold ${'text-ink'}`}>{lead.company}</span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Company Size</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
-                      {lead.companySize || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink font-medium'}>
+                      {lead.companySize || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Location</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
-                      {lead.location || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink font-medium'}>
+                      {lead.location || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Preferred Channel</span>
-                    <span className="text-teal-600 dark:text-teal-400 font-semibold">{channelBadge.name}</span>
+                    <span className="text-brand font-semibold">{channelBadge.name}</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 2: Business & Requirement */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <span className={`text-xs font-bold uppercase tracking-wider block ${
-                  isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                  'text-ink-2'
                 }`}>
                   Business & Requirement Scope
                 </span>
 
                 <div className="space-y-3.5 text-xs">
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-1.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-1.5 ${
+                      'text-ink-3'
                     }`}>Requirement Statement</span>
                     <p className={`p-3.5 rounded-lg border leading-relaxed font-normal ${
-                      isLight
-                        ? 'bg-slate-50 border-slate-200/80 text-slate-800'
-                        : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)] text-[#E8E9D8]'
+                      'bg-surface-raised border-line text-ink'
                     }`}>
                       {lead.requirement || lead.description || (
-                        <span className="italic text-slate-400">Not provided</span>
+                        <span className="italic text-ink-3">Not provided</span>
                       )}
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                     <div>
-                      <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                        'text-ink-3'
                       }`}>Budget Allocated</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
-                        {lead.budget || lead.value || <span className="italic text-slate-400 font-normal">Not provided</span>}
+                      <span className="text-ok font-semibold tabular-nums">
+                        {lead.budget || lead.value || <span className="italic text-ink-3 font-normal">Not provided</span>}
                       </span>
                     </div>
                     <div>
-                      <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                        'text-ink-3'
                       }`}>Expected Timeline</span>
-                      <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                        {lead.timeline || <span className="italic text-slate-400 font-normal">Not provided</span>}
+                      <span className={`font-semibold ${'text-ink'}`}>
+                        {lead.timeline || <span className="italic text-ink-3 font-normal">Not provided</span>}
                       </span>
                     </div>
                     <div>
-                      <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                        'text-ink-3'
                       }`}>Decision Maker</span>
                       {lead.decisionMaker === true ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">✓ Yes (Verified)</span>
+                        <span className="text-ok font-semibold">✓ Yes (Verified)</span>
                       ) : lead.decisionMaker === false ? (
-                        <span className="text-rose-600 dark:text-rose-400 font-semibold">Requires approval</span>
+                        <span className="text-danger font-semibold">Requires approval</span>
                       ) : (
-                        <span className="italic text-slate-400">Not determined</span>
+                        <span className="italic text-ink-3">Not determined</span>
                       )}
                     </div>
                   </div>
@@ -1327,54 +1092,52 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 3: Attribution & Campaign Source */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <span className={`text-xs font-bold uppercase tracking-wider block ${
-                  isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                  'text-ink-2'
                 }`}>
                   Lead Source & Attribution
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Origin Channel</span>
-                    <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>{lead.source}</span>
+                    <span className={`font-semibold ${'text-ink'}`}>{lead.source}</span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Campaign Name</span>
-                    <span className={isLight ? 'text-slate-800 font-medium' : 'text-[#E8E9D8]'}>
-                      {lead.campaignAttribution?.campaignName || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink font-medium'}>
+                      {lead.campaignAttribution?.campaignName || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>First Touch</span>
-                    <span className={isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}>
-                      {lead.campaignAttribution?.firstTouch || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink-2'}>
+                      {lead.campaignAttribution?.firstTouch || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                      isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      'text-ink-3'
                     }`}>Last Touch</span>
-                    <span className={isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}>
-                      {lead.campaignAttribution?.lastTouch || lead.lastActivity || <span className="italic text-slate-400">Not provided</span>}
+                    <span className={'text-ink-2'}>
+                      {lead.campaignAttribution?.lastTouch || lead.lastActivity || <span className="italic text-ink-3">Not provided</span>}
                     </span>
                   </div>
                   {lead.campaignAttribution?.adName && (
                     <div className="sm:col-span-2">
-                      <span className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${
-                        isLight ? 'text-slate-400' : 'text-[#A9BFA5]/60'
+                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                        'text-ink-3'
                       }`}>Creative / Ad Name</span>
-                      <span className={`font-medium ${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'}`}>
+                      <span className={`font-medium ${'text-ink'}`}>
                         {lead.campaignAttribution.adName}
                       </span>
                     </div>
@@ -1389,44 +1152,42 @@ export default function LeadIntelligenceWorkspace({
               TAB 4: ACTIVITY TIMELINE
              ======================================================== */}
           {activeSubTab === 'timeline' && (
-            <div className="space-y-4 max-w-3xl">
-              <div className={`p-6 rounded-xl border space-y-6 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+            <div className="space-y-4">
+              <div className={`p-[22px] rounded-[15px] border space-y-6  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${
-                    isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <div className="flex items-center justify-between pb-3 border-b border-line-subtle">
+                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                    'text-ink-2'
                   }`}>
                     Chronological Activity Timeline
                   </span>
                   <span className={`text-xs font-mono tabular-nums ${
-                    isLight ? 'text-slate-400' : 'text-[#A9BFA5]/70'
+                    'text-ink-3'
                   }`}>
                     {timelineEvents.length} events logged
                   </span>
                 </div>
 
                 {timelineEvents.length === 0 ? (
-                  <div className="text-center py-10 text-slate-400 dark:text-slate-500">
+                  <div className="text-center py-10 text-ink-3">
                     <Clock className="w-8 h-8 mx-auto mb-2 opacity-50 stroke-[1.5]" />
                     <p className="text-xs font-medium">No activity events recorded yet.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-200 dark:before:bg-slate-800">
+                  <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
                     {timelineEvents.map((evt) => (
                       <div key={evt.id} className="flex items-start space-x-3.5 relative pl-1">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[10px] shadow-2xs ${
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[10px]  ${
                           evt.type === 'message'
-                            ? 'bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/40'
+                            ? 'bg-info-soft text-info border border-sky-200'
                             : evt.type === 'ai_action'
-                            ? 'bg-teal-50 text-teal-600 border border-teal-200 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800/40'
+                            ? 'bg-brand-soft text-brand border border-brand/30'
                             : evt.type === 'qualification'
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/40'
+                            ? 'bg-ok-soft text-ok border border-transparent'
                             : evt.type === 'handoff'
-                            ? 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/40'
-                            : 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40'
+                            ? 'bg-warn-soft text-warn border border-transparent'
+                            : 'bg-purple-50 text-purple-600 border border-purple-200'
                         }`}>
                           {evt.type === 'message' ? <MessageSquare className="w-3 h-3" /> :
                            evt.type === 'ai_action' ? <Bot className="w-3 h-3" /> :
@@ -1437,16 +1198,16 @@ export default function LeadIntelligenceWorkspace({
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline justify-between gap-2">
-                            <span className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-[#E8E9D8]'}`}>
+                            <span className={`text-xs font-semibold ${'text-ink'}`}>
                               {evt.title}
                             </span>
-                            <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-slate-500 shrink-0">
+                            <span className="text-[11px] font-mono tabular-nums text-ink-3 shrink-0">
                               {evt.at ? formatRelative(evt.at) : evt.time}
                             </span>
                           </div>
                           {evt.description && (
                             <p className={`text-xs font-normal mt-0.5 leading-relaxed ${
-                              isLight ? 'text-slate-500' : 'text-[#A9BFA5]/75'
+                              'text-ink-3'
                             }`}>
                               {evt.description}
                             </p>
@@ -1464,24 +1225,22 @@ export default function LeadIntelligenceWorkspace({
               TAB 5: FOLLOW-UPS, NOTES & TAGS
              ======================================================== */}
           {activeSubTab === 'notes' && (
-            <div className="space-y-6 max-w-3xl">
+            <div className="space-y-6">
               
               {/* Card 1: Scheduled Follow-ups */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${
-                    isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
+                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                    'text-ink-2'
                   }`}>
                     Scheduled Follow-ups
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowAddFollowUp(!showAddFollowUp)}
-                    className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center space-x-1 cursor-pointer"
+                    className="text-xs font-semibold text-brand hover:underline flex items-center space-x-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Follow-up</span>
@@ -1490,19 +1249,15 @@ export default function LeadIntelligenceWorkspace({
 
                 {showAddFollowUp && (
                   <div className={`p-4 rounded-lg border space-y-3 animate-fadeIn ${
-                    isLight
-                      ? 'bg-slate-50 border-slate-200'
-                      : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)]'
+                    'bg-surface-raised border-line'
                   }`}>
                     <input
                       type="text"
                       placeholder="e.g. Schedule discovery call regarding requirements..."
                       value={newFollowUpText}
                       onChange={(e) => setNewFollowUpText(e.target.value)}
-                      className={`w-full text-xs px-3 py-2 rounded-lg border focus:outline-none focus:border-teal-600 ${
-                        isLight
-                          ? 'bg-white border-slate-200 text-slate-900'
-                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                      className={`w-full text-xs px-3 py-2 rounded-lg border focus:outline-none focus:border-brand/30 ${
+                        'bg-surface border-line text-ink'
                       }`}
                     />
                     <div className="flex items-center justify-between gap-3">
@@ -1511,10 +1266,8 @@ export default function LeadIntelligenceWorkspace({
                         placeholder="Due date & time..."
                         value={newFollowUpTime}
                         onChange={(e) => setNewFollowUpTime(e.target.value)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border font-mono tabular-nums focus:outline-none focus:border-teal-600 ${
-                          isLight
-                            ? 'bg-white border-slate-200 text-slate-700'
-                            : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#A9BFA5]'
+                        className={`text-xs px-3 py-1.5 rounded-lg border font-mono tabular-nums focus:outline-none focus:border-brand/30 ${
+                          'bg-surface border-line text-ink-2'
                         }`}
                       />
                       <div className="flex items-center space-x-2">
@@ -1522,7 +1275,7 @@ export default function LeadIntelligenceWorkspace({
                           type="button"
                           onClick={() => setShowAddFollowUp(false)}
                           className={`text-xs font-medium cursor-pointer px-2.5 py-1.5 ${
-                            isLight ? 'text-slate-500 hover:text-slate-800' : 'text-[#A9BFA5] hover:text-white'
+                            'text-ink-3 hover:text-ink'
                           }`}
                         >
                           Cancel
@@ -1531,7 +1284,7 @@ export default function LeadIntelligenceWorkspace({
                           type="button"
                           onClick={handleAddFollowUp}
                           disabled={!newFollowUpText.trim()}
-                          className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg shadow-xs cursor-pointer disabled:opacity-40"
+                          className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg  cursor-pointer disabled:opacity-40"
                         >
                           Save Follow-up
                         </button>
@@ -1541,7 +1294,7 @@ export default function LeadIntelligenceWorkspace({
                 )}
 
                 {followUps.length === 0 ? (
-                  <p className="text-xs text-slate-400 py-3 text-center">No scheduled follow-ups.</p>
+                  <p className="text-xs text-ink-3 py-3 text-center">No scheduled follow-ups.</p>
                 ) : (
                   <div className="space-y-2">
                     {followUps.map((item) => (
@@ -1549,12 +1302,8 @@ export default function LeadIntelligenceWorkspace({
                         key={item.id}
                         className={`p-3.5 rounded-lg border text-xs flex items-start justify-between gap-3 transition-colors ${
                           item.isCompleted 
-                            ? isLight
-                              ? 'bg-slate-50 border-slate-200/60 opacity-60'
-                              : 'bg-[#061816] border-[rgba(169,191,165,0.1)] opacity-60'
-                            : isLight
-                            ? 'bg-white border-slate-200/90 shadow-2xs'
-                            : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)]'
+                            ? 'bg-surface-raised border-line opacity-60'
+                            : 'bg-surface border-line '
                         }`}
                       >
                         <div className="flex items-start space-x-3">
@@ -1563,10 +1312,8 @@ export default function LeadIntelligenceWorkspace({
                             onClick={() => handleToggleFollowUp(item.id)}
                             className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center cursor-pointer transition-colors border ${
                               item.isCompleted 
-                                ? 'bg-teal-600 border-teal-600 text-white' 
-                                : isLight
-                                ? 'border-slate-300 hover:border-teal-600'
-                                : 'border-[#A9BFA5]/50 hover:border-white'
+                                ? 'bg-brand border-brand/30 text-white' 
+                                : 'border-line-strong hover:border-brand/30'
                             }`}
                             aria-label={item.isCompleted ? "Mark incomplete" : "Mark complete"}
                           >
@@ -1575,12 +1322,12 @@ export default function LeadIntelligenceWorkspace({
                           <div>
                             <p className={`font-medium leading-snug ${
                               item.isCompleted 
-                                ? 'line-through text-slate-400 dark:text-[#A9BFA5]' 
-                                : isLight ? 'text-slate-800' : 'text-[#E8E9D8]'
+                                ? 'line-through text-ink-3' 
+                                : 'text-ink'
                             }`}>
                               {item.title}
                             </p>
-                            <span className="text-[11px] font-mono tabular-nums text-slate-400 dark:text-[#A9BFA5]/70 mt-0.5 block">
+                            <span className="text-[11px] font-mono tabular-nums text-ink-3 mt-0.5 block">
                               {item.dueTime}
                             </span>
                           </div>
@@ -1592,21 +1339,19 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 2: Internal Notes */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
                   <div className="flex items-center space-x-2">
                     <Lock className="w-4 h-4 text-amber-500" />
-                    <span className={`text-xs font-bold uppercase tracking-wider ${
-                      isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                    <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                      'text-ink-2'
                     }`}>
                       Internal Notes
                     </span>
                   </div>
-                  <span className="text-[11px] font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-2.5 py-0.5 rounded-md">
+                  <span className="text-[11px] font-medium text-warn bg-warn-soft border border-transparent px-2.5 py-0.5 rounded-md">
                     Internal Team Only
                   </span>
                 </div>
@@ -1618,37 +1363,33 @@ export default function LeadIntelligenceWorkspace({
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
                       rows={2}
-                      className={`flex-1 text-xs p-3 rounded-lg border resize-none focus:outline-none focus:border-teal-600 ${
-                        isLight
-                          ? 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400'
-                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] placeholder:text-[#A9BFA5]/50'
+                      className={`flex-1 text-xs p-3 rounded-lg border resize-none focus:outline-none focus:border-brand/30 ${
+                        'bg-surface border-line text-ink placeholder:text-ink-3'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={handleAddNote}
                       disabled={!newNote.trim()}
-                      className="px-3.5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors shrink-0 shadow-xs"
+                      className="px-3.5 py-2.5 bg-brand hover:bg-brand-hover text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-40 transition-colors shrink-0 "
                     >
                       Add Note
                     </button>
                   </div>
 
                   {notes.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-3 text-center">No internal notes yet.</p>
+                    <p className="text-xs text-ink-3 py-3 text-center">No internal notes yet.</p>
                   ) : (
                     <div className="space-y-2 pt-2">
                       {notes.map((note, idx) => (
                         <div 
                           key={idx}
                           className={`p-3 rounded-lg border text-xs leading-relaxed ${
-                            isLight
-                              ? 'bg-slate-50 border-slate-200/80 text-slate-700'
-                              : 'bg-[#071C1A] border-[rgba(169,191,165,0.18)] text-[#E8E9D8]'
+                            'bg-surface-raised border-line text-ink-2'
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-1 text-[11px] text-slate-400">
-                            <span className="font-semibold text-teal-600 dark:text-teal-400">Team Note</span>
+                          <div className="flex items-center justify-between mb-1 text-[11px] text-ink-3">
+                            <span className="font-semibold text-brand">Team Note</span>
                           </div>
                           <p>{note}</p>
                         </div>
@@ -1659,14 +1400,12 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 3: Lead Tags */}
-              <div className={`p-6 rounded-xl border space-y-4 shadow-xs transition-colors ${
-                isLight
-                  ? 'bg-white border-slate-200/90'
-                  : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+                'bg-surface border-line'
               }`}>
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${
-                    isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
+                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                    'text-ink-2'
                   }`}>
                     Lead Tags
                   </span>
@@ -1674,7 +1413,7 @@ export default function LeadIntelligenceWorkspace({
                     <button
                       type="button"
                       onClick={() => setIsAddingTag(true)}
-                      className="text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline flex items-center space-x-1 cursor-pointer"
+                      className="text-xs font-semibold text-brand hover:underline flex items-center space-x-1 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add Tag</span>
@@ -1686,17 +1425,13 @@ export default function LeadIntelligenceWorkspace({
                   {tags.map((tag) => (
                     <span 
                       key={tag}
-                      className={`text-xs px-2.5 py-1 rounded-md border font-medium flex items-center space-x-1.5 ${
-                        isLight
-                          ? 'bg-slate-100 border-slate-200 text-slate-800'
-                          : 'bg-[#0D2D2A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
-                      }`}
+                      className="nx-tag teal"
                     >
                       <span>{tag}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-rose-500 cursor-pointer ml-1"
+                        className="min-h-0! hover:text-danger cursor-pointer opacity-70 hover:opacity-100"
                         aria-label={`Remove tag ${tag}`}
                       >
                         <X className="w-3 h-3" />
@@ -1713,16 +1448,14 @@ export default function LeadIntelligenceWorkspace({
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleAddTag(); }}
-                      className={`text-xs px-3 py-1.5 rounded-lg border focus:outline-none focus:border-teal-600 ${
-                        isLight
-                          ? 'bg-white border-slate-200 text-slate-900'
-                          : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                      className={`text-xs px-3 py-1.5 rounded-lg border focus:outline-none focus:border-brand/30 ${
+                        'bg-surface border-line text-ink'
                       }`}
                     />
                     <button
                       type="button"
                       onClick={handleAddTag}
-                      className="px-3.5 py-1.5 text-xs bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold cursor-pointer shadow-xs"
+                      className="px-3.5 py-1.5 text-xs bg-brand hover:bg-brand-hover text-white rounded-lg font-semibold cursor-pointer "
                     >
                       Add
                     </button>
@@ -1730,7 +1463,7 @@ export default function LeadIntelligenceWorkspace({
                       type="button"
                       onClick={() => setIsAddingTag(false)}
                       className={`text-xs cursor-pointer px-2 ${
-                        isLight ? 'text-slate-500 hover:text-slate-800' : 'text-[#A9BFA5] hover:text-white'
+                        'text-ink-3 hover:text-ink'
                       }`}
                     >
                       Cancel
@@ -1743,83 +1476,57 @@ export default function LeadIntelligenceWorkspace({
           )}
 
         </div>
+        </div>
 
-        {/* ========================================================
-            STANDARDIZED PERSISTENT BOTTOM ACTION BAR
-           ======================================================== */}
-        <div className={`border-t px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 transition-colors shadow-sm ${
-          isLight
-            ? 'bg-white border-slate-200/90 text-slate-700'
-            : 'bg-[#061816] border-[rgba(169,191,165,0.18)] text-[#A9BFA5]'
-        }`}>
-          <div className="flex items-center space-x-2.5 text-xs">
-            <span>
-              Assigned: <strong className={isLight ? 'text-slate-900' : 'text-white'}>{lead.assignee?.name || <span className="italic font-normal text-slate-400">Unassigned</span>}</strong>
-            </span>
+        {/* Footer actions */}
+        <div className="border-t border-line px-[27px] py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 bg-surface">
+          <div className="flex items-center gap-2 text-[11px] text-ink-3">
+            <span>Assigned: <b className="text-ink">{lead.assignee?.name || 'Unassigned'}</b></span>
             <span>·</span>
-            <span className={handlingMode === 'HUMAN' ? 'text-amber-600 dark:text-amber-300 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-medium'}>
-              {handlingMode === 'HUMAN' ? '⚠️ Human Attention Active' : '🤖 AI Qualifier Active'}
+            <span className={`nx-tag ${handlingMode === 'HUMAN' ? 'amber' : 'green'}`}>
+              {handlingMode === 'HUMAN' ? 'Human attention active' : 'AI qualifier active'}
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-[9px] flex-wrap">
             <button
               type="button"
+              className="nx-btn sm"
               onClick={() => {
                 setActiveSubTab('conversation');
                 setTimeout(() => {
                   document.getElementById('lead-reply-input')?.focus();
                 }, 50);
               }}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
-                isLight
-                  ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                  : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
-              }`}
             >
               Reply
             </button>
-
             <button
               type="button"
+              className="nx-btn sm"
               onClick={() => {
                 setActiveSubTab('notes');
                 setShowAddFollowUp(true);
               }}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
-                isLight
-                  ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
-              }`}
             >
-              Follow-up
+              Add follow-up
             </button>
-
+            <button type="button" className="nx-btn sm" onClick={handleToggleHandoff}>
+              <UserCheck className="w-3.5 h-3.5" />
+              {handlingMode === 'HUMAN' ? 'Hand back to AI' : 'Take over'}
+            </button>
             <button
               type="button"
-              onClick={handleToggleHandoff}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
-                isLight
-                  ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                  : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
-              }`}
-            >
-              {handlingMode === 'HUMAN' ? 'Hand to AI' : 'Human Handoff'}
-            </button>
-
-            <button
-              type="button"
+              className="nx-btn sm primary"
               onClick={() => {
                 setActiveSubTab('qualification');
-                if (onNotify) onNotify('Discovery Call Queued', 'Discovery call invite ready to dispatch.');
+                if (onNotify) onNotify('Discovery call queued', 'Discovery call invite ready to send.');
               }}
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 text-white shadow-xs transition-colors cursor-pointer"
             >
-              Schedule Discovery Call
+              Schedule discovery call →
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -1323,3 +1323,13 @@ table td { padding-top: 15px !important; padding-bottom: 15px !important; }
   .nx-channelrow { grid-template-columns: 30px 1fr 30px; }
   .nx-channelrow .nx-track, .nx-channelrow .nx-tag { display: none; }
 }
+
+/* Lead drawer */
+.nx-drawer { box-shadow: -12px 0 40px rgba(10, 34, 48, 0.11); }
+.nx-progress { height: 7px; background: var(--surface-raised); border-radius: 9px; overflow: hidden; }
+.nx-progress > div { height: 100%; background: var(--primary); border-radius: 9px; }
+.nx-kv b { color: var(--text-primary); font-weight: 700; }
+.nx-kv b.text-ok { color: var(--success); }
+.nx-kv b.text-danger { color: var(--error); }
+/* Lead drawer: inline links/icon buttons shouldn't inherit the 38px control height */
+.nx-drawer button:not(.nx-btn):not([class*="h-["]):not([class*="py-"]) { min-height: 0; }
