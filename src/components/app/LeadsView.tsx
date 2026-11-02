@@ -62,6 +62,10 @@ import {
   addFollowUp, 
   FollowUp 
 } from '../../data/followUps';
+import FollowUpsView from './followups/FollowUpsView';
+import { RowModal } from './followups/FollowUpKit';
+
+type FollowUpModalState = RowModal | { type: 'add'; leadId?: string } | null;
 
 export interface LeadsViewProps {
   activeSubCategory: SubCategory;
@@ -73,20 +77,8 @@ export interface LeadsViewProps {
   onUpdateLead?: (updated: Lead) => void;
   onDeleteLeads?: (ids: string[]) => void;
   onNavigateInbox?: (lead: Lead) => void;
-  onNotify?: (title: string, desc: string) => void;
+  onNotify?: (title: string, desc: string, action?: { label: string; onClick: () => void }) => void;
   isFirstRun?: boolean;
-}
-
-export interface FollowUpItem {
-  id: string;
-  status: 'overdue' | 'today' | 'upcoming' | 'done';
-  dueDate: string;
-  company: string;
-  contactName: string;
-  channel: string;
-  owner: string;
-  task: string;
-  draft: string;
 }
 
 interface CustomSavedView {
@@ -156,53 +148,6 @@ function formatStageValue(total: number): string {
   }
   return total > 0 ? `₹${total}` : '₹0';
 }
-
-const INITIAL_FOLLOW_UPS: FollowUpItem[] = [
-  {
-    id: 'fu-1',
-    status: 'overdue',
-    dueDate: '2 days overdue',
-    company: 'Nova Retail',
-    contactName: 'Priya Mehta',
-    channel: 'Email',
-    owner: 'You',
-    task: 'Send revised proposal with updated seat allocation',
-    draft: 'Hi Priya, following up on the proposal we shared last Thursday. I have updated the seat allocation and API terms to match your requirements.'
-  },
-  {
-    id: 'fu-2',
-    status: 'today',
-    dueDate: 'Today at 2:00 PM',
-    company: 'Aster Labs',
-    contactName: 'Rahul Sharma',
-    channel: 'WhatsApp',
-    owner: 'You',
-    task: 'Book discovery walkthrough call',
-    draft: 'Hi Rahul, would tomorrow at 11:30 AM IST work for a 20-minute tailored platform preview with our technical team?'
-  },
-  {
-    id: 'fu-3',
-    status: 'upcoming',
-    dueDate: 'In 3 days',
-    company: 'PulseWorks',
-    contactName: 'Aisha Khan',
-    channel: 'Instagram',
-    owner: 'AI',
-    task: 'Check in on multi-store evaluation',
-    draft: 'Hello Aisha, checking in to see if your retail steering team reviewed the multi-branch dispatch overview.'
-  },
-  {
-    id: 'fu-4',
-    status: 'overdue',
-    dueDate: '1 day overdue',
-    company: 'FinTrack Systems',
-    contactName: 'Karan Patel',
-    channel: 'LinkedIn',
-    owner: 'You',
-    task: 'Share security compliance documentation',
-    draft: 'Hi Karan, attached is our SOC 2 Type II report and GDPR compliance addendum for your legal team.'
-  }
-];
 
 export default function LeadsView({
   activeSubCategory,
@@ -297,22 +242,8 @@ export default function LeadsView({
   const [isChoosingLostReason, setIsChoosingLostReason] = useState(false);
   const [lostReasonChoice, setLostReasonChoice] = useState<string>('Budget');
 
-  // Follow-ups local card state (for legacy board/tab view)
-  const [followUpItems, setFollowUpItems] = useState<FollowUpItem[]>(() => {
-    try {
-      const stored = localStorage.getItem('nexora_follow_ups');
-      if (stored) return JSON.parse(stored);
-    } catch {
-      // ignore
-    }
-    return INITIAL_FOLLOW_UPS;
-  });
-  const [followUpTab, setFollowUpTab] = useState<'overdue' | 'today' | 'upcoming' | 'done'>('overdue');
-  const [snoozeMenuId, setSnoozeMenuId] = useState<string | null>(null);
-
-  // Review & Send Draft Modal state
-  const [reviewingFollowUp, setReviewingFollowUp] = useState<FollowUpItem | null>(null);
-  const [editedDraft, setEditedDraft] = useState('');
+  // Follow-up modals (shared follow-up engine)
+  const [followUpModal, setFollowUpModal] = useState<FollowUpModalState>(null);
 
   // Board collapsible columns: Won & Lost
   const [isWonExpanded, setIsWonExpanded] = useState(false);
@@ -343,13 +274,10 @@ export default function LeadsView({
       ) {
         setIsFilterPopoverOpen(false);
       }
-      setSnoozeMenuId(null);
     }
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setIsFilterPopoverOpen(false);
-        setSnoozeMenuId(null);
-        setReviewingFollowUp(null);
         setIsStageMenuOpen(false);
         setIsConfirmingWon(false);
         setIsChoosingLostReason(false);
@@ -828,49 +756,6 @@ export default function LeadsView({
     }
   };
 
-  // Follow-up actions
-  const handleSnooze = (id: string, option: 'later' | 'tomorrow' | 'next_week') => {
-    setFollowUpItems(prev => prev.map(item => {
-      if (item.id !== id) return item;
-      if (option === 'later') {
-        return { ...item, status: 'today', dueDate: 'Today at 5:00 PM' };
-      }
-      if (option === 'tomorrow') {
-        return { ...item, status: 'upcoming', dueDate: 'Tomorrow at 9:00 AM' };
-      }
-      return { ...item, status: 'upcoming', dueDate: 'Next week (in 7 days)' };
-    }));
-    setSnoozeMenuId(null);
-    if (onNotify) onNotify('Follow-up Snoozed', 'Reminder has been rescheduled.');
-  };
-
-  const handleMarkDone = (id: string) => {
-    setFollowUpItems(prev => prev.map(item => {
-      if (item.id === id) {
-        return { ...item, status: 'done' };
-      }
-      return item;
-    }));
-    if (onNotify) onNotify('Follow-up Completed', 'Task marked as done.');
-  };
-
-  const handleOpenReviewModal = (item: FollowUpItem) => {
-    setReviewingFollowUp(item);
-    setEditedDraft(item.draft);
-  };
-
-  const handleSendDraft = () => {
-    if (!reviewingFollowUp) return;
-    handleMarkDone(reviewingFollowUp.id);
-    if (onNotify) {
-      onNotify(
-        'Message Dispatched', 
-        `Sent reply to ${reviewingFollowUp.contactName} on ${reviewingFollowUp.channel}.`
-      );
-    }
-    setReviewingFollowUp(null);
-  };
-
   // Board stages: 5 active stages
   const activeBoardStages: Array<{ id: LeadStage; label: string }> = [
     { id: 'New', label: 'New' },
@@ -928,8 +813,7 @@ export default function LeadsView({
               variant="primary"
               size="md"
               leadingIcon={<Plus className="w-3.5 h-3.5 stroke-[2.5]" />}
-              onClick={topTab === 'leads' ? onAddLeadModal : undefined}
-              disabled={topTab === 'follow-ups'}
+              onClick={topTab === 'leads' ? onAddLeadModal : () => setFollowUpModal({ type: 'add' })}
             >
               {topTab === 'leads' ? "Add lead" : "Add follow-up"}
             </Button>
@@ -2285,260 +2169,18 @@ export default function LeadsView({
       )}
 
       {/* ========================================================
-          TAB 2: FOLLOW-UPS VIEW
-          Filtered by sub-tab (Overdue, Today, Upcoming, Done), real Snooze,
-          Mark Done, and Review & Send draft modal
+          TAB 2: FOLLOW-UPS — shared follow-up engine
          ======================================================== */}
       {topTab === 'follow-ups' && (
-        <div className="space-y-4">
-          
-          {/* Sub-tabs bar: Segmented control */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line-subtle pb-3">
-            <SegmentedControl<'overdue' | 'today' | 'upcoming' | 'done'>
-              options={[
-                { id: 'overdue', label: 'Overdue', count: followUpCounts.overdue },
-                { id: 'today', label: 'Today', count: followUpCounts.today },
-                { id: 'upcoming', label: 'Upcoming', count: followUpCounts.upcoming },
-                { id: 'done', label: 'Done', count: followUpCounts.done }
-              ]}
-              value={followUpTab}
-              onChange={setFollowUpTab}
-            />
-            
-            <span className="text-xs text-ink-3">
-              {followUpCounts.overdue > 0 
-                ? `${followUpCounts.overdue} urgent follow-up${followUpCounts.overdue > 1 ? 's' : ''} pending review`
-                : 'All overdue items cleared'
-              }
-            </span>
-          </div>
-
-          {/* Follow-up Cards filtered by active sub-tab */}
-          <div className="space-y-3.5">
-            {followUpItems.filter(f => f.status === followUpTab).length === 0 ? (
-              <EmptyState
-                icon={<Clock className="w-6 h-6 text-ink-3" />}
-                title={`No ${followUpTab} follow-ups`}
-                description={
-                  followUpTab === 'done' 
-                    ? 'Completed follow-up items will appear here.'
-                    : `You are completely caught up on ${followUpTab} follow-ups.`
-                }
-              />
-            ) : (
-              followUpItems.filter(f => f.status === followUpTab).map(item => (
-                <div
-                  key={item.id}
-                  className="p-5 rounded-xl border border-line-subtle bg-surface space-y-3.5 shadow-card transition-colors relative"
-                >
-                  {/* Card Header */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      {item.status === 'overdue' && (
-                        <Badge tone="danger">
-                          Overdue · {item.dueDate}
-                        </Badge>
-                      )}
-                      {item.status === 'today' && (
-                        <Badge tone="warning">
-                          {item.dueDate}
-                        </Badge>
-                      )}
-                      {item.status === 'upcoming' && (
-                        <Badge tone="neutral">
-                          {item.dueDate}
-                        </Badge>
-                      )}
-                      {item.status === 'done' && (
-                        <Badge tone="success">
-                          Completed
-                        </Badge>
-                      )}
-
-                      <span className="font-semibold text-ink">
-                        {item.company}
-                      </span>
-                      <span className="text-ink-3">·</span>
-                      <span className="text-ink-2">
-                        {item.contactName} ({item.channel})
-                      </span>
-                    </div>
-
-                    <span className="text-xs font-medium text-ink-3">
-                      Assigned: {item.owner}
-                    </span>
-                  </div>
-
-                  {/* Task Name */}
-                  <h4 className="text-sm font-semibold tracking-tight text-ink">
-                    "{item.task}"
-                  </h4>
-
-                  {/* AI Draft Box */}
-                  <div className="p-3.5 rounded-lg border border-line-subtle bg-surface-raised text-xs space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-brand uppercase tracking-wide">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>AI Draft Ready</span>
-                    </div>
-                    <p className="italic leading-relaxed text-ink-2">
-                      "{item.draft}"
-                    </p>
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                    {item.status !== 'done' && (
-                      <>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          leadingIcon={<Send className="w-3.5 h-3.5" />}
-                          onClick={() => handleOpenReviewModal(item)}
-                        >
-                          Review & send
-                        </Button>
-
-                        {/* Snooze Popover */}
-                        <div className="relative">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            leadingIcon={<Clock className="w-3.5 h-3.5" />}
-                            trailingIcon={<ChevronDown className="w-3 h-3 text-ink-3" />}
-                            onClick={() => setSnoozeMenuId(prev => prev === item.id ? null : item.id)}
-                          >
-                            Snooze
-                          </Button>
-
-                          {snoozeMenuId === item.id && (
-                            <div 
-                              onClick={(e) => e.stopPropagation()}
-                              className="absolute left-0 bottom-full mb-1.5 w-44 rounded-xl border border-line bg-surface p-1 shadow-pop z-30 space-y-0.5 animate-fadeIn"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => handleSnooze(item.id, 'later')}
-                                className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-ink hover:bg-surface-hover cursor-pointer"
-                              >
-                                Later today (5:00 PM)
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleSnooze(item.id, 'tomorrow')}
-                                className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-ink hover:bg-surface-hover cursor-pointer"
-                              >
-                                Tomorrow (9:00 AM)
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleSnooze(item.id, 'next_week')}
-                                className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-ink hover:bg-surface-hover cursor-pointer"
-                              >
-                                Next week (+7 days)
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          leadingIcon={<Check className="w-3.5 h-3.5" />}
-                          onClick={() => handleMarkDone(item.id)}
-                        >
-                          Mark done
-                        </Button>
-                      </>
-                    )}
-
-                    {item.status === 'done' && (
-                      <Badge tone="success" className="gap-1">
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Resolved</span>
-                      </Badge>
-                    )}
-
-                    {/* Open lead link */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const matched = leads.find(l => (l.company || '').toLowerCase().includes(item.company.toLowerCase())) || leads[0];
-                        if (matched) onSelectLead(matched);
-                      }}
-                      className="px-3 py-1.5 text-brand font-semibold hover:underline cursor-pointer ml-auto inline-flex items-center gap-1"
-                    >
-                      <span>Open lead</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-        </div>
-      )}
-
-      {/* Review & Send Follow-up Modal */}
-      {reviewingFollowUp && (
-        <div 
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="review-draft-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn"
-        >
-          <div className="w-full max-w-lg rounded-2xl border border-line bg-surface p-5 shadow-pop space-y-4">
-            <div className="flex items-center justify-between border-b border-line-subtle pb-3">
-              <div className="space-y-0.5">
-                <h3 id="review-draft-title" className="text-base font-semibold text-ink">
-                  Review & Send Follow-up
-                </h3>
-                <p className="text-xs text-ink-3">
-                  To {reviewingFollowUp.contactName} ({reviewingFollowUp.company}) via {reviewingFollowUp.channel}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setReviewingFollowUp(null)}
-                aria-label="Close modal"
-                className="p-1 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-ink">
-                Draft Message:
-              </label>
-              <textarea
-                rows={5}
-                value={editedDraft}
-                onChange={(e) => setEditedDraft(e.target.value)}
-                className="w-full p-3 rounded-lg border border-line bg-surface-raised text-xs text-ink focus:outline-none focus:ring-2 focus:ring-brand resize-y leading-relaxed"
-                placeholder="Write your follow-up message..."
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-line-subtle">
-              <Button
-                variant="ghost"
-                size="md"
-                onClick={() => setReviewingFollowUp(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                leadingIcon={<Send className="w-3.5 h-3.5" />}
-                onClick={handleSendDraft}
-              >
-                Send message
-              </Button>
-            </div>
-          </div>
-        </div>
+        <FollowUpsView
+          leads={leads}
+          onOpenLead={onSelectLead}
+          onOpenConversation={onNavigateInbox}
+          onUpdateLead={onUpdateLead}
+          onNotify={onNotify}
+          modal={followUpModal}
+          setModal={setFollowUpModal}
+        />
       )}
 
       {/* Date Range & Sort Calendar Popover Dropdown */}

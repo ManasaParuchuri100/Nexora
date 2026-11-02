@@ -45,7 +45,7 @@ import { PageHeader } from './ui';
 import { UserSession } from './AuthModal';
 import { BRAND_NAME } from '../config/brand';
 import { setGlobalConversations, useConversations } from '../data/conversations';
-import { getFollowUpsForLead, deleteFollowUp, restoreFollowUp, FollowUp } from '../data/followUps';
+import { getFollowUpsForLead, deleteFollowUp, restoreFollowUp, FollowUp, runFollowUpAutomation } from '../data/followUps';
 import { assertDataIntegrity } from '../lib/pipeline';
 
 interface NexoraAppProps {
@@ -304,6 +304,39 @@ export default function NexoraApp({
   const handleUpdateScheduledPost = (updated: ScheduledPost) => {
     setScheduledPosts(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
+
+  // Follow-up engine tick: sends approved AI follow-ups that have fallen due
+  // (skipping human-handled leads) and chains the next attempt.
+  const leadsRef = useRef(leads);
+  leadsRef.current = leads;
+  useEffect(() => {
+    const tick = () => {
+      const sent = runFollowUpAutomation(id => {
+        const l = leadsRef.current.find(x => x.id === id);
+        if (!l) return undefined;
+        const temp = l.temperatureOverride || l.temperature || (l.score >= 80 ? 'HOT' : l.score >= 50 ? 'WARM' : 'COLD');
+        return {
+          handlingMode: l.handlingMode,
+          temperature: temp,
+          firstName: l.name.replace(/^(Dr\.|Mr\.|Ms\.|Mrs\.)\s+/i, '').split(/\s+/)[0],
+        };
+      });
+      if (sent.length) {
+        showToast(
+          'Engagement Agent sent follow-ups',
+          sent.length === 1
+            ? `"${sent[0].title}" was sent. The next attempt is scheduled if there's no reply.`
+            : `${sent.length} approved follow-ups were sent. Next attempts are scheduled if there's no reply.`
+        );
+      }
+    };
+    const first = setTimeout(tick, 1500);
+    const timer = setInterval(tick, 30000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { theme } = useTheme();
   const isLight = theme === 'light';

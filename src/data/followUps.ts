@@ -1,8 +1,41 @@
 import { useSyncExternalStore, useState, useEffect } from 'react';
 
+/* ==========================================================================
+   FOLLOW-UP ENGINE
+   --------------------------------------------------------------------------
+   Single source of truth for every follow-up in the workspace (Follow-ups
+   page, lead drawer, leads table, sidebar badge, overview).
+
+   Rules (from the Tecavy product brief):
+   - Follow-ups live in a scheduled "table" with a due time — never a sleep().
+   - The AI only sends *approved* follow-ups. AI drafts need human approval;
+     once approved, the engine sends them when they fall due.
+   - Every completion records an outcome. "Sent" or "No response" schedules
+     the next attempt on a temperature-based cadence (Hot 1d, Warm 3d,
+     Cold 7d) up to MAX_ATTEMPTS, then the lead moves to nurture instead of
+     being chased every few days.
+   - A customer reply ends the sequence — qualification continues.
+   - "Don't contact until…" parks a lead in nurture until the date it asked.
+   - Follow-ups are always scheduled inside business hours.
+   - AI-owned follow-ups pause while a human has taken over the lead.
+   Status (bucket) is always computed from data, never stored.
+   ========================================================================== */
+
 export type FollowUpKind = 'call' | 'email' | 'message' | 'task';
 export type FollowUpSource = 'manual' | 'auto' | 'ai';
-export type FollowUpBucket = 'done' | 'overdue' | 'today' | 'upcoming';
+export type FollowUpPurpose = 'follow_up' | 'nurture' | 'appointment_reminder' | 'no_show' | 'reactivation';
+export type FollowUpApproval = 'draft' | 'approved';
+export type FollowUpOutcome =
+  | 'sent'
+  | 'replied'
+  | 'no_response'
+  | 'call_connected'
+  | 'meeting_booked'
+  | 'not_interested'
+  | 'done'
+  | 'cancelled';
+export type FollowUpBucket = 'done' | 'overdue' | 'today' | 'upcoming' | 'nurture';
+export type Temperature = 'HOT' | 'WARM' | 'COLD';
 
 export interface FollowUp {
   id: string;
@@ -17,205 +50,353 @@ export interface FollowUp {
   createdAt: string; // ISO
   completedAt?: string; // ISO
   source: FollowUpSource;
+  purpose?: FollowUpPurpose;
+  /** Only meaningful for AI-owned messages/emails. */
+  approval?: FollowUpApproval;
+  attempt?: number;
+  maxAttempts?: number;
+  outcome?: FollowUpOutcome;
+  outcomeNote?: string;
+  snoozeCount?: number;
+  /** Set when the customer replied after this follow-up was scheduled. */
+  customerRepliedAt?: string;
+  /** Id of the follow-up this one was created from (sequence chain). */
+  previousId?: string;
 }
 
 export interface FollowUpCounts {
   overdue: number;
   today: number;
   upcoming: number;
+  nurture: number;
   done: number;
   open: number;
+  awaitingApproval: number;
   oldestOverdueDays: number;
 }
 
-const STORAGE_KEY = 'nexora_followups_v2';
-const OLD_STORAGE_KEY = 'nexora_follow_ups';
+export const MAX_ATTEMPTS = 3;
+export const CADENCE_DAYS: Record<Temperature, number> = { HOT: 1, WARM: 3, COLD: 7 };
+export const NURTURE_DAYS = 30;
+export const BUSINESS_START_HOUR = 9;
+export const BUSINESS_END_HOUR = 19;
 
-/**
- * Computes the lifecycle bucket for a follow-up task.
- * Status is always computed dynamically, never stored.
- */
+export const OUTCOME_LABELS: Record<FollowUpOutcome, string> = {
+  sent: 'Message sent',
+  replied: 'Customer replied',
+  no_response: 'No response',
+  call_connected: 'Call connected',
+  meeting_booked: 'Meeting booked',
+  not_interested: 'Not interested',
+  done: 'Completed',
+  cancelled: 'Cancelled',
+};
+
+export const PURPOSE_LABELS: Record<FollowUpPurpose, string> = {
+  follow_up: 'Follow-up',
+  nurture: 'Nurture',
+  appointment_reminder: 'Appointment reminder',
+  no_show: 'No-show recovery',
+  reactivation: 'Reactivation',
+};
+
+const STORAGE_KEY = 'nexora_followups_v3';
+const LEGACY_KEYS = ['nexora_followups_v2', 'nexora_follow_ups'];
+
+/* --------------------------------------------------------------------------
+   Time helpers
+   -------------------------------------------------------------------------- */
+
+const DAY = 24 * 60 * 60 * 1000;
+
+function sameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+/** Moves a date into business hours (Mon–Sat, 9:00–19:00). */
+export function alignToBusinessHours(input: Date): Date {
+  const d = new Date(input);
+  if (d.getHours() >= BUSINESS_END_HOUR) {
+    d.setDate(d.getDate() + 1);
+    d.setHours(BUSINESS_START_HOUR, 0, 0, 0);
+  } else if (d.getHours() < BUSINESS_START_HOUR) {
+    d.setHours(BUSINESS_START_HOUR, 0, 0, 0);
+  }
+  if (d.getDay() === 0) {
+    d.setDate(d.getDate() + 1);
+    d.setHours(BUSINESS_START_HOUR, 0, 0, 0);
+  }
+  return d;
+}
+
+export function isOutsideBusinessHours(d: Date): boolean {
+  return d.getDay() === 0 || d.getHours() < BUSINESS_START_HOUR || d.getHours() >= BUSINESS_END_HOUR;
+}
+
+/** Date `days` from `from` at 10:00, aligned to business hours. */
+export function daysFromNowAt(days: number, hour = 10, from = new Date()): Date {
+  const d = new Date(from);
+  d.setDate(d.getDate() + days);
+  d.setHours(hour, 0, 0, 0);
+  return alignToBusinessHours(d);
+}
+
+export function nextAttemptDate(temperature: Temperature = 'WARM', from = new Date()): Date {
+  return daysFromNowAt(CADENCE_DAYS[temperature] ?? 3, 10, from);
+}
+
+/** Human-friendly due label, e.g. "2 days overdue", "Today · 2:00 PM", "Tomorrow · 10:00 AM". */
+export function formatDue(task: FollowUp, now = new Date()): string {
+  const due = new Date(task.dueAt);
+  const time = due.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  if (task.completedAt) {
+    const done = new Date(task.completedAt);
+    return sameDay(done, now)
+      ? `Completed today · ${done.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
+      : `Completed ${done.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  }
+  const diff = due.getTime() - now.getTime();
+  if (diff < 0) {
+    const mins = Math.round(-diff / 60000);
+    if (mins < 60) return `${mins} min overdue`;
+    const hours = Math.round(mins / 60);
+    if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} overdue`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days === 1 ? '' : 's'} overdue`;
+  }
+  if (sameDay(due, now)) return `Today · ${time}`;
+  const tomorrow = new Date(now.getTime() + DAY);
+  if (sameDay(due, tomorrow)) return `Tomorrow · ${time}`;
+  const days = Math.ceil(diff / DAY);
+  if (days < 7) return `${due.toLocaleDateString('en-US', { weekday: 'long' })} · ${time}`;
+  return `${due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${time}`;
+}
+
+/* --------------------------------------------------------------------------
+   Status
+   -------------------------------------------------------------------------- */
+
+/** Lifecycle bucket — always computed, never stored. */
 export function getBucket(task: FollowUp, now = new Date()): FollowUpBucket {
   if (task.completedAt) return 'done';
-  const dueDate = new Date(task.dueAt);
-  if (dueDate.getTime() < now.getTime()) {
-    return 'overdue';
-  }
-  const isSameDay =
-    dueDate.getFullYear() === now.getFullYear() &&
-    dueDate.getMonth() === now.getMonth() &&
-    dueDate.getDate() === now.getDate();
-  if (isSameDay) {
-    return 'today';
-  }
+  const due = new Date(task.dueAt);
+  if (due.getTime() < now.getTime()) return 'overdue';
+  if (sameDay(due, now)) return 'today';
+  if (task.purpose === 'nurture') return 'nurture';
   return 'upcoming';
 }
 
-/**
- * Seeds 8 realistic tasks relative to Date.now(), using real lead IDs from seed leads:
- * - 2 overdue (2 days and 1 day)
- * - 2 due today (one is Rahul's "Book discovery walkthrough call" at 2 pm)
- * - 3 upcoming
- * - 1 done
- * Includes draft text on message/email tasks.
- */
+export function needsApproval(task: FollowUp): boolean {
+  return !task.completedAt && task.owner === 'AI' && (task.kind === 'message' || task.kind === 'email') && task.approval !== 'approved';
+}
+
+/** AI follow-ups pause while a human owns the conversation. */
+export function isPausedByHandoff(task: FollowUp, leadHandlingMode?: 'AI' | 'HUMAN'): boolean {
+  return !task.completedAt && task.owner === 'AI' && leadHandlingMode === 'HUMAN';
+}
+
+/* --------------------------------------------------------------------------
+   Seeds — realistic tasks relative to "now", tied to real seed lead ids
+   -------------------------------------------------------------------------- */
+
 export function createSeedFollowUps(): FollowUp[] {
   const now = new Date();
-
-  // 1. Overdue: 2 days ago
-  const overdue2Days = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  overdue2Days.setHours(10, 30, 0, 0);
-
-  // 2. Overdue: 1 day ago
-  const overdue1Day = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
-  overdue1Day.setHours(15, 0, 0, 0);
-
-  // 3. Due today: Rahul's "Book discovery walkthrough call" at 2:00 PM local
-  const today2pm = new Date(now);
-  today2pm.setHours(14, 0, 0, 0);
-
-  // 4. Due today: Neha at 4:30 PM local
-  const today430pm = new Date(now);
-  today430pm.setHours(16, 30, 0, 0);
-
-  // 5. Upcoming 1: tomorrow at 10:00 AM local
-  const tomorrow10am = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
-  tomorrow10am.setHours(10, 0, 0, 0);
-
-  // 6. Upcoming 2: in 2 days at 11:30 AM local
-  const in2Days = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
-  in2Days.setHours(11, 30, 0, 0);
-
-  // 7. Upcoming 3: in 4 days at 3:00 PM local
-  const in4Days = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
-  in4Days.setHours(15, 0, 0, 0);
-
-  // 8. Done: completed 1 day ago
-  const doneDue = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  const doneCompleted = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+  const at = (days: number, h: number, m = 0) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + days);
+    d.setHours(h, m, 0, 0);
+    return d.toISOString();
+  };
+  const ago = (ms: number) => new Date(now.getTime() - ms).toISOString();
 
   return [
     {
-      id: 'task-1',
+      id: 'fu-elena-proposal',
       leadId: 'lead-elena',
-      title: 'Follow-up on tailored proposal feedback',
-      kind: 'email',
-      channel: 'WhatsApp',
-      owner: 'Rahul — Sales',
-      dueAt: overdue2Days.toISOString(),
-      draft: 'Hi Elena, checking in regarding the Nordic Space proposal we sent on Friday. Were you able to review it with your CFO?',
-      note: 'High-value European deal (€12k ARR equivalent).',
-      createdAt: new Date(overdue2Days.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'auto'
-    },
-    {
-      id: 'task-2',
-      leadId: 'lead-ananya',
-      title: 'Send DPDP compliance certificate & whitepaper',
+      title: 'Follow up on proposal feedback',
       kind: 'message',
       channel: 'WhatsApp',
-      owner: 'Sarah — Solutions',
-      dueAt: overdue1Day.toISOString(),
-      draft: 'Hello Dr. Sen, sharing our DPDP Act compliance certificate and healthcare security architecture whitepaper.',
-      note: 'Waiting on compliance clearance before clinical rollout.',
-      createdAt: new Date(overdue1Day.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'manual'
+      owner: 'AI',
+      purpose: 'follow_up',
+      approval: 'draft',
+      attempt: 2,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(-2, 10, 30),
+      draft: 'Hi Elena, checking in on the Nordic Space proposal we shared on Friday. Were you able to review it with your CFO? Happy to walk through any part of it.',
+      note: 'No reply to the first proposal message.',
+      createdAt: ago(5 * DAY),
+      source: 'ai',
     },
     {
-      id: 'task-3',
+      id: 'fu-ananya-compliance',
+      leadId: 'lead-ananya',
+      title: 'Send DPDP compliance certificate',
+      kind: 'email',
+      channel: 'Email',
+      owner: 'Sarah — Solutions',
+      purpose: 'follow_up',
+      attempt: 1,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(-1, 15),
+      draft: 'Hello Dr. Sen, sharing our DPDP Act compliance certificate and healthcare security whitepaper as promised.',
+      note: 'Waiting on compliance clearance before clinical rollout.',
+      createdAt: ago(3 * DAY),
+      source: 'manual',
+    },
+    {
+      id: 'fu-rahul-discovery',
       leadId: 'lead-rahul-sharma',
-      title: 'Book discovery walkthrough call',
+      title: 'Call to book discovery walkthrough',
       kind: 'call',
       channel: 'WhatsApp',
       owner: 'Rahul — Sales',
-      dueAt: today2pm.toISOString(),
-      draft: 'Hi Rahul, would 2:00 PM today work for a brief 15-minute walkthrough of Aster Labs WhatsApp routing?',
-      note: 'Prospect asked for enterprise tier pricing for 12 seats.',
-      createdAt: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(),
-      source: 'ai'
+      purpose: 'follow_up',
+      attempt: 1,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(0, 16),
+      note: 'Asked for enterprise pricing for 12 seats. Hot lead — call within the day.',
+      createdAt: ago(4 * 60 * 60 * 1000),
+      source: 'ai',
     },
     {
-      id: 'task-4',
+      id: 'fu-neha-ratecard',
       leadId: 'lead-neha',
-      title: 'Send commercial showroom rate card',
+      title: 'Send commercial rate card',
       kind: 'message',
       channel: 'Instagram',
-      owner: 'Sarah — Solutions',
-      dueAt: today430pm.toISOString(),
-      draft: 'Hi Neha! Here is our commercial tier breakdown tailored for Kavya Luxury Interiors 5 store locations.',
-      note: 'Requested full pricing breakdown for multi-store deployment.',
-      createdAt: new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString(),
-      source: 'auto'
+      owner: 'AI',
+      purpose: 'follow_up',
+      approval: 'approved',
+      attempt: 1,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(0, 18),
+      draft: 'Hi Neha! Here is the commercial pricing for Kavya Luxury Interiors across all 5 stores. Would a quick call tomorrow help?',
+      createdAt: ago(6 * 60 * 60 * 1000),
+      source: 'ai',
     },
     {
-      id: 'task-5',
+      id: 'fu-priya-replied',
+      leadId: 'lead-priya',
+      title: 'Check in on studio lighting brief',
+      kind: 'message',
+      channel: 'WhatsApp',
+      owner: 'AI',
+      purpose: 'follow_up',
+      approval: 'approved',
+      attempt: 2,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(1, 11),
+      draft: 'Hi Priya, just checking whether you had a chance to look at the brief we sent.',
+      createdAt: ago(2 * DAY),
+      customerRepliedAt: ago(3 * 60 * 60 * 1000),
+      source: 'auto',
+    },
+    {
+      id: 'fu-marcus-demo',
       leadId: 'lead-marcus',
-      title: 'Share engineering demo calendar link',
+      title: 'Share demo calendar link',
       kind: 'message',
       channel: 'LinkedIn',
       owner: 'Priya — AE',
-      dueAt: tomorrow10am.toISOString(),
-      draft: 'Hi Marcus, here is our team live calendar link to book a 20-min session for your 18 engineering managers: cal.com/tecavy/marcus',
-      note: 'Confirmed engineering budget $10k/mo.',
-      createdAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'ai'
+      purpose: 'follow_up',
+      attempt: 1,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(2, 11, 30),
+      draft: 'Hi Marcus, here is a link to book a 20-minute session for your engineering managers: cal.com/tecavy/marcus',
+      createdAt: ago(1 * DAY),
+      source: 'manual',
     },
     {
-      id: 'task-6',
-      leadId: 'lead-vikram',
-      title: 'Prepare private wealth CRM executive briefing',
-      kind: 'task',
-      owner: 'Rahul — Sales',
-      dueAt: in2Days.toISOString(),
-      note: 'Highlight Mumbai cloud data residency & Surat advisor access controls.',
-      createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'manual'
-    },
-    {
-      id: 'task-7',
+      id: 'fu-vanguard-reminder',
       leadId: 'lead-vanguard',
-      title: 'Review architectural workflow documentation with partners',
-      kind: 'call',
-      channel: 'Website',
-      owner: 'Sarah — Solutions',
-      dueAt: in4Days.toISOString(),
-      draft: 'Hello David, following up on our documentation review session for Vanguard partner group.',
-      note: 'Technical evaluation of client portal generation.',
-      createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'manual'
+      title: 'Remind David about Thursday walkthrough',
+      kind: 'message',
+      channel: 'Email',
+      owner: 'AI',
+      purpose: 'appointment_reminder',
+      approval: 'approved',
+      dueAt: at(3, 9, 30),
+      draft: 'Hi David, a quick reminder of our workflow walkthrough tomorrow at 11:00 AM. Reply here if you need to reschedule.',
+      createdAt: ago(2 * DAY),
+      source: 'auto',
     },
     {
-      id: 'task-8',
+      id: 'fu-vikram-nurture',
+      leadId: 'lead-vikram',
+      title: 'Revisit after Diwali, as requested',
+      kind: 'message',
+      channel: 'WhatsApp',
+      owner: 'AI',
+      purpose: 'nurture',
+      approval: 'draft',
+      dueAt: at(21, 10),
+      draft: 'Hi Vikram, you mentioned you would revisit this after Diwali. We have two options that match your earlier requirements. Would you like me to send them?',
+      note: 'Customer said: "Interested, but buying after Diwali." Do not contact before then.',
+      createdAt: ago(4 * DAY),
+      source: 'ai',
+    },
+    {
+      id: 'fu-carlos-handoff',
       leadId: 'lead-carlos',
-      title: 'Hand off executed agreement to Customer Success',
+      title: 'Hand signed agreement to Customer Success',
       kind: 'task',
       owner: 'Rahul — Sales',
-      dueAt: doneDue.toISOString(),
-      completedAt: doneCompleted.toISOString(),
-      note: 'DocuSign countersigned. 12-month enterprise contract activated.',
-      createdAt: new Date(doneDue.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      source: 'auto'
-    }
+      purpose: 'follow_up',
+      dueAt: at(-2, 12),
+      completedAt: ago(1 * DAY),
+      outcome: 'done',
+      note: 'Contract countersigned. 12-month plan activated.',
+      createdAt: ago(7 * DAY),
+      source: 'auto',
+    },
+    {
+      id: 'fu-sophie-sent',
+      leadId: 'lead-sophie',
+      title: 'Send portfolio and pricing',
+      kind: 'message',
+      channel: 'Instagram',
+      owner: 'AI',
+      purpose: 'follow_up',
+      approval: 'approved',
+      attempt: 1,
+      maxAttempts: MAX_ATTEMPTS,
+      dueAt: at(-1, 11),
+      completedAt: ago(1 * DAY - 60 * 60 * 1000),
+      outcome: 'replied',
+      outcomeNote: 'Asked for a site visit next week.',
+      draft: 'Hi Sophie, sharing our portfolio and pricing for boutique fit-outs.',
+      createdAt: ago(3 * DAY),
+      source: 'ai',
+    },
   ];
 }
 
-function loadInitialFollowUps(): FollowUp[] {
-  if (typeof window === 'undefined') {
-    return createSeedFollowUps();
-  }
-  try {
-    // Clean up old storage key and ignore contents
-    window.localStorage.removeItem(OLD_STORAGE_KEY);
+/* --------------------------------------------------------------------------
+   Persistence
+   -------------------------------------------------------------------------- */
 
+function normalise(task: FollowUp): FollowUp {
+  return {
+    purpose: 'follow_up',
+    ...task,
+    approval: task.approval ?? (task.owner === 'AI' && (task.kind === 'message' || task.kind === 'email') ? 'draft' : undefined),
+    attempt: task.attempt ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : 1),
+    maxAttempts: task.maxAttempts ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : MAX_ATTEMPTS),
+    outcome: task.outcome ?? (task.completedAt ? 'done' : undefined),
+  };
+}
+
+function loadInitialFollowUps(): FollowUp[] {
+  if (typeof window === 'undefined') return createSeedFollowUps();
+  try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
+      if (Array.isArray(parsed)) return parsed.map(normalise);
     }
+    for (const key of LEGACY_KEYS) window.localStorage.removeItem(key);
   } catch {
-    // Fall back to seed data if localStorage is inaccessible
+    // storage unavailable — fall back to seeds
   }
   return createSeedFollowUps();
 }
@@ -225,19 +406,17 @@ function saveFollowUps(tasks: FollowUp[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   } catch {
-    // Ignore localStorage quota / sandbox errors
+    // quota / sandbox errors — keep in memory
   }
 }
 
-// Module store instance
 let followUpsStore: FollowUp[] = loadInitialFollowUps();
 const listeners = new Set<() => void>();
 
-function emitChange() {
+function commit(next: FollowUp[]) {
+  followUpsStore = next;
   saveFollowUps(followUpsStore);
-  for (const listener of listeners) {
-    listener();
-  }
+  for (const listener of listeners) listener();
 }
 
 function subscribe(listener: () => void) {
@@ -251,153 +430,326 @@ function getSnapshot(): FollowUp[] {
   return followUpsStore;
 }
 
-// Actions
-export function addFollowUp(taskData: Omit<FollowUp, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): FollowUp {
-  const newTask: FollowUp = {
+const newId = () => `fu-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+/* --------------------------------------------------------------------------
+   Actions
+   -------------------------------------------------------------------------- */
+
+export function addFollowUp(
+  taskData: Omit<FollowUp, 'id' | 'createdAt'> & { id?: string; createdAt?: string }
+): FollowUp {
+  const dueAt = alignToBusinessHours(new Date(taskData.dueAt)).toISOString();
+  const task = normalise({
     ...taskData,
-    id: taskData.id || `task-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    createdAt: taskData.createdAt || new Date().toISOString()
-  };
-  followUpsStore = [newTask, ...followUpsStore];
-  emitChange();
-  return newTask;
+    dueAt,
+    id: taskData.id || newId(),
+    createdAt: taskData.createdAt || new Date().toISOString(),
+  });
+  commit([task, ...followUpsStore]);
+  return task;
 }
 
 export function updateFollowUp(id: string, patch: Partial<FollowUp>): void {
-  followUpsStore = followUpsStore.map((t) => (t.id === id ? { ...t, ...patch } : t));
-  emitChange();
+  commit(followUpsStore.map(t => (t.id === id ? { ...t, ...patch } : t)));
 }
 
-export function completeFollowUp(id: string): void {
-  const now = new Date().toISOString();
-  followUpsStore = followUpsStore.map((t) =>
-    t.id === id ? { ...t, completedAt: now } : t
+/** Approve an AI draft so the engine can send it when it falls due. */
+export function approveFollowUp(id: string, draft?: string): void {
+  commit(
+    followUpsStore.map(t =>
+      t.id === id ? { ...t, approval: 'approved' as const, draft: draft ?? t.draft } : t
+    )
   );
-  emitChange();
+}
+
+function followUpDraft(task: FollowUp, leadFirstName?: string): string {
+  const name = leadFirstName ? ` ${leadFirstName}` : '';
+  return `Hi${name}, just following up on my last message. Is there anything I can clarify or send over to help you decide?`;
+}
+
+export interface CompleteOptions {
+  outcome: FollowUpOutcome;
+  note?: string;
+  /** Used for cadence when scheduling the next attempt. */
+  temperature?: Temperature;
+  /** When false, the engine won't chain a next step. Defaults to true. */
+  scheduleNext?: boolean;
+  /** Overrides the computed next due date. */
+  nextDueAt?: string;
+  leadFirstName?: string;
+}
+
+export interface CompleteResult {
+  completed?: FollowUp;
+  next?: FollowUp;
+  movedToNurture?: boolean;
+}
+
+/** Computes what the engine would schedule next for an outcome (without saving). */
+export function planNextStep(
+  task: FollowUp,
+  outcome: FollowUpOutcome,
+  temperature: Temperature = 'WARM',
+  now = new Date()
+): { kind: 'attempt' | 'nurture' | 'reminder' | 'none'; dueAt?: Date; label: string } {
+  const attempt = task.attempt ?? 1;
+  const max = task.maxAttempts ?? MAX_ATTEMPTS;
+  if (outcome === 'sent' || outcome === 'no_response') {
+    if (task.purpose === 'nurture' || task.purpose === 'reactivation' || attempt >= max) {
+      const dueAt = daysFromNowAt(NURTURE_DAYS, 10, now);
+      return { kind: 'nurture', dueAt, label: `Move to nurture · check back ${dueAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` };
+    }
+    const dueAt = nextAttemptDate(temperature, now);
+    return {
+      kind: 'attempt',
+      dueAt,
+      label: `Attempt ${attempt + 1} of ${max} · ${dueAt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, 10:00 AM`,
+    };
+  }
+  if (outcome === 'meeting_booked') {
+    const dueAt = daysFromNowAt(1, 9, now);
+    return { kind: 'reminder', dueAt, label: 'Appointment reminder the day before' };
+  }
+  return { kind: 'none', label: outcome === 'replied' ? 'Sequence ends — qualification continues in the conversation' : 'No further follow-up' };
+}
+
+export function completeFollowUp(id: string, options?: CompleteOptions): CompleteResult {
+  const task = followUpsStore.find(t => t.id === id);
+  if (!task || task.completedAt) return {};
+  const opts: CompleteOptions = options ?? { outcome: 'done', scheduleNext: false };
+  const nowIso = new Date().toISOString();
+  const completed: FollowUp = {
+    ...task,
+    completedAt: nowIso,
+    outcome: opts.outcome,
+    outcomeNote: opts.note?.trim() || undefined,
+  };
+
+  let next: FollowUp | undefined;
+  let movedToNurture = false;
+  if (opts.scheduleNext !== false) {
+    const plan = planNextStep(task, opts.outcome, opts.temperature);
+    const dueAt = opts.nextDueAt ? alignToBusinessHours(new Date(opts.nextDueAt)) : plan.dueAt;
+    if (plan.kind === 'attempt' && dueAt) {
+      next = normalise({
+        id: newId(),
+        leadId: task.leadId,
+        title: task.title,
+        kind: task.kind === 'call' ? 'call' : task.kind,
+        channel: task.channel,
+        owner: task.owner,
+        purpose: 'follow_up',
+        approval: task.owner === 'AI' ? 'draft' : undefined,
+        attempt: (task.attempt ?? 1) + 1,
+        maxAttempts: task.maxAttempts ?? MAX_ATTEMPTS,
+        dueAt: dueAt.toISOString(),
+        draft: task.kind === 'message' || task.kind === 'email' ? followUpDraft(task, opts.leadFirstName) : undefined,
+        createdAt: nowIso,
+        source: 'auto',
+        previousId: task.id,
+      });
+    } else if (plan.kind === 'nurture' && dueAt) {
+      movedToNurture = true;
+      next = normalise({
+        id: newId(),
+        leadId: task.leadId,
+        title: 'Nurture check-in with something new',
+        kind: 'message',
+        channel: task.channel,
+        owner: 'AI',
+        purpose: 'nurture',
+        approval: 'draft',
+        dueAt: dueAt.toISOString(),
+        draft: `Hi${opts.leadFirstName ? ` ${opts.leadFirstName}` : ''}, it's been a while — we have a few new options that match what you were looking for. Would you like me to share them?`,
+        note: `No reply after ${task.attempt ?? MAX_ATTEMPTS} attempts. Paused active follow-ups to avoid over-messaging.`,
+        createdAt: nowIso,
+        source: 'auto',
+        previousId: task.id,
+      });
+    } else if (plan.kind === 'reminder' && dueAt) {
+      next = normalise({
+        id: newId(),
+        leadId: task.leadId,
+        title: 'Send appointment reminder',
+        kind: 'message',
+        channel: task.channel,
+        owner: 'AI',
+        purpose: 'appointment_reminder',
+        approval: 'approved',
+        dueAt: dueAt.toISOString(),
+        draft: `Hi${opts.leadFirstName ? ` ${opts.leadFirstName}` : ''}, a quick reminder of our meeting. Reply here if you need to reschedule.`,
+        createdAt: nowIso,
+        source: 'auto',
+        previousId: task.id,
+      });
+    }
+  }
+
+  const rest = followUpsStore.map(t => (t.id === id ? completed : t));
+  commit(next ? [next, ...rest] : rest);
+  return { completed, next, movedToNurture };
 }
 
 export function reopenFollowUp(id: string): void {
-  followUpsStore = followUpsStore.map((t) =>
-    t.id === id ? { ...t, completedAt: undefined } : t
+  commit(
+    followUpsStore.map(t =>
+      t.id === id ? { ...t, completedAt: undefined, outcome: undefined, outcomeNote: undefined } : t
+    )
   );
-  emitChange();
 }
 
-export function snoozeFollowUp(
-  id: string,
-  option: 'later' | 'tomorrow' | 'next_week' | string
-): void {
-  const now = new Date();
-  let targetDate: Date;
+export type SnoozeOption = 'later' | 'tomorrow' | 'in_3_days' | 'next_week' | string;
 
+export function snoozeTarget(option: SnoozeOption, now = new Date()): Date {
   if (option === 'later') {
-    // Today 5:00 PM, or +3 hours if that has passed
-    targetDate = new Date(now);
-    targetDate.setHours(17, 0, 0, 0);
-    if (targetDate.getTime() <= now.getTime()) {
-      targetDate = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-    }
-  } else if (option === 'tomorrow') {
-    // Tomorrow 9:00 AM
-    targetDate = new Date(now);
-    targetDate.setDate(targetDate.getDate() + 1);
-    targetDate.setHours(9, 0, 0, 0);
-  } else if (option === 'next_week') {
-    // Next Monday 9:00 AM
-    targetDate = new Date(now);
-    const day = targetDate.getDay();
-    const daysUntilNextMonday = ((1 - day + 7) % 7) || 7;
-    targetDate.setDate(targetDate.getDate() + daysUntilNextMonday);
-    targetDate.setHours(9, 0, 0, 0);
-  } else {
-    const parsed = new Date(option);
-    targetDate = !isNaN(parsed.getTime()) ? parsed : new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const d = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    return alignToBusinessHours(d);
   }
+  if (option === 'tomorrow') return daysFromNowAt(1, 10, now);
+  if (option === 'in_3_days') return daysFromNowAt(3, 10, now);
+  if (option === 'next_week') {
+    const d = new Date(now);
+    const daysUntilMonday = ((1 - d.getDay() + 7) % 7) || 7;
+    return daysFromNowAt(daysUntilMonday, 10, now);
+  }
+  const parsed = new Date(option);
+  return alignToBusinessHours(isNaN(parsed.getTime()) ? new Date(now.getTime() + DAY) : parsed);
+}
 
-  followUpsStore = followUpsStore.map((t) =>
-    t.id === id ? { ...t, dueAt: targetDate.toISOString(), completedAt: undefined } : t
+export function snoozeFollowUp(id: string, option: SnoozeOption): Date {
+  const target = snoozeTarget(option);
+  commit(
+    followUpsStore.map(t =>
+      t.id === id
+        ? { ...t, dueAt: target.toISOString(), completedAt: undefined, snoozeCount: (t.snoozeCount ?? 0) + 1 }
+        : t
+    )
   );
-  emitChange();
+  return target;
+}
+
+/**
+ * "Don't contact until…" — closes the lead's open follow-ups and parks the
+ * lead in nurture until the requested date.
+ */
+export function holdLeadUntil(
+  leadId: string,
+  until: Date,
+  reason: string,
+  channel?: string,
+  leadFirstName?: string
+): FollowUp {
+  const nowIso = new Date().toISOString();
+  const closed = followUpsStore.map(t =>
+    t.leadId === leadId && !t.completedAt
+      ? { ...t, completedAt: nowIso, outcome: 'cancelled' as const, outcomeNote: `Paused: ${reason}` }
+      : t
+  );
+  const nurture = normalise({
+    id: newId(),
+    leadId,
+    title: 'Revisit as the customer requested',
+    kind: 'message',
+    channel,
+    owner: 'AI',
+    purpose: 'nurture',
+    approval: 'draft',
+    dueAt: alignToBusinessHours(until).toISOString(),
+    draft: `Hi${leadFirstName ? ` ${leadFirstName}` : ''}, you asked us to get back in touch around now. Are you still looking for something similar?`,
+    note: `Do not contact before this date. Reason: ${reason}`,
+    createdAt: nowIso,
+    source: 'manual',
+  });
+  commit([nurture, ...closed]);
+  return nurture;
 }
 
 export function deleteFollowUp(id: string): FollowUp | undefined {
-  const found = followUpsStore.find((t) => t.id === id);
-  if (found) {
-    followUpsStore = followUpsStore.filter((t) => t.id !== id);
-    emitChange();
-  }
+  const found = followUpsStore.find(t => t.id === id);
+  if (found) commit(followUpsStore.filter(t => t.id !== id));
   return found;
 }
 
 export function restoreFollowUp(task: FollowUp): void {
-  if (!followUpsStore.some((t) => t.id === task.id)) {
-    followUpsStore = [task, ...followUpsStore];
-    emitChange();
-  }
+  if (!followUpsStore.some(t => t.id === task.id)) commit([task, ...followUpsStore]);
 }
 
-// Selectors
-export function computeFollowUpCounts(
-  tasks: FollowUp[] = followUpsStore,
+/**
+ * Engine tick: sends approved AI follow-ups that have fallen due (unless the
+ * lead is human-handled or the customer already replied) and chains the next
+ * attempt. Returns the follow-ups it sent.
+ */
+export function runFollowUpAutomation(
+  leadInfo: (leadId: string) => { handlingMode?: 'AI' | 'HUMAN'; temperature?: Temperature; firstName?: string } | undefined,
   now = new Date()
-): FollowUpCounts {
-  let overdue = 0;
-  let today = 0;
-  let upcoming = 0;
-  let done = 0;
-  let oldestOverdueDays = 0;
+): FollowUp[] {
+  const due = followUpsStore.filter(
+    t =>
+      !t.completedAt &&
+      t.owner === 'AI' &&
+      t.approval === 'approved' &&
+      !t.customerRepliedAt &&
+      new Date(t.dueAt).getTime() <= now.getTime()
+  );
+  const sent: FollowUp[] = [];
+  for (const task of due) {
+    const info = leadInfo(task.leadId);
+    if (info?.handlingMode === 'HUMAN') continue;
+    completeFollowUp(task.id, {
+      outcome: 'sent',
+      note: 'Sent automatically by the Engagement Agent.',
+      temperature: info?.temperature,
+      leadFirstName: info?.firstName,
+    });
+    sent.push(task);
+  }
+  return sent;
+}
 
+/* --------------------------------------------------------------------------
+   Selectors
+   -------------------------------------------------------------------------- */
+
+export function computeFollowUpCounts(tasks: FollowUp[] = followUpsStore, now = new Date()): FollowUpCounts {
+  const c: FollowUpCounts = { overdue: 0, today: 0, upcoming: 0, nurture: 0, done: 0, open: 0, awaitingApproval: 0, oldestOverdueDays: 0 };
   for (const task of tasks) {
     const bucket = getBucket(task, now);
-    if (bucket === 'done') {
-      done++;
-    } else if (bucket === 'overdue') {
-      overdue++;
-      const dueTime = new Date(task.dueAt).getTime();
-      const diffMs = now.getTime() - dueTime;
-      const days = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-      if (days > oldestOverdueDays) {
-        oldestOverdueDays = days;
-      }
-    } else if (bucket === 'today') {
-      today++;
-    } else if (bucket === 'upcoming') {
-      upcoming++;
+    c[bucket]++;
+    if (needsApproval(task)) c.awaitingApproval++;
+    if (bucket === 'overdue') {
+      const days = Math.max(1, Math.floor((now.getTime() - new Date(task.dueAt).getTime()) / DAY));
+      c.oldestOverdueDays = Math.max(c.oldestOverdueDays, days);
     }
   }
-
-  const open = overdue + today + upcoming;
-  return { overdue, today, upcoming, done, open, oldestOverdueDays };
+  c.open = c.overdue + c.today + c.upcoming + c.nurture;
+  return c;
 }
 
 export function getFollowUpsForLead(leadId: string): FollowUp[] {
-  return followUpsStore.filter((t) => t.leadId === leadId);
+  return followUpsStore.filter(t => t.leadId === leadId);
 }
 
 export function getNextFollowUp(leadId: string): FollowUp | undefined {
-  const openTasks = followUpsStore
-    .filter((t) => t.leadId === leadId && !t.completedAt)
-    .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime());
-  return openTasks[0];
+  return followUpsStore
+    .filter(t => t.leadId === leadId && !t.completedAt)
+    .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())[0];
 }
 
 export function isLeadFollowUpOverdue(leadId: string, now = new Date()): boolean {
-  return followUpsStore.some(
-    (t) => t.leadId === leadId && getBucket(t, now) === 'overdue'
-  );
+  return followUpsStore.some(t => t.leadId === leadId && getBucket(t, now) === 'overdue');
 }
 
 export function getOverdueLeadIdSet(now = new Date()): Set<string> {
   const set = new Set<string>();
-  for (const task of followUpsStore) {
-    if (getBucket(task, now) === 'overdue') {
-      set.add(task.leadId);
-    }
-  }
+  for (const task of followUpsStore) if (getBucket(task, now) === 'overdue') set.add(task.leadId);
   return set;
 }
 
-// Hooks
+/* --------------------------------------------------------------------------
+   Hooks
+   -------------------------------------------------------------------------- */
+
 export function useFollowUps(): FollowUp[] {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
@@ -410,13 +762,9 @@ export function useFollowUpCounts(): FollowUpCounts {
 
 export function useNow(intervalMs = 60000): Date {
   const [now, setNow] = useState(() => new Date());
-
   useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, intervalMs);
+    const timer = setInterval(() => setNow(new Date()), intervalMs);
     return () => clearInterval(timer);
   }, [intervalMs]);
-
   return now;
 }

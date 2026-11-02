@@ -40,6 +40,8 @@ import {
   stageToStatus 
 } from '../../../lib/leadIntel';
 import { formatRelative } from '../../../lib/time';
+import { useFollowUps, useNow, formatDue } from '../../../data/followUps';
+import { FollowUpRow, FollowUpModals, RowModal } from '../followups/FollowUpKit';
 import { BRAND_NAME } from '../../../config/brand';
 
 interface LeadIntelligenceWorkspaceProps {
@@ -138,10 +140,21 @@ export default function LeadIntelligenceWorkspace({
   const [timelineEvents, setTimelineEvents] = useState<LeadTimelineEvent[]>(lead?.timelineEvents || []);
 
   // Follow-ups
-  const [followUps, setFollowUps] = useState<LeadFollowUp[]>(lead?.followUps || []);
-  const [showAddFollowUp, setShowAddFollowUp] = useState(false);
-  const [newFollowUpText, setNewFollowUpText] = useState('');
-  const [newFollowUpTime, setNewFollowUpTime] = useState('Tomorrow — 11:00 AM');
+  // Follow-ups come from the shared follow-up engine (same data as the Follow-ups page)
+  const allFollowUps = useFollowUps();
+  const followUpNow = useNow(30000);
+  const leadFollowUps = allFollowUps
+    .filter(f => f.leadId === lead.id)
+    .sort((a, b) =>
+      a.completedAt && !b.completedAt ? 1 : !a.completedAt && b.completedAt ? -1 : new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()
+    );
+  const openLeadFollowUps = leadFollowUps.filter(f => !f.completedAt);
+  const followUps = openLeadFollowUps;
+  const [fuModal, setFuModal] = useState<RowModal | { type: 'add'; leadId?: string } | null>(null);
+  const [showDoneFollowUps, setShowDoneFollowUps] = useState(false);
+  const setShowAddFollowUp = (open: boolean) => {
+    if (open) setFuModal({ type: 'add', leadId: lead.id });
+  };
 
   // Internal Notes
   const [notes, setNotes] = useState<string[]>(lead?.internalNotes || []);
@@ -363,81 +376,6 @@ export default function LeadIntelligenceWorkspace({
       onUpdateLead({ ...lead, conversationSummary: generated });
       if (onNotify) onNotify('Summary Refreshed', 'AI intelligence summary updated.');
     }, 450);
-  };
-
-  // Add follow-up
-  const handleAddFollowUp = () => {
-    if (!newFollowUpText.trim()) return;
-    const now = new Date();
-    const newFollowUp: LeadFollowUp = {
-      id: `f-${Date.now()}`,
-      title: newFollowUpText.trim(),
-      dueTime: newFollowUpTime,
-      dueAt: now.toISOString(),
-      kind: 'task',
-      type: 'upcoming',
-      isCompleted: false
-    };
-    const updated = [newFollowUp, ...followUps];
-    setFollowUps(updated);
-
-    const newTimelineEvt: LeadTimelineEvent = {
-      id: `t-${Date.now()}`,
-      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      at: now.toISOString(),
-      title: `Follow-up task scheduled: ${newFollowUp.title}`,
-      type: 'follow_up'
-    };
-    const updatedTimeline = [newTimelineEvt, ...timelineEvents];
-    setTimelineEvents(updatedTimeline);
-
-    setNewFollowUpText('');
-    setShowAddFollowUp(false);
-    onUpdateLead({
-      ...lead,
-      followUps: updated,
-      timelineEvents: updatedTimeline
-    });
-    if (onNotify) onNotify('Follow-up Added', `Scheduled: ${newFollowUp.title}`);
-  };
-
-  // Toggle follow-up completed
-  const handleToggleFollowUp = (id: string) => {
-    const targetItem = followUps.find((f) => f.id === id);
-    const now = new Date();
-    const willComplete = targetItem ? !targetItem.isCompleted : false;
-
-    const updated = followUps.map((f) =>
-      f.id === id
-        ? {
-            ...f,
-            isCompleted: willComplete,
-            completedAt: willComplete ? now.toISOString() : undefined
-          }
-        : f
-    );
-    setFollowUps(updated);
-
-    if (targetItem) {
-      const newTimelineEvt: LeadTimelineEvent = {
-        id: `t-${Date.now()}`,
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        at: now.toISOString(),
-        title: willComplete
-          ? `Follow-up completed: ${targetItem.title}`
-          : `Follow-up reopened: ${targetItem.title}`,
-        type: 'follow_up'
-      };
-      const updatedTimeline = [newTimelineEvt, ...timelineEvents];
-      setTimelineEvents(updatedTimeline);
-      onUpdateLead({
-        ...lead,
-        followUps: updated,
-        timelineEvents: updatedTimeline
-      });
-    } else {
-      onUpdateLead({ ...lead, followUps: updated });
-    }
   };
 
   // Add internal note
@@ -1228,116 +1166,75 @@ export default function LeadIntelligenceWorkspace({
             <div className="nx-section-body">
             <div className="space-y-6">
               
-              {/* Card 1: Scheduled Follow-ups */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
-                'bg-surface border-line'
-              }`}>
-                <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
-                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
-                    'text-ink-2'
-                  }`}>
-                    Scheduled Follow-ups
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddFollowUp(!showAddFollowUp)}
-                    className="text-xs font-semibold text-brand hover:underline flex items-center space-x-1 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Follow-up</span>
-                  </button>
+              {/* Card 1: Follow-ups (shared follow-up engine) */}
+              <section className="nx-panel nx-pad">
+                <div className="nx-sectionhead">
+                  <div>
+                    <h2>Follow-ups</h2>
+                    <p>
+                      {openLeadFollowUps.length
+                        ? `${openLeadFollowUps.length} open · next ${formatDue(openLeadFollowUps[0], followUpNow).toLowerCase()}`
+                        : 'Nothing scheduled for this lead.'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button type="button" className="nx-btn sm" onClick={() => setFuModal({ type: 'hold', lead })}>
+                      Don't contact until…
+                    </button>
+                    <button type="button" className="nx-btn sm primary" onClick={() => setFuModal({ type: 'add', leadId: lead.id })}>
+                      + Add follow-up
+                    </button>
+                  </div>
                 </div>
 
-                {showAddFollowUp && (
-                  <div className={`p-4 rounded-lg border space-y-3 animate-fadeIn ${
-                    'bg-surface-raised border-line'
-                  }`}>
-                    <input
-                      type="text"
-                      placeholder="e.g. Schedule discovery call regarding requirements..."
-                      value={newFollowUpText}
-                      onChange={(e) => setNewFollowUpText(e.target.value)}
-                      className={`w-full text-xs px-3 py-2 rounded-lg border focus:outline-none focus:border-brand/30 ${
-                        'bg-surface border-line text-ink'
-                      }`}
-                    />
-                    <div className="flex items-center justify-between gap-3">
-                      <input
-                        type="text"
-                        placeholder="Due date & time..."
-                        value={newFollowUpTime}
-                        onChange={(e) => setNewFollowUpTime(e.target.value)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border font-mono tabular-nums focus:outline-none focus:border-brand/30 ${
-                          'bg-surface border-line text-ink-2'
-                        }`}
-                      />
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowAddFollowUp(false)}
-                          className={`text-xs font-medium cursor-pointer px-2.5 py-1.5 ${
-                            'text-ink-3 hover:text-ink'
-                          }`}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleAddFollowUp}
-                          disabled={!newFollowUpText.trim()}
-                          className="px-3.5 py-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold rounded-lg  cursor-pointer disabled:opacity-40"
-                        >
-                          Save Follow-up
-                        </button>
-                      </div>
-                    </div>
+                {openLeadFollowUps.length === 0 ? (
+                  <div className="nx-callout">
+                    <Clock className="w-4 h-4 shrink-0 mt-px" />
+                    <span>
+                      No open follow-ups. {lead.aiRecommendation ? <>Suggested next step: <b className="text-ink">{lead.aiRecommendation}</b>.</> : 'Schedule one so this lead doesn’t go cold.'}
+                    </span>
                   </div>
-                )}
-
-                {followUps.length === 0 ? (
-                  <p className="text-xs text-ink-3 py-3 text-center">No scheduled follow-ups.</p>
                 ) : (
-                  <div className="space-y-2">
-                    {followUps.map((item) => (
-                      <div 
-                        key={item.id}
-                        className={`p-3.5 rounded-lg border text-xs flex items-start justify-between gap-3 transition-colors ${
-                          item.isCompleted 
-                            ? 'bg-surface-raised border-line opacity-60'
-                            : 'bg-surface border-line '
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleFollowUp(item.id)}
-                            className={`w-4 h-4 rounded mt-0.5 flex items-center justify-center cursor-pointer transition-colors border ${
-                              item.isCompleted 
-                                ? 'bg-brand border-brand/30 text-white' 
-                                : 'border-line-strong hover:border-brand/30'
-                            }`}
-                            aria-label={item.isCompleted ? "Mark incomplete" : "Mark complete"}
-                          >
-                            {item.isCompleted && <Check className="w-3 h-3 stroke-[2.5]" />}
-                          </button>
-                          <div>
-                            <p className={`font-medium leading-snug ${
-                              item.isCompleted 
-                                ? 'line-through text-ink-3' 
-                                : 'text-ink'
-                            }`}>
-                              {item.title}
-                            </p>
-                            <span className="text-[11px] font-mono tabular-nums text-ink-3 mt-0.5 block">
-                              {item.dueTime}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="border-t border-line">
+                    {openLeadFollowUps.map(task => (
+                      <React.Fragment key={task.id}>
+                      <FollowUpRow
+                        task={task}
+                        lead={lead}
+                        now={followUpNow}
+                        compact
+                        onOpenModal={setFuModal}
+                        onOpenConversation={() => setActiveSubTab('conversation')}
+                        onNotify={onNotify}
+                      />
+                      </React.Fragment>
                     ))}
                   </div>
                 )}
-              </div>
+
+                {leadFollowUps.length > openLeadFollowUps.length && (
+                  <div className="mt-3">
+                    <button type="button" className="nx-link text-[11px]" onClick={() => setShowDoneFollowUps(v => !v)}>
+                      {showDoneFollowUps ? 'Hide' : 'Show'} {leadFollowUps.length - openLeadFollowUps.length} completed
+                    </button>
+                    {showDoneFollowUps && (
+                      <div className="border-t border-line mt-2">
+                        {leadFollowUps.filter(f => f.completedAt).map(task => (
+                          <React.Fragment key={task.id}><FollowUpRow task={task} lead={lead} now={followUpNow} compact onOpenModal={setFuModal} onNotify={onNotify} /></React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              <FollowUpModals
+                modal={fuModal}
+                leads={[lead]}
+                onClose={() => setFuModal(null)}
+                onNotify={onNotify}
+                onUpdateLead={onUpdateLead}
+              />
 
               {/* Card 2: Internal Notes */}
               <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
