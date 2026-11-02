@@ -30,20 +30,20 @@ export function StatCard({
   id,
 }: StatCardProps) {
   const content = (
-    <div className="p-4 sm:p-5 flex flex-col justify-between h-full space-y-3">
+    <div className="px-5 sm:px-[22px] py-5 flex flex-col justify-between h-full gap-2.5 min-h-[121px]">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-ink-3 uppercase tracking-wider">
+        <span className="text-[11.5px] font-medium text-ink-3">
           {label}
         </span>
         {icon && (
-          <div className="w-7 h-7 rounded-lg bg-surface-raised border border-line-subtle flex items-center justify-center text-ink-2 shrink-0">
+          <div className="w-8 h-8 rounded-[10px] bg-brand-soft flex items-center justify-center text-brand shrink-0">
             {icon}
           </div>
         )}
       </div>
 
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
+        <span className="font-display text-[29px] leading-none font-extrabold tracking-[-0.04em] text-ink tabular-nums">
           {value}
         </span>
         {sparklineData && sparklineData.length > 1 && (
@@ -58,12 +58,12 @@ export function StatCard({
         {delta && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
-              className={`inline-flex items-center px-1.5 py-0.5 rounded font-medium tabular-nums ${
+              className={`inline-flex items-center text-[11px] font-bold tabular-nums ${
                 delta.trend === 'up'
-                  ? 'bg-ok-soft text-ok'
+                  ? 'text-ok'
                   : delta.trend === 'down'
-                  ? 'bg-danger-soft text-danger'
-                  : 'bg-surface-raised text-ink-3'
+                  ? 'text-danger'
+                  : 'text-ink-3'
               }`}
             >
               {delta.trend === 'up' ? '↑' : delta.trend === 'down' ? '↓' : '→'} {delta.value}
@@ -80,7 +80,7 @@ export function StatCard({
     </div>
   );
 
-  const baseClasses = `bg-surface border border-line rounded-xl shadow-card text-left transition-all ${className}`;
+  const baseClasses = `bg-surface border border-line rounded-[15px] shadow-card text-left transition-all ${className}`;
 
   if (onClick) {
     return (
@@ -88,7 +88,7 @@ export function StatCard({
         id={id}
         type="button"
         onClick={onClick}
-        className={`${baseClasses} min-h-24! rounded-xl! hover:border-line hover:bg-surface-hover cursor-pointer focus-visible:outline-none`}
+        className={`${baseClasses} min-h-24! rounded-[15px]! hover:border-line-strong hover:-translate-y-px hover:shadow-pop cursor-pointer focus-visible:outline-none`}
       >
         {content}
       </button>

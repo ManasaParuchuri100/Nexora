@@ -12,8 +12,10 @@
 
   --color-line: var(--border);
   --color-line-subtle: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
 
   --color-brand: var(--primary);
+  --color-brand-hover: var(--primary-hover);
   --color-text-brand: var(--primary);
   --color-on-brand: var(--primary-foreground);
   --color-brand-soft: var(--accent-subtle);
@@ -23,224 +25,226 @@
   --color-warn: var(--warning);
   --color-warn-soft: var(--warning-background);
   --color-danger: var(--error);
+  --color-on-danger: #FFFFFF;
   --color-danger-soft: var(--error-background);
   --color-info: var(--info);
   --color-info-soft: var(--info-background);
   --color-hot: var(--status-hot);
   --color-hot-soft: var(--status-hot-bg);
-}
 
-@theme {
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
-  --shadow-pop: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --color-avatar: var(--avatar-bg);
+  --color-avatar-ink: var(--avatar-ink);
+  --color-overlay: var(--overlay);
+
+  --shadow-card: var(--shadow-card-value);
+  --shadow-pop: var(--shadow-pop-value);
+  --shadow-modal: var(--shadow-modal-value);
+
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ==========================================================================
-   GLOBAL SEMANTIC COLOR SYSTEM & WCAG 2.2 ACCESSIBILITY TOKENS
-   Maintains existing visual identity while enforcing accessible contrast (AA/AAA).
-   Dark Mode by default; high-clarity Light Mode with verified contrast hierarchy.
+   NEXORA DESIGN SYSTEM — "Quiet premium"
+   A calm, editorial palette: cool paper canvas, white surfaces, deep navy ink,
+   a single considered teal accent, and muted gold / clay / sage status hues.
+   Light is the default; dark mode keeps the same hierarchy on deep slate.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
 
-  /* 1. Page Backgrounds & Canvas */
-  --background: #070B14;
-  --background-secondary: #090E18;
+  /* 1. Page backgrounds */
+  --background: #111B25;
+  --background-secondary: #15212C;
   --canvas: var(--background);
-  --sidebar: var(--background-secondary);
+  --sidebar: var(--surface);
 
-  /* 2. Surfaces & Containers */
-  --surface: #0D1420;
-  --surface-elevated: #131D2E;
-  --surface-raised: var(--surface-elevated);
-  --surface-hover: #172336;
+  /* 2. Surfaces */
+  --surface: #1B2934;
+  --surface-elevated: #20313D;
+  --surface-raised: #223642;
+  --surface-hover: #243845;
 
-  /* 3. Text Hierarchy (WCAG AAA / AA compliant against --surface #0D1420) */
-  --text-primary: #F8FAFC;      /* Slate-50  - Ratio: 17.5:1 (AAA) */
-  --text-secondary: #CBD5E1;    /* Slate-300 - Ratio: 10.5:1 (AAA) */
-  --text-muted: #94A3B8;        /* Slate-400 - Ratio: 5.9:1  (AA)  */
-  --text-disabled: #64748B;     /* Slate-500 - Ratio: 3.2:1  (Disabled controls) */
+  /* 3. Text */
+  --text-primary: #E9F2F5;
+  --text-secondary: #C3D2DA;
+  --text-muted: #9AAFBB;
+  --text-disabled: #6B808C;
   --muted-decor: var(--text-muted);
 
-  /* 4. Borders & Dividers (Visible 3:1 separation without glare) */
-  --border-subtle: rgba(148, 163, 184, 0.18);
-  --border: rgba(148, 163, 184, 0.30);
-  --border-strong: rgba(148, 163, 184, 0.52);
+  /* 4. Borders */
+  --border-subtle: #2A3B47;
+  --border: #314450;
+  --border-strong: #45606F;
 
-  /* 5. Primary Actions & Accents */
-  --primary: #2DD4BF;           /* Teal-400 */
-  --primary-hover: #5EEAD4;     /* Teal-300 */
-  --primary-active: #14B8A6;    /* Teal-500 */
-  --primary-foreground: #042F2E;/* Teal-950 */
+  /* 5. Accent */
+  --primary: #3FB8B3;
+  --primary-hover: #5CCAC5;
+  --primary-active: #2EA19C;
+  --primary-foreground: #0B2226;
   --accent: var(--primary);
   --accent-hover: var(--primary-hover);
   --accent-active: var(--primary-active);
   --accent-foreground: var(--primary-foreground);
-  --accent-subtle: rgba(45, 212, 191, 0.14);
+  --accent-subtle: #183D41;
 
-  /* 6. Secondary Actions */
-  --secondary: #1E293B;
-  --secondary-foreground: #F8FAFC;
+  --secondary: #223642;
+  --secondary-foreground: #E9F2F5;
 
-  /* 7. Semantic Status Feedback Families */
-  /* Converted / Success / Won */
-  --success: #4ADE80;           /* Green-400 - Ratio: 8.2:1 */
-  --success-background: rgba(34, 197, 94, 0.15);
-  --success-foreground: #4ADE80;
+  /* 6. Status */
+  --success: #6CCBA8;
+  --success-background: rgba(35, 131, 106, 0.22);
+  --success-foreground: #6CCBA8;
   --status-converted: var(--success);
   --status-converted-bg: var(--success-background);
-  --status-converted-border: rgba(74, 222, 128, 0.40);
+  --status-converted-border: rgba(108, 203, 168, 0.32);
 
-  /* Warning / Warm */
-  --warning: #FBBF24;           /* Amber-400 - Ratio: 8.5:1 */
-  --warning-background: rgba(245, 158, 11, 0.15);
-  --warning-foreground: #FBBF24;
+  --warning: #E3B66E;
+  --warning-background: rgba(161, 106, 37, 0.24);
+  --warning-foreground: #E3B66E;
   --status-warm: var(--warning);
   --status-warm-bg: var(--warning-background);
-  --status-warm-border: rgba(251, 191, 36, 0.40);
+  --status-warm-border: rgba(227, 182, 110, 0.32);
 
-  /* Error / Lost */
-  --error: #F87171;             /* Red-400 - Ratio: 5.8:1 */
-  --error-background: rgba(239, 68, 68, 0.15);
-  --error-foreground: #F87171;
+  --error: #E48C90;
+  --error-background: rgba(182, 83, 88, 0.22);
+  --error-foreground: #E48C90;
   --status-lost: var(--error);
   --status-lost-bg: var(--error-background);
-  --status-lost-border: rgba(248, 113, 113, 0.40);
+  --status-lost-border: rgba(228, 140, 144, 0.32);
 
-  /* Hot Lead */
-  --status-hot: #FB7185;         /* Rose-400 - Ratio: 6.2:1 */
-  --status-hot-bg: rgba(251, 113, 133, 0.15);
-  --status-hot-border: rgba(251, 113, 133, 0.40);
+  --status-hot: #E8939B;
+  --status-hot-bg: rgba(182, 83, 88, 0.22);
+  --status-hot-border: rgba(232, 147, 155, 0.32);
 
-  /* Qualified Lead */
-  --status-qualified: #38BDF8;   /* Sky-400 - Ratio: 6.8:1 */
-  --status-qualified-bg: rgba(56, 189, 248, 0.15);
-  --status-qualified-border: rgba(56, 189, 248, 0.40);
+  --status-qualified: #7FC4D6;
+  --status-qualified-bg: rgba(56, 120, 150, 0.24);
+  --status-qualified-border: rgba(127, 196, 214, 0.32);
 
-  /* Nurture / New */
-  --status-nurture: #CBD5E1;     /* Slate-300 - Ratio: 10.5:1 */
-  --status-nurture-bg: rgba(148, 163, 184, 0.15);
-  --status-nurture-border: rgba(148, 163, 184, 0.40);
+  --status-nurture: #C3D2DA;
+  --status-nurture-bg: #223642;
+  --status-nurture-border: #314450;
 
-  /* Info */
-  --info: #38BDF8;
-  --info-background: rgba(56, 189, 248, 0.15);
-  --info-foreground: #38BDF8;
+  --info: #7FB6E0;
+  --info-background: rgba(56, 110, 160, 0.24);
+  --info-foreground: #7FB6E0;
 
-  /* 8. Interactive Focus Indicator */
-  --focus-ring: #2DD4BF;
+  --avatar-bg: #24414F;
+  --avatar-ink: #A9CBDB;
+  --overlay: rgba(6, 14, 22, 0.62);
 
-  /* 9. Geometry Foundations */
-  --radius-card: 12px;
-  --radius-control: 8px;
-  --control-height: 40px;
+  /* 7. Depth */
+  --shadow-card-value: none;
+  --shadow-pop-value: 0 16px 40px rgba(0, 0, 0, 0.35);
+  --shadow-modal-value: 0 24px 70px rgba(0, 0, 0, 0.45);
+
+  /* 8. Focus & geometry */
+  --focus-ring: #5CCAC5;
+  --radius-card: 15px;
+  --radius-control: 9px;
+  --control-height: 38px;
 }
-
-/* ==========================================================================
-   LIGHT MODE SEMANTIC SYSTEM
-   High-clarity light theme with verified WCAG 2.2 AA / AAA contrast.
-   ========================================================================== */
 
 [data-theme="light"],
 .theme-light {
   color-scheme: light;
 
-  /* 1. Page Backgrounds & Canvas (Clearly distinguishable from cards) */
-  --background: #F8FAFC;        /* Slate-50 page background */
-  --background-secondary: #F1F5F9; /* Slate-100 sidebar/nav background */
+  /* 1. Page backgrounds */
+  --background: #F6F8FB;
+  --background-secondary: #F9FBFD;
   --canvas: var(--background);
-  --sidebar: var(--background-secondary);
+  --sidebar: var(--surface);
 
-  /* 2. Surfaces & Containers (Pure white cards distinct from slate canvas) */
+  /* 2. Surfaces */
   --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
-  --surface-raised: #F1F5F9;
-  --surface-hover: #F1F5F9;
+  --surface-raised: #F7F9FB;
+  --surface-hover: #F3F7F9;
 
-  /* 3. Text Hierarchy (WCAG AAA / AA compliant against #FFFFFF and #F8FAFC) */
-  --text-primary: #0F172A;      /* Slate-900 - Ratio: 15.6:1 (AAA) */
-  --text-secondary: #334155;    /* Slate-700 - Ratio: 9.6:1  (AAA) */
-  --text-muted: #475569;        /* Slate-600 - Ratio: 7.2:1  (AAA) */
-  --text-disabled: #64748B;     /* Slate-500 - Ratio: 4.6:1  (AA)  */
-  --muted-decor: var(--text-muted);
+  /* 3. Text — deep navy ink, cool slate secondary */
+  --text-primary: #14253B;
+  --text-secondary: #3F5568;
+  --text-muted: #66778A;
+  --text-disabled: #9BA7B6;
+  --muted-decor: #9BA7B6;
 
-  /* 4. Borders & Dividers (Crisp visible borders: 3:1 contrast against canvas) */
-  --border-subtle: #E2E8F0;     /* Slate-200 */
-  --border: #CBD5E1;            /* Slate-300 */
-  --border-strong: #94A3B8;     /* Slate-400 */
+  /* 4. Borders */
+  --border-subtle: #EEF2F6;
+  --border: #E6EBF1;
+  --border-strong: #CED7E1;
 
-  /* 5. Primary Actions & Accents */
-  --primary: #0F766E;           /* Teal-700 */
-  --primary-hover: #115E59;     /* Teal-800 */
-  --primary-active: #134E4A;    /* Teal-900 */
-  --primary-foreground: #FFFFFF;/* White */
+  /* 5. Accent — a single, deep teal */
+  --primary: #087F87;
+  --primary-hover: #066B73;
+  --primary-active: #055C63;
+  --primary-foreground: #FFFFFF;
   --accent: var(--primary);
   --accent-hover: var(--primary-hover);
   --accent-active: var(--primary-active);
   --accent-foreground: var(--primary-foreground);
-  --accent-subtle: rgba(15, 118, 110, 0.12);
+  --accent-subtle: #E9F5F3;
 
-  /* 6. Secondary Actions */
-  --secondary: #E2E8F0;
-  --secondary-foreground: #0F172A;
+  --secondary: #F1F5F7;
+  --secondary-foreground: #14253B;
 
-  /* 7. Semantic Status Feedback Families (700 text on 100 bg = 5:1+ contrast) */
-  /* Converted / Success / Won */
-  --success: #15803D;           /* Emerald-700 - Ratio: 5.2:1 */
-  --success-background: #DCFCE7;/* Emerald-100 */
-  --success-foreground: #15803D;
+  /* 6. Status — sage, gold, clay */
+  --success: #23836A;
+  --success-background: #E9F6F0;
+  --success-foreground: #23836A;
   --status-converted: var(--success);
   --status-converted-bg: var(--success-background);
-  --status-converted-border: #86EFAC;
+  --status-converted-border: #CBE7DA;
 
-  /* Warning / Warm */
-  --warning: #B45309;           /* Amber-700 - Ratio: 4.8:1 */
-  --warning-background: #FEF3C7;/* Amber-100 */
-  --warning-foreground: #B45309;
+  --warning: #A16A25;
+  --warning-background: #FFF6E7;
+  --warning-foreground: #A16A25;
   --status-warm: var(--warning);
   --status-warm-bg: var(--warning-background);
-  --status-warm-border: #FCD34D;
+  --status-warm-border: #F1E2C4;
 
-  /* Error / Lost */
-  --error: #B91C1C;             /* Red-700 - Ratio: 5.6:1 */
-  --error-background: #FEE2E2;  /* Red-100 */
-  --error-foreground: #B91C1C;
+  --error: #B65358;
+  --error-background: #FFF0F0;
+  --error-foreground: #B65358;
   --status-lost: var(--error);
   --status-lost-bg: var(--error-background);
-  --status-lost-border: #FCA5A5;
+  --status-lost-border: #F2D3D5;
 
-  /* Hot Lead */
-  --status-hot: #BE123C;         /* Rose-700 - Ratio: 5.8:1 */
-  --status-hot-bg: #FFE4E6;     /* Rose-100 */
-  --status-hot-border: #FDA4AF;
+  --status-hot: #B65358;
+  --status-hot-bg: #FFF0F0;
+  --status-hot-border: #F2D3D5;
 
-  /* Qualified Lead */
-  --status-qualified: #0E7490;   /* Cyan-700 - Ratio: 5.4:1 */
-  --status-qualified-bg: #CFFAFE;/* Cyan-100 */
-  --status-qualified-border: #67E8F9;
+  --status-qualified: #2B6F86;
+  --status-qualified-bg: #EAF4F8;
+  --status-qualified-border: #CFE4EC;
 
-  /* Nurture / New */
-  --status-nurture: #334155;     /* Slate-700 - Ratio: 9.6:1 */
-  --status-nurture-bg: #F1F5F9; /* Slate-100 */
-  --status-nurture-border: #CBD5E1;
+  --status-nurture: #526879;
+  --status-nurture-bg: #F1F5F7;
+  --status-nurture-border: #E1E8EE;
 
-  /* Info */
-  --info: #0369A1;              /* Sky-700 - Ratio: 5.4:1 */
-  --info-background: #E0F2FE;   /* Sky-100 */
-  --info-foreground: #0369A1;
+  --info: #2F6690;
+  --info-background: #EDF4FA;
+  --info-foreground: #2F6690;
 
-  /* 8. Interactive Focus Indicator & Geometry */
-  --focus-ring: #0F766E;
-  --radius-card: 12px;
-  --radius-control: 8px;
-  --control-height: 40px;
+  --avatar-bg: #E6F0F4;
+  --avatar-ink: #386278;
+  --overlay: rgba(14, 35, 59, 0.42);
+
+  /* 7. Depth — whisper-soft */
+  --shadow-card-value: 0 8px 28px rgba(21, 44, 68, 0.035);
+  --shadow-pop-value: 0 14px 40px rgba(16, 32, 48, 0.12);
+  --shadow-modal-value: 0 20px 70px rgba(7, 27, 43, 0.19);
+
+  /* 8. Focus & geometry */
+  --focus-ring: #8BD2D2;
+  --radius-card: 15px;
+  --radius-control: 9px;
+  --control-height: 38px;
 }
 
 /* ==========================================================================
-   TYPOGRAPHIC & BASE FOUNDATIONS
-   Clean Inter typography stack.
-   Tabular numerals for numbers, scores, currency, metrics.
+   TYPOGRAPHY
+   DM Sans for interface text; Manrope for display headings and numerals.
    ========================================================================== */
 
 html {
@@ -251,51 +255,105 @@ html {
 body {
   background-color: var(--background);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.55;
   font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Tabular numerals for data, metrics, counts, scores, and currency */
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
 .tabular-nums,
 table,
 [data-tabular="true"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Page Titles */
 h1,
-.page-title,
-.text-2xl,
-.text-3xl {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.page-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+  color: var(--text-primary);
 }
 
-/* Section Titles */
+.text-2xl,
+.text-3xl,
+.text-4xl {
+  font-family: var(--font-display);
+  letter-spacing: -0.035em;
+}
+
 h2,
 h3,
+h4,
 .section-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
-/* Deprecate serif display in favor of clean Inter sans stack */
+/* Retire the legacy serif / monospace looks in favour of the house faces */
 .serif,
 .font-serif-display,
-.font-sans-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+.font-sans-body,
+.font-mono {
+  font-family: var(--font-sans) !important;
 }
 
-/* Supporting labels */
+.font-mono.tracking-widest,
+.font-mono.tracking-wider {
+  letter-spacing: 0.04em !important;
+}
+
+kbd,
+code,
+pre {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-black,
+.font-extrabold {
+  font-weight: 700 !important;
+}
+
+h1.font-extrabold,
+h1.font-black,
+.text-3xl.font-extrabold {
+  font-weight: 800 !important;
+}
+
+/* Eyebrow label — the small, tracked, uppercase kicker above titles */
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--primary);
+  line-height: 1.4;
+}
+
 .text-xs,
 .supporting-label,
 label {
   font-size: 12px;
+}
+
+/* Cards — unify any surface using the shared card shadow */
+.shadow-card {
+  box-shadow: var(--shadow-card-value) !important;
 }
 
 /* Control heights & geometry */
@@ -822,27 +880,94 @@ select option {
   background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
 }
 
-/* Light mode fair color for topbar division */
-[data-theme="light"] div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1),
-.theme-light div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) {
-  background-color: #FFFFFF !important;
-  border-bottom-color: #CBD5E1 !important;
+
+/* ==========================================================================
+   MOTION — restrained, quick, and respectful of reduced-motion settings
+   ========================================================================== */
+
+@keyframes nx-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-[data-theme="light"] div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) > div:nth-of-type(1),
-.theme-light div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) > div:nth-of-type(1) {
-  background-color: #FFFFFF !important;
-  color: #000000 !important;
+@keyframes nx-slide-right {
+  from { transform: translateX(-12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-[data-theme="dark"] div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1),
-.theme-dark div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) {
-  background-color: #061816 !important;
-  border-bottom-color: rgba(169, 191, 165, 0.18) !important;
+.animate-fadeIn {
+  animation: nx-fade-in 160ms ease-out both;
 }
 
-[data-theme="dark"] div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) > div:nth-of-type(1),
-.theme-dark div#root > div:nth-of-type(1) > div:nth-of-type(3) > header:nth-of-type(1) > div:nth-of-type(1) {
-  background-color: transparent !important;
+.animate-slideRight {
+  animation: nx-slide-right 200ms ease-out both;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .animate-slideRight {
+    animation: none;
+  }
+}
+
+/* Toast — a confident navy chip in both themes */
+.nx-toast {
+  background: #142F40;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.nx-toast .nx-toast-title { color: #FFFFFF !important; }
+.nx-toast .nx-toast-desc { color: rgba(226, 238, 244, 0.82) !important; }
+.nx-toast .nx-toast-action { color: #8BD2D2 !important; }
+
+/* ==========================================================================
+   LEGACY HEADING HARMONISATION
+   Older views use light serif display titles; render them in the house
+   display face so every page shares one confident, consistent title style.
+   ========================================================================== */
+
+h1.serif {
+  font-family: var(--font-display) !important;
+  font-size: 28px !important;
+  line-height: 1.25 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.04em !important;
+  color: var(--text-primary) !important;
+}
+
+@media (max-width: 640px) {
+  h1.serif {
+    font-size: 24px !important;
+  }
+}
+
+h2.serif,
+h3.serif,
+span.serif,
+p.serif {
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Page kickers ("WORKSPACE // …") become the teal eyebrow */
+span.tracking-widest-plus.block.mb-2 {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.2em !important;
+  color: var(--primary) !important;
+}
+
+/* Primary CTAs: sentence-case, confident, never shouty */
+button.bg-\[\#E8E9D8\].uppercase {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.bg-\[\#E8E9D8\]:hover,
+.bg-\[\#22D3EE\]:hover,
+button.bg-\[\#E8E9D8\]:hover {
+  background-color: var(--primary-hover) !important;
+}

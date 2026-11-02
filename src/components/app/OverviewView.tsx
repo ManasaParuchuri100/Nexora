@@ -429,6 +429,7 @@ export default function OverviewView({
       
       {/* 1. PAGE HEADER with Dynamic Greeting, Subtitle, and Date Controls */}
       <PageHeader
+        eyebrow="Workspace / Overview"
         title={getGreeting()}
         subtitle={subtitle}
         actions={

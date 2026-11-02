@@ -10,7 +10,7 @@ export interface BadgeProps {
 }
 
 export function Badge({ children, tone = 'neutral', size = 'sm', className = '' }: BadgeProps) {
-  const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
+  const sizeClasses = size === 'sm' ? 'px-2 py-[3px] text-[10.5px]' : 'px-2.5 py-[5px] text-[11px]';
 
   let toneClasses = '';
   switch (tone) {
@@ -40,7 +40,7 @@ export function Badge({ children, tone = 'neutral', size = 'sm', className = '' 
 
   return (
     <span
-      className={`inline-flex items-center justify-center font-medium rounded-md border ${sizeClasses} ${toneClasses} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 font-bold rounded-[6px]! border border-transparent! whitespace-nowrap ${sizeClasses} ${toneClasses} ${className}`}
     >
       {children}
     </span>

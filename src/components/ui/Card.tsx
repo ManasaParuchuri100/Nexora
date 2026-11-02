@@ -12,7 +12,7 @@ export function Card({ children, className = '', onClick, id }: CardProps) {
     <div
       id={id}
       onClick={onClick}
-      className={`bg-surface border border-line rounded-xl shadow-card overflow-hidden ${className}`}
+      className={`bg-surface border border-line rounded-[15px] shadow-card overflow-hidden min-w-0 ${className}`}
     >
       {children}
     </div>
@@ -28,13 +28,13 @@ export interface CardHeaderProps {
 
 export function CardHeader({ title, description, action, className = '' }: CardHeaderProps) {
   return (
-    <div className={`p-4 sm:p-5 flex items-start justify-between gap-4 border-b border-line-subtle ${className}`}>
-      <div className="min-w-0 space-y-0.5">
-        <h3 className="text-sm sm:text-base font-semibold text-ink tracking-tight truncate">
+    <div className={`px-5 sm:px-[22px] pt-5 sm:pt-[22px] pb-4 flex items-start justify-between gap-4 ${className}`}>
+      <div className="min-w-0 space-y-1">
+        <h3 className="font-display text-[15px] font-bold text-ink tracking-[-0.02em] truncate">
           {title}
         </h3>
         {description && (
-          <p className="text-xs text-ink-3">
+          <p className="text-[11.5px] text-ink-3">
             {description}
           </p>
         )}

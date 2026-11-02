@@ -16,10 +16,11 @@ export default function AgentView({ onNavigate }: AgentViewProps) {
   const pausedCount = conversations.filter(c => Boolean(c.aiAlert?.isPaused)).length;
 
   return (
-    <div className="flex-1 p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full animate-fadeIn">
+    <div className="flex-1 space-y-6 w-full animate-fadeIn">
       {/* Page Header */}
       <PageHeader
-        title="Engagement agent"
+        eyebrow="Intelligence / Engagement Agent"
+        title="Engagement Agent"
         subtitle="Your AI replies to leads on WhatsApp, Instagram, LinkedIn and your website, and hands over to you when it needs a person."
         actions={
           <Button

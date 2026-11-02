@@ -34,22 +34,22 @@ export function Button({
 }: ButtonProps) {
   // Use Tailwind important modifier (e.g. min-h-8!, rounded-lg!) to override index.css button rules
   const sizeClasses = size === 'sm'
-    ? 'min-h-[44px] sm:min-h-8! sm:h-8 px-2.5 text-xs font-medium gap-1.5'
-    : 'min-h-[44px] sm:min-h-9! sm:h-9 px-3.5 text-sm font-medium gap-2';
+    ? 'min-h-[44px] sm:min-h-8! sm:h-8 px-2.5 text-[11.5px] font-bold gap-1.5'
+    : 'min-h-[44px] sm:min-h-[38px]! sm:h-[38px] px-3.5 text-[13px] font-bold gap-2';
 
   let variantClasses = '';
   switch (variant) {
     case 'primary':
-      variantClasses = 'bg-brand text-on-brand hover:opacity-90 active:opacity-95 shadow-xs border-transparent';
+      variantClasses = 'bg-brand text-on-brand border border-brand hover:bg-brand-hover hover:border-brand-hover';
       break;
     case 'secondary':
-      variantClasses = 'bg-surface text-ink border border-line hover:bg-surface-hover active:bg-surface-raised shadow-xs';
+      variantClasses = 'bg-surface text-ink-2 border border-line hover:bg-surface-hover hover:text-ink hover:border-line-strong';
       break;
     case 'ghost':
-      variantClasses = 'bg-transparent text-ink-2 hover:text-ink hover:bg-surface-hover active:bg-surface-raised border-transparent';
+      variantClasses = 'bg-transparent text-brand hover:bg-brand-soft border border-transparent';
       break;
     case 'danger':
-      variantClasses = 'bg-danger-soft text-danger border border-line-subtle hover:opacity-90 active:opacity-95';
+      variantClasses = 'bg-danger-soft text-danger border border-transparent hover:border-danger/30';
       break;
   }
 
@@ -61,7 +61,7 @@ export function Button({
       disabled={disabled}
       title={title}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center rounded-lg! cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none ${sizeClasses} ${variantClasses} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[9px]! whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none ${sizeClasses} ${variantClasses} ${className}`}
     >
       {leadingIcon && <span className="inline-flex shrink-0">{leadingIcon}</span>}
       {children && <span className="truncate">{children}</span>}

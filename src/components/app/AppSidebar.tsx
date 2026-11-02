@@ -177,7 +177,7 @@ export default function AppSidebar({
     <div className="flex flex-col h-full bg-surface select-none text-ink">
       
       {/* 1. BRAND HEADER (Three lines, no logo square) */}
-      <div className="flex items-start justify-between px-4 py-4 border-b border-line-subtle">
+      <div className="flex items-start justify-between px-[27px] pt-[26px] pb-[22px]">
         <button
           type="button"
           onClick={() => {
@@ -186,13 +186,13 @@ export default function AppSidebar({
           }}
           className="text-left focus-visible:outline-none cursor-pointer flex flex-col group"
         >
-          <span className="text-xs font-semibold tracking-[0.2em] text-brand uppercase">
+          <span className="text-[9px] font-extrabold tracking-[0.33em] text-brand uppercase">
             {BRAND_COMPANY}
           </span>
-          <span className="text-3xl font-extrabold tracking-tight text-ink uppercase">
+          <span className="font-display text-[25px] leading-none font-extrabold tracking-[-0.05em] text-ink uppercase mt-1.5">
             {BRAND_NAME}<span className="text-brand">.</span>
           </span>
-          <span className="text-xs tracking-widest text-ink-3 uppercase">
+          <span className="text-[9px] tracking-[0.22em] text-ink-3 uppercase mt-1.5">
             {BRAND_TAGLINE}
           </span>
         </button>
@@ -209,20 +209,22 @@ export default function AppSidebar({
       </div>
 
       {/* 2. WORKSPACE CARD */}
-      <div className="p-3 border-b border-line-subtle relative">
-        <div className="rounded-xl border border-line bg-surface p-3">
+      <div className="px-[17px] pb-3 relative">
+        <div className="rounded-[10px] border border-line bg-surface p-[11px] hover:border-line-strong transition-colors">
           <button
             type="button"
             onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
             className="w-full flex items-center justify-between transition-colors cursor-pointer text-left focus-visible:outline-none"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <Avatar name={currentWorkspace} size="md" className="rounded-lg" />
+              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-xs font-extrabold uppercase shrink-0">
+                {currentWorkspace[0]}
+              </span>
               <div className="min-w-0">
-                <span className="text-sm font-semibold text-ink truncate block">
+                <span className="text-[13px] font-bold text-ink truncate block leading-tight">
                   {currentWorkspace}
                 </span>
-                <span className="text-xs text-ink-3 block leading-tight truncate">
+                <span className="text-[10px] text-ink-3 block leading-tight truncate mt-0.5">
                   {isDemoWorkspace ? 'Demo workspace' : userRole}
                 </span>
               </div>
@@ -233,7 +235,7 @@ export default function AppSidebar({
 
         {/* Workspace Switcher Dropdown */}
         {isWorkspaceMenuOpen && (
-          <div className="absolute left-3 right-3 top-full mt-1 bg-surface border border-line rounded-xl shadow-pop py-1.5 z-50 text-sm animate-fadeIn">
+          <div className="absolute left-[17px] right-[17px] top-full -mt-1 bg-surface border border-line rounded-[12px] shadow-pop py-1.5 z-50 text-sm animate-fadeIn">
             <div className="px-3 py-1 text-xs font-medium text-ink-3">
               Workspaces
             </div>
@@ -287,13 +289,13 @@ export default function AppSidebar({
       </div>
 
       {/* 3. MAIN NAVIGATION (Grouped sections) */}
-      <nav className="flex-1 py-2 px-3 overflow-y-auto">
+      <nav className="flex-1 pb-3 px-[14px] overflow-y-auto">
         {NAV_SECTIONS.map((section, sIndex) => (
           <div key={section.title}>
-            <div className={`text-xs font-semibold uppercase tracking-wider text-ink-3 px-3 ${sIndex === 0 ? 'mt-2 mb-1' : 'mt-5 mb-1'}`}>
+            <div className={`text-[9px] font-extrabold uppercase tracking-[0.2em] text-muted-decor px-[13px] pb-[7px] ${sIndex === 0 ? 'pt-3.5' : 'pt-5'}`}>
               {section.title}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-px">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = item.isActive(activeCategory, activeSubCategory);
@@ -308,15 +310,16 @@ export default function AppSidebar({
                       onCloseMobile();
                     }}
                     aria-current={active ? 'page' : undefined}
-                    className={`w-full flex items-center justify-between h-10 rounded-xl px-3 gap-3 text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
+                    className={`w-full flex items-center justify-between h-10 min-h-10! rounded-[9px]! px-[13px] gap-3 text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
                       active
-                        ? 'bg-brand-soft text-brand font-semibold'
-                        : 'text-ink-2 hover:bg-surface-hover'
+                        ? 'bg-brand-soft text-brand'
+                        : 'text-ink-2 hover:bg-surface-hover hover:text-ink'
                     }`}
                   >
-                    <div className="flex items-center gap-3 truncate">
-                      <Icon 
-                        className={`w-4 h-4 shrink-0 transition-colors ${
+                    <div className="flex items-center gap-[11px] truncate">
+                      <Icon
+                        strokeWidth={1.8}
+                        className={`w-[17px] h-[17px] shrink-0 transition-colors ${
                           active ? 'text-brand' : 'text-ink-3'
                         }`}
                       />
@@ -326,7 +329,7 @@ export default function AppSidebar({
                     {/* Inbox badge */}
                     {item.key === 'inbox' && inboxCounts.needsYou > 0 && (
                       <span
-                        className="bg-brand text-on-brand rounded-md min-w-5 px-1.5 text-xs font-semibold tabular-nums flex items-center justify-center shrink-0"
+                        className="bg-brand text-on-brand rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0"
                         aria-label={`${inboxCounts.needsYou} conversations need you`}
                       >
                         {inboxCounts.needsYou}
@@ -336,7 +339,7 @@ export default function AppSidebar({
                     {/* Follow-ups overdue badge */}
                     {item.key === 'follow-ups' && followUpCounts.overdue > 0 && (
                       <span
-                        className="bg-danger text-on-danger rounded-md min-w-5 px-1.5 text-xs font-semibold tabular-nums flex items-center justify-center shrink-0"
+                        className="bg-danger-soft text-danger rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0"
                         aria-label={`${followUpCounts.overdue} overdue follow-ups`}
                       >
                         {followUpCounts.overdue}
@@ -351,7 +354,7 @@ export default function AppSidebar({
       </nav>
 
       {/* 4. SIDEBAR FOOTER (Settings, Help, User Card) */}
-      <div className="p-3 border-t border-line-subtle space-y-1">
+      <div className="mx-[14px] pt-3 pb-[18px] border-t border-line space-y-px">
         
         {/* Settings button */}
         <button
@@ -362,13 +365,13 @@ export default function AppSidebar({
             onCloseMobile();
           }}
           aria-current={activeCategory === 'settings' ? 'page' : undefined}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer text-left focus-visible:outline-none ${
+          className={`w-full flex items-center gap-[11px] px-[13px] h-10 min-h-10! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'settings'
-              ? 'bg-brand-soft text-brand font-semibold'
+              ? 'bg-brand-soft text-brand'
               : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
           }`}
         >
-          <Settings className={`w-4 h-4 shrink-0 ${activeCategory === 'settings' ? 'text-brand' : 'text-ink-3'}`} />
+          <Settings strokeWidth={1.8} className={`w-[17px] h-[17px] shrink-0 ${activeCategory === 'settings' ? 'text-brand' : 'text-ink-3'}`} />
           <span>Settings</span>
         </button>
 
@@ -381,14 +384,14 @@ export default function AppSidebar({
             else onSelectNav('settings', 'business');
             onCloseMobile();
           }}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
+          className="w-full flex items-center gap-[11px] px-[13px] h-10 min-h-10! rounded-[9px]! text-[13px] font-semibold text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none"
         >
-          <HelpCircle className="w-4 h-4 shrink-0 text-ink-3" />
+          <HelpCircle strokeWidth={1.8} className="w-[17px] h-[17px] shrink-0 text-ink-3" />
           <span>Help</span>
         </button>
 
         {/* User Card */}
-        <div className="pt-2 border-t border-line-subtle mt-2 flex items-center justify-between px-2 py-1.5 rounded-lg bg-surface-raised">
+        <div className="mt-3 flex items-center justify-between px-2.5 py-2 rounded-[10px] border border-line bg-surface-raised">
           <div className="flex items-center gap-2.5 min-w-0">
             <Avatar name={userName} size="sm" />
             <div className="min-w-0">
@@ -403,7 +406,7 @@ export default function AppSidebar({
           <button
             type="button"
             onClick={onLogout}
-            className="p-1.5 rounded-lg text-ink-3 hover:text-danger hover:bg-danger-soft transition-colors cursor-pointer shrink-0"
+            className="p-1.5 min-h-0! rounded-[7px]! text-ink-3 hover:text-danger hover:bg-danger-soft transition-colors cursor-pointer shrink-0"
             title="Log out"
             aria-label="Log out"
           >
@@ -421,7 +424,7 @@ export default function AppSidebar({
       {/* Desktop Fixed Sidebar (w-60 / 240px wide) */}
       <aside 
         id="app-desktop-sidebar"
-        className="hidden md:block fixed top-0 left-0 bottom-0 w-60 z-30 border-r border-line bg-surface"
+        className="hidden md:block fixed top-0 left-0 bottom-0 w-[232px] z-30 border-r border-line bg-surface"
       >
         {renderNavContent()}
       </aside>
@@ -429,7 +432,7 @@ export default function AppSidebar({
       {/* Mobile Drawer */}
       {isOpenMobile && (
         <div 
-          className="md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity"
+          className="md:hidden fixed inset-0 z-50 bg-overlay backdrop-blur-[2px] transition-opacity"
           onClick={onCloseMobile}
         >
           <div 

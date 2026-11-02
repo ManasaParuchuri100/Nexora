@@ -907,6 +907,7 @@ export default function LeadsView({
           PageHeader with dynamic title/subtitle and primary action based on topTab
          ======================================================== */}
       <PageHeader
+        eyebrow={topTab === 'leads' ? 'Workspace / Leads' : 'Workspace / Leads / Follow-ups'}
         title={topTab === 'leads' ? "Leads" : "Follow-ups"}
         subtitle={topTab === 'leads' ? "Every prospect across your channels" : "Tasks that keep deals moving"}
         actions={

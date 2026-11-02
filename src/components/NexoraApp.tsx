@@ -309,25 +309,9 @@ export default function NexoraApp({
   const isInbox = activeCategory === 'inbox' || activeCategory === 'engage';
 
   return (
-    <div className={`${
-      isLight ? 'bg-[#F8FAFC] text-slate-900' : 'bg-[#071C1A] text-[#E8E9D8]'
-    } font-sans-body selection:bg-teal-500/25 selection:text-teal-900 relative ${
+    <div className={`bg-canvas text-ink font-sans relative ${
       isInbox ? 'h-screen overflow-hidden flex flex-col' : 'min-h-screen'
     }`}>
-      {/* Background atmosphere subtle ambient lighting in dark mode */}
-      {!isLight && (
-        <>
-          <div 
-            className="fixed top-0 right-0 w-[600px] h-[600px] rounded-full blur-[160px] pointer-events-none opacity-[0.06]"
-            style={{ background: 'radial-gradient(circle, #A9BFA5 0%, transparent 70%)' }}
-          />
-          <div 
-            className="fixed bottom-0 left-60 w-[500px] h-[500px] rounded-full blur-[140px] pointer-events-none opacity-[0.04]"
-            style={{ background: 'radial-gradient(circle, #0D2D2A 0%, transparent 70%)' }}
-          />
-        </>
-      )}
-
       {/* Fixed Left Sidebar Navigation (10-item spec) */}
       <AppSidebar
         activeCategory={activeCategory}
@@ -350,7 +334,7 @@ export default function NexoraApp({
       {/* Main Workspace Frame */}
       {(() => {
         return (
-          <div className={`md:pl-60 flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
+          <div className={`md:pl-[232px] flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
             {/* Top Navigation Bar with Dynamic Breadcrumb */}
             <AppTopBar
               activeCategory={activeCategory}
@@ -376,14 +360,10 @@ export default function NexoraApp({
               
               {/* Mode Switch Banner for First-Run vs Demo Data - Only visible in DEV mode */}
               {import.meta.env.DEV && (
-                <div className={`${
-                  isLight 
-                    ? 'bg-white border-b border-slate-200 text-slate-600' 
-                    : 'bg-[#051513] border-b border-[rgba(169,191,165,0.18)] text-[#A9BFA5]'
-                } px-6 py-2 flex items-center justify-between text-xs font-mono shrink-0`}>
+                <div className="bg-surface-raised border-b border-line text-ink-3 px-6 sm:px-10 py-1.5 flex items-center justify-between text-[11px] shrink-0">
                   <div className="flex items-center space-x-2">
-                    <span className={`w-2 h-2 rounded-full ${isFirstRun ? 'bg-amber-400' : 'bg-emerald-500'}`} />
-                    <span className={`${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'} font-medium`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isFirstRun ? 'bg-warn' : 'bg-ok'}`} />
+                    <span className="text-ink-2 font-medium">
                       {isFirstRun ? 'First-Run Mode (Empty States)' : 'Demo Mode (Sample Data)'}
                     </span>
                   </div>
@@ -398,11 +378,7 @@ export default function NexoraApp({
                         nextState ? 'Displaying initial empty state views.' : 'Loaded sample leads, metrics, and conversations.'
                       );
                     }}
-                    className={`px-2.5 py-1 text-xs rounded transition-colors cursor-pointer ${
-                      isLight
-                        ? 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 shadow-2xs'
-                        : 'bg-[#0D2D2A] hover:bg-[#133F3B] border border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
-                    }`}
+                    className="min-h-0! px-2 py-0.5 text-[11px] font-semibold text-brand hover:underline cursor-pointer"
                   >
                     {isFirstRun ? 'Switch to Demo Data' : 'View Empty States'}
                   </button>
@@ -412,7 +388,7 @@ export default function NexoraApp({
               <div className={
                 isInbox
                   ? "w-full px-3 sm:px-4 py-2 sm:py-3 flex-1 min-h-0 flex flex-col overflow-hidden"
-                  : "max-w-7xl w-full mx-auto px-6 sm:px-10 lg:px-12 py-8 lg:py-10"
+                  : "max-w-[1430px] w-full mx-auto px-4 sm:px-8 lg:px-10 pt-7 sm:pt-9 pb-24"
               }>
             {/* 1. OVERVIEW */}
             {activeCategory === 'overview' && (
@@ -595,83 +571,96 @@ export default function NexoraApp({
         onNotify={showToast}
       />
 
-      {/* Help Panel Drawer (Page 7 spec) */}
+      {/* Help Panel Drawer */}
       {isHelpOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end animate-fadeIn">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setIsHelpOpen(false)} />
-          <div className="relative w-full max-w-md bg-[#071C1A] border-l border-[rgba(169,191,165,0.25)] h-full p-6 shadow-2xl z-10 flex flex-col justify-between font-mono text-xs text-[#E8E9D8]">
-            <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.2)] pb-3">
-                <span className="serif text-xl font-light text-white">Help & Documentation</span>
-                <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="Close help" className="text-[#A9BFA5] hover:text-white p-1 cursor-pointer">
+        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+          <div className="fixed inset-0 bg-overlay backdrop-blur-[2px] animate-fadeIn" onClick={() => setIsHelpOpen(false)} />
+          <div className="relative w-full max-w-[500px] bg-surface border-l border-line h-full p-7 shadow-modal z-10 flex flex-col justify-between text-ink animate-fadeIn">
+            <div className="space-y-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="eyebrow">Support</div>
+                  <h2 className="text-[22px] font-extrabold tracking-tight mt-1.5">Help & documentation</h2>
+                </div>
+                <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="Close help" className="w-9 h-9 min-h-9! grid place-items-center rounded-[9px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="space-y-3">
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
-                  <h4 className="font-semibold text-white mb-1">{BRAND_NAME} OS Architecture</h4>
-                  <p className="text-xs text-[#A9BFA5] font-light">Learn how autonomous WhatsApp qualifiers and human escalation work in one loop.</p>
-                </div>
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
-                  <h4 className="font-semibold text-white mb-1">Keyboard Shortcuts</h4>
-                  <p className="text-[11px] text-[#A9BFA5] font-light">Press ⌘K for search, L for new lead, P for post, C for content, M for campaign.</p>
-                </div>
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
-                  <h4 className="font-semibold text-white mb-1">Support & Hotline</h4>
-                  <p className="text-[11px] text-[#A9BFA5] font-light">Direct email: support@tecavy.io · WhatsApp: +91 98201 44820</p>
-                </div>
+              <div className="divide-y divide-line">
+                {[
+                  [`${BRAND_NAME} architecture`, 'Learn how WhatsApp qualifiers and human escalation work together in one loop.'],
+                  ['Keyboard shortcuts', 'Press ⌘K for search, L for a new lead, P for a post, C for content, M for a campaign.'],
+                  ['Support', 'Email support@tecavy.io · WhatsApp +91 98201 44820'],
+                ].map(([title, desc]) => (
+                  <div key={title} className="py-4 first:pt-0">
+                    <h3 className="text-[13px] font-bold text-ink">{title}</h3>
+                    <p className="text-xs text-ink-3 mt-1 leading-relaxed">{desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
             <button
               type="button"
               onClick={() => setIsHelpOpen(false)}
-              className="w-full py-2 bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px]"
+              className="w-full h-10 min-h-10! rounded-[9px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
             >
-              Close Help
+              Close
             </button>
           </div>
         </div>
       )}
 
-      {/* Profile Drawer (Page 8 spec) */}
+      {/* Profile Drawer */}
       {isProfileOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end animate-fadeIn">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-[2px]" onClick={() => setIsProfileOpen(false)} />
-          <div className="relative w-full max-w-md bg-[#071C1A] border-l border-[rgba(169,191,165,0.25)] h-full p-6 shadow-2xl z-10 flex flex-col justify-between font-mono text-xs text-[#E8E9D8]">
-            <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.2)] pb-3">
-                <span className="serif text-xl font-light text-white">Your Profile</span>
-                <button type="button" onClick={() => setIsProfileOpen(false)} className="text-[#A9BFA5] hover:text-white">✕</button>
+        <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
+          <div className="fixed inset-0 bg-overlay backdrop-blur-[2px] animate-fadeIn" onClick={() => setIsProfileOpen(false)} />
+          <div className="relative w-full max-w-[500px] bg-surface border-l border-line h-full p-7 shadow-modal z-10 flex flex-col justify-between text-ink animate-fadeIn">
+            <div className="space-y-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="eyebrow">Account</div>
+                  <h2 className="text-[22px] font-extrabold tracking-tight mt-1.5">Your profile</h2>
+                </div>
+                <button type="button" onClick={() => setIsProfileOpen(false)} aria-label="Close profile" className="w-9 h-9 min-h-9! grid place-items-center rounded-[9px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] uppercase text-[#A9BFA5] block mb-1">Name</label>
-                  <input type="text" defaultValue="Aryan Mehta" className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] px-3 py-2 rounded text-white" />
+                  <label className="text-[11px] font-bold text-ink-3 block mb-1.5">Name</label>
+                  <input type="text" defaultValue="Aryan Mehta" className="w-full px-3 py-2.5 text-ink" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase text-[#A9BFA5] block mb-1">Email</label>
-                  <input type="email" defaultValue="you@acme.com" className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] px-3 py-2 rounded text-white" />
+                  <label className="text-[11px] font-bold text-ink-3 block mb-1.5">Email</label>
+                  <input type="email" defaultValue="you@acme.com" className="w-full px-3 py-2.5 text-ink" />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase text-[#A9BFA5] block mb-1">Role</label>
-                  <span className="text-emerald-300 font-semibold">Workspace Owner</span>
+                <div className="flex items-center justify-between py-3 border-t border-line">
+                  <span className="text-xs text-ink-3">Role</span>
+                  <span className="text-xs font-bold text-ink">Workspace owner</span>
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase text-[#A9BFA5] block mb-1">Notification Preferences</label>
-                  <p className="text-[#A9BFA5] text-[11px]">Instant alerts for leads needing human response.</p>
+                <div className="flex items-center justify-between py-3 border-t border-line">
+                  <span className="text-xs text-ink-3">Notifications</span>
+                  <span className="text-xs font-bold text-ink">Instant alerts for human handoffs</span>
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="flex gap-2.5 justify-end">
+              <button
+                type="button"
+                onClick={() => setIsProfileOpen(false)}
+                className="h-10 min-h-10! px-4 rounded-[9px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
+              >
+                Cancel
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   setIsProfileOpen(false);
-                  showToast('Profile Saved', 'Account details updated successfully.');
+                  showToast('Profile saved', 'Account details updated successfully.');
                 }}
-                className="w-full py-2 bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px]"
+                className="h-10 min-h-10! px-4 rounded-[9px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
               >
-                Save Changes
+                Save changes
               </button>
             </div>
           </div>
@@ -680,12 +669,12 @@ export default function NexoraApp({
 
       {/* Floating System Toast (positioned top-right to avoid covering bottom-right action buttons) */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 sm:right-6 z-50 bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-xl p-3.5 max-w-sm text-[#E8E9D8] animate-fadeIn rounded-lg flex items-start justify-between space-x-3">
+        <div className="nx-toast fixed top-5 right-5 sm:right-6 z-[80] shadow-pop px-[18px] py-3.5 max-w-sm animate-fadeIn rounded-[10px] flex items-start justify-between gap-3" role="status">
           <div className="min-w-0 flex-1">
-            <p className="text-xs uppercase tracking-wider text-[#A9BFA5] font-semibold mb-0.5">
+            <p className="text-[13px] font-semibold mb-0.5 nx-toast-title">
               {toastMessage.title}
             </p>
-            <p className="text-xs text-[#E8E9D8]/90 leading-relaxed">
+            <p className="text-xs leading-relaxed nx-toast-desc">
               {toastMessage.desc}
             </p>
             {toastMessage.action && (
@@ -696,7 +685,7 @@ export default function NexoraApp({
                   if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
                   setToastMessage(null);
                 }}
-                className="mt-2 text-xs font-semibold px-2.5 py-1 rounded bg-[#0D2D2A] text-[#A9BFA5] hover:text-white border border-[rgba(169,191,165,0.3)] hover:bg-[#133F3B] cursor-pointer transition-colors"
+                className="mt-2 min-h-0! text-xs font-semibold nx-toast-action hover:underline cursor-pointer"
               >
                 {toastMessage.action.label}
               </button>
@@ -708,7 +697,7 @@ export default function NexoraApp({
               if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
               setToastMessage(null);
             }}
-            className="text-slate-400 hover:text-white transition-colors cursor-pointer p-0.5 shrink-0"
+            className="min-h-0! nx-toast-desc hover:opacity-100 opacity-70 transition-opacity cursor-pointer p-0.5 shrink-0"
             title="Dismiss notification"
           >
             <X className="w-3.5 h-3.5" />

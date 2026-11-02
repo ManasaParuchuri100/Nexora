@@ -4,22 +4,15 @@ import {
   Bell, 
   ChevronDown, 
   User, 
-  Settings, 
-  HelpCircle, 
   LogOut, 
   Menu,
-  CheckCircle2,
   Sparkles,
-  Command,
   X,
   Sun,
   Moon,
   Plus,
   Calendar,
   Megaphone,
-  Check,
-  Clock,
-  ExternalLink
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
@@ -181,53 +174,43 @@ export default function AppTopBar({
     }
   };
 
+  const iconBtn =
+    'inline-flex items-center justify-center w-9 h-9 min-h-9! rounded-[9px]! border border-line bg-surface text-ink-2 hover:bg-surface-hover hover:text-ink transition-colors cursor-pointer focus-visible:outline-none';
+  const menuPanel =
+    'absolute right-0 mt-2 bg-surface border border-line rounded-[13px] shadow-pop z-50 animate-fadeIn text-sm text-ink overflow-hidden';
+  const menuItem =
+    'w-full flex items-center justify-between gap-3 px-3.5 py-2 min-h-0! rounded-none! text-left text-ink hover:bg-surface-hover transition-colors cursor-pointer';
+  const kbd = 'text-[10px] px-1.5 py-px border border-line rounded-[4px] text-ink-3 bg-surface-raised font-sans';
+
   return (
-    <header className={`sticky top-0 z-20 w-full h-14 sm:h-16 shrink-0 border-b transition-colors select-none ${
-      theme === 'light' 
-        ? 'border-[#CBD5E1] bg-[#FFFFFF] shadow-2xs' 
-        : 'border-[rgba(169,191,165,0.18)] bg-[#061816]'
-    }`}>
-      <div className={`h-full px-4 sm:px-8 flex items-center justify-between ${
-        theme === 'light' ? 'bg-[#FFFFFF] text-[#000000]' : 'bg-transparent text-[#E8E9D8]'
-      }`}>
-        
-        {/* Left: Mobile hamburger & Breadcrumb (Page 6 & 7 spec) */}
-        <div className="flex items-center space-x-3 sm:space-x-4">
+    <header className="sticky top-0 z-20 w-full h-14 sm:h-[67px] shrink-0 border-b border-line bg-surface/95 backdrop-blur-md select-none">
+      <div className="h-full px-3 sm:px-8 lg:px-10 flex items-center justify-between gap-3 sm:gap-4">
+
+        {/* Left: Mobile menu + breadcrumb */}
+        <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={onOpenMobileMenu}
-            className={`md:hidden p-1.5 focus:outline-none cursor-pointer ${
-              theme === 'light' ? 'text-[#000000] hover:text-black' : 'text-[#A9BFA5] hover:text-white'
-            }`}
+            className="md:hidden p-1.5 min-h-0! text-ink-2 hover:text-ink cursor-pointer"
             aria-label="Open sidebar menu"
           >
-            <Menu className="w-5 h-5 stroke-[2.2]" />
+            <Menu className="w-5 h-5" />
           </button>
 
-          {/* Breadcrumb Segment */}
-          <nav className={`flex items-center space-x-2 text-xs font-mono tracking-widest ${
-            theme === 'light' ? 'text-[#000000]' : 'text-[#E8E9D8]'
-          }`} aria-label="Breadcrumb">
+          <nav className="hidden sm:flex items-center gap-2.5 text-[12px] text-ink-3 min-w-0" aria-label="Breadcrumb">
+            <span>{BRAND_NAME} workspace</span>
+            <span className="text-line-strong">/</span>
             <button
               type="button"
               onClick={() => onSelectNav(activeCategory, activeSubCategory)}
-              className={`px-3.5 py-1.5 rounded-[6px] uppercase tracking-wider transition-all cursor-pointer font-extrabold ${
-                theme === 'light'
-                  ? 'bg-[#FFFFFF] border-2 border-[#CBD5E1] text-[#000000] hover:bg-white hover:border-[#94A3B8] shadow-xs'
-                  : 'bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:border-[#A9BFA5]'
-              }`}
+              className="min-h-0! font-semibold text-ink hover:text-brand transition-colors cursor-pointer truncate"
             >
               {formatCategoryTitle(activeCategory, activeSubCategory)}
             </button>
-
             {currentRecordTitle && (
               <>
-                <span className={theme === 'light' ? 'text-[#000000] font-extrabold' : 'text-[#A9BFA5]/60'}>›</span>
-                <span className={`px-3.5 py-1.5 rounded-[6px] font-extrabold truncate max-w-[140px] sm:max-w-[240px] ${
-                  theme === 'light'
-                    ? 'bg-[#FFFFFF] border-2 border-[#CBD5E1] text-[#000000] shadow-xs'
-                    : 'bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
-                }`}>
+                <span className="text-ink-3">/</span>
+                <span className="font-semibold text-ink truncate max-w-[140px] sm:max-w-[260px]">
                   {currentRecordTitle}
                 </span>
               </>
@@ -235,215 +218,133 @@ export default function AppTopBar({
           </nav>
         </div>
 
-        {/* Right Controls: Search ⌘K | + New ▼ | 🔔 3 | ◯ Acme ▼ */}
-        <div className="flex items-center space-x-2 sm:space-x-3.5">
-          
-          {/* 1. [🔍 Search ⌘K] Command Palette trigger */}
+        {/* Right controls */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+
           <button
             type="button"
             id="topbar-search-button"
             onClick={onOpenQuickSearch}
-            className={`flex items-center space-x-2 text-xs px-3.5 py-1.5 rounded-[6px] transition-all focus:outline-none cursor-pointer font-mono font-extrabold ${
-              theme === 'light'
-                ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
-                : 'text-[#A9BFA5] hover:text-white bg-[#051513] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
-            }`}
+            className="flex items-center gap-2 h-9 min-h-9! rounded-[9px]! border border-line bg-surface-raised text-ink-3 hover:text-ink-2 hover:border-line-strong transition-colors px-3 sm:pl-3.5 sm:pr-2.5 sm:min-w-[220px] cursor-pointer"
             title="Search workspace (⌘K or Ctrl+K)"
           >
-            <Search className={`w-3.5 h-3.5 stroke-[2.5] ${theme === 'light' ? 'text-[#000000]' : 'text-[#A9BFA5]'}`} />
-            <span className={`hidden sm:inline text-xs font-extrabold ${theme === 'light' ? 'text-[#000000]' : 'text-[#A9BFA5]'}`}>Search</span>
-            <kbd className={`text-[10px] px-1.5 py-0.2 border rounded-[3px] font-mono font-extrabold ${
-              theme === 'light' ? 'border-[#94A3B8] bg-[#F1F5F9] text-[#000000]' : 'border-[rgba(169,191,165,0.2)] bg-[#041210] text-[#A9BFA5]/60'
-            }`}>⌘K</kbd>
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline text-[13px] flex-1 text-left">Search</span>
+            <kbd className={`hidden sm:inline ${kbd}`}>⌘K</kbd>
           </button>
 
-          {/* 2. [+ New ▼] Universal Creator Menu (Page 8 spec) */}
+          {/* + New */}
           <div className="relative" ref={newMenuRef}>
             <button
               type="button"
               id="topbar-new-button"
               onClick={() => setNewMenuOpen(!newMenuOpen)}
-              className={`flex items-center space-x-1.5 text-xs font-mono font-extrabold px-3.5 py-1.5 rounded-[6px] transition-all cursor-pointer ${
-                theme === 'light'
-                  ? 'bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] text-[#000000] shadow-xs'
-                  : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white shadow-sm'
-              }`}
+              className="inline-flex items-center gap-1.5 h-9 min-h-9! rounded-[9px]! px-2.5 sm:px-3.5 bg-brand text-on-brand text-[13px] font-semibold hover:bg-brand-hover transition-colors cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[3]" />
-              <span className="font-extrabold">New</span>
-              <ChevronDown className="w-3 h-3 stroke-[2.5]" />
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New</span>
             </button>
 
             {newMenuOpen && (
-              <div className="absolute right-0 mt-1.5 w-48 bg-[#051513] border border-[rgba(169,191,165,0.3)] shadow-2xl rounded-[2px] py-1.5 z-50 font-mono text-xs animate-fadeIn">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewMenuOpen(false);
-                    onTriggerNew('lead');
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <User className="w-3.5 h-3.5 text-[#A9BFA5]" />
-                    <span>Lead</span>
-                  </div>
-                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">L</kbd>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewMenuOpen(false);
-                    onTriggerNew('post');
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Post</span>
-                  </div>
-                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">P</kbd>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewMenuOpen(false);
-                    onTriggerNew('content');
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Content</span>
-                  </div>
-                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">C</kbd>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewMenuOpen(false);
-                    onTriggerNew('campaign');
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-[#0D2D2A] text-left text-[#E8E9D8] transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Megaphone className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Campaign</span>
-                  </div>
-                  <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">M</kbd>
-                </button>
+              <div className={`${menuPanel} w-52 py-1.5`}>
+                {([
+                  ['lead', 'Lead', User, 'L'],
+                  ['post', 'Post', Calendar, 'P'],
+                  ['content', 'Content', Sparkles, 'C'],
+                  ['campaign', 'Campaign', Megaphone, 'M'],
+                ] as const).map(([type, label, Icon, key]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setNewMenuOpen(false);
+                      onTriggerNew(type);
+                    }}
+                    className={menuItem}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4 text-ink-3" />
+                      <span>{label}</span>
+                    </span>
+                    <kbd className={kbd}>{key}</kbd>
+                  </button>
+                ))}
               </div>
             )}
           </div>
 
-          {/* 3. 🔔 Notifications Panel (Page 8 & 9 spec) */}
+          {/* Notifications */}
           <div className="relative" ref={notifMenuRef}>
             <button
               type="button"
               id="topbar-notifications-button"
               onClick={() => setNotifMenuOpen(!notifMenuOpen)}
-              className={`flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-[6px] focus:outline-none cursor-pointer transition-all font-extrabold ${
-                theme === 'light'
-                  ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
-                  : 'text-[#A9BFA5] hover:text-white bg-[#051513] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
-              }`}
+              className={`${iconBtn} relative`}
               aria-label="View notifications"
             >
-              <Bell className="w-4 h-4 stroke-[2.2]" />
+              <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className={`font-mono text-[11px] font-extrabold px-1.5 py-0.2 rounded-[3px] ${
-                  theme === 'light'
-                    ? 'bg-[#FEF3C7] border border-[#F59E0B] text-[#000000]'
-                    : 'bg-emerald-400 text-[#071C1A]'
-                }`}>
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand text-on-brand text-[10px] font-semibold leading-4 text-center tabular-nums">
                   {unreadCount}
                 </span>
               )}
             </button>
 
             {notifMenuOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-[#061816] border border-[rgba(169,191,165,0.25)] shadow-2xl z-50 rounded-[2px] animate-fadeIn font-mono text-xs">
-                <div className="p-3.5 border-b border-[rgba(169,191,165,0.15)] flex items-center justify-between">
-                  <span className="uppercase tracking-widest text-[#E8E9D8] font-semibold text-[11px]">
-                    Notifications
-                  </span>
+              <div className={`${menuPanel} w-80 sm:w-96`}>
+                <div className="px-4 py-3 border-b border-line-subtle flex items-center justify-between">
+                  <span className="font-display font-bold text-ink text-sm">Notifications</span>
                   {unreadCount > 0 && (
                     <button
                       type="button"
                       onClick={markAllRead}
-                      className="text-[11px] text-[#A9BFA5] hover:text-white transition-colors cursor-pointer"
+                      className="min-h-0! text-xs font-semibold text-brand hover:underline cursor-pointer"
                     >
                       Mark all read
                     </button>
                   )}
                 </div>
 
-                <div className="max-h-80 overflow-y-auto divide-y divide-[rgba(169,191,165,0.1)]">
-                  {/* Group: TODAY */}
-                  <div className="px-3.5 py-1.5 bg-[#051513] text-xs uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
-                    TODAY
-                  </div>
-                  {notifications.filter(n => n.group === 'TODAY').map(notif => (
-                    <button
-                      key={notif.id}
-                      type="button"
-                      onClick={() => {
-                        setNotifMenuOpen(false);
-                        onSelectNav(notif.category, notif.sub);
-                      }}
-                      className="w-full text-left p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1.5">
-                          {notif.unread && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                          )}
-                          <span className="font-semibold text-white text-xs">{notif.title}</span>
-                        </div>
-                        <span className="text-xs text-[#A9BFA5]/60">{notif.time}</span>
+                <div className="max-h-80 overflow-y-auto">
+                  {(['TODAY', 'EARLIER'] as const).map(group => (
+                    <div key={group}>
+                      <div className="px-4 pt-3 pb-1 eyebrow text-ink-3!">
+                        {group === 'TODAY' ? 'Today' : 'Earlier'}
                       </div>
-                      <p className="text-xs text-[#A9BFA5] font-light pl-3">
-                        {notif.detail}
-                      </p>
-                    </button>
-                  ))}
-
-                  {/* Group: EARLIER */}
-                  <div className="px-3.5 py-1.5 bg-[#051513] text-xs uppercase tracking-wider text-[#A9BFA5]/60 font-semibold">
-                    EARLIER
-                  </div>
-                  {notifications.filter(n => n.group === 'EARLIER').map(notif => (
-                    <button
-                      key={notif.id}
-                      type="button"
-                      onClick={() => {
-                        setNotifMenuOpen(false);
-                        onSelectNav(notif.category, notif.sub);
-                      }}
-                      className="w-full text-left p-3 hover:bg-[#0D2D2A]/40 transition-colors cursor-pointer space-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-white text-xs">{notif.title}</span>
-                        <span className="text-xs text-[#A9BFA5]/60">{notif.time}</span>
-                      </div>
-                      <p className="text-xs text-[#A9BFA5]/70 font-light">
-                        {notif.detail}
-                      </p>
-                    </button>
+                      {notifications.filter(n => n.group === group).map(notif => (
+                        <button
+                          key={notif.id}
+                          type="button"
+                          onClick={() => {
+                            setNotifMenuOpen(false);
+                            onSelectNav(notif.category, notif.sub);
+                          }}
+                          className="w-full min-h-0! rounded-none! text-left px-4 py-2.5 hover:bg-surface-hover transition-colors cursor-pointer border-b border-line-subtle last:border-b-0"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="flex items-center gap-2 min-w-0">
+                              {notif.unread && <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />}
+                              <span className={`text-[13px] truncate ${notif.unread ? 'font-semibold text-ink' : 'text-ink-2'}`}>
+                                {notif.title}
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-ink-3 shrink-0">{notif.time}</span>
+                          </div>
+                          <p className="text-xs text-ink-3 mt-0.5 pl-3.5">{notif.detail}</p>
+                        </button>
+                      ))}
+                    </div>
                   ))}
                 </div>
 
-                <div className="p-2.5 border-t border-[rgba(169,191,165,0.15)] bg-[#051513] text-center">
+                <div className="px-4 py-2.5 border-t border-line-subtle bg-surface-raised">
                   <button
                     type="button"
                     onClick={() => {
                       setNotifMenuOpen(false);
                       onSelectNav('settings', 'notifications');
                     }}
-                    className="text-xs text-emerald-300 hover:underline cursor-pointer"
+                    className="min-h-0! text-xs font-semibold text-brand hover:underline cursor-pointer"
                   >
                     Notification settings →
                   </button>
@@ -452,146 +353,111 @@ export default function AppTopBar({
             )}
           </div>
 
-          {/* Theme Toggle Button (Light / Dark) */}
+          {/* Theme toggle */}
           <button
             type="button"
             id="topbar-theme-toggle"
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className={`flex items-center space-x-1.5 p-2 rounded-[6px] text-xs transition-all cursor-pointer ${
-              theme === 'light'
-                ? 'bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] text-[#000000] shadow-xs'
-                : 'bg-[#051513] hover:bg-[#081F1C] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5] text-[#A9BFA5] hover:text-white'
-            }`}
-            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            className={`${iconBtn} hidden sm:inline-flex`}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
             aria-label="Toggle theme mode"
           >
-            {theme === 'light' ? (
-              <Moon className="w-4 h-4 text-[#000000] stroke-[2.5]" />
-            ) : (
-              <Sun className="w-4 h-4 text-[#E8E9D8] stroke-[2.5]" />
-            )}
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
 
-          {/* 4. Account Menu */}
+          {/* Account */}
           <div className="relative" ref={accountMenuRef}>
             <button
               type="button"
               id="topbar-user-menu"
               onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-              className={`flex items-center space-x-2 text-xs p-1.5 pr-2.5 rounded-[6px] transition-all cursor-pointer font-extrabold ${
-                theme === 'light'
-                  ? 'text-[#000000] bg-[#FFFFFF] hover:bg-white border-2 border-[#CBD5E1] hover:border-[#94A3B8] shadow-xs'
-                  : 'text-[#E8E9D8] bg-[#051513] hover:bg-[#081F1C] border border-[rgba(169,191,165,0.25)] hover:border-[#A9BFA5]'
-              }`}
+              className="flex items-center gap-2 h-9 min-h-9! rounded-[9px]! pl-1 pr-2 hover:bg-surface-hover transition-colors cursor-pointer"
+              aria-label="Account menu"
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-black uppercase ${
-                theme === 'light'
-                  ? 'bg-[#E2E8F0] border border-[#94A3B8] text-[#000000]'
-                  : 'bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] text-[#A9BFA5]'
-              }`}>
+              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-xs font-bold uppercase">
                 {(currentUser?.workspace || currentUser?.name || BRAND_NAME)[0]}
-              </div>
-              <span className={`hidden sm:inline font-mono text-xs font-extrabold ${
-                theme === 'light' ? 'text-[#000000]' : 'text-[#E8E9D8]'
-              }`}>
+              </span>
+              <span className="hidden lg:inline text-[13px] font-semibold text-ink max-w-[140px] truncate">
                 {currentUser?.workspace || currentUser?.name || BRAND_NAME}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
+              <ChevronDown className="w-3.5 h-3.5 text-ink-3" />
             </button>
 
             {accountMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-[#061816] border border-[rgba(169,191,165,0.25)] shadow-2xl rounded-[2px] py-1.5 z-50 font-mono text-xs animate-fadeIn">
-                {/* User details */}
-                <div className="px-3.5 py-2 border-b border-[rgba(169,191,165,0.15)]">
-                  <p className="text-[#E8E9D8] font-semibold text-xs">
+              <div className={`${menuPanel} w-60 py-1.5`}>
+                <div className="px-3.5 py-2.5 border-b border-line-subtle mb-1">
+                  <p className="font-semibold text-ink text-[13px] truncate">
                     {currentUser?.workspace || currentUser?.name || `${BRAND_NAME} Workspace`}
                   </p>
-                  <p className="text-xs text-[#A9BFA5]/70 truncate">
+                  <p className="text-xs text-ink-3 truncate">
                     {currentUser?.email || `alex@${BRAND_NAME.toLowerCase()}.com`} · {currentUser?.role || 'Owner'}
                   </p>
                 </div>
 
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false);
-                      if (onOpenProfileDrawer) onOpenProfileDrawer();
-                      else onSelectNav('settings', 'business');
-                    }}
-                    className="w-full text-left px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
-                  >
-                    Your profile
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    if (onOpenProfileDrawer) onOpenProfileDrawer();
+                    else onSelectNav('settings', 'business');
+                  }}
+                  className={menuItem}
+                >
+                  Your profile
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    if (onOpenLogin) onOpenLogin();
+                    else onLogout();
+                  }}
+                  className={menuItem}
+                >
+                  Switch account
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false);
-                      if (onOpenLogin) onOpenLogin();
-                      else onLogout();
-                    }}
-                    className="w-full text-left px-3.5 py-1.5 text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer flex items-center space-x-2"
-                  >
-                    <User className="w-3.5 h-3.5 text-[#A9BFA5]/70" />
-                    <span>Switch account / Log in</span>
-                  </button>
-
-                  {/* Theme Switcher: Light · Dark · System */}
-                  <div className="px-3.5 py-1.5 flex items-center justify-between text-[#A9BFA5]">
-                    <span>Theme</span>
-                    <div className="flex items-center space-x-1 text-[11px]">
+                <div className="px-3.5 py-2 flex items-center justify-between text-ink-2">
+                  <span>Theme</span>
+                  <div className="flex items-center gap-1 p-0.5 rounded-[8px] bg-surface-raised border border-line-subtle">
+                    {(['light', 'dark'] as const).map(mode => (
                       <button
+                        key={mode}
                         type="button"
-                        onClick={() => setTheme('light')}
-                        className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                          theme === 'light'
-                            ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold shadow-sm'
-                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+                        onClick={() => setTheme(mode)}
+                        className={`min-h-0! px-2.5 py-0.5 rounded-[6px]! text-xs capitalize cursor-pointer transition-colors ${
+                          theme === mode ? 'bg-surface text-brand font-semibold shadow-card' : 'text-ink-3 hover:text-ink'
                         }`}
                       >
-                        Light
+                        {mode}
                       </button>
-                      <span className="text-[var(--text-muted)]">·</span>
-                      <button
-                        type="button"
-                        onClick={() => setTheme('dark')}
-                        className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                          theme === 'dark'
-                            ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold shadow-sm'
-                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
-                        }`}
-                      >
-                        Dark
-                      </button>
-                    </div>
+                    ))}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false);
-                      setShowShortcutsModal(true);
-                    }}
-                    className="w-full flex items-center justify-between px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
-                  >
-                    <span>Keyboard shortcuts</span>
-                    <kbd className="text-[10px] text-[#A9BFA5]/60 font-mono">?</kbd>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false);
-                      onSelectNav('settings', 'billing');
-                    }}
-                    className="w-full text-left px-3.5 py-1.5 text-[#E8E9D8] hover:bg-[#0D2D2A] transition-colors cursor-pointer"
-                  >
-                    Billing
-                  </button>
                 </div>
 
-                <div className="border-t border-[rgba(169,191,165,0.15)] my-1" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    setShowShortcutsModal(true);
+                  }}
+                  className={menuItem}
+                >
+                  <span>Keyboard shortcuts</span>
+                  <kbd className={kbd}>?</kbd>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    onSelectNav('settings', 'billing');
+                  }}
+                  className={menuItem}
+                >
+                  Billing
+                </button>
+
+                <div className="border-t border-line-subtle my-1" />
 
                 <button
                   type="button"
@@ -599,72 +465,67 @@ export default function AppTopBar({
                     setAccountMenuOpen(false);
                     onLogout();
                   }}
-                  className="w-full text-left px-3.5 py-1.5 text-rose-300 hover:bg-[#0D2D2A] transition-colors cursor-pointer flex items-center space-x-2"
+                  className={`${menuItem} text-danger!`}
                 >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Log out</span>
+                  <span className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4" />
+                    Log out
+                  </span>
                 </button>
               </div>
             )}
           </div>
-
         </div>
-
       </div>
 
-      {/* Keyboard Shortcuts Dialog */}
+      {/* Keyboard shortcuts dialog */}
       {showShortcutsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
-          <div className="w-full max-w-md bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-2xl p-6 rounded-[2px] font-mono text-xs space-y-4 text-[#E8E9D8]">
-            <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.2)] pb-3">
-              <span className="serif text-lg font-light text-white">Keyboard Shortcuts</span>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px] p-4 animate-fadeIn"
+          onClick={() => setShowShortcutsModal(false)}
+        >
+          <div
+            className="w-full max-w-md bg-surface border border-line rounded-[16px] shadow-modal p-7 text-sm text-ink"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-xl font-bold">Keyboard shortcuts</h2>
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="p-1 text-[#A9BFA5] hover:text-white"
+                className={iconBtn}
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Open Command Palette</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">⌘K / Ctrl+K</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Create New Lead</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">L</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Create New Post</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">P</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Create Content</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">C</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Create Campaign</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">M</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Inbox Navigation</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">J / K</kbd>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#A9BFA5]">Take over conversation</span>
-                <kbd className="px-2 py-0.5 border border-[rgba(169,191,165,0.25)] rounded bg-[#071C1A]">T</kbd>
-              </div>
+            <div className="divide-y divide-line-subtle">
+              {[
+                ['Open command palette', '⌘K / Ctrl+K'],
+                ['Create new lead', 'L'],
+                ['Create new post', 'P'],
+                ['Create content', 'C'],
+                ['Create campaign', 'M'],
+                ['Inbox navigation', 'J / K'],
+                ['Take over conversation', 'T'],
+              ].map(([label, key]) => (
+                <div key={label} className="flex items-center justify-between py-2.5">
+                  <span className="text-ink-2">{label}</span>
+                  <kbd className={kbd}>{key}</kbd>
+                </div>
+              ))}
             </div>
 
-            <div className="pt-2 border-t border-[rgba(169,191,165,0.15)] text-right">
+            <div className="mt-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="px-3 py-1.5 bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[2px]"
+                className="h-9 min-h-9! px-4 rounded-[9px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
               >
-                Close
+                Done
               </button>
             </div>
           </div>
