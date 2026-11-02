@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import { StatMetric, Lead, Campaign, TrendingTopic, NavCategory, SubCategory } from '../../types';
 import { useInboxCounts, getTopPricingConversation } from '../../data/conversations';
-import { useFollowUpCounts } from '../../data/followUps';
+import { useFollowUpCounts, useFollowUps, useNow, getUpcomingCalls, formatDue } from '../../data/followUps';
+import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
 import DateRangeCalendarModal, { DateRangeSelection } from './DateRangeCalendarModal';
 import { 
@@ -50,6 +51,7 @@ interface OverviewViewProps {
   onTriggerQuickAction?: (action: 'campaign' | 'content' | 'lead' | 'schedule') => void;
   isFirstRun?: boolean;
   userName?: string;
+  onNotify?: (title: string, desc: string, action?: { label: string; onClick: () => void }) => void;
 }
 
 interface ActivityItem {
@@ -99,10 +101,16 @@ export default function OverviewView({
   onSelectLead,
   onTriggerQuickAction,
   isFirstRun = false,
-  userName = 'Alex'
+  userName = 'Alex',
+  onNotify
 }: OverviewViewProps) {
   const inboxCounts = useInboxCounts();
   const followUpCounts = useFollowUpCounts();
+  const allFollowUps = useFollowUps();
+  const callNow = useNow(30000);
+  const leadById = useMemo(() => new Map(leads.map(l => [l.id, l])), [leads]);
+  const upcomingCalls = getUpcomingCalls(allFollowUps, callNow).filter(c => leadById.has(c.leadId)).slice(0, 4);
+  const [fuModal, setFuModal] = useState<AnyFollowUpModal>(null);
   const topPricing = getTopPricingConversation();
 
   // Date filters: Today, 7 days, 30 days, Custom
@@ -745,35 +753,82 @@ export default function OverviewView({
             </section>
           </div>
 
-          {/* Next best actions */}
-          <section className="nx-panel nx-pad">
-            <div className="nx-sectionhead">
-              <div>
-                <h2>Next best actions</h2>
-                <p>Recommended tasks, not automatic changes.</p>
+          {/* Upcoming calls (whole team) + next best actions */}
+          <div className="nx-grid nx-two">
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Upcoming calls</h2>
+                  <p>Every scheduled call across the team.</p>
+                </div>
+                <button type="button" className="nx-btn sm" onClick={() => setFuModal({ type: 'call' })}>
+                  + Schedule a call
+                </button>
               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 border-t border-line md:divide-x divide-line">
-              <div className="nx-actioncard md:pr-6! md:border-t-0!">
-                <span className="eyebrow">Lead recovery</span>
-                <h3>Reconnect with dormant leads</h3>
-                <p>{Math.max(3, Math.round(stats.newLeads / 2))} previous enquiries may be ready for a follow-up.</p>
-                <button type="button" className="nx-link" onClick={() => onNavigate('leads', 'follow-ups')}>Review opportunity →</button>
+              {upcomingCalls.length === 0 ? (
+                <div className="nx-callout">
+                  <span>No calls scheduled. Book one from a lead, the Inbox or here.</span>
+                </div>
+              ) : (
+                <div className="border-t border-line">
+                  {upcomingCalls.map(call => {
+                    const l = leadById.get(call.leadId)!;
+                    return (
+                      <div key={call.id} className="nx-row">
+                        <div className="nx-alerticon">
+                          <span className="font-display font-extrabold text-[11px] leading-tight text-center">
+                            {new Date(call.dueAt).toLocaleDateString('en-US', { month: 'short' })}
+                            <br />
+                            {new Date(call.dueAt).getDate()}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <button type="button" className="nx-inline-link text-[13px]" onClick={() => onSelectLead(l)}>
+                            {l.name} · {l.company}
+                          </button>
+                          <p>{formatDue(call, callNow)} · Host: {call.owner}</p>
+                          <div className="mt-1.5"><CallChip task={call} onNotify={onNotify} /></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <button type="button" className="nx-link mt-1 text-[12px]" onClick={() => onNavigate('leads', 'follow-ups')}>
+                Open follow-ups →
+              </button>
+            </section>
+
+            <section className="nx-panel nx-pad">
+              <div className="nx-sectionhead">
+                <div>
+                  <h2>Next best actions</h2>
+                  <p>Recommended tasks, not automatic changes.</p>
+                </div>
               </div>
-              <div className="nx-actioncard md:px-6! md:border-t-0!">
-                <span className="eyebrow">Pricing</span>
-                <h3>Answer pricing questions</h3>
-                <p>{inboxCounts.askedForPricing} lead{inboxCounts.askedForPricing === 1 ? '' : 's'} asked about pricing and are waiting for a quote.</p>
-                <button type="button" className="nx-link" onClick={() => onNavigate('inbox', 'asked-pricing')}>Open conversations →</button>
+              <div className="border-t border-line">
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Lead recovery</span>
+                  <h3>Reconnect with dormant leads</h3>
+                  <p>{Math.max(3, Math.round(stats.newLeads / 2))} previous enquiries may be ready for a follow-up.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('leads', 'follow-ups')}>Review opportunity →</button>
+                </div>
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Pricing</span>
+                  <h3>Answer pricing questions</h3>
+                  <p>{inboxCounts.askedForPricing} lead{inboxCounts.askedForPricing === 1 ? '' : 's'} asked about pricing and are waiting for a quote.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('inbox', 'asked-pricing')}>Open conversations →</button>
+                </div>
+                <div className="nx-actioncard">
+                  <span className="eyebrow">Campaigns</span>
+                  <h3>Plan your next campaign</h3>
+                  <p>Turn this week's qualified demand into a re-engagement campaign.</p>
+                  <button type="button" className="nx-link" onClick={() => onNavigate('campaigns', 'campaign-list')}>Open campaigns →</button>
+                </div>
               </div>
-              <div className="nx-actioncard md:pl-6! md:border-t-0!">
-                <span className="eyebrow">Campaigns</span>
-                <h3>Plan your next campaign</h3>
-                <p>Turn this week's qualified demand into a re-engagement campaign.</p>
-                <button type="button" className="nx-link" onClick={() => onNavigate('campaigns', 'campaign-list')}>Open campaigns →</button>
-              </div>
-            </div>
-          </section>
+            </section>
+          </div>
+          <FollowUpModals modal={fuModal} leads={leads} onClose={() => setFuModal(null)} setModal={setFuModal} onNotify={onNotify} />
         </div>
       )}
 

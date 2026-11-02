@@ -63,9 +63,9 @@ import {
   FollowUp 
 } from '../../data/followUps';
 import FollowUpsView from './followups/FollowUpsView';
-import { RowModal } from './followups/FollowUpKit';
+import { AnyFollowUpModal } from './followups/FollowUpKit';
 
-type FollowUpModalState = RowModal | { type: 'add'; leadId?: string } | null;
+type FollowUpModalState = AnyFollowUpModal;
 
 export interface LeadsViewProps {
   activeSubCategory: SubCategory;
@@ -809,6 +809,11 @@ export default function LeadsView({
               }}
             />
 
+            {topTab === 'follow-ups' && (
+              <Button variant="secondary" size="md" onClick={() => setFollowUpModal({ type: 'call' })}>
+                Schedule a call
+              </Button>
+            )}
             <Button
               variant="primary"
               size="md"

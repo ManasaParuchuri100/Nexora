@@ -409,6 +409,7 @@ export default function NexoraApp({
                 onTriggerQuickAction={handleTriggerQuickAction}
                 isFirstRun={isFirstRun}
                 userName={currentUser?.name}
+                onNotify={showToast}
               />
             )}
 

@@ -9,3 +9,4 @@ export * from './Sparkline';
 export * from './EmptyState';
 export * from './PageHeader';
 export * from './ChannelLogo';
+export * from './PlatformLogo';

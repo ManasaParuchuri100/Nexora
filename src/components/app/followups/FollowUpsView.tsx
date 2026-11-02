@@ -9,8 +9,9 @@ import {
   getBucket,
   computeFollowUpCounts,
   needsApproval,
+  getUpcomingCalls,
 } from '../../../data/followUps';
-import { FollowUpRow, FollowUpModals, RowModal, Notify, leadTemperature } from './FollowUpKit';
+import { FollowUpRow, FollowUpModals, AnyFollowUpModal, Notify, leadTemperature } from './FollowUpKit';
 
 type Tab = Exclude<FollowUpBucket, never>;
 type OwnerFilter = 'all' | 'ai' | 'people';
@@ -50,8 +51,8 @@ export default function FollowUpsView({
   onOpenConversation?: (lead: Lead) => void;
   onUpdateLead?: (lead: Lead) => void;
   onNotify?: Notify;
-  modal: RowModal | { type: 'add'; leadId?: string } | null;
-  setModal: (m: RowModal | { type: 'add'; leadId?: string } | null) => void;
+  modal: AnyFollowUpModal;
+  setModal: (m: AnyFollowUpModal) => void;
 }) {
   const tasks = useFollowUps();
   const now = useNow(30000);
@@ -61,7 +62,11 @@ export default function FollowUpsView({
   const counts = computeFollowUpCounts(live, now);
 
   const [tab, setTab] = useState<Tab>(() => (counts.overdue > 0 ? 'overdue' : 'today'));
-  const [approvalOnly, setApprovalOnly] = useState(false);
+  const [special, setSpecial] = useState<null | 'approval' | 'calls'>(null);
+  const approvalOnly = special === 'approval';
+  const callsOnly = special === 'calls';
+  const setApprovalOnly = (v: boolean | ((x: boolean) => boolean)) => setSpecial(prev => ((typeof v === 'function' ? v(prev === 'approval') : v) ? 'approval' : null));
+  const queueRef = React.useRef<HTMLElement>(null);
   const [owner, setOwner] = useState<OwnerFilter>('all');
   const [channel, setChannel] = useState('all');
   const [query, setQuery] = useState('');
@@ -74,7 +79,7 @@ export default function FollowUpsView({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return live
-      .filter(t => (approvalOnly ? needsApproval(t) : getBucket(t, now) === tab))
+      .filter(t => (approvalOnly ? needsApproval(t) : callsOnly ? t.purpose === 'meeting' && !t.completedAt : getBucket(t, now) === tab))
       .filter(t => owner === 'all' || (owner === 'ai' ? t.owner === 'AI' : t.owner !== 'AI'))
       .filter(t => channel === 'all' || t.channel === channel)
       .filter(t => {
@@ -83,10 +88,10 @@ export default function FollowUpsView({
         return [t.title, t.note, t.draft, l?.name, l?.company].some(v => v?.toLowerCase().includes(q));
       })
       .sort((a, b) => {
-        if (!approvalOnly && tab === 'done') {
+        if (!approvalOnly && !callsOnly && tab === 'done') {
           return new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime();
         }
-        if (!approvalOnly && (tab === 'overdue' || tab === 'today')) {
+        if (!approvalOnly && !callsOnly && (tab === 'overdue' || tab === 'today')) {
           // Lead Recovery: hot leads first, then oldest due
           const ta = TEMP_RANK[leadTemperature(leadMap.get(a.leadId))];
           const tb = TEMP_RANK[leadTemperature(leadMap.get(b.leadId))];
@@ -94,7 +99,7 @@ export default function FollowUpsView({
         }
         return new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime();
       });
-  }, [live, tab, approvalOnly, owner, channel, query, now, leadMap]);
+  }, [live, tab, approvalOnly, callsOnly, owner, channel, query, now, leadMap]);
 
   // Lead Recovery triage — open, actionable follow-ups by temperature
   const triage = useMemo(() => {
@@ -107,7 +112,8 @@ export default function FollowUpsView({
     return { total: new Set(actionable.map(t => t.leadId)).size, hot: byTemp.HOT.size, warm: byTemp.WARM.size, cold: byTemp.COLD.size };
   }, [live, now, leadMap]);
 
-  const showGroups = !approvalOnly && (tab === 'upcoming' || tab === 'nurture');
+  const showGroups = callsOnly || (!approvalOnly && (tab === 'upcoming' || tab === 'nurture'));
+  const callCount = getUpcomingCalls(live, now).length;
   let lastGroup = '';
 
   const metrics = [
@@ -117,7 +123,7 @@ export default function FollowUpsView({
       value: counts.overdue,
       delta: counts.overdue ? `Oldest ${counts.oldestOverdueDays} day${counts.oldestOverdueDays === 1 ? '' : 's'} late` : 'All on time',
       tone: counts.overdue ? 'down' : '',
-      go: () => { setApprovalOnly(false); setTab('overdue'); },
+      go: () => { setSpecial(null); setTab('overdue'); },
     },
     {
       id: 'today',
@@ -125,7 +131,7 @@ export default function FollowUpsView({
       value: counts.today,
       delta: counts.today ? 'Inside business hours' : 'Nothing else today',
       tone: 'neutral',
-      go: () => { setApprovalOnly(false); setTab('today'); },
+      go: () => { setSpecial(null); setTab('today'); },
     },
     {
       id: 'approval',
@@ -141,7 +147,7 @@ export default function FollowUpsView({
       value: counts.nurture,
       delta: 'Paused until the time they asked',
       tone: 'neutral',
-      go: () => { setApprovalOnly(false); setTab('nurture'); },
+      go: () => { setSpecial(null); setTab('nurture'); },
     },
   ];
 
@@ -162,7 +168,7 @@ export default function FollowUpsView({
               ].filter(Boolean).join(' · ')}
             </p>
             <div className="flex gap-[9px] mt-[13px] flex-wrap">
-              <button type="button" className="nx-btn sm primary" onClick={() => { setApprovalOnly(false); setTab(counts.overdue ? 'overdue' : 'today'); }}>
+              <button type="button" className="nx-btn sm primary" onClick={() => { setSpecial(null); setTab(counts.overdue ? 'overdue' : 'today'); setOwner('all'); setChannel('all'); setQuery(''); queueRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                 Start with hot leads →
               </button>
               {counts.awaitingApproval > 0 && (
@@ -181,7 +187,7 @@ export default function FollowUpsView({
             key={m.id}
             type="button"
             onClick={m.go}
-            className={`nx-panel nx-metric min-h-[112px]! rounded-[15px]! ${(m.id === 'approval' ? approvalOnly : !approvalOnly && tab === m.id) ? 'is-active' : ''}`}
+            className={`nx-panel nx-metric min-h-[112px]! rounded-[15px]! ${(m.id === 'approval' ? approvalOnly : !special && tab === m.id) ? 'is-active' : ''}`}
           >
             <div className="nx-label">{m.label}</div>
             <div className="nx-number tabular-nums">{m.value}</div>
@@ -190,7 +196,7 @@ export default function FollowUpsView({
         ))}
       </div>
 
-      <section className="nx-panel nx-pad">
+      <section ref={queueRef} className="nx-panel nx-pad scroll-mt-20">
         <div className="nx-sectionhead">
           <div>
             <h2>Follow-up queue</h2>
@@ -201,14 +207,14 @@ export default function FollowUpsView({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-line pb-3 mb-1">
           <div className="flex items-center gap-[5px] flex-wrap" role="tablist" aria-label="Follow-up status">
             {TABS.map(t => {
-              const active = !approvalOnly && tab === t.id;
+              const active = !special && tab === t.id;
               return (
                 <button
                   key={t.id}
                   type="button"
                   role="tab"
                   aria-selected={active}
-                  onClick={() => { setApprovalOnly(false); setTab(t.id); }}
+                  onClick={() => { setSpecial(null); setTab(t.id); }}
                   className={`nx-tab ${active ? 'active' : ''}`}
                 >
                   {t.label}
@@ -221,11 +227,21 @@ export default function FollowUpsView({
               type="button"
               role="tab"
               aria-selected={approvalOnly}
-              onClick={() => setApprovalOnly(v => !v)}
+              onClick={() => setSpecial(approvalOnly ? null : 'approval')}
               className={`nx-tab ${approvalOnly ? 'active' : ''}`}
             >
               Needs approval
               <span className="nx-tab-count">{counts.awaitingApproval}</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={callsOnly}
+              onClick={() => setSpecial(callsOnly ? null : 'calls')}
+              className={`nx-tab ${callsOnly ? 'active' : ''}`}
+            >
+              Calls
+              <span className="nx-tab-count">{callCount}</span>
             </button>
           </div>
 
@@ -258,18 +274,20 @@ export default function FollowUpsView({
               {approvalOnly || tab === 'done' ? <Inbox className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
             </div>
             <div className="font-display text-[14px] font-bold text-ink">
-              {query || owner !== 'all' || channel !== 'all' ? 'No follow-ups match these filters' : approvalOnly ? 'No drafts waiting for approval' : `You're all caught up`}
+              {query || owner !== 'all' || channel !== 'all' ? 'No follow-ups match these filters' : approvalOnly ? 'No drafts waiting for approval' : callsOnly ? 'No calls scheduled' : `You're all caught up`}
             </div>
             <p className="text-[12px] text-ink-3 mt-1 mb-0 max-w-[420px] mx-auto">
               {query || owner !== 'all' || channel !== 'all'
                 ? 'Try clearing the search or filters.'
                 : approvalOnly
                 ? 'Every AI-drafted follow-up has been reviewed.'
+                : callsOnly
+                ? 'Scheduled Zoom, Google Meet and Teams calls appear here for the whole team.'
                 : TABS.find(t => t.id === tab)?.empty}
             </p>
             {!approvalOnly && tab !== 'done' && !query && (
-              <button type="button" className="nx-btn sm mt-4" onClick={() => setModal({ type: 'add' })}>
-                + Add follow-up
+              <button type="button" className="nx-btn sm mt-4" onClick={() => setModal(callsOnly ? { type: 'call' } : { type: 'add' })}>
+                {callsOnly ? '+ Schedule a call' : '+ Add follow-up'}
               </button>
             )}
           </div>
@@ -302,7 +320,7 @@ export default function FollowUpsView({
         Follow-ups are scheduled Mon–Sat, 9 AM–7 PM. No reply → next attempt (hot 1 day, warm 3 days, cold 7 days), up to 3 attempts, then nurture.
       </p>
 
-      <FollowUpModals modal={modal} leads={leads} onClose={() => setModal(null)} onNotify={onNotify} onUpdateLead={onUpdateLead} />
+      <FollowUpModals modal={modal} leads={leads} onClose={() => setModal(null)} onNotify={onNotify} onUpdateLead={onUpdateLead} setModal={setModal} />
     </div>
   );
 }

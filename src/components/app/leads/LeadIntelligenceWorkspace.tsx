@@ -41,7 +41,7 @@ import {
 } from '../../../lib/leadIntel';
 import { formatRelative } from '../../../lib/time';
 import { useFollowUps, useNow, formatDue } from '../../../data/followUps';
-import { FollowUpRow, FollowUpModals, RowModal } from '../followups/FollowUpKit';
+import { FollowUpRow, FollowUpModals, AnyFollowUpModal, CallChip } from '../followups/FollowUpKit';
 import { BRAND_NAME } from '../../../config/brand';
 
 interface LeadIntelligenceWorkspaceProps {
@@ -150,7 +150,8 @@ export default function LeadIntelligenceWorkspace({
     );
   const openLeadFollowUps = leadFollowUps.filter(f => !f.completedAt);
   const followUps = openLeadFollowUps;
-  const [fuModal, setFuModal] = useState<RowModal | { type: 'add'; leadId?: string } | null>(null);
+  const [fuModal, setFuModal] = useState<AnyFollowUpModal>(null);
+  const nextCall = openLeadFollowUps.find(f => f.purpose === 'meeting');
   const [showDoneFollowUps, setShowDoneFollowUps] = useState(false);
   const setShowAddFollowUp = (open: boolean) => {
     if (open) setFuModal({ type: 'add', leadId: lead.id });
@@ -554,6 +555,17 @@ export default function LeadIntelligenceWorkspace({
             <span className="nx-tag teal">{handlingMode === 'HUMAN' ? 'Human owned' : 'AI owned'}</span>
             <span className="nx-tag">{channelBadge.name}</span>
           </div>
+
+          {nextCall && (
+            <div className="nx-callbar mt-3">
+              <span className="text-[11px] font-bold text-ink">Upcoming call</span>
+              <span className="text-[11px] text-ink-2">{formatDue(nextCall, followUpNow)} · Host: {nextCall.owner}</span>
+              <CallChip task={nextCall} onNotify={onNotify} />
+              <button type="button" className="nx-link text-[11px] ml-auto" onClick={() => setFuModal({ type: 'call', editing: nextCall })}>
+                Reschedule
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 mt-[18px] pt-4 border-t border-line">
             {[
@@ -1234,6 +1246,7 @@ export default function LeadIntelligenceWorkspace({
                 onClose={() => setFuModal(null)}
                 onNotify={onNotify}
                 onUpdateLead={onUpdateLead}
+                setModal={setFuModal}
               />
 
               {/* Card 2: Internal Notes */}
@@ -1417,12 +1430,9 @@ export default function LeadIntelligenceWorkspace({
             <button
               type="button"
               className="nx-btn sm primary"
-              onClick={() => {
-                setActiveSubTab('qualification');
-                if (onNotify) onNotify('Discovery call queued', 'Discovery call invite ready to send.');
-              }}
+              onClick={() => setFuModal(nextCall ? { type: 'call', editing: nextCall } : { type: 'call', leadId: lead.id })}
             >
-              Schedule discovery call →
+              {nextCall ? 'Reschedule call' : 'Schedule a call →'}
             </button>
           </div>
         </div>

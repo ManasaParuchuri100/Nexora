@@ -29,7 +29,8 @@ import {
 } from 'lucide-react';
 import { Lead, SubCategory } from '../../types';
 import { ConversationItem, useConversations } from '../../data/conversations';
-import { useFollowUps, getBucket } from '../../data/followUps';
+import { useFollowUps, getBucket, formatDue } from '../../data/followUps';
+import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
 import { 
   Button, 
@@ -45,7 +46,7 @@ interface EngageViewProps {
   leads: Lead[];
   onNavigateSub: (sub: SubCategory) => void;
   onSelectLead?: (lead: Lead) => void;
-  onNotify?: (title: string, desc: string) => void;
+  onNotify?: (title: string, desc: string, action?: { label: string; onClick: () => void }) => void;
   isFirstRun?: boolean;
   onNavigateSettings?: () => void;
 }
@@ -349,6 +350,42 @@ export default function EngageView({
   const handleStageChange = (newStage: string) => {
     setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, stage: newStage } : c));
     if (onNotify) onNotify('Stage Updated', `Pipeline stage moved to ${newStage}.`);
+  };
+
+  // Lead linked to the open conversation (same matching rules as "Lead profile")
+  const linkedLead = useMemo(() => {
+    if (!currentConvo) return undefined;
+    let match = currentConvo.leadReferenceId ? leads.find(l => l.id === currentConvo.leadReferenceId) : undefined;
+    if (!match && (currentConvo as any).email) {
+      const e = String((currentConvo as any).email).trim().toLowerCase();
+      match = leads.find(l => l.email && l.email.trim().toLowerCase() === e);
+    }
+    if (!match && currentConvo.name && currentConvo.company) {
+      const n = currentConvo.name.trim().toLowerCase();
+      const c = currentConvo.company.trim().toLowerCase();
+      match = leads.find(l => l.name.trim().toLowerCase() === n && l.company.trim().toLowerCase() === c);
+    }
+    return match;
+  }, [currentConvo, leads]);
+  const [fuModal, setFuModal] = useState<AnyFollowUpModal>(null);
+  const linkedCall = linkedLead
+    ? followUps
+        .filter(f => f.leadId === linkedLead.id && f.purpose === 'meeting' && !f.completedAt)
+        .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())[0]
+    : undefined;
+  const linkedNext = linkedLead
+    ? followUps
+        .filter(f => f.leadId === linkedLead.id && !f.completedAt && f.purpose !== 'meeting')
+        .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())[0]
+    : undefined;
+  const openScheduler = (kind: 'call' | 'add') => {
+    if (!linkedLead) {
+      // Save the lead first by opening its profile; scheduling is available there.
+      handleOpenLead();
+      return;
+    }
+    if (kind === 'call') setFuModal(linkedCall ? { type: 'call', editing: linkedCall } : { type: 'call', leadId: linkedLead.id });
+    else setFuModal({ type: 'add', leadId: linkedLead.id });
   };
 
   const handleOpenLead = () => {
@@ -1280,9 +1317,7 @@ export default function EngageView({
                 variant="secondary"
                 size="sm"
                 className="w-full justify-between"
-                onClick={() => {
-                  if (onNotify) onNotify('Action Queued', currentConvo.nextAction);
-                }}
+                onClick={() => openScheduler(/call|demo|meeting|walkthrough/i.test(currentConvo.nextAction || '') ? 'call' : 'add')}
               >
                 <span className="truncate">{currentConvo.nextAction}</span>
                 <ArrowRight className="w-3.5 h-3.5 shrink-0" />
@@ -1300,13 +1335,42 @@ export default function EngageView({
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    if (onNotify) onNotify('Follow-up Scheduled', `Follow-up queued for ${currentConvo.name}.`);
-                  }}
+                  onClick={() => openScheduler('add')}
                 >
-                  Schedule
+                  Add follow-up
                 </Button>
               </div>
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-full"
+                onClick={() => openScheduler('call')}
+              >
+                {linkedCall ? 'Reschedule call' : 'Schedule a call'}
+              </Button>
+
+              {(linkedCall || linkedNext) && (
+                <div className="pt-3 space-y-2.5">
+                  {linkedCall && (
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] text-ink-3 block">Upcoming call · {formatDue(linkedCall)} · Host: {linkedCall.owner}</span>
+                      <CallChip task={linkedCall} onNotify={onNotify} />
+                    </div>
+                  )}
+                  {linkedNext && (
+                    <span className="text-[11px] text-ink-3 block">
+                      Next follow-up: <b className="text-ink">{linkedNext.title}</b> · {formatDue(linkedNext)}
+                    </span>
+                  )}
+                </div>
+              )}
+              <FollowUpModals
+                modal={fuModal}
+                leads={leads}
+                onClose={() => setFuModal(null)}
+                onNotify={onNotify}
+                setModal={setFuModal}
+              />
             </div>
 
           </div>

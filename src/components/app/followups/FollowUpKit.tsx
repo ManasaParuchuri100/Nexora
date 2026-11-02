@@ -11,6 +11,8 @@ import {
   PauseCircle,
   CornerDownRight,
   AlertTriangle,
+  Video,
+  Copy,
 } from 'lucide-react';
 import { Lead } from '../../../types';
 import {
@@ -43,7 +45,12 @@ import {
   nextAttemptDate,
   getNextFollowUp,
   getFollowUpsForLead,
+  MeetingPlatform,
+  scheduleCall,
+  rescheduleCall,
+  cancelCall,
 } from '../../../data/followUps';
+import { PlatformLogo, PLATFORM_LABELS, PLATFORM_COLORS } from '../../ui';
 
 export type Notify = (title: string, desc: string, action?: { label: string; onClick: () => void }) => void;
 
@@ -291,18 +298,196 @@ export function ReviewSendModal({
    Log outcome / complete
    -------------------------------------------------------------------------- */
 
+/* --------------------------------------------------------------------------
+   Date & time — always blank, never preset
+   -------------------------------------------------------------------------- */
+
+const todayISO = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
+/** Combines the date and time boxes; returns null until both are filled. */
+function combineDateTime(date: string, time: string): Date | null {
+  if (!date || !time) return null;
+  const d = new Date(`${date}T${time}`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function DateTimeFields({
+  date,
+  time,
+  onDate,
+  onTime,
+  label = 'Date & time',
+}: {
+  date: string;
+  time: string;
+  onDate: (v: string) => void;
+  onTime: (v: string) => void;
+  label?: string;
+}) {
+  const when = combineDateTime(date, time);
+  return (
+    <Field
+      label={label}
+      hint={
+        when ? (
+          isOutsideBusinessHours(when) ? (
+            <span className="text-warn">Outside business hours (Mon–Sat, 9 AM–7 PM)</span>
+          ) : (
+            shortDate(when)
+          )
+        ) : undefined
+      }
+    >
+      <div className="grid grid-cols-2 gap-[10px]">
+        <input type="date" value={date} min={todayISO()} onChange={e => onDate(e.target.value)} aria-label="Date" />
+        <input type="time" value={time} onChange={e => onTime(e.target.value)} aria-label="Time" />
+      </div>
+    </Field>
+  );
+}
+
+function PlatformPicker({ value, onChange }: { value: MeetingPlatform | null; onChange: (p: MeetingPlatform) => void }) {
+  return (
+    <div className="grid grid-cols-3 gap-[9px]" role="radiogroup" aria-label="Call platform">
+      {(['zoom', 'meet', 'teams'] as MeetingPlatform[]).map(p => (
+        <button
+          key={p}
+          type="button"
+          role="radio"
+          aria-checked={value === p}
+          onClick={() => onChange(p)}
+          className={`nx-platform ${value === p ? 'active' : ''}`}
+        >
+          <span style={{ color: PLATFORM_COLORS[p] }}>
+            <PlatformLogo platform={p} className="w-[22px] h-[22px]" />
+          </span>
+          <span>{PLATFORM_LABELS[p]}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------------------
+   Schedule a call (Zoom / Google Meet / Microsoft Teams)
+   -------------------------------------------------------------------------- */
+
+export function ScheduleCallModal({
+  leads,
+  leadId: fixedLeadId,
+  editing,
+  previousId,
+  currentUserName = 'You',
+  onClose,
+  onNotify,
+}: {
+  leads: Lead[];
+  leadId?: string;
+  editing?: FollowUp;
+  previousId?: string;
+  currentUserName?: string;
+  onClose: () => void;
+  onNotify?: Notify;
+}) {
+  const [leadId, setLeadId] = useState(editing?.leadId || fixedLeadId || '');
+  const lead = leads.find(l => l.id === leadId);
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [platform, setPlatform] = useState<MeetingPlatform | null>(editing?.meeting?.platform ?? null);
+  const [touched, setTouched] = useState(false);
+  const when = combineDateTime(date, time);
+  const host = editing?.owner || lead?.assignee?.name || currentUserName;
+
+  const errors: string[] = [];
+  if (!leadId) errors.push('Choose who the call is with.');
+  if (!date) errors.push('Pick a date.');
+  else if (!time) errors.push('Pick a time.');
+  else if (when && when.getTime() < Date.now()) errors.push('That time has already passed.');
+  if (!platform) errors.push('Choose Zoom, Google Meet or Microsoft Teams.');
+
+  const save = () => {
+    setTouched(true);
+    if (errors.length || !when || !platform) return;
+    if (editing) {
+      rescheduleCall(editing.id, when, platform, firstName(lead));
+      onNotify?.('Call rescheduled', `${PLATFORM_LABELS[platform]} · ${shortDate(when)}. ${lead?.name || 'The lead'} will get an updated reminder.`);
+    } else {
+      const { reminder } = scheduleCall({
+        leadId,
+        at: when,
+        platform,
+        host,
+        leadName: lead?.name,
+        leadFirstName: firstName(lead),
+        previousId,
+      });
+      onNotify?.(
+        'Call scheduled',
+        `${PLATFORM_LABELS[platform]} with ${lead?.name || 'the lead'} · ${shortDate(when)}. Visible to the whole team${reminder ? '; a reminder is sent automatically' : ''}.`
+      );
+    }
+    onClose();
+  };
+
+  return (
+    <NxModal
+      title={editing ? 'Reschedule call' : 'Schedule a call'}
+      subtitle={lead ? <>With <b className="text-ink">{lead.name}</b>{lead.company ? ` · ${lead.company}` : ''} · Host: {host}</> : 'Pick the lead, time and platform.'}
+      onClose={onClose}
+      width={480}
+      footer={
+        <>
+          {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
+          <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
+          <button type="button" className="nx-btn primary" onClick={save}>{editing ? 'Save new time' : 'Schedule call'}</button>
+        </>
+      }
+    >
+      {!fixedLeadId && !editing && (
+        <Field label="Lead">
+          <select value={leadId} onChange={e => setLeadId(e.target.value)} autoFocus>
+            <option value="">Select a lead…</option>
+            {[...leads].sort((a, b) => (a.company || a.name).localeCompare(b.company || b.name)).map(l => (
+              <option key={l.id} value={l.id}>{l.company || l.name}{l.company && l.name ? ` — ${l.name}` : ''}</option>
+            ))}
+          </select>
+        </Field>
+      )}
+      {editing && (
+        <div className="nx-callout mb-4">
+          <Clock className="w-4 h-4 shrink-0 mt-px" />
+          <span>Currently {shortDate(new Date(editing.dueAt))} on {editing.meeting ? PLATFORM_LABELS[editing.meeting.platform] : 'a call'}.</span>
+        </div>
+      )}
+      <DateTimeFields date={date} time={time} onDate={setDate} onTime={setTime} />
+      <Field label="Platform">
+        <PlatformPicker value={platform} onChange={setPlatform} />
+      </Field>
+    </NxModal>
+  );
+}
+
+/* --------------------------------------------------------------------------
+   Log outcome / complete
+   -------------------------------------------------------------------------- */
+
 const OUTCOMES_BY_KIND: Record<FollowUpKind, FollowUpOutcome[]> = {
-  call: ['call_connected', 'no_response', 'meeting_booked', 'not_interested'],
+  call: ['call_connected', 'no_show', 'not_interested'],
   message: ['replied', 'no_response', 'meeting_booked', 'not_interested'],
   email: ['replied', 'no_response', 'meeting_booked', 'not_interested'],
   task: ['done', 'cancelled'],
 };
 
 const OUTCOME_HELP: Partial<Record<FollowUpOutcome, string>> = {
-  call_connected: 'You spoke with the customer.',
-  no_response: 'No answer or no reply yet.',
+  call_connected: 'The call took place.',
+  no_show: 'The customer didn’t join.',
+  no_response: 'No reply yet.',
   replied: 'The customer responded — qualification continues.',
-  meeting_booked: 'An appointment or demo was scheduled.',
+  meeting_booked: 'The customer agreed to a call.',
   not_interested: 'The customer declined.',
   done: 'The task is complete.',
   cancelled: 'No longer needed.',
@@ -314,67 +499,89 @@ export function LogOutcomeModal({
   onClose,
   onNotify,
   onUpdateLead,
+  currentUserName = 'You',
 }: {
   task: FollowUp;
   lead?: Lead;
   onClose: () => void;
   onNotify?: Notify;
   onUpdateLead?: (lead: Lead) => void;
+  currentUserName?: string;
 }) {
   const options = OUTCOMES_BY_KIND[task.kind];
-  const [outcome, setOutcome] = useState<FollowUpOutcome>(options[0]);
+  const [outcome, setOutcome] = useState<FollowUpOutcome | null>(null);
   const [note, setNote] = useState('');
   const temperature = leadTemperature(lead);
-  const plan = planNextStep(task, outcome, temperature);
+  const plan = outcome ? planNextStep(task, outcome, temperature) : null;
   const [scheduleNext, setScheduleNext] = useState(true);
-  const [customNext, setCustomNext] = useState<string>('');
+  const [changeDate, setChangeDate] = useState(false);
+  const [nextDate, setNextDate] = useState('');
+  const [nextTime, setNextTime] = useState('');
   const [markLost, setMarkLost] = useState(true);
-  const defaultNext = plan.dueAt ?? nextAttemptDate(temperature);
+  // inline call booking for "meeting booked" / "call held → book another"
+  const [callDate, setCallDate] = useState('');
+  const [callTime, setCallTime] = useState('');
+  const [platform, setPlatform] = useState<MeetingPlatform | null>(null);
+  const [bookAnother, setBookAnother] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
-    setScheduleNext(plan.kind !== 'none' || outcome === 'call_connected');
-    setCustomNext('');
-  }, [outcome]); // eslint-disable-line react-hooks/exhaustive-deps
+    setScheduleNext(true);
+    setChangeDate(false);
+    setTouched(false);
+  }, [outcome]);
+
+  const callWhen = combineDateTime(callDate, callTime);
+  const needsCall = outcome === 'meeting_booked' || (outcome === 'call_connected' && bookAnother);
+  const customNext = changeDate ? combineDateTime(nextDate, nextTime) : null;
+
+  const errors: string[] = [];
+  if (!outcome) errors.push('Choose what happened.');
+  if (needsCall) {
+    if (!callDate || !callTime) errors.push('Pick the call date and time.');
+    else if (callWhen && callWhen.getTime() < Date.now()) errors.push('The call time has already passed.');
+    if (!platform) errors.push('Choose Zoom, Google Meet or Microsoft Teams.');
+  }
+  if (changeDate && scheduleNext && plan && plan.kind !== 'none') {
+    if (!customNext) errors.push('Pick the new date and time, or keep the suggested one.');
+    else if (customNext.getTime() < Date.now()) errors.push('That time has already passed.');
+  }
 
   const submit = () => {
-    const nextIso = customNext ? new Date(customNext).toISOString() : undefined;
-    let res;
-    if (plan.kind === 'none' && scheduleNext && (outcome === 'call_connected' || outcome === 'done')) {
-      res = completeFollowUp(task.id, { outcome, note, scheduleNext: false });
-      const next = addFollowUp({
+    setTouched(true);
+    if (errors.length || !outcome) return;
+    const res = completeFollowUp(task.id, {
+      outcome,
+      note,
+      temperature,
+      scheduleNext: plan?.kind !== 'none' && scheduleNext,
+      nextDueAt: customNext ? customNext.toISOString() : undefined,
+      leadFirstName: firstName(lead),
+    });
+    let callText = '';
+    if (needsCall && callWhen && platform) {
+      scheduleCall({
         leadId: task.leadId,
-        title: 'Follow up after conversation',
-        kind: task.kind === 'task' ? 'task' : 'message',
-        channel: task.channel,
-        owner: task.owner,
-        purpose: 'follow_up',
-        attempt: 1,
-        dueAt: nextIso ?? defaultNext.toISOString(),
-        source: 'manual',
-        draft: task.kind === 'task' ? undefined : aiDraftFor(lead, 'follow_up', 'our conversation'),
+        at: callWhen,
+        platform,
+        host: lead?.assignee?.name || currentUserName,
+        leadName: lead?.name,
+        leadFirstName: firstName(lead),
         previousId: task.id,
       });
-      res = { ...res, next };
-    } else {
-      res = completeFollowUp(task.id, {
-        outcome,
-        note,
-        temperature,
-        scheduleNext: plan.kind !== 'none' && scheduleNext,
-        nextDueAt: nextIso,
-        leadFirstName: firstName(lead),
-      });
+      callText = `${PLATFORM_LABELS[platform]} call scheduled for ${shortDate(callWhen)}.`;
     }
     if (outcome === 'not_interested' && markLost && lead && onUpdateLead) {
       onUpdateLead({ ...lead, stage: 'Lost', status: 'Lost', lostReason: note.trim() || 'Not interested' });
     }
     onNotify?.(
       OUTCOME_LABELS[outcome],
-      res.next
-        ? `Next: ${res.next.purpose === 'nurture' ? 'nurture check-in' : res.next.attempt && res.next.attempt > 1 ? `attempt ${res.next.attempt} of ${res.next.maxAttempts ?? MAX_ATTEMPTS}` : res.next.title} · ${shortDate(new Date(res.next.dueAt))}.`
-        : outcome === 'not_interested' && markLost
-        ? `${lead?.name || 'Lead'} marked as lost. No further follow-ups.`
-        : 'Follow-up completed. Nothing else is scheduled for this lead.'
+      callText ||
+        (res.next
+          ? `Next: ${res.next.purpose === 'nurture' ? 'nurture check-in' : res.next.purpose === 'no_show' ? 'rebooking message (needs approval)' : res.next.attempt && res.next.attempt > 1 ? `attempt ${res.next.attempt} of ${res.next.maxAttempts ?? MAX_ATTEMPTS}` : res.next.title} · ${shortDate(new Date(res.next.dueAt))}.`
+          : outcome === 'not_interested' && markLost
+          ? `${lead?.name || 'Lead'} marked as lost. No further follow-ups.`
+          : 'Done. Nothing else is scheduled from this follow-up.')
     );
     onClose();
   };
@@ -386,8 +593,9 @@ export function LogOutcomeModal({
       onClose={onClose}
       footer={
         <>
+          {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
-          <button type="button" className="nx-btn primary" onClick={submit}>Save outcome</button>
+          <button type="button" className="nx-btn primary" onClick={submit}>Save</button>
         </>
       }
     >
@@ -397,7 +605,7 @@ export function LogOutcomeModal({
             <label key={o} className={`nx-option ${outcome === o ? 'active' : ''}`}>
               <input type="radio" name="outcome" checked={outcome === o} onChange={() => setOutcome(o)} />
               <span className="flex-1">
-                <b>{o === 'no_response' && task.kind === 'call' ? 'No answer' : OUTCOME_LABELS[o]}</b>
+                <b>{o === 'call_connected' ? 'Call held' : OUTCOME_LABELS[o]}</b>
                 <span>{OUTCOME_HELP[o]}</span>
               </span>
             </label>
@@ -405,43 +613,64 @@ export function LogOutcomeModal({
         </div>
       </Field>
 
-      <Field label="Note (optional)">
-        <textarea rows={3} value={note} onChange={e => setNote(e.target.value)} placeholder="Key points, objections, what the customer asked for…" />
-      </Field>
+      {outcome && (
+        <>
+          {needsCall || outcome === 'call_connected' ? (
+            <div className="nx-next mb-4">
+              {outcome === 'call_connected' && (
+                <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                  <input type="checkbox" checked={bookAnother} onChange={e => setBookAnother(e.target.checked)} />
+                  Book a follow-up call
+                </label>
+              )}
+              {needsCall && (
+                <div className={outcome === 'call_connected' ? 'mt-3' : ''}>
+                  {outcome === 'meeting_booked' && <div className="text-[11px] font-bold text-ink-2 mb-2">Schedule the call</div>}
+                  <DateTimeFields date={callDate} time={callTime} onDate={setCallDate} onTime={setCallTime} label="When" />
+                  <Field label="Platform">
+                    <PlatformPicker value={platform} onChange={setPlatform} />
+                  </Field>
+                  <div className="text-[11px] text-ink-3 -mt-2">A reminder with the join link is sent automatically.</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="nx-next mb-4">
+              <div className="text-[11px] font-bold text-ink-2 mb-2">What happens next</div>
+              {outcome === 'not_interested' ? (
+                <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                  <input type="checkbox" checked={markLost} onChange={e => setMarkLost(e.target.checked)} />
+                  Mark {lead?.name || 'this lead'} as Lost and stop follow-ups
+                </label>
+              ) : plan && plan.kind === 'none' ? (
+                <div className="text-[12px] text-ink-2">{plan.label}.</div>
+              ) : plan ? (
+                <>
+                  <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                    <input type="checkbox" checked={scheduleNext} onChange={e => setScheduleNext(e.target.checked)} />
+                    {plan.label}
+                  </label>
+                  {scheduleNext && plan.kind !== 'no_show' && (
+                    changeDate ? (
+                      <div className="mt-3">
+                        <DateTimeFields date={nextDate} time={nextTime} onDate={setNextDate} onTime={setNextTime} label="New date & time" />
+                      </div>
+                    ) : (
+                      <button type="button" className="nx-link text-[11px] mt-2 ml-[25px]" onClick={() => setChangeDate(true)}>
+                        Choose a different time
+                      </button>
+                    )
+                  )}
+                </>
+              ) : null}
+            </div>
+          )}
 
-      <div className="nx-next">
-        <div className="text-[11px] font-bold text-ink-2 mb-2">What happens next</div>
-        {outcome === 'not_interested' ? (
-          <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
-            <input type="checkbox" checked={markLost} onChange={e => setMarkLost(e.target.checked)} />
-            Mark {lead?.name || 'this lead'} as Lost and stop follow-ups
-          </label>
-        ) : plan.kind === 'none' && outcome !== 'call_connected' && outcome !== 'done' ? (
-          <div className="text-[12px] text-ink-2">{plan.label}.</div>
-        ) : (
-          <>
-            <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
-              <input type="checkbox" checked={scheduleNext} onChange={e => setScheduleNext(e.target.checked)} />
-              {plan.kind === 'none' ? 'Schedule another follow-up' : plan.label}
-            </label>
-            {scheduleNext && (
-              <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-                <input
-                  type="datetime-local"
-                  className="nx-input max-w-[230px]"
-                  value={customNext || toLocalInput(defaultNext)}
-                  min={toLocalInput(new Date())}
-                  onChange={e => setCustomNext(e.target.value)}
-                  aria-label="Next follow-up date"
-                />
-                <span className="text-[11px] text-ink-3">
-                  {plan.kind === 'attempt' ? `${temperature.charAt(0) + temperature.slice(1).toLowerCase()} lead cadence` : 'Adjust if needed'}
-                </span>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+          <Field label="Note (optional)">
+            <textarea rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder="Key points, objections, what the customer asked for…" />
+          </Field>
+        </>
+      )}
     </NxModal>
   );
 }
@@ -450,23 +679,8 @@ export function LogOutcomeModal({
    Add / edit follow-up
    -------------------------------------------------------------------------- */
 
-type DueChip = 'hour' | 'today_pm' | 'tomorrow' | 'in_3' | 'next_week' | 'custom';
-
-function dueFromChip(chip: DueChip): Date {
-  const now = new Date();
-  switch (chip) {
-    case 'hour': return alignToBusinessHours(new Date(now.getTime() + 60 * 60 * 1000));
-    case 'today_pm': {
-      const d = new Date(now);
-      d.setHours(17, 0, 0, 0);
-      return d.getTime() > now.getTime() ? d : daysFromNowAt(1, 10);
-    }
-    case 'tomorrow': return daysFromNowAt(1, 10);
-    case 'in_3': return daysFromNowAt(3, 10);
-    case 'next_week': return snoozeTarget('next_week');
-    default: return daysFromNowAt(1, 10);
-  }
-}
+const toDateInput = (d: Date) => toLocalInput(d).slice(0, 10);
+const toTimeInput = (d: Date) => toLocalInput(d).slice(11, 16);
 
 export function AddFollowUpModal({
   leads,
@@ -475,6 +689,7 @@ export function AddFollowUpModal({
   currentUserName = 'You',
   onClose,
   onNotify,
+  onScheduleCall,
 }: {
   leads: Lead[];
   initialLeadId?: string;
@@ -482,6 +697,7 @@ export function AddFollowUpModal({
   currentUserName?: string;
   onClose: () => void;
   onNotify?: Notify;
+  onScheduleCall?: (leadId?: string) => void;
 }) {
   const sortedLeads = useMemo(() => [...leads].sort((a, b) => (a.company || a.name).localeCompare(b.company || b.name)), [leads]);
   const [leadId, setLeadId] = useState(editing?.leadId || initialLeadId || '');
@@ -491,21 +707,19 @@ export function AddFollowUpModal({
   const [title, setTitle] = useState(editing?.title || '');
   const [channel, setChannel] = useState(editing?.channel || '');
   const [owner, setOwner] = useState(editing?.owner || 'AI');
-  const [chip, setChip] = useState<DueChip | null>(editing ? 'custom' : 'tomorrow');
-  const [customDue, setCustomDue] = useState(editing ? toLocalInput(new Date(editing.dueAt)) : '');
+  const [date, setDate] = useState(editing ? toDateInput(new Date(editing.dueAt)) : '');
+  const [time, setTime] = useState(editing ? toTimeInput(new Date(editing.dueAt)) : '');
   const [draft, setDraft] = useState(editing?.draft || '');
   const [note, setNote] = useState(editing?.note || '');
   const [autoSend, setAutoSend] = useState(editing?.approval === 'approved');
   const [touched, setTouched] = useState(false);
-  const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!lead || editing) return;
-    setChannel(lead.preferredChannel || (lead.source === 'Instagram' || lead.source === 'WhatsApp' || lead.source === 'Website' ? lead.source : 'WhatsApp'));
-    if (!title) setTitle(lead.aiRecommendation ? lead.aiRecommendation.replace(/\.$/, '') : 'Check in on next steps');
+    setChannel(lead.preferredChannel || (lead.source === 'Instagram' || lead.source === 'WhatsApp' ? lead.source : 'WhatsApp'));
   }, [leadId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const due = chip && chip !== 'custom' ? dueFromChip(chip) : customDue ? new Date(customDue) : null;
+  const due = combineDateTime(date, time);
   const isMessage = kind === 'message' || kind === 'email';
   const existing = leadId && !editing ? getNextFollowUp(leadId) : undefined;
   const owners = Array.from(new Set(['AI', currentUserName, lead?.assignee?.name].filter(Boolean) as string[]));
@@ -513,15 +727,15 @@ export function AddFollowUpModal({
   const errors: string[] = [];
   if (!leadId) errors.push('Choose a lead.');
   if (!title.trim()) errors.push('Add a short title.');
-  if (!due || isNaN(due.getTime())) errors.push('Pick when it is due.');
-  else if (due.getTime() < Date.now() - 60 * 1000) errors.push('The due time is in the past.');
-  if (isMessage && owner === 'AI' && !draft.trim()) errors.push('AI-sent messages need a draft.');
-  if (kind === 'call' && owner === 'AI') errors.push('Calls need a person as owner.');
+  if (!date) errors.push('Pick a date.');
+  else if (!time) errors.push('Pick a time.');
+  else if (due && due.getTime() < Date.now() - 60 * 1000) errors.push('That time has already passed.');
+  if (isMessage && owner === 'AI' && !draft.trim()) errors.push('Messages sent by the AI need a draft.');
+  if (kind === 'task' && owner === 'AI') errors.push('Tasks need a person as owner.');
 
   const save = () => {
     setTouched(true);
     if (errors.length || !due) return;
-    const aligned = alignToBusinessHours(due);
     const payload = {
       leadId,
       title: title.trim(),
@@ -529,19 +743,24 @@ export function AddFollowUpModal({
       channel: kind === 'task' ? undefined : channel || undefined,
       owner,
       purpose,
-      dueAt: aligned.toISOString(),
+      dueAt: due.toISOString(),
       draft: isMessage ? draft.trim() || undefined : undefined,
       note: note.trim() || undefined,
-      approval: owner === 'AI' && isMessage ? (autoSend ? 'approved' as const : 'draft' as const) : undefined,
+      approval: owner === 'AI' && isMessage ? (autoSend ? ('approved' as const) : ('draft' as const)) : undefined,
     };
     if (editing) {
       updateFollowUp(editing.id, payload);
-      onNotify?.('Follow-up updated', `${title.trim()} · ${shortDate(aligned)}.`);
+      onNotify?.('Follow-up updated', `${title.trim()} · ${shortDate(due)}.`);
     } else {
-      addFollowUp({ ...payload, source: 'manual', attempt: purpose === 'follow_up' ? 1 : undefined, maxAttempts: purpose === 'follow_up' ? MAX_ATTEMPTS : undefined });
+      addFollowUp({
+        ...payload,
+        source: 'manual',
+        attempt: purpose === 'follow_up' ? 1 : undefined,
+        maxAttempts: purpose === 'follow_up' ? MAX_ATTEMPTS : undefined,
+      });
       onNotify?.(
         'Follow-up scheduled',
-        `${lead?.name || 'Lead'} · ${shortDate(aligned)}${owner === 'AI' && isMessage ? (autoSend ? ' · AI will send automatically' : ' · waiting for your approval') : ''}.`
+        `${lead?.name || 'Lead'} · ${shortDate(alignToBusinessHours(due))}${owner === 'AI' && isMessage ? (autoSend ? ' · the AI will send it automatically' : ' · waiting for your approval') : ''}.`
       );
     }
     onClose();
@@ -550,9 +769,8 @@ export function AddFollowUpModal({
   return (
     <NxModal
       title={editing ? 'Edit follow-up' : 'New follow-up'}
-      subtitle="Scheduled within business hours (Mon–Sat, 9 AM–7 PM)."
       onClose={onClose}
-      width={620}
+      width={580}
       footer={
         <>
           {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
@@ -561,9 +779,9 @@ export function AddFollowUpModal({
         </>
       }
     >
-      <div className="grid sm:grid-cols-2 gap-x-[18px]">
+      <div className="grid sm:grid-cols-2 gap-x-[16px]">
         <Field label="Lead">
-          <select value={leadId} onChange={e => setLeadId(e.target.value)} disabled={!!editing} autoFocus={!initialLeadId && !editing}>
+          <select value={leadId} onChange={e => setLeadId(e.target.value)} disabled={!!editing}>
             <option value="">Select a lead…</option>
             {sortedLeads.map(l => (
               <option key={l.id} value={l.id}>{l.company || l.name}{l.company && l.name ? ` — ${l.name}` : ''}</option>
@@ -572,7 +790,7 @@ export function AddFollowUpModal({
         </Field>
         <Field label="Type">
           <select value={purpose} onChange={e => setPurpose(e.target.value as FollowUpPurpose)}>
-            {(Object.keys(PURPOSE_LABELS) as FollowUpPurpose[]).map(p => (
+            {(['follow_up', 'nurture', 'no_show', 'reactivation'] as FollowUpPurpose[]).map(p => (
               <option key={p} value={p}>{PURPOSE_LABELS[p]}</option>
             ))}
           </select>
@@ -580,39 +798,52 @@ export function AddFollowUpModal({
       </div>
 
       {existing && (
-        <div className="nx-callout mb-3">
+        <div className="nx-callout mb-4">
           <Clock className="w-4 h-4 shrink-0 mt-px" />
-          <span>This lead already has an open follow-up: <b>{existing.title}</b> ({formatDue(existing)}).</span>
+          <span>Already scheduled: <b>{existing.title}</b> ({formatDue(existing)}).</span>
         </div>
       )}
 
       <Field label="Title">
-        <input ref={titleRef} value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Send pricing comparison" />
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Send pricing comparison" />
       </Field>
 
       <Field label="Action">
-        <Chips<FollowUpKind>
-          options={(['message', 'email', 'call', 'task'] as FollowUpKind[]).map(k => ({ id: k, label: KIND_LABEL[k] }))}
-          value={kind}
-          onChange={k => {
-            setKind(k);
-            if (k === 'call' && owner === 'AI') setOwner(lead?.assignee?.name || currentUserName);
-          }}
-        />
+        <div className="flex flex-wrap gap-[7px] items-center">
+          {(['message', 'email', 'task'] as FollowUpKind[]).map(k => (
+            <button
+              key={k}
+              type="button"
+              className={`nx-chip ${kind === k ? 'active' : ''}`}
+              aria-pressed={kind === k}
+              onClick={() => {
+                setKind(k);
+                if (k === 'task' && owner === 'AI') setOwner(lead?.assignee?.name || currentUserName);
+              }}
+            >
+              {KIND_LABEL[k]}
+            </button>
+          ))}
+          {!editing && onScheduleCall && (
+            <button type="button" className="nx-chip inline-flex items-center gap-1.5" onClick={() => onScheduleCall(leadId || undefined)}>
+              <Video className="w-3.5 h-3.5" /> Video call…
+            </button>
+          )}
+        </div>
       </Field>
 
-      <div className="grid sm:grid-cols-2 gap-x-[18px]">
+      <div className="grid sm:grid-cols-2 gap-x-[16px]">
         {kind !== 'task' && (
           <Field label="Channel">
             <select value={channel} onChange={e => setChannel(e.target.value)}>
-              {['WhatsApp', 'Instagram', 'Email', 'LinkedIn', 'Phone', 'Website'].map(c => <option key={c} value={c}>{c}</option>)}
+              {['WhatsApp', 'Instagram', 'Email', 'LinkedIn', 'Website'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
         )}
         <Field label="Owner">
           <select value={owner} onChange={e => setOwner(e.target.value)}>
             {owners.map(o => (
-              <option key={o} value={o} disabled={o === 'AI' && (kind === 'call' || kind === 'task')}>
+              <option key={o} value={o} disabled={o === 'AI' && kind === 'task'}>
                 {o === 'AI' ? 'Engagement Agent (AI)' : o}
               </option>
             ))}
@@ -620,45 +851,11 @@ export function AddFollowUpModal({
         </Field>
       </div>
 
-      <Field
-        label="Due"
-        hint={due && !isNaN(due.getTime()) ? (
-          <>
-            {shortDate(alignToBusinessHours(due))}
-            {isOutsideBusinessHours(due) && ' · moved into business hours'}
-          </>
-        ) : undefined}
-      >
-        <Chips<DueChip>
-          options={[
-            { id: 'hour', label: 'In 1 hour' },
-            { id: 'today_pm', label: 'Today 5 PM' },
-            { id: 'tomorrow', label: 'Tomorrow 10 AM' },
-            { id: 'in_3', label: 'In 3 days' },
-            { id: 'next_week', label: 'Next week' },
-            { id: 'custom', label: 'Pick date…' },
-          ]}
-          value={chip}
-          onChange={c => {
-            setChip(c);
-            if (c === 'custom' && !customDue) setCustomDue(toLocalInput(daysFromNowAt(1, 10)));
-          }}
-        />
-        {chip === 'custom' && (
-          <input
-            type="datetime-local"
-            className="mt-2.5 max-w-[240px]"
-            value={customDue}
-            min={toLocalInput(new Date())}
-            onChange={e => setCustomDue(e.target.value)}
-            aria-label="Custom due date"
-          />
-        )}
-      </Field>
+      <DateTimeFields date={date} time={time} onDate={setDate} onTime={setTime} label="Due" />
 
       {isMessage && (
         <Field
-          label="Message draft"
+          label="Message"
           hint={
             <div className="flex justify-end">
               <button type="button" className="nx-link text-[11px] inline-flex items-center gap-1" onClick={() => setDraft(aiDraftFor(lead, purpose, title || 'our last conversation'))} disabled={!lead}>
@@ -667,7 +864,7 @@ export function AddFollowUpModal({
             </div>
           }
         >
-          <textarea rows={4} value={draft} onChange={e => setDraft(e.target.value)} placeholder="What should we send?" />
+          <textarea rows={3} value={draft} onChange={e => setDraft(e.target.value)} placeholder="What should we send?" />
         </Field>
       )}
 
@@ -698,15 +895,16 @@ export function AddFollowUpModal({
    -------------------------------------------------------------------------- */
 
 export function HoldModal({ lead, onClose, onNotify }: { lead: Lead; onClose: () => void; onNotify?: Notify }) {
-  const [chip, setChip] = useState<'week' | 'month' | 'quarter' | 'custom'>('month');
-  const [custom, setCustom] = useState(toLocalInput(daysFromNowAt(30, 10)));
-  const [reason, setReason] = useState('Customer asked to be contacted later');
-  const until =
-    chip === 'week' ? daysFromNowAt(7, 10) : chip === 'month' ? daysFromNowAt(30, 10) : chip === 'quarter' ? daysFromNowAt(90, 10) : new Date(custom);
+  const [date, setDate] = useState('');
+  const [reason, setReason] = useState('');
+  const [touched, setTouched] = useState(false);
+  const until = date ? new Date(`${date}T10:00`) : null;
   const openCount = getFollowUpsForLead(lead.id).filter(t => !t.completedAt).length;
+  const error = !date ? 'Pick a date.' : until && until.getTime() < Date.now() ? 'Pick a future date.' : '';
 
   const save = () => {
-    if (isNaN(until.getTime())) return;
+    setTouched(true);
+    if (error || !until) return;
     holdLeadUntil(lead.id, until, reason.trim() || 'Customer asked to be contacted later', lead.preferredChannel, firstName(lead));
     onNotify?.('Lead moved to nurture', `${lead.name} won't be contacted before ${until.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.`);
     onClose();
@@ -715,32 +913,21 @@ export function HoldModal({ lead, onClose, onNotify }: { lead: Lead; onClose: ()
   return (
     <NxModal
       title="Don't contact until…"
-      subtitle={<>Pause active follow-ups for <b className="text-ink">{lead.name}</b> and check back at the time they asked.</>}
+      subtitle={<>Pause follow-ups for <b className="text-ink">{lead.name}</b> until the date they asked.</>}
       onClose={onClose}
-      width={500}
+      width={460}
       footer={
         <>
+          {touched && error && <span className="text-[11px] text-danger mr-auto">{error}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
-          <button type="button" className="nx-btn primary" onClick={save}>Pause & schedule check-in</button>
+          <button type="button" className="nx-btn primary" onClick={save}>Pause follow-ups</button>
         </>
       }
     >
-      <Field label="Check back" hint={!isNaN(until.getTime()) ? shortDate(alignToBusinessHours(until)) : undefined}>
-        <Chips
-          options={[
-            { id: 'week' as const, label: 'Next week' },
-            { id: 'month' as const, label: 'Next month' },
-            { id: 'quarter' as const, label: 'In 3 months' },
-            { id: 'custom' as const, label: 'Pick date…' },
-          ]}
-          value={chip}
-          onChange={setChip}
-        />
-        {chip === 'custom' && (
-          <input type="datetime-local" className="mt-2.5 max-w-[240px]" value={custom} min={toLocalInput(new Date())} onChange={e => setCustom(e.target.value)} aria-label="Check back date" />
-        )}
+      <Field label="Check back on" hint={openCount ? `${openCount} open follow-up${openCount === 1 ? '' : 's'} will be closed and replaced by one check-in.` : 'One check-in will be scheduled for that day.'}>
+        <input type="date" value={date} min={todayISO()} onChange={e => setDate(e.target.value)} aria-label="Check back date" />
       </Field>
-      <Field label="Reason" hint={openCount ? `${openCount} open follow-up${openCount === 1 ? '' : 's'} will be closed and replaced by one check-in.` : 'A single check-in will be scheduled.'}>
+      <Field label="Reason (optional)">
         <input value={reason} onChange={e => setReason(e.target.value)} placeholder='e.g. "Buying after Diwali"' />
       </Field>
     </NxModal>
@@ -755,7 +942,39 @@ export type RowModal =
   | { type: 'review'; task: FollowUp }
   | { type: 'outcome'; task: FollowUp }
   | { type: 'edit'; task: FollowUp }
-  | { type: 'hold'; lead: Lead };
+  | { type: 'hold'; lead: Lead }
+  | { type: 'call'; leadId?: string; editing?: FollowUp };
+
+export type AnyFollowUpModal = RowModal | { type: 'add'; leadId?: string } | null;
+
+function copyText(text: string, onNotify?: Notify) {
+  const done = () => onNotify?.('Link copied', text);
+  try {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+      return;
+    }
+  } catch {
+    // clipboard unavailable
+  }
+  done();
+}
+
+export function CallChip({ task, onNotify }: { task: FollowUp; onNotify?: Notify }) {
+  if (!task.meeting) return null;
+  const p = task.meeting.platform;
+  return (
+    <span className="nx-callchip">
+      <span style={{ color: PLATFORM_COLORS[p] }}><PlatformLogo platform={p} className="w-3.5 h-3.5" /></span>
+      {PLATFORM_LABELS[p]} · {task.meeting.durationMins} min
+      {!task.completedAt && (
+        <button type="button" onClick={() => copyText(task.meeting!.link, onNotify)} aria-label="Copy join link" title={task.meeting.link}>
+          <Copy className="w-3 h-3" /> Copy link
+        </button>
+      )}
+    </span>
+  );
+}
 
 export function FollowUpRow({
   task,
@@ -788,23 +1007,28 @@ export function FollowUpRow({
   }, [menu]);
 
   const bucket = getBucket(task, now);
-  const Icon = KIND_ICON[task.kind];
+  const isCall = task.purpose === 'meeting' && !!task.meeting;
+  const Icon = isCall ? Video : KIND_ICON[task.kind];
   const tone = bucket === 'overdue' ? 'red' : bucket === 'today' ? 'amber' : bucket === 'done' ? 'green' : bucket === 'nurture' ? '' : 'muted';
   const paused = isPausedByHandoff(task, lead?.handlingMode);
   const awaiting = needsApproval(task);
   const replied = !!task.customerRepliedAt && !task.completedAt;
   const isMessage = task.kind === 'message' || task.kind === 'email';
   const temperature = leadTemperature(lead);
+  const startsSoon = isCall && !task.completedAt && new Date(task.dueAt).getTime() - now.getTime() < 15 * 60 * 1000;
 
   const primary = (() => {
     if (task.completedAt) return null;
+    if (isCall) {
+      if (bucket === 'overdue' || startsSoon) return { label: 'Log call', primary: true, run: () => onOpenModal({ type: 'outcome', task }) };
+      return { label: 'Reschedule', primary: false, run: () => onOpenModal({ type: 'call', editing: task }) };
+    }
     if (replied) return { label: 'Open conversation', primary: true, run: () => lead && (onOpenConversation ?? onOpenLead)?.(lead) };
     if (paused) return { label: 'Open lead', primary: false, run: () => lead && onOpenLead?.(lead) };
     if (isMessage && awaiting) return { label: 'Review & approve', primary: bucket !== 'upcoming' && bucket !== 'nurture', run: () => onOpenModal({ type: 'review', task }) };
     if (isMessage && task.owner === 'AI' && (bucket === 'upcoming' || bucket === 'nurture'))
       return { label: 'Edit draft', primary: false, run: () => onOpenModal({ type: 'review', task }) };
     if (isMessage) return { label: 'Review & send', primary: bucket === 'overdue' || bucket === 'today', run: () => onOpenModal({ type: 'review', task }) };
-    if (task.kind === 'call') return { label: 'Log call', primary: bucket === 'overdue' || bucket === 'today', run: () => onOpenModal({ type: 'outcome', task }) };
     return { label: 'Mark done', primary: bucket === 'overdue' || bucket === 'today', run: () => onOpenModal({ type: 'outcome', task }) };
   })();
 
@@ -827,8 +1051,8 @@ export function FollowUpRow({
   const meta = [
     formatDue(task, now),
     !compact && lead ? lead.name : null,
-    task.channel || (task.kind === 'task' ? 'Internal task' : null),
-    task.owner === 'AI' ? 'Engagement Agent' : task.owner,
+    isCall ? `Host: ${task.owner}` : task.channel || (task.kind === 'task' ? 'Internal task' : null),
+    isCall ? null : task.owner === 'AI' ? 'Engagement Agent' : task.owner,
   ].filter(Boolean);
 
   return (
@@ -838,20 +1062,27 @@ export function FollowUpRow({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <strong className="text-[13px] text-ink">
-            {task.title}
-            {!compact && lead && (
-              <>
-                {' '}
-                <span className="text-ink-3 font-normal">·</span>{' '}
-                <button type="button" className="nx-inline-link" onClick={() => onOpenLead?.(lead)}>
-                  {lead.company || lead.name}
-                </button>
-              </>
-            )}
-          </strong>
-        </div>
+        <strong className="text-[13px] text-ink">
+          {task.title}
+          {!compact && lead && !(isCall && task.title.includes(lead.name)) && (
+            <>
+              {' '}
+              <span className="text-ink-3 font-normal">·</span>{' '}
+              <button type="button" className="nx-inline-link" onClick={() => onOpenLead?.(lead)}>
+                {lead.company || lead.name}
+              </button>
+            </>
+          )}
+          {!compact && lead && isCall && task.title.includes(lead.name) && (
+            <>
+              {' '}
+              <span className="text-ink-3 font-normal">·</span>{' '}
+              <button type="button" className="nx-inline-link" onClick={() => onOpenLead?.(lead)}>
+                {lead.company}
+              </button>
+            </>
+          )}
+        </strong>
         <p className="text-[11px] text-ink-3 mt-[3px] mb-0 truncate">
           <span className={bucket === 'overdue' ? 'text-danger font-bold' : bucket === 'today' ? 'text-warn font-bold' : ''}>{meta[0]}</span>
           {meta.slice(1).map((m, i) => (
@@ -860,12 +1091,13 @@ export function FollowUpRow({
         </p>
 
         <div className="flex items-center gap-[6px] flex-wrap mt-2">
+          {isCall && <CallChip task={task} onNotify={onNotify} />}
           {!compact && lead && (
             <span className={`nx-tag ${temperature === 'HOT' ? 'red' : temperature === 'WARM' ? 'amber' : ''}`}>
               {temperature.charAt(0) + temperature.slice(1).toLowerCase()} · {lead.score}
             </span>
           )}
-          {task.purpose && task.purpose !== 'follow_up' && <span className="nx-tag teal">{PURPOSE_LABELS[task.purpose]}</span>}
+          {task.purpose && task.purpose !== 'follow_up' && task.purpose !== 'meeting' && <span className="nx-tag teal">{PURPOSE_LABELS[task.purpose]}</span>}
           {task.attempt && task.purpose === 'follow_up' && !task.completedAt && (
             <span className="nx-tag">Attempt {task.attempt} of {task.maxAttempts ?? MAX_ATTEMPTS}</span>
           )}
@@ -881,8 +1113,8 @@ export function FollowUpRow({
             <span className="nx-tag">Rescheduled {task.snoozeCount}×</span>
           )}
           {task.completedAt && task.outcome && (
-            <span className={`nx-tag ${task.outcome === 'replied' || task.outcome === 'meeting_booked' || task.outcome === 'call_connected' ? 'green' : task.outcome === 'not_interested' ? 'red' : ''}`}>
-              {OUTCOME_LABELS[task.outcome]}
+            <span className={`nx-tag ${task.outcome === 'replied' || task.outcome === 'meeting_booked' || task.outcome === 'call_connected' ? 'green' : task.outcome === 'not_interested' || task.outcome === 'no_show' ? 'red' : ''}`}>
+              {task.outcome === 'call_connected' ? 'Call held' : OUTCOME_LABELS[task.outcome]}
             </span>
           )}
         </div>
@@ -912,11 +1144,11 @@ export function FollowUpRow({
           >
             Reopen
           </button>
-        ) : (
+        ) : !isCall ? (
           <button type="button" className="nx-btn sm" onClick={() => setMenu(menu === 'snooze' ? null : 'snooze')} aria-haspopup="menu" aria-expanded={menu === 'snooze'}>
             <Clock className="w-3.5 h-3.5" /> Snooze
           </button>
-        )}
+        ) : null}
         <button type="button" className="nx-iconbtn sm" aria-label="More actions" aria-haspopup="menu" aria-expanded={menu === 'more'} onClick={() => setMenu(menu === 'more' ? null : 'more')}>
           <MoreHorizontal className="w-4 h-4" />
         </button>
@@ -925,9 +1157,9 @@ export function FollowUpRow({
           <div className="nx-menu" role="menu">
             {([
               ['later', 'In 3 hours'],
-              ['tomorrow', 'Tomorrow 10 AM'],
+              ['tomorrow', 'Tomorrow morning'],
               ['in_3_days', 'In 3 days'],
-              ['next_week', 'Next Monday'],
+              ['next_week', 'Next week'],
             ] as const).map(([id, label]) => (
               <button key={id} type="button" role="menuitem" onClick={() => doSnooze(id)}>
                 <span>{label}</span>
@@ -935,14 +1167,39 @@ export function FollowUpRow({
               </button>
             ))}
             <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'edit', task }); }}>
-              <span>Pick date & time…</span>
+              <span>Choose date & time…</span>
             </button>
           </div>
         )}
 
         {menu === 'more' && (
           <div className="nx-menu" role="menu">
-            {!task.completedAt && (
+            {!task.completedAt && isCall && (
+              <>
+                <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'outcome', task }); }}>Log call…</button>
+                <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'call', editing: task }); }}>Reschedule…</button>
+                <button type="button" role="menuitem" onClick={() => { setMenu(null); copyText(task.meeting!.link, onNotify); }}>Copy join link</button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="danger"
+                  onClick={() => {
+                    setMenu(null);
+                    const affected = getFollowUpsForLead(task.leadId).filter(
+                      t => !t.completedAt && (t.id === task.id || (t.previousId === task.id && t.purpose === 'appointment_reminder'))
+                    );
+                    cancelCall(task.id);
+                    onNotify?.('Call cancelled', `${task.title} and its reminder were cancelled.`, {
+                      label: 'Undo',
+                      onClick: () => affected.forEach(t => reopenFollowUp(t.id)),
+                    });
+                  }}
+                >
+                  Cancel call
+                </button>
+              </>
+            )}
+            {!task.completedAt && !isCall && (
               <>
                 <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'edit', task }); }}>Edit follow-up</button>
                 <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'outcome', task }); }}>Log outcome…</button>
@@ -959,7 +1216,7 @@ export function FollowUpRow({
                   >
                     Assign to {lead?.assignee?.name || 'me'}
                   </button>
-                ) : task.kind !== 'call' && task.kind !== 'task' ? (
+                ) : task.kind !== 'task' ? (
                   <button
                     type="button"
                     role="menuitem"
@@ -972,17 +1229,26 @@ export function FollowUpRow({
                     Hand to Engagement Agent
                   </button>
                 ) : null}
-                {lead && (
-                  <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'hold', lead }); }}>
-                    Don't contact until…
+              </>
+            )}
+            {!task.completedAt && lead && (
+              <>
+                {!isCall && (
+                  <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'call', leadId: lead.id }); }}>
+                    Schedule a call…
                   </button>
                 )}
+                <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenModal({ type: 'hold', lead }); }}>
+                  Don't contact until…
+                </button>
               </>
             )}
             {!compact && lead && (
               <button type="button" role="menuitem" onClick={() => { setMenu(null); onOpenLead?.(lead); }}>Open lead</button>
             )}
-            <button type="button" role="menuitem" className="danger" onClick={doDelete}>Delete</button>
+            {!isCall || task.completedAt ? (
+              <button type="button" role="menuitem" className="danger" onClick={doDelete}>Delete</button>
+            ) : null}
           </div>
         )}
       </div>
@@ -998,13 +1264,15 @@ export function FollowUpModals({
   onNotify,
   onUpdateLead,
   currentUserName,
+  setModal,
 }: {
-  modal: RowModal | { type: 'add'; leadId?: string } | null;
+  modal: AnyFollowUpModal;
   leads: Lead[];
   onClose: () => void;
   onNotify?: Notify;
   onUpdateLead?: (lead: Lead) => void;
   currentUserName?: string;
+  setModal?: (m: AnyFollowUpModal) => void;
 }) {
   if (!modal) return null;
   const leadOf = (id: string) => leads.find(l => l.id === id);
@@ -1012,13 +1280,26 @@ export function FollowUpModals({
     case 'review':
       return <ReviewSendModal task={modal.task} lead={leadOf(modal.task.leadId)} onClose={onClose} onNotify={onNotify} />;
     case 'outcome':
-      return <LogOutcomeModal task={modal.task} lead={leadOf(modal.task.leadId)} onClose={onClose} onNotify={onNotify} onUpdateLead={onUpdateLead} />;
+      return <LogOutcomeModal task={modal.task} lead={leadOf(modal.task.leadId)} onClose={onClose} onNotify={onNotify} onUpdateLead={onUpdateLead} currentUserName={currentUserName} />;
     case 'edit':
-      return <AddFollowUpModal leads={leads} editing={modal.task} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />;
+      return modal.task.purpose === 'meeting'
+        ? <ScheduleCallModal leads={leads} editing={modal.task} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />
+        : <AddFollowUpModal leads={leads} editing={modal.task} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />;
     case 'hold':
       return <HoldModal lead={modal.lead} onClose={onClose} onNotify={onNotify} />;
+    case 'call':
+      return <ScheduleCallModal leads={leads} leadId={modal.leadId} editing={modal.editing} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />;
     case 'add':
-      return <AddFollowUpModal leads={leads} initialLeadId={modal.leadId} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />;
+      return (
+        <AddFollowUpModal
+          leads={leads}
+          initialLeadId={modal.leadId}
+          onClose={onClose}
+          onNotify={onNotify}
+          currentUserName={currentUserName}
+          onScheduleCall={setModal ? leadId => setModal({ type: 'call', leadId }) : undefined}
+        />
+      );
     default:
       return null;
   }

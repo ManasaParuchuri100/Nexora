@@ -23,7 +23,14 @@ import { useSyncExternalStore, useState, useEffect } from 'react';
 
 export type FollowUpKind = 'call' | 'email' | 'message' | 'task';
 export type FollowUpSource = 'manual' | 'auto' | 'ai';
-export type FollowUpPurpose = 'follow_up' | 'nurture' | 'appointment_reminder' | 'no_show' | 'reactivation';
+export type FollowUpPurpose = 'follow_up' | 'meeting' | 'nurture' | 'appointment_reminder' | 'no_show' | 'reactivation';
+export type MeetingPlatform = 'zoom' | 'meet' | 'teams';
+
+export interface MeetingInfo {
+  platform: MeetingPlatform;
+  link: string;
+  durationMins: number;
+}
 export type FollowUpApproval = 'draft' | 'approved';
 export type FollowUpOutcome =
   | 'sent'
@@ -31,6 +38,7 @@ export type FollowUpOutcome =
   | 'no_response'
   | 'call_connected'
   | 'meeting_booked'
+  | 'no_show'
   | 'not_interested'
   | 'done'
   | 'cancelled';
@@ -62,6 +70,8 @@ export interface FollowUp {
   customerRepliedAt?: string;
   /** Id of the follow-up this one was created from (sequence chain). */
   previousId?: string;
+  /** Present on scheduled video calls. */
+  meeting?: MeetingInfo;
 }
 
 export interface FollowUpCounts {
@@ -87,6 +97,7 @@ export const OUTCOME_LABELS: Record<FollowUpOutcome, string> = {
   no_response: 'No response',
   call_connected: 'Call connected',
   meeting_booked: 'Meeting booked',
+  no_show: 'No-show',
   not_interested: 'Not interested',
   done: 'Completed',
   cancelled: 'Cancelled',
@@ -94,14 +105,15 @@ export const OUTCOME_LABELS: Record<FollowUpOutcome, string> = {
 
 export const PURPOSE_LABELS: Record<FollowUpPurpose, string> = {
   follow_up: 'Follow-up',
+  meeting: 'Scheduled call',
   nurture: 'Nurture',
   appointment_reminder: 'Appointment reminder',
   no_show: 'No-show recovery',
   reactivation: 'Reactivation',
 };
 
-const STORAGE_KEY = 'nexora_followups_v3';
-const LEGACY_KEYS = ['nexora_followups_v2', 'nexora_follow_ups'];
+const STORAGE_KEY = 'nexora_followups_v4';
+const LEGACY_KEYS = ['nexora_followups_v3', 'nexora_followups_v2', 'nexora_follow_ups'];
 
 /* --------------------------------------------------------------------------
    Time helpers
@@ -246,13 +258,12 @@ export function createSeedFollowUps(): FollowUp[] {
     {
       id: 'fu-rahul-discovery',
       leadId: 'lead-rahul-sharma',
-      title: 'Call to book discovery walkthrough',
+      title: 'Discovery call with Rahul Sharma',
       kind: 'call',
-      channel: 'WhatsApp',
+      channel: 'Zoom',
       owner: 'Rahul — Sales',
-      purpose: 'follow_up',
-      attempt: 1,
-      maxAttempts: MAX_ATTEMPTS,
+      purpose: 'meeting',
+      meeting: { platform: 'zoom', link: 'https://zoom.us/j/84213397520', durationMins: 30 },
       dueAt: at(0, 16),
       note: 'Asked for enterprise pricing for 12 seats. Hot lead — call within the day.',
       createdAt: ago(4 * 60 * 60 * 1000),
@@ -380,8 +391,8 @@ function normalise(task: FollowUp): FollowUp {
     purpose: 'follow_up',
     ...task,
     approval: task.approval ?? (task.owner === 'AI' && (task.kind === 'message' || task.kind === 'email') ? 'draft' : undefined),
-    attempt: task.attempt ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : 1),
-    maxAttempts: task.maxAttempts ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : MAX_ATTEMPTS),
+    attempt: task.attempt ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : task.kind === 'call' ? undefined : 1),
+    maxAttempts: task.maxAttempts ?? (task.purpose && task.purpose !== 'follow_up' ? undefined : task.kind === 'call' ? undefined : MAX_ATTEMPTS),
     outcome: task.outcome ?? (task.completedAt ? 'done' : undefined),
   };
 }
@@ -492,7 +503,11 @@ export function planNextStep(
   outcome: FollowUpOutcome,
   temperature: Temperature = 'WARM',
   now = new Date()
-): { kind: 'attempt' | 'nurture' | 'reminder' | 'none'; dueAt?: Date; label: string } {
+): { kind: 'attempt' | 'nurture' | 'reminder' | 'no_show' | 'none'; dueAt?: Date; label: string } {
+  if (outcome === 'no_show') {
+    const dueAt = alignToBusinessHours(new Date(now.getTime() + 60 * 60 * 1000));
+    return { kind: 'no_show', dueAt, label: 'Send a “sorry we missed you” message to rebook' };
+  }
   const attempt = task.attempt ?? 1;
   const max = task.maxAttempts ?? MAX_ATTEMPTS;
   if (outcome === 'sent' || outcome === 'no_response') {
@@ -508,8 +523,7 @@ export function planNextStep(
     };
   }
   if (outcome === 'meeting_booked') {
-    const dueAt = daysFromNowAt(1, 9, now);
-    return { kind: 'reminder', dueAt, label: 'Appointment reminder the day before' };
+    return { kind: 'none', label: 'Schedule the call below — a reminder is sent automatically' };
   }
   return { kind: 'none', label: outcome === 'replied' ? 'Sequence ends — qualification continues in the conversation' : 'No further follow-up' };
 }
@@ -563,6 +577,22 @@ export function completeFollowUp(id: string, options?: CompleteOptions): Complet
         dueAt: dueAt.toISOString(),
         draft: `Hi${opts.leadFirstName ? ` ${opts.leadFirstName}` : ''}, it's been a while — we have a few new options that match what you were looking for. Would you like me to share them?`,
         note: `No reply after ${task.attempt ?? MAX_ATTEMPTS} attempts. Paused active follow-ups to avoid over-messaging.`,
+        createdAt: nowIso,
+        source: 'auto',
+        previousId: task.id,
+      });
+    } else if (plan.kind === 'no_show' && dueAt) {
+      next = normalise({
+        id: newId(),
+        leadId: task.leadId,
+        title: 'Rebook after missed call',
+        kind: 'message',
+        channel: 'WhatsApp',
+        owner: 'AI',
+        purpose: 'no_show',
+        approval: 'draft',
+        dueAt: dueAt.toISOString(),
+        draft: `Hi${opts.leadFirstName ? ` ${opts.leadFirstName}` : ''}, sorry we missed you on the call today. Would you like to pick another time that suits you?`,
         createdAt: nowIso,
         source: 'auto',
         previousId: task.id,
@@ -663,6 +693,131 @@ export function holdLeadUntil(
   });
   commit([nurture, ...closed]);
   return nurture;
+}
+
+/* --------------------------------------------------------------------------
+   Scheduled calls (Zoom / Google Meet / Microsoft Teams)
+   Calls are follow-ups with purpose "meeting", so they appear everywhere
+   follow-ups do: the Follow-ups queue, the lead panel, the Inbox lead panel
+   and the team's Upcoming calls on Overview.
+   -------------------------------------------------------------------------- */
+
+function meetingLink(platform: MeetingPlatform): string {
+  const r = (n: number) => Array.from({ length: n }, () => 'abcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 25)]).join('');
+  const digits = (n: number) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('');
+  if (platform === 'zoom') return `https://zoom.us/j/${digits(11)}`;
+  if (platform === 'meet') return `https://meet.google.com/${r(3)}-${r(4)}-${r(3)}`;
+  return `https://teams.microsoft.com/l/meetup-join/${digits(6)}${r(6)}`;
+}
+
+const PLATFORM_NAME: Record<MeetingPlatform, string> = { zoom: 'Zoom', meet: 'Google Meet', teams: 'Microsoft Teams' };
+
+/** When the automatic reminder goes out: the day before, or 2 hours before for short notice. */
+function reminderTime(callAt: Date, now = new Date()): Date | null {
+  const dayBefore = new Date(callAt.getTime() - DAY);
+  if (dayBefore.getTime() > now.getTime() + 60 * 60 * 1000) return dayBefore;
+  const twoHours = new Date(callAt.getTime() - 2 * 60 * 60 * 1000);
+  return twoHours.getTime() > now.getTime() ? twoHours : null;
+}
+
+export interface ScheduleCallInput {
+  leadId: string;
+  at: Date;
+  platform: MeetingPlatform;
+  host: string;
+  leadName?: string;
+  leadFirstName?: string;
+  previousId?: string;
+}
+
+export function scheduleCall(input: ScheduleCallInput): { call: FollowUp; reminder?: FollowUp } {
+  const nowIso = new Date().toISOString();
+  const call = normalise({
+    id: newId(),
+    leadId: input.leadId,
+    title: `${PLATFORM_NAME[input.platform]} call${input.leadName ? ` with ${input.leadName}` : ''}`,
+    kind: 'call',
+    channel: PLATFORM_NAME[input.platform],
+    owner: input.host,
+    purpose: 'meeting',
+    meeting: { platform: input.platform, link: meetingLink(input.platform), durationMins: 30 },
+    dueAt: input.at.toISOString(),
+    createdAt: nowIso,
+    source: 'manual',
+    previousId: input.previousId,
+  });
+  const when = reminderTime(input.at);
+  const timeText = input.at.toLocaleString('en-US', { weekday: 'long', hour: 'numeric', minute: '2-digit' });
+  const reminder = when
+    ? normalise({
+        id: newId(),
+        leadId: input.leadId,
+        title: 'Call reminder',
+        kind: 'message',
+        channel: 'WhatsApp',
+        owner: 'AI',
+        purpose: 'appointment_reminder',
+        approval: 'approved',
+        dueAt: when.toISOString(),
+        draft: `Hi${input.leadFirstName ? ` ${input.leadFirstName}` : ''}, a quick reminder of our ${PLATFORM_NAME[input.platform]} call on ${timeText}. Join here: ${call.meeting!.link}`,
+        createdAt: nowIso,
+        source: 'auto',
+        previousId: call.id,
+      })
+    : undefined;
+  commit(reminder ? [call, reminder, ...followUpsStore] : [call, ...followUpsStore]);
+  return { call, reminder };
+}
+
+export function rescheduleCall(id: string, at: Date, platform: MeetingPlatform, leadFirstName?: string): void {
+  const call = followUpsStore.find(t => t.id === id);
+  if (!call || !call.meeting) return;
+  const samePlatform = call.meeting.platform === platform;
+  const meeting: MeetingInfo = samePlatform ? call.meeting : { platform, link: meetingLink(platform), durationMins: call.meeting.durationMins };
+  const when = reminderTime(at);
+  const timeText = at.toLocaleString('en-US', { weekday: 'long', hour: 'numeric', minute: '2-digit' });
+  let next = followUpsStore.map(t => {
+    if (t.id === id) {
+      return {
+        ...t,
+        dueAt: at.toISOString(),
+        channel: PLATFORM_NAME[platform],
+        title: t.title.replace(/^(Zoom|Google Meet|Microsoft Teams) call/, `${PLATFORM_NAME[platform]} call`),
+        meeting,
+        snoozeCount: (t.snoozeCount ?? 0) + 1,
+      };
+    }
+    // keep the linked reminder in step with the call
+    if (t.previousId === id && t.purpose === 'appointment_reminder' && !t.completedAt) {
+      return when
+        ? {
+            ...t,
+            dueAt: when.toISOString(),
+            draft: `Hi${leadFirstName ? ` ${leadFirstName}` : ''}, a quick reminder of our ${PLATFORM_NAME[platform]} call on ${timeText}. Join here: ${meeting.link}`,
+          }
+        : { ...t, completedAt: new Date().toISOString(), outcome: 'cancelled' as const, outcomeNote: 'Call moved too close for a reminder.' };
+    }
+    return t;
+  });
+  commit(next);
+}
+
+/** Cancels a scheduled call and its pending reminder. */
+export function cancelCall(id: string, reason = 'Call cancelled'): void {
+  const nowIso = new Date().toISOString();
+  commit(
+    followUpsStore.map(t =>
+      (t.id === id || (t.previousId === id && t.purpose === 'appointment_reminder')) && !t.completedAt
+        ? { ...t, completedAt: nowIso, outcome: 'cancelled' as const, outcomeNote: reason }
+        : t
+    )
+  );
+}
+
+export function getUpcomingCalls(tasks: FollowUp[] = followUpsStore, now = new Date()): FollowUp[] {
+  return tasks
+    .filter(t => t.purpose === 'meeting' && !t.completedAt && new Date(t.dueAt).getTime() > now.getTime() - 60 * 60 * 1000)
+    .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime());
 }
 
 export function deleteFollowUp(id: string): FollowUp | undefined {
