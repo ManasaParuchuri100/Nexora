@@ -19,8 +19,7 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
-  PanelLeftClose,
-  PanelLeftOpen
+  ChevronDown
 } from 'lucide-react';
 import { 
   Lead, 
@@ -110,24 +109,22 @@ export default function LeadIntelligenceWorkspace({
 
   // Sub-tabs: 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes'
   type WorkspaceSubTab = 'qualification' | 'conversation' | 'info' | 'timeline' | 'notes';
-  const [activeSubTab, setActiveSubTab] = useState<WorkspaceSubTab>('qualification');
-  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('nexora_lead_rail_collapsed') === '1';
-    } catch {
-      return false;
-    }
-  });
-  const toggleRail = () => {
-    setIsRailCollapsed(prev => {
-      const next = !prev;
-      try {
-        localStorage.setItem('nexora_lead_rail_collapsed', next ? '1' : '0');
-      } catch {
-        // storage unavailable — keep in-memory state only
-      }
+  // Accordion: several sections can be open at once
+  const [openSections, setOpenSections] = useState<Set<WorkspaceSubTab>>(() => new Set<WorkspaceSubTab>(['qualification']));
+  const toggleSection = (id: WorkspaceSubTab) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
+  };
+  // Opens a section (keeping others as they are) and scrolls it into view
+  const setActiveSubTab = (id: WorkspaceSubTab) => {
+    setOpenSections(prev => (prev.has(id) ? prev : new Set(prev).add(id)));
+    setTimeout(() => {
+      document.getElementById(`lead-section-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
   };
 
   // Reply text input
@@ -515,6 +512,34 @@ export default function LeadIntelligenceWorkspace({
   const tempTag = temperature === 'HOT' ? 'red' : temperature === 'WARM' ? 'amber' : '';
   const verifiedCount = qualificationChecks.filter(c => c.status === 'verified').length;
 
+  const renderSectionHeader = (id: WorkspaceSubTab, hint: string) => {
+    const item = navItems.find(n => n.id === id)!;
+    const Icon = item.icon;
+    const open = openSections.has(id);
+    return (
+      <button
+        type="button"
+        id={`lead-section-${id}`}
+        onClick={() => toggleSection(id)}
+        aria-expanded={open}
+        aria-controls={`lead-section-body-${id}`}
+        className={`nx-accordion ${open ? 'open' : ''}`}
+      >
+        <span className={`nx-alerticon ${open ? '' : 'muted'}`}>
+          <Icon className="w-4 h-4" strokeWidth={1.9} />
+        </span>
+        <span className="flex-1 min-w-0 text-left">
+          <span className="block font-display text-[14px] font-bold tracking-[-0.2px] text-ink">{item.label}</span>
+          <span className="block text-[11px] text-ink-3 truncate mt-0.5">{hint}</span>
+        </span>
+        {typeof item.count === 'number' && item.count > 0 && (
+          <span className="nx-tag teal tabular-nums">{item.count}</span>
+        )}
+        <ChevronDown className={`w-4 h-4 text-ink-3 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
       {/* Backdrop */}
@@ -611,66 +636,32 @@ export default function LeadIntelligenceWorkspace({
           </div>
         </div>
 
-        {/* Body: vertical, collapsible section rail + content */}
-        <div className="flex-1 min-h-0 flex">
-          <nav
-            aria-label="Lead sections"
-            className={`shrink-0 border-r border-line bg-surface flex flex-col py-3 transition-[width] duration-200 ${
-              isRailCollapsed ? 'w-[64px] px-[10px]' : 'w-[214px] px-[12px]'
-            }`}
-          >
-            <div className={`flex items-center mb-1.5 ${isRailCollapsed ? 'justify-center' : 'justify-between pl-[11px]'}`}>
-              {!isRailCollapsed && (
-                <span className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
-              )}
-              <button
-                type="button"
-                onClick={toggleRail}
-                aria-label={isRailCollapsed ? 'Expand sections' : 'Collapse sections'}
-                aria-expanded={!isRailCollapsed}
-                title={isRailCollapsed ? 'Expand sections' : 'Collapse sections'}
-                className="w-[30px] h-[30px] min-h-[30px]! rounded-[8px]! grid place-items-center text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer"
-              >
-                {isRailCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
-              </button>
-            </div>
-
-            {navItems.map(item => {
-              const Icon = item.icon;
-              const active = activeSubTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveSubTab(item.id)}
-                  aria-current={active ? 'page' : undefined}
-                  title={isRailCollapsed ? item.label : undefined}
-                  className={`relative w-full flex items-center h-[42px] min-h-[42px]! my-px rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer ${
-                    isRailCollapsed ? 'justify-center px-0' : 'gap-[11px] px-[11px]'
-                  } ${active ? 'bg-brand-soft text-brand' : 'text-ink-2 hover:bg-surface-hover hover:text-ink'}`}
-                >
-                  <Icon strokeWidth={1.8} className={`w-[17px] h-[17px] shrink-0 ${active ? 'text-brand' : 'text-ink-3'}`} />
-                  {!isRailCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
-                  {typeof item.count === 'number' && item.count > 0 && (
-                    isRailCollapsed ? (
-                      <span className="absolute top-[7px] right-[7px] w-[7px] h-[7px] rounded-full bg-brand" />
-                    ) : (
-                      <span className={`text-[10px] font-bold tabular-nums rounded-[5px] px-1.5 py-px ${active ? 'bg-brand text-on-brand' : 'bg-surface-raised text-ink-3'}`}>
-                        {item.count}
-                      </span>
-                    )
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-        <div className="flex-1 min-w-0 overflow-y-auto bg-canvas px-[27px] py-[24px] space-y-[15px]">
+        {/* Body: vertically stacked, collapsible sections */}
+        <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-w-0 overflow-y-auto bg-canvas px-[27px] py-[22px] space-y-3">
+          <div className="flex items-center justify-between gap-3 pb-1">
+            <span className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
+            <button
+              type="button"
+              className="nx-link text-[11px]"
+              onClick={() =>
+                setOpenSections(
+                  openSections.size === navItems.length
+                    ? new Set<WorkspaceSubTab>()
+                    : new Set<WorkspaceSubTab>(navItems.map(n => n.id))
+                )
+              }
+            >
+              {openSections.size === navItems.length ? 'Collapse all' : 'Expand all'}
+            </button>
+          </div>
 
           {/* ========================================================
               TAB 1: AI QUALIFICATION
              ======================================================== */}
-          {activeSubTab === 'qualification' && (
+          {renderSectionHeader('qualification', `${lead.score}/100 · ${verifiedCount} of ${qualificationChecks.length} criteria verified`)}
+          {openSections.has('qualification') && (
+            <div className="pt-1 pb-3 animate-fadeIn">
             <div className="space-y-[15px]">
 
               {/* Score & summary */}
@@ -798,12 +789,15 @@ export default function LeadIntelligenceWorkspace({
                 </div>
               </div>
             </div>
+            </div>
           )}
 
           {/* ========================================================
               TAB 2: CONVERSATION (UNIFIED WITH useConversations)
              ======================================================== */}
-          {activeSubTab === 'conversation' && (
+          {renderSectionHeader('conversation', `${conversationMessages.length} message${conversationMessages.length === 1 ? '' : 's'} · ${channelBadge.name}`)}
+          {openSections.has('conversation') && (
+            <div className="pt-1 pb-3 animate-fadeIn">
             <div className="space-y-4">
               
               {/* Channel & Mode banner */}
@@ -944,12 +938,15 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
             </div>
+            </div>
           )}
 
           {/* ========================================================
               TAB 3: LEAD INFO & SOURCE
              ======================================================== */}
-          {activeSubTab === 'info' && (
+          {renderSectionHeader('info', 'Contact, requirement scope and attribution')}
+          {openSections.has('info') && (
+            <div className="pt-1 pb-3 animate-fadeIn">
             <div className="space-y-6">
               
               {/* Card 1: Contact Information */}
@@ -1146,12 +1143,15 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
             </div>
+            </div>
           )}
 
           {/* ========================================================
               TAB 4: ACTIVITY TIMELINE
              ======================================================== */}
-          {activeSubTab === 'timeline' && (
+          {renderSectionHeader('timeline', `${timelineEvents.length} event${timelineEvents.length === 1 ? '' : 's'}`)}
+          {openSections.has('timeline') && (
+            <div className="pt-1 pb-3 animate-fadeIn">
             <div className="space-y-4">
               <div className={`p-[22px] rounded-[15px] border space-y-6  transition-colors ${
                 'bg-surface border-line'
@@ -1219,12 +1219,15 @@ export default function LeadIntelligenceWorkspace({
                 )}
               </div>
             </div>
+            </div>
           )}
 
           {/* ========================================================
               TAB 5: FOLLOW-UPS, NOTES & TAGS
              ======================================================== */}
-          {activeSubTab === 'notes' && (
+          {renderSectionHeader('notes', `${followUps.length} follow-up${followUps.length === 1 ? '' : 's'} · ${notes.length} note${notes.length === 1 ? '' : 's'} · ${tags.length} tag${tags.length === 1 ? '' : 's'}`)}
+          {openSections.has('notes') && (
+            <div className="pt-1 pb-3 animate-fadeIn">
             <div className="space-y-6">
               
               {/* Card 1: Scheduled Follow-ups */}
@@ -1472,6 +1475,7 @@ export default function LeadIntelligenceWorkspace({
                 )}
               </div>
 
+            </div>
             </div>
           )}
 

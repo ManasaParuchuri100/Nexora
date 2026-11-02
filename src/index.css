@@ -1333,3 +1333,24 @@ table td { padding-top: 15px !important; padding-bottom: 15px !important; }
 .nx-kv b.text-danger { color: var(--error); }
 /* Lead drawer: inline links/icon buttons shouldn't inherit the 38px control height */
 .nx-drawer button:not(.nx-btn):not([class*="h-["]):not([class*="py-"]) { min-height: 0; }
+
+/* Accordion section header (lead drawer) */
+.nx-accordion {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 0 !important;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px !important;
+  box-shadow: var(--shadow-card-value);
+  cursor: pointer;
+  scroll-margin-top: 12px;
+  transition: border-color .15s, background-color .15s;
+}
+.nx-accordion:hover { border-color: var(--border-strong); }
+.nx-accordion.open { border-color: #CFE6E3; }
+:root:not([data-theme="light"]) .nx-accordion.open { border-color: #2C5355; }
+.nx-alerticon.muted { background: var(--surface-raised); color: var(--text-muted); }
