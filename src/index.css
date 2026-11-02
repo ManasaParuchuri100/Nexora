@@ -1354,3 +1354,80 @@ table td { padding-top: 15px !important; padding-bottom: 15px !important; }
 .nx-accordion.open { border-color: #CFE6E3; }
 :root:not([data-theme="light"]) .nx-accordion.open { border-color: #2C5355; }
 .nx-alerticon.muted { background: var(--surface-raised); color: var(--text-muted); }
+
+/* ==========================================================================
+   Lead drawer — premium accordion: one calm surface, hairline rhythm
+   ========================================================================== */
+.nx-acc-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 0 !important;
+  padding: 18px 2px;
+  border-top: 1px solid var(--border);
+  border-radius: 0 !important;
+  background: transparent;
+  cursor: pointer;
+  scroll-margin-top: 8px;
+  transition: background-color .15s;
+}
+.nx-acc-head:hover .nx-acc-chevron { border-color: var(--border-strong); color: var(--text-primary); }
+.nx-acc-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
+  transition: all .2s;
+}
+.nx-acc-head.open .nx-acc-icon { background: var(--accent-subtle); border-color: transparent; color: var(--primary); }
+.nx-acc-chevron {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform .25s ease, border-color .15s, color .15s;
+}
+.nx-acc-head.open .nx-acc-chevron { transform: rotate(180deg); color: var(--primary); border-color: #CFE6E3; }
+:root:not([data-theme="light"]) .nx-acc-head.open .nx-acc-chevron { border-color: #2C5355; }
+.nx-acc > :last-child { border-bottom: 1px solid var(--border); }
+
+.nx-section-body {
+  padding: 2px 0 30px 46px;
+  animation: nx-acc-reveal 220ms ease-out both;
+}
+@keyframes nx-acc-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .nx-section-body { animation: none; } }
+@media (max-width: 640px) { .nx-section-body { padding-left: 0; } }
+
+/* Flatten nested cards inside a section into quiet, hairline-separated blocks */
+.nx-section-body .nx-panel,
+.nx-section-body [class*="rounded-[15px]"]:not(.nx-keep),
+.nx-section-body [class*="rounded-[13px]"][class*="border"]:not(.nx-keep):not(input):not(textarea):not(button) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+.nx-section-body .nx-panel + .nx-panel,
+.nx-section-body .nx-panel + .nx-insight,
+.nx-section-body [class*="space-y"] > [class*="rounded-[15px]"] + [class*="rounded-[15px]"] {
+  border-top: 1px solid var(--border) !important;
+  padding-top: 22px !important;
+  margin-top: 22px !important;
+}
+.nx-section-body .nx-insight { margin-top: 22px; }
+.nx-section-body .nx-keep { border-color: var(--border) !important; }

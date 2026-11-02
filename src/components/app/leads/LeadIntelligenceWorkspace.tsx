@@ -523,19 +523,21 @@ export default function LeadIntelligenceWorkspace({
         onClick={() => toggleSection(id)}
         aria-expanded={open}
         aria-controls={`lead-section-body-${id}`}
-        className={`nx-accordion ${open ? 'open' : ''}`}
+        className={`nx-acc-head group ${open ? 'open' : ''}`}
       >
-        <span className={`nx-alerticon ${open ? '' : 'muted'}`}>
-          <Icon className="w-4 h-4" strokeWidth={1.9} />
+        <span className="nx-acc-icon">
+          <Icon className="w-[15px] h-[15px]" strokeWidth={1.8} />
         </span>
         <span className="flex-1 min-w-0 text-left">
-          <span className="block font-display text-[14px] font-bold tracking-[-0.2px] text-ink">{item.label}</span>
-          <span className="block text-[11px] text-ink-3 truncate mt-0.5">{hint}</span>
+          <span className="block font-display text-[15px] font-bold tracking-[-0.3px] text-ink">{item.label}</span>
+          <span className="block text-[11px] text-ink-3 truncate mt-[3px]">{hint}</span>
         </span>
         {typeof item.count === 'number' && item.count > 0 && (
-          <span className="nx-tag teal tabular-nums">{item.count}</span>
+          <span className="text-[11px] font-bold text-ink-3 tabular-nums">{item.count}</span>
         )}
-        <ChevronDown className={`w-4 h-4 text-ink-3 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+        <span className="nx-acc-chevron">
+          <ChevronDown className="w-4 h-4" strokeWidth={1.8} />
+        </span>
       </button>
     );
   };
@@ -638,8 +640,8 @@ export default function LeadIntelligenceWorkspace({
 
         {/* Body: vertically stacked, collapsible sections */}
         <div className="flex-1 min-h-0 flex flex-col">
-        <div className="flex-1 min-w-0 overflow-y-auto bg-canvas px-[27px] py-[22px] space-y-3">
-          <div className="flex items-center justify-between gap-3 pb-1">
+        <div className="flex-1 min-w-0 overflow-y-auto bg-surface px-[27px] pt-[18px] pb-10 nx-acc">
+          <div className="flex items-center justify-between gap-3 pb-3">
             <span className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
             <button
               type="button"
@@ -661,22 +663,20 @@ export default function LeadIntelligenceWorkspace({
              ======================================================== */}
           {renderSectionHeader('qualification', `${lead.score}/100 · ${verifiedCount} of ${qualificationChecks.length} criteria verified`)}
           {openSections.has('qualification') && (
-            <div className="pt-1 pb-3 animate-fadeIn">
+            <div className="nx-section-body">
             <div className="space-y-[15px]">
 
               {/* Score & summary */}
               <section className="nx-panel nx-pad">
-                <div className="nx-sectionhead">
+                <div className="flex items-end justify-between gap-4">
                   <div>
-                    <h2>AI qualification</h2>
-                    <p>Score is based on stated requirements, intent and engagement signals.</p>
+                    <div className="text-[11px] text-ink-3">Qualification score</div>
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="font-display text-[34px] leading-none font-extrabold tracking-[-1.3px] text-ink tabular-nums">{lead.score}</span>
+                      <span className="text-[14px] text-ink-3">/ 100</span>
+                    </div>
                   </div>
                   <span className={`nx-tag ${tempTag}`}>{intentLevel.replace(/🔥\s*/g, '')}</span>
-                </div>
-
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-display text-[29px] font-extrabold tracking-[-1.1px] text-ink tabular-nums">{lead.score}</span>
-                  <span className="text-[14px] text-ink-3">/ 100</span>
                 </div>
                 <div className="nx-progress mt-2.5"><div style={{ width: `${Math.min(100, Math.max(0, lead.score))}%` }} /></div>
 
@@ -797,7 +797,7 @@ export default function LeadIntelligenceWorkspace({
              ======================================================== */}
           {renderSectionHeader('conversation', `${conversationMessages.length} message${conversationMessages.length === 1 ? '' : 's'} · ${channelBadge.name}`)}
           {openSections.has('conversation') && (
-            <div className="pt-1 pb-3 animate-fadeIn">
+            <div className="nx-section-body">
             <div className="space-y-4">
               
               {/* Channel & Mode banner */}
@@ -805,26 +805,26 @@ export default function LeadIntelligenceWorkspace({
                 'bg-surface border-line text-ink-2 '
               }`}>
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 " />
+                  <span className="w-2 h-2 rounded-full bg-ok" />
                   <span className="font-semibold">{channelBadge.name}</span>
                   {lead.phone && <span className="text-ink-3">({lead.phone})</span>}
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className={'text-ink-3 font-medium'}>
-                    Mode: {handlingMode === 'HUMAN' ? '👤 Human Handled' : '🤖 AI Handled'}
+                    {handlingMode === 'HUMAN' ? 'Human handling' : 'AI handling'}
                   </span>
                   <button
                     type="button"
                     onClick={handleToggleHandoff}
                     className="text-xs font-semibold text-brand hover:underline cursor-pointer"
                   >
-                    {handlingMode === 'HUMAN' ? 'Return to AI' : 'Take Over'}
+                    {handlingMode === 'HUMAN' ? 'Hand back to AI' : 'Take over'}
                   </button>
                 </div>
               </div>
 
               {/* Chat Thread Container */}
-              <div className={`border rounded-[13px] flex flex-col h-[520px]  overflow-hidden transition-colors ${
+              <div className={`nx-keep border rounded-[13px] flex flex-col max-h-[460px] overflow-hidden transition-colors nx-messages ${
                 'bg-surface border-line'
               }`}>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
@@ -870,12 +870,10 @@ export default function LeadIntelligenceWorkspace({
                             <span className="text-[10px] font-mono tabular-nums">{msg.time}</span>
                           </div>
 
-                          <div className={`p-3.5 text-xs max-w-[82%] sm:max-w-[75%] leading-relaxed  ${
+                          <div className={`max-w-[82%] sm:max-w-[75%] leading-[1.6] ${
                             isCustomer
-                              ? 'bg-surface-raised text-ink border border-line rounded-2xl rounded-tl-sm'
-                              : isAi
-                              ? 'bg-brand-soft text-teal-950 border border-brand/30 rounded-2xl rounded-tr-sm'
-                              : 'bg-slate-900 text-white rounded-2xl rounded-tr-sm'
+                              ? 'nx-bubble'
+                              : 'nx-bubble mine'
                           }`}>
                             {msg.text}
                           </div>
@@ -946,7 +944,7 @@ export default function LeadIntelligenceWorkspace({
              ======================================================== */}
           {renderSectionHeader('info', 'Contact, requirement scope and attribution')}
           {openSections.has('info') && (
-            <div className="pt-1 pb-3 animate-fadeIn">
+            <div className="nx-section-body">
             <div className="space-y-6">
               
               {/* Card 1: Contact Information */}
@@ -1151,7 +1149,7 @@ export default function LeadIntelligenceWorkspace({
              ======================================================== */}
           {renderSectionHeader('timeline', `${timelineEvents.length} event${timelineEvents.length === 1 ? '' : 's'}`)}
           {openSections.has('timeline') && (
-            <div className="pt-1 pb-3 animate-fadeIn">
+            <div className="nx-section-body">
             <div className="space-y-4">
               <div className={`p-[22px] rounded-[15px] border space-y-6  transition-colors ${
                 'bg-surface border-line'
@@ -1227,7 +1225,7 @@ export default function LeadIntelligenceWorkspace({
              ======================================================== */}
           {renderSectionHeader('notes', `${followUps.length} follow-up${followUps.length === 1 ? '' : 's'} · ${notes.length} note${notes.length === 1 ? '' : 's'} · ${tags.length} tag${tags.length === 1 ? '' : 's'}`)}
           {openSections.has('notes') && (
-            <div className="pt-1 pb-3 animate-fadeIn">
+            <div className="nx-section-body">
             <div className="space-y-6">
               
               {/* Card 1: Scheduled Follow-ups */}
