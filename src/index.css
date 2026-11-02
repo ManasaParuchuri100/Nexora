@@ -1295,3 +1295,31 @@ table tbody tr:hover {
 table button { min-height: 0 !important; }
 table p { line-height: 1.35; }
 table td { padding-top: 15px !important; padding-bottom: 15px !important; }
+
+/* Channel rows (Overview) */
+.nx-channelrow {
+  display: grid;
+  grid-template-columns: 30px 78px 1fr 30px 92px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+  font-size: 11px;
+  text-align: left;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.nx-channelrow b { color: var(--text-primary); }
+.nx-channel-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+.nx-channel-name { font-weight: 700; color: var(--text-primary); transition: color .15s; }
+@media (max-width: 480px) {
+  .nx-channelrow { grid-template-columns: 30px 1fr 30px; }
+  .nx-channelrow .nx-track, .nx-channelrow .nx-tag { display: none; }
+}

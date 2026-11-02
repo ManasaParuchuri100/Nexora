@@ -8,3 +8,4 @@ export * from './ProgressBar';
 export * from './Sparkline';
 export * from './EmptyState';
 export * from './PageHeader';
+export * from './ChannelLogo';

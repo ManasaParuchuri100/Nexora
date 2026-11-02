@@ -34,7 +34,10 @@ import {
   StatCard, 
   ProgressBar, 
   EmptyState, 
-  PageHeader 
+  PageHeader,
+  ChannelLogo,
+  BRAND_COLORS,
+  ChannelBrand
 } from '../ui';
 
 interface OverviewViewProps {
@@ -434,13 +437,6 @@ export default function OverviewView({
       ? 'Last 30 days'
       : `${customRange.startDate.slice(5)} – ${customRange.endDate.slice(5)}`;
 
-  // Qualified-demand bars (relative heights, scaled to the selected window)
-  const demandBars = useMemo(() => {
-    const base = [28, 45, 38, 58, 27, 47, 78];
-    const shift = datePreset === 'today' ? 6 : datePreset === '30d' ? -4 : 0;
-    return base.map((h, i) => Math.max(12, Math.min(96, h + (i % 2 === 0 ? shift : -shift))));
-  }, [datePreset]);
-
   const contacted = Math.max(stats.wonLeads + 1, Math.round(stats.qualifiedLeads * 0.62));
   const journey: Array<[string, number]> = [
     ['New', stats.newLeads],
@@ -449,6 +445,15 @@ export default function OverviewView({
     ['Contacted', contacted],
     ['Won', stats.wonLeads],
   ];
+
+  // Lead volume and qualification rate by source
+  const channels: Array<{ brand: ChannelBrand; name: string; share: number; qualified: number }> = [
+    { brand: 'whatsapp', name: 'WhatsApp', share: 48, qualified: 43 },
+    { brand: 'instagram', name: 'Instagram', share: 31, qualified: 30 },
+    { brand: 'website', name: 'Website', share: 14, qualified: 22 },
+    { brand: 'linkedin', name: 'LinkedIn', share: 7, qualified: 45 },
+  ];
+  const maxShare = Math.max(...channels.map(c => c.share));
 
   const deltaText = (d: { value: string; trend: 'up' | 'down' }) =>
     `${d.trend === 'up' ? '↑' : '↓'} ${d.value} ${stats.periodText}`;
@@ -492,10 +497,6 @@ export default function OverviewView({
   const rowTone = (iconBg: string) =>
     iconBg.includes('danger') ? 'red' : iconBg.includes('warn') ? 'amber' : iconBg.includes('ok') ? 'green' : '';
 
-  const formatClock = (ts: number) =>
-    new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-  const recentActivity = filteredActivities.slice(0, 4);
 
   return (
     <div className="select-text text-ink animate-fadeIn">
@@ -674,55 +675,8 @@ export default function OverviewView({
             ))}
           </div>
 
-          {/* Demand chart + next best actions */}
-          <div className="nx-grid nx-two">
-            <section className="nx-panel nx-pad">
-              <div className="nx-sectionhead">
-                <div>
-                  <h2>Are we creating qualified demand?</h2>
-                  <p>Newly qualified leads · {rangeLabel.toLowerCase()}</p>
-                </div>
-              </div>
-              <div className="nx-chart">
-                {demandBars.map((h, i) => (
-                  <div key={i} className="nx-bar" data-label={['M', 'T', 'W', 'T', 'F', 'S', 'S'][i]} style={{ height: `${h}%` }} />
-                ))}
-              </div>
-              <div className="text-[11px] text-ink-3 mt-[31px]">Qualification trend based on sample data.</div>
-            </section>
-
-            <section className="nx-panel nx-pad">
-              <div className="nx-sectionhead">
-                <div>
-                  <h2>Next best actions</h2>
-                  <p>Recommended tasks, not automatic changes.</p>
-                </div>
-              </div>
-              <div className="border-t border-line">
-                <div className="nx-actioncard">
-                  <span className="eyebrow">Lead recovery</span>
-                  <h3>Reconnect with dormant leads</h3>
-                  <p>{Math.max(3, Math.round(stats.newLeads / 2))} previous enquiries may be ready for a follow-up.</p>
-                  <button type="button" className="nx-link" onClick={() => onNavigate('leads', 'follow-ups')}>Review opportunity →</button>
-                </div>
-                <div className="nx-actioncard">
-                  <span className="eyebrow">Pricing</span>
-                  <h3>Answer pricing questions</h3>
-                  <p>{inboxCounts.askedForPricing} lead{inboxCounts.askedForPricing === 1 ? '' : 's'} asked about pricing and are waiting for a quote.</p>
-                  <button type="button" className="nx-link" onClick={() => onNavigate('inbox', 'asked-pricing')}>Open conversations →</button>
-                </div>
-                <div className="nx-actioncard">
-                  <span className="eyebrow">Campaigns</span>
-                  <h3>Plan your next campaign</h3>
-                  <p>Turn this week's qualified demand into a re-engagement campaign.</p>
-                  <button type="button" className="nx-link" onClick={() => onNavigate('campaigns', 'campaign-list')}>Open campaigns →</button>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Lead journey + recent activity */}
-          <div className="nx-grid nx-two">
+          {/* Lead journey + channels */}
+          <div className="nx-grid grid-cols-1 lg:grid-cols-2">
             <section className="nx-panel nx-pad">
               <div className="nx-sectionhead">
                 <div>
@@ -753,31 +707,73 @@ export default function OverviewView({
             <section className="nx-panel nx-pad">
               <div className="nx-sectionhead">
                 <div>
-                  <h2>Recent activity</h2>
-                  <p>A traceable record of agent and human actions.</p>
+                  <h2>Channels</h2>
+                  <p>Lead volume and qualification rate by source.</p>
                 </div>
               </div>
-              <div className="border-t border-line">
-                {recentActivity.length > 0 ? (
-                  recentActivity.map(act => (
+              <div className="grid gap-[14px]">
+                {channels.map(c => {
+                  const count = Math.max(1, Math.round((stats.newLeads * c.share) / 100));
+                  return (
                     <button
-                      key={act.id}
+                      key={c.brand}
                       type="button"
-                      onClick={() => onNavigate(act.category, act.subCategory)}
-                      className="nx-actioncard block w-full text-left min-h-0! rounded-none! cursor-pointer hover:text-brand"
+                      onClick={() => onNavigate('leads', 'all-leads')}
+                      className="nx-channelrow group"
                     >
-                      <b className="tabular-nums">{formatClock(act.timestamp)}</b> · {act.description}
+                      <span
+                        className="nx-channel-logo"
+                        style={{ color: BRAND_COLORS[c.brand], backgroundColor: `${BRAND_COLORS[c.brand]}14` }}
+                      >
+                        <ChannelLogo brand={c.brand} className="w-[15px] h-[15px]" />
+                      </span>
+                      <span className="nx-channel-name group-hover:text-brand">{c.name}</span>
+                      <span className="nx-track">
+                        <span
+                          className="block h-full rounded-[10px]"
+                          style={{ width: `${Math.round((c.share / maxShare) * 100)}%`, backgroundColor: BRAND_COLORS[c.brand] }}
+                        />
+                      </span>
+                      <b className="tabular-nums text-right">{count}</b>
+                      <span className={`nx-tag justify-center ${c.qualified >= 40 ? 'green' : c.qualified >= 28 ? 'amber' : ''}`}>
+                        {c.qualified}% qualified
+                      </span>
                     </button>
-                  ))
-                ) : (
-                  <div className="nx-actioncard text-ink-3">No activity in this period.</div>
-                )}
+                  );
+                })}
               </div>
-              <button type="button" className="nx-link mt-1" onClick={() => onNavigate('analytics', 'overview')}>
-                View activity log →
-              </button>
             </section>
           </div>
+
+          {/* Next best actions */}
+          <section className="nx-panel nx-pad">
+            <div className="nx-sectionhead">
+              <div>
+                <h2>Next best actions</h2>
+                <p>Recommended tasks, not automatic changes.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 border-t border-line md:divide-x divide-line">
+              <div className="nx-actioncard md:pr-6! md:border-t-0!">
+                <span className="eyebrow">Lead recovery</span>
+                <h3>Reconnect with dormant leads</h3>
+                <p>{Math.max(3, Math.round(stats.newLeads / 2))} previous enquiries may be ready for a follow-up.</p>
+                <button type="button" className="nx-link" onClick={() => onNavigate('leads', 'follow-ups')}>Review opportunity →</button>
+              </div>
+              <div className="nx-actioncard md:px-6! md:border-t-0!">
+                <span className="eyebrow">Pricing</span>
+                <h3>Answer pricing questions</h3>
+                <p>{inboxCounts.askedForPricing} lead{inboxCounts.askedForPricing === 1 ? '' : 's'} asked about pricing and are waiting for a quote.</p>
+                <button type="button" className="nx-link" onClick={() => onNavigate('inbox', 'asked-pricing')}>Open conversations →</button>
+              </div>
+              <div className="nx-actioncard md:pl-6! md:border-t-0!">
+                <span className="eyebrow">Campaigns</span>
+                <h3>Plan your next campaign</h3>
+                <p>Turn this week's qualified demand into a re-engagement campaign.</p>
+                <button type="button" className="nx-link" onClick={() => onNavigate('campaigns', 'campaign-list')}>Open campaigns →</button>
+              </div>
+            </div>
+          </section>
         </div>
       )}
 
