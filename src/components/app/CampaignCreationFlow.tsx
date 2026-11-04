@@ -219,20 +219,35 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
         }
       />
 
-      <div className="flex gap-2 mb-[15px] flex-wrap">
-        {STEP_TITLES.map((t, i) => (
-          <button
-            key={t}
-            type="button"
-            className={`nx-tab ${step === i + 1 ? 'active' : ''}`}
-            onClick={() => (i + 1 < step || form.name.trim() ? setStep(i + 1) : next())}
-          >
-            {i + 1}. {t}
-          </button>
-        ))}
-      </div>
+      <ol className="flex items-center gap-0 mb-[22px] p-0 list-none flex-wrap">
+        {STEP_TITLES.map((t, i) => {
+          const n = i + 1;
+          const done = step > n;
+          const cur = step === n;
+          return (
+            <li key={t} className="flex items-center">
+              <button
+                type="button"
+                onClick={() => (n < step || form.name.trim() ? setStep(n) : next())}
+                className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-0 min-h-0!"
+              >
+                <span
+                  className={`w-[26px] h-[26px] rounded-full grid place-items-center text-[11px] font-bold border ${
+                    cur ? 'bg-brand text-white border-brand' : done ? 'bg-brand-soft text-brand border-brand-soft' : 'bg-surface text-ink-3 border-line'
+                  }`}
+                >
+                  {done ? '✓' : n}
+                </span>
+                <span className={`text-[12px] font-semibold ${cur ? 'text-ink' : 'text-ink-3'}`}>{t}</span>
+              </button>
+              {n < STEP_TITLES.length && <span className="w-8 h-px bg-line mx-3" />}
+            </li>
+          );
+        })}
+      </ol>
 
-      <section className="nx-panel nx-pad max-w-[760px]">
+      <div className="grid gap-[15px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
+      <section className="nx-panel nx-pad">
         {step === 1 && (
           <>
             <Group label="Campaign name">
@@ -338,6 +353,25 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
           </button>
         </div>
       </section>
+
+        <aside className="nx-panel nx-pad lg:sticky lg:top-[88px]">
+          <div className="eyebrow mb-1">Your campaign</div>
+          <h3 className="font-display text-[18px] font-bold text-ink m-0 mb-3 tracking-[-0.4px]">
+            {form.name.trim() || 'Untitled campaign'}
+          </h3>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            <span className="nx-tag teal">{form.type}</span>
+            <span className="nx-tag">{form.primaryGoal}</span>
+          </div>
+          <div className="nx-split" />
+          <div className="nx-kv"><span>Audience</span><strong className="text-ink text-[12px] text-right">{form.audienceType}</strong></div>
+          <div className="nx-kv"><span>Reach</span><strong className="text-ink text-[12px] text-right">{form.location}, {form.ageRange}</strong></div>
+          <div className="nx-kv"><span>Budget</span><strong className="text-ink text-[12px]">{budgetLabel}</strong></div>
+          <div className="nx-kv"><span>Runs</span><strong className="text-ink text-[12px]">{DURATIONS.find(d => d.id === durationId)!.label}</strong></div>
+          <div className="nx-kv"><span>Channels</span><strong className="text-ink text-[12px] text-right">{form.channels.join(', ') || '—'}</strong></div>
+          <div className="nx-kv"><span>Tone</span><strong className="text-ink text-[12px]">{form.brandVoice} · {form.visualStyle}</strong></div>
+        </aside>
+      </div>
     </div>
   );
 }
