@@ -477,7 +477,7 @@ export default function NexoraApp({
 
                 {(activeSubCategory === 'schedule' || activeSubCategory === 'social-posts') && (
                   <SocialHubView
-                    activeSubCategory="ai-guided-creation"
+                    activeSubCategory="manual-scheduling"
                     accounts={accounts}
                     scheduledPosts={scheduledPosts}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
