@@ -470,6 +470,8 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
+                    campaigns={campaigns}
+                    onSchedulePost={handleAddScheduledPost}
                   />
                 )}
 
@@ -493,6 +495,8 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
+                    campaigns={campaigns}
+                    onSchedulePost={handleAddScheduledPost}
                   />
                 )}
               </>
