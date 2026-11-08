@@ -1,41 +1,307 @@
-import { PageHeader, Tabs } from '../ui';
-import React, { useState } from 'react';
-import { 
-  BarChart3, 
-  Activity, 
-  PieChart, 
-  TrendingUp, 
-  Calendar, 
-  ChevronDown, 
-  Download, 
-  Clock, 
-  ExternalLink,
-  Search,
-  Filter
-} from 'lucide-react';
-import { SubCategory, StatMetric } from '../../types';
+import React, { useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
+import { NavCategory, StatMetric, SubCategory } from '../../types';
+import { AIInsight, EmptyState, PageHeader, Tabs } from '../ui';
+import { AnalyticsData, Point, RANGES, RangeId, getAnalytics, toCsv } from '../../data/analyticsDemo';
 
 interface AnalyticsViewProps {
   activeSubCategory: SubCategory;
   onNavigateSub: (sub: SubCategory) => void;
-  metrics: StatMetric[];
+  metrics?: StatMetric[];
+  isFirstRun?: boolean;
+  onNavigateTo?: (category: NavCategory, sub?: SubCategory) => void;
+  onNotify?: (title: string, desc: string) => void;
 }
 
 export type AnalyticsTab = 'overview' | 'leads' | 'channels' | 'activity';
 
+const ACTIVITY_LABEL: Record<string, string> = {
+  lead: 'New lead',
+  ai: 'AI',
+  handoff: 'Handoff',
+  followup: 'Follow-up',
+  call: 'Call',
+  campaign: 'Campaign',
+};
+
+/* ---------------------------------------------------------------- */
+/*  Charts                                                           */
+/* ---------------------------------------------------------------- */
+function LineChart({ current, previous }: { current: Point[]; previous: Point[] }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const W = 720;
+  const H = 220;
+  const pad = { l: 34, r: 10, t: 10, b: 24 };
+  const max = Math.max(1, ...current.map(p => p.value), ...previous.map(p => p.value));
+  const niceMax = Math.ceil(max / 4) * 4 || 4;
+  const x = (i: number) => pad.l + (current.length === 1 ? (W - pad.l - pad.r) / 2 : (i / (current.length - 1)) * (W - pad.l - pad.r));
+  const y = (v: number) => pad.t + (1 - v / niceMax) * (H - pad.t - pad.b);
+  const path = (pts: Point[]) => pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+  const area = `${path(current)} L${x(current.length - 1)},${H - pad.b} L${x(0)},${H - pad.b} Z`;
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map(t => Math.round(t * niceMax));
+  const step = Math.max(1, Math.ceil(current.length / 8));
+  const hp = hover !== null ? current[hover] : null;
+
+  return (
+    <div className="relative">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Leads over time, this period against the previous period"
+        onMouseLeave={() => setHover(null)}
+        onMouseMove={e => {
+          const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+          const rel = ((e.clientX - r.left) / r.width) * W;
+          const i = Math.round(((rel - pad.l) / (W - pad.l - pad.r)) * (current.length - 1));
+          setHover(Math.min(current.length - 1, Math.max(0, i)));
+        }}>
+        {ticks.map(t => (
+          <g key={t}>
+            <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth="1" />
+            <text x={pad.l - 6} y={y(t) + 3} textAnchor="end" fontSize="10" fill="var(--text-muted)">{t}</text>
+          </g>
+        ))}
+        <path d={area} fill="var(--accent-subtle)" />
+        <path d={path(previous)} fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeDasharray="4 4" />
+        <path d={path(current)} fill="none" stroke="var(--primary)" strokeWidth="2.2" strokeLinejoin="round" />
+        {current.map((p, i) => (current.length - 1 - i) % step === 0 && (
+          <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fontSize="10" fill="var(--text-muted)">{p.label}</text>
+        ))}
+        {hover !== null && (
+          <g>
+            <line x1={x(hover)} x2={x(hover)} y1={pad.t} y2={H - pad.b} stroke="var(--border-strong)" />
+            <circle cx={x(hover)} cy={y(current[hover].value)} r="4" fill="var(--primary)" />
+          </g>
+        )}
+      </svg>
+      {hp && hover !== null && (
+        <div className="absolute top-1 right-2 text-[11px] bg-surface border border-line rounded-[8px] px-2.5 py-1.5 shadow-pop pointer-events-none">
+          <div className="font-bold text-ink">{hp.label}</div>
+          <div className="text-brand">This period: {hp.value}</div>
+          <div className="text-ink-3">Previous: {previous[hover]?.value ?? '—'}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BarRow({ label, value, max, suffix = '', tone = 'brand' }: { key?: React.Key; label: string; value: number; max: number; suffix?: string; tone?: 'brand' | 'warn' | 'danger' }) {
+  const color = tone === 'warn' ? 'bg-warn' : tone === 'danger' ? 'bg-danger' : 'bg-brand';
+  return (
+    <div className="flex items-center gap-3 py-[7px] text-[12px]">
+      <span className="w-[130px] shrink-0 text-ink-2 truncate">{label}</span>
+      <div className="flex-1 h-[7px] rounded-full bg-surface-raised overflow-hidden" aria-hidden="true">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${max ? (value / max) * 100 : 0}%` }} />
+      </div>
+      <span className="w-[56px] text-right font-bold text-ink tabular-nums">{value}{suffix}</span>
+    </div>
+  );
+}
+
+function Panel({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <section className="nx-panel nx-pad">
+      <div className="nx-sectionhead"><div><h2>{title}</h2>{sub && <p>{sub}</p>}</div></div>
+      {children}
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/*  Tabs                                                             */
+/* ---------------------------------------------------------------- */
+function Overview({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?: SubCategory) => void }) {
+  const total = d.current.reduce((a, p) => a + p.value, 0);
+  const prevTotal = d.previous.reduce((a, p) => a + p.value, 0);
+  const best = [...d.sources].sort((a, b) => b.conv - a.conv)[0];
+  const top = [...d.sources].sort((a, b) => b.leads - a.leads)[0];
+  const drop = d.funnel.slice(1).map((f, i) => ({ from: d.funnel[i].stage, to: f.stage, lost: d.funnel[i].count - f.count })).sort((a, b) => b.lost - a.lost)[0];
+  const click: Record<string, (() => void) | undefined> = {
+    leads: () => onGo('leads', 'all-leads'),
+    qualified: () => onGo('leads', 'all-leads'),
+    won: () => onGo('leads', 'all-leads'),
+    ai: () => onGo('inbox', 'inbox'),
+  };
+
+  return (
+    <div className="grid gap-[15px]">
+      <div className="nx-grid nx-metrics" style={{ gridTemplateColumns: 'repeat(5, minmax(0,1fr))' }}>
+        {d.kpis.map(k => {
+          const action = click[k.id];
+          const Tag: any = action ? 'button' : 'div';
+          return (
+            <Tag key={k.id} type={action ? 'button' : undefined} onClick={action} className={`nx-panel nx-metric text-left ${action ? 'cursor-pointer' : ''}`}>
+              <div className="nx-label">{k.label}</div>
+              <div className="nx-number">{k.value}</div>
+              <div className={`nx-delta ${k.delta < 0 ? 'down' : ''}`}>
+                {k.delta >= 0 ? '↑' : '↓'} {Math.abs(k.delta)}% <span className="text-ink-3 font-normal">vs previous</span>
+              </div>
+            </Tag>
+          );
+        })}
+      </div>
+
+      <AIInsight
+        observation={`${top.name} brings the most leads (${top.leads}), and ${best.name} converts best (${best.conv}%). The biggest funnel drop is ${drop.from} to ${drop.to}.`}
+        recommendation={`Reply faster on ${top.name} and review how leads are handled between ${drop.from} and ${drop.to}.`}
+        evidence={`Based on ${total} leads in ${d.range.label.toLowerCase()} (${prevTotal} in the previous period)`}
+        freshness="Sample workspace data"
+        action={{ label: 'Open leads', onClick: () => onGo('leads', 'all-leads') }}
+      />
+
+      <Panel title="Leads over time" sub={`${total} leads · previous period ${prevTotal}`}>
+        <div className="flex items-center gap-4 text-[11px] text-ink-3 mb-2">
+          <span className="inline-flex items-center gap-1.5"><span className="w-3 h-[3px] bg-brand rounded" />This period</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-3 border-t-2 border-dashed border-ink-3" />Previous period</span>
+        </div>
+        <LineChart current={d.current} previous={d.previous} />
+      </Panel>
+
+      <div className="nx-grid nx-two">
+        <Panel title="Funnel conversion" sub="Share of new leads reaching each stage.">
+          {d.funnel.map(f => (
+            <BarRow key={f.stage} label={`${f.stage} (${f.count})`} value={f.rate} max={100} suffix="%" tone={f.stage === 'Won' ? 'brand' : 'brand'} />
+          ))}
+        </Panel>
+        <Panel title="Speed and response" sub="How quickly customers get an answer.">
+          <div className="nx-kv"><span>Median first reply</span><strong className="text-ok">{d.speed.firstReply}</strong></div>
+          <div className="nx-kv"><span>Handoffs to a person</span><strong className="text-ink">{d.speed.handoffs}</strong></div>
+          <div className="nx-kv"><span>Median human reply</span><strong className="text-warn">{d.speed.humanReply}</strong></div>
+          <div className="nx-kv"><span>Handled by AI</span><strong className="text-ink">{d.speed.aiShare}%</strong></div>
+          <div className="nx-split" />
+          <button type="button" className="nx-btn sm" onClick={() => onGo('inbox', 'waiting-human')}>Review handoffs →</button>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function LeadsTab({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?: SubCategory) => void }) {
+  const maxSrc = Math.max(...d.sources.map(s => s.leads));
+  const maxCamp = Math.max(...d.campaigns.map(c => c.leads));
+  const maxLost = Math.max(...d.lost.map(l => l.count));
+  const maxTime = Math.max(...d.timeInStage.map(t => t.days));
+  const biggestLoss = [...d.lost].sort((a, b) => b.count - a.count)[0];
+  const lostTotal = d.lost.reduce((a, l) => a + l.count, 0);
+  return (
+    <div className="grid gap-[15px]">
+      <AIInsight
+        observation={`${biggestLoss.reason} is the top reason for lost leads (${biggestLoss.count} of ${lostTotal}).`}
+        recommendation={biggestLoss.reason === 'Price' ? 'Share a clear price range earlier in the conversation and review the pricing answers in AI knowledge.' : 'Review the follow-up cadence for these leads.'}
+        evidence={`${lostTotal} lost leads in ${d.range.label.toLowerCase()}`}
+        freshness="Sample workspace data"
+        action={{ label: 'Review follow-ups', onClick: () => onGo('leads', 'follow-ups') }}
+      />
+      <div className="nx-grid nx-two">
+        <Panel title="By source" sub="Where leads come from.">
+          {d.sources.map(s => <BarRow key={s.name} label={s.name} value={s.leads} max={maxSrc} />)}
+        </Panel>
+        <Panel title="By campaign" sub="Leads linked to a campaign. Leads without tracking show as “No campaign”.">
+          {d.campaigns.map(c => <BarRow key={c.name} label={c.name} value={c.leads} max={maxCamp} tone={c.name === 'No campaign' ? 'warn' : 'brand'} />)}
+        </Panel>
+        <Panel title="Time in stage" sub="Median days a lead stays in each stage.">
+          {d.timeInStage.map(t => <BarRow key={t.stage} label={t.stage} value={t.days} max={maxTime} suffix="d" />)}
+        </Panel>
+        <Panel title="Lost reasons" sub="Why leads were closed as lost.">
+          {d.lost.map(l => <BarRow key={l.reason} label={l.reason} value={l.count} max={maxLost} tone="danger" />)}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function ChannelsTab({ d }: { d: AnalyticsData }) {
+  const best = [...d.sources].sort((a, b) => b.conv - a.conv)[0];
+  const most = [...d.sources].sort((a, b) => b.leads - a.leads)[0];
+  return (
+    <div className="grid gap-[15px]">
+      <AIInsight
+        observation={`${most.name} brings the most qualified leads (${[...d.sources].sort((a, b) => b.qualified - a.qualified)[0].qualified}); ${best.name} converts best at ${best.conv}%.`}
+        recommendation={`Keep investing in ${most.name} and test what ${best.name} does differently.`}
+        evidence={`${d.sources.reduce((a, s) => a + s.leads, 0)} leads across ${d.sources.length} channels`}
+        freshness="Sample workspace data"
+      />
+      <section className="nx-panel overflow-x-auto">
+        <table className="w-full min-w-[640px]">
+          <thead>
+            <tr><th>Channel</th><th className="text-right">Conversations</th><th className="text-right">Leads</th><th className="text-right">Qualified</th><th className="text-right">Won</th><th className="text-right">Conv. %</th><th className="text-right">Avg first reply</th></tr>
+          </thead>
+          <tbody>
+            {d.sources.map(s => (
+              <tr key={s.name}>
+                <td className="font-semibold text-ink">{s.name}</td>
+                <td className="text-right tabular-nums">{s.conversations}</td>
+                <td className="text-right tabular-nums font-bold text-ink">{s.leads}</td>
+                <td className="text-right tabular-nums text-brand">{s.qualified}</td>
+                <td className="text-right tabular-nums">{s.won}</td>
+                <td className="text-right tabular-nums text-ok">{s.conv}%</td>
+                <td className="text-right tabular-nums">{s.reply}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
+
+function ActivityTab({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?: SubCategory) => void }) {
+  const [filter, setFilter] = useState('All');
+  const types = ['All', ...Array.from(new Set(d.activity.map(a => a.type)))];
+  const rows = d.activity.filter(a => filter === 'All' || a.type === filter);
+  return (
+    <section className="nx-panel nx-pad">
+      <div className="nx-sectionhead"><div><h2>Activity log</h2><p>What your team and the AI did, newest first.</p></div></div>
+      <div className="flex flex-wrap gap-[7px] mb-3" role="group" aria-label="Filter activity">
+        {types.map(t => (
+          <button key={t} type="button" aria-pressed={filter === t} className={`nx-chip ${filter === t ? 'active' : ''}`} onClick={() => setFilter(t)}>
+            {t === 'All' ? 'All' : ACTIVITY_LABEL[t] || t}
+          </button>
+        ))}
+      </div>
+      <div className="border-t border-line">
+        {rows.map(a => (
+          <div key={a.id} className="nx-row">
+            <span className="text-[11px] text-ink-3 w-[70px] shrink-0 tabular-nums">{a.when}</span>
+            <span className="nx-tag shrink-0">{ACTIVITY_LABEL[a.type] || a.type}</span>
+            <div className="flex-1 min-w-0 text-[12px] text-ink">{a.text}</div>
+            <button type="button" className="nx-inline-link shrink-0" onClick={() => onGo(a.go.category as NavCategory, a.go.sub as SubCategory)}>Open →</button>
+          </div>
+        ))}
+        {rows.length === 0 && <p className="text-[12px] text-ink-3 py-6 text-center m-0">No activity of this type.</p>}
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+
 export default function AnalyticsView({
   activeSubCategory,
   onNavigateSub,
-  metrics
+  isFirstRun = false,
+  onNavigateTo,
+  onNotify,
 }: AnalyticsViewProps) {
-  // Active Tab
-  const initialTab: AnalyticsTab = 
+  const initialTab: AnalyticsTab =
     activeSubCategory === 'leads' || activeSubCategory === 'lead-analytics' ? 'leads' :
     activeSubCategory === 'channels' || activeSubCategory === 'channel-performance' ? 'channels' :
     activeSubCategory === 'activity-log' || activeSubCategory === 'stats' ? 'activity' : 'overview';
 
-  const [currentTab, setCurrentTab] = useState<AnalyticsTab>(initialTab);
-  const [dateRange, setDateRange] = useState('Last 30 days');
+  const [tab, setTab] = useState<AnalyticsTab>(initialTab);
+  const [rangeId, setRangeId] = useState<RangeId>('30d');
+  const data = useMemo(() => getAnalytics(rangeId), [rangeId]);
+  const go = (cat: NavCategory, sub?: SubCategory) => onNavigateTo?.(cat, sub);
+
+  const exportCsv = () => {
+    const { name, rows } = toCsv(data, tab);
+    const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+    const csv = rows.map(r => r.map(esc).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    onNotify?.('Export ready', `${name}.csv was downloaded.`);
+  };
 
   return (
     <div className="space-y-[15px] pb-12 animate-fadeIn text-ink select-text">
@@ -45,23 +311,12 @@ export default function AnalyticsView({
         subtitle="See what is producing leads and where they are in the funnel."
         actions={
           <>
-            <div className="relative">
-              <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                aria-label="Date range"
-                className="bg-surface border border-line text-ink px-3 py-1.5 rounded-[9px] focus:outline-none cursor-pointer"
-              >
-                <option value="Today">Today</option>
-                <option value="7 days">7 days</option>
-                <option value="Last 30 days">Last 30 days</option>
-                <option value="90 days">90 days</option>
-                <option value="This quarter">This quarter</option>
-              </select>
-            </div>
-            <button type="button" onClick={() => alert('Exporting CSV analytics data...')} className="nx-btn inline-flex items-center gap-1.5">
+            <select value={rangeId} onChange={e => setRangeId(e.target.value as RangeId)} aria-label="Date range" className="bg-surface border border-line text-ink px-3 py-1.5 rounded-[9px] cursor-pointer">
+              {RANGES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
+            </select>
+            <button type="button" onClick={exportCsv} disabled={isFirstRun} className="nx-btn inline-flex items-center gap-1.5">
               <Download className="w-3.5 h-3.5" />
-              <span>Export</span>
+              <span>Export CSV</span>
             </button>
           </>
         }
@@ -70,11 +325,8 @@ export default function AnalyticsView({
       <Tabs<AnalyticsTab>
         idPrefix="analytics"
         label="Analytics sections"
-        value={currentTab}
-        onChange={id => {
-          setCurrentTab(id);
-          onNavigateSub(id === 'activity' ? 'activity-log' : id);
-        }}
+        value={tab}
+        onChange={id => { setTab(id); onNavigateSub(id === 'activity' ? 'activity-log' : id); }}
         tabs={[
           { id: 'overview', label: 'Overview' },
           { id: 'leads', label: 'Leads' },
@@ -83,290 +335,20 @@ export default function AnalyticsView({
         ]}
       />
 
-      {/* ========================================================
-          TAB 1: OVERVIEW (Page 32 spec)
-         ======================================================== */}
-      {currentTab === 'overview' && (
-        <div className="space-y-6">
-          
-          {/* 5 KPI Cards Row (Page 32 spec) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
-              <span className="text-[10px] text-ink-2 uppercase font-semibold block">LEADS</span>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-ink font-light">86</span>
-                <span className="text-xs text-ok font-semibold">↑ 18%</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
-              <span className="text-[10px] text-ink-2 uppercase font-semibold block">QUALIFIED</span>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-ink font-light">31</span>
-                <span className="text-xs text-ink-2">36%</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
-              <span className="text-[10px] text-ink-2 uppercase font-semibold block">WON</span>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-ink font-light">9</span>
-                <span className="text-xs text-ok font-semibold">10.5%</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
-              <span className="text-[10px] text-ink-2 uppercase font-semibold block">REVENUE</span>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-ink font-light">₹8.6L</span>
-                <span className="text-xs text-ok font-semibold">↑ 24%</span>
-              </div>
-            </div>
-
-            <div className="p-4 bg-surface-raised border border-line rounded-[9px] col-span-2 sm:col-span-1">
-              <span className="text-[10px] text-ink-2 uppercase font-semibold block">AI HANDLED</span>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-ok font-light">71%</span>
-                <span className="text-xs text-ink-2">Auto</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Leads Over Time Chart Box */}
-          <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
-            <div className="flex items-center justify-between text-xs pb-2 border-b border-line-subtle">
-              <span className="uppercase text-ink-2 font-semibold">LEADS OVER TIME</span>
-              <div className="flex items-center space-x-4 text-[11px]">
-                <span className="flex items-center space-x-1.5 text-ink">
-                  <span className="w-3 h-0.5 bg-ok" />
-                  <span>This period</span>
-                </span>
-                <span className="flex items-center space-x-1.5 text-ink-3">
-                  <span className="w-3 h-0.5 border-t border-dashed border-line-strong" />
-                  <span>Previous</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Sparkline Histogram */}
-            <div className="h-32 flex items-end justify-between gap-1.5 pt-4">
-              {[22, 34, 45, 68, 52, 78, 86, 74, 62, 88, 92, 104, 96, 112].map((val, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
-                  <div 
-                    className="w-full bg-brand/30 group-hover:bg-brand transition-colors rounded-t-[1px]"
-                    style={{ height: `${(val / 112) * 100}%` }}
-                  />
-                  <span className="text-[9px] text-ink-3">{idx + 1}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 2-Column: Funnel & Response */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 text-xs">
-            <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
-              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
-                FUNNEL CONVERSION
-              </span>
-              <div className="space-y-2 text-ink">
-                <div className="flex justify-between"><span>New (86)</span><span>100%</span></div>
-                <div className="flex justify-between"><span>Engaged (54)</span><span>63%</span></div>
-                <div className="flex justify-between"><span>Qualified (31)</span><span>36%</span></div>
-                <div className="flex justify-between"><span>Contacted (18)</span><span>21%</span></div>
-                <div className="flex justify-between text-ok font-semibold"><span>Won (9)</span><span>10.5%</span></div>
-              </div>
-            </div>
-
-            <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
-              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
-                SPEED & RESPONSE METRICS
-              </span>
-              <div className="space-y-3 pt-1">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-ink-2">Median first reply</span>
-                  <span className="text-ok font-bold text-sm">40 s</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-ink-2">Handoffs triggered</span>
-                  <span className="text-ink font-bold text-sm">23</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-ink-2">Median human reply</span>
-                  <span className="text-warn font-bold text-sm">6 min</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
+      {isFirstRun ? (
+        <EmptyState
+          title="No analytics yet"
+          description="Numbers appear here once leads start coming in from your connected channels."
+          action={<button type="button" className="nx-btn primary" onClick={() => go('settings', 'channels' as SubCategory)}>Connect a channel</button>}
+        />
+      ) : (
+        <div role="tabpanel" id={`analytics-panel-${tab}`} aria-labelledby={`analytics-tab-${tab}`}>
+          {tab === 'overview' && <Overview d={data} onGo={go} />}
+          {tab === 'leads' && <LeadsTab d={data} onGo={go} />}
+          {tab === 'channels' && <ChannelsTab d={data} />}
+          {tab === 'activity' && <ActivityTab d={data} onGo={go} />}
         </div>
       )}
-
-      {/* ========================================================
-          TAB 2: LEADS (Page 33 spec)
-         ======================================================== */}
-      {currentTab === 'leads' && (
-        <div className="space-y-5 text-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {/* By Source */}
-            <div className="p-5 bg-surface-raised border border-line rounded space-y-3">
-              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
-                BY SOURCE
-              </span>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="w-24">WhatsApp</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-ok h-full w-[100%]" /></div>
-                  <span className="w-8 text-right font-bold">42</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="w-24">Instagram</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-pink-400 h-full w-[64%]" /></div>
-                  <span className="w-8 text-right font-bold">27</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="w-24">Website</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-teal-400 h-full w-[43%]" /></div>
-                  <span className="w-8 text-right font-bold">18</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="w-24">LinkedIn</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-sky-400 h-full w-[26%]" /></div>
-                  <span className="w-8 text-right font-bold">11</span>
-                </div>
-              </div>
-            </div>
-
-            {/* By Campaign */}
-            <div className="p-5 bg-surface-raised border border-line rounded space-y-3">
-              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
-                BY CAMPAIGN
-              </span>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="w-32 truncate">Diwali offer</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-amber-400 h-full w-[100%]" /></div>
-                  <span className="w-8 text-right font-bold">42</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="w-32 truncate">Reactivate 2025</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-ok h-full w-[42%]" /></div>
-                  <span className="w-8 text-right font-bold">18</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="w-32 truncate">No campaign</span>
-                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-brand h-full w-[61%]" /></div>
-                  <span className="w-8 text-right font-bold">26</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="p-5 bg-surface-raised border border-line rounded space-y-2">
-              <span className="uppercase text-ink-2 font-semibold block pb-1 border-b border-line-subtle">
-                TIME IN STAGE (MEDIAN DAYS)
-              </span>
-              <p className="text-ink pt-2 leading-relaxed">
-                New: 0.5d · Engaged: 1.2d · Qualified: 3.4d · Contacted: 6.0d
-              </p>
-            </div>
-
-            <div className="p-5 bg-surface-raised border border-line rounded space-y-2">
-              <span className="uppercase text-ink-2 font-semibold block pb-1 border-b border-line-subtle">
-                LOST REASONS
-              </span>
-              <p className="text-ink-2 pt-2 leading-relaxed">
-                Price: 9 · No reply: 7 · Timing: 4 · Chose competitor: 3
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          TAB 3: CHANNELS (Page 33 spec)
-         ======================================================== */}
-      {currentTab === 'channels' && (
-        <div className="space-y-4 text-xs">
-          <div className="border border-line bg-surface-raised rounded overflow-x-auto">
-            <div className="min-w-[700px] grid grid-cols-12 px-5 py-3 bg-surface border-b border-line-subtle text-[10px] uppercase font-semibold text-ink-2">
-              <div className="col-span-3">Channel</div>
-              <div className="col-span-2 text-right">Conversations</div>
-              <div className="col-span-2 text-right">Leads</div>
-              <div className="col-span-2 text-right">Qualified</div>
-              <div className="col-span-1 text-right">Won</div>
-              <div className="col-span-1 text-right">Conv. %</div>
-              <div className="col-span-1 text-right">Avg reply</div>
-            </div>
-
-            <div className="divide-y divide-line-subtle">
-              {[
-                { name: 'WhatsApp', conv: 120, leads: 42, qual: 18, won: 4, convRate: '43%', reply: '35 s' },
-                { name: 'Instagram', conv: 84, leads: 27, qual: 8, won: 2, convRate: '30%', reply: '1m 10s' },
-                { name: 'Website', conv: 51, leads: 18, qual: 4, won: 2, convRate: '22%', reply: '50 s' },
-                { name: 'LinkedIn', conv: 30, leads: 11, qual: 5, won: 1, convRate: '45%', reply: '4 min' }
-              ].map(c => (
-                <div key={c.name} className="min-w-[700px] grid grid-cols-12 px-5 py-3 items-center hover:bg-surface-hover">
-                  <div className="col-span-3 font-semibold text-ink">{c.name}</div>
-                  <div className="col-span-2 text-right text-ink-2">{c.conv}</div>
-                  <div className="col-span-2 text-right text-ink font-bold">{c.leads}</div>
-                  <div className="col-span-2 text-right text-ok font-bold">{c.qual}</div>
-                  <div className="col-span-1 text-right text-ink">{c.won}</div>
-                  <div className="col-span-1 text-right text-ok">{c.convRate}</div>
-                  <div className="col-span-1 text-right text-ink-2">{c.reply}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="p-4 bg-surface-raised border border-ok/30 rounded text-xs text-ok">
-            ✦ Insight: WhatsApp brings the most qualified leads; LinkedIn converts best.
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================
-          TAB 4: ACTIVITY (Page 33 spec)
-         ======================================================== */}
-      {currentTab === 'activity' && (
-        <div className="space-y-4 text-xs">
-          <div className="p-5 bg-surface-raised border border-line rounded space-y-4">
-            <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
-              TODAY'S ACTIVITY LOG
-            </span>
-
-            <div className="divide-y divide-line-subtle">
-              <div className="py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="text-ink-2">10:42</span>
-                  <span className="text-ok">＋</span>
-                  <span className="text-ink">New WhatsApp lead · Rahul Sharma</span>
-                </div>
-                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
-              </div>
-
-              <div className="py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="text-ink-2">10:36</span>
-                  <span className="text-ok">✦</span>
-                  <span className="text-ink">AI qualified Aster Labs as Hot · score 92</span>
-                </div>
-                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
-              </div>
-
-              <div className="py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="text-ink-2">10:18</span>
-                  <span className="text-warn">👤</span>
-                  <span className="text-ink">Handoff requested · John Carter · Instagram</span>
-                </div>
-                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

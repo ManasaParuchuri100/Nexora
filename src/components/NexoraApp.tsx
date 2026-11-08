@@ -555,6 +555,9 @@ export default function NexoraApp({
                 activeSubCategory={activeSubCategory}
                 onNavigateSub={(sub) => handleSelectNav('analytics', sub)}
                 metrics={metrics}
+                isFirstRun={isFirstRun}
+                onNavigateTo={handleSelectNav}
+                onNotify={showToast}
               />
             )}
 
