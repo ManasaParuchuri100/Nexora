@@ -73,38 +73,38 @@ export default function LeadDetailModal({
         className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl flex flex-col border transition-colors ${
           isLight 
             ? 'bg-white border-slate-200 text-slate-900' 
-            : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+            : 'bg-surface border-line text-ink'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className={`p-6 border-b flex items-start justify-between ${
-          isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+          isLight ? 'bg-slate-50/80 border-slate-200' : 'bg-surface-raised border-line'
         }`}>
           <div>
             <div className="flex items-center space-x-2.5 mb-1.5">
               <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
                 lead.tag === 'Priority' || lead.isPriority
-                  ? 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/40'
+                  ? 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-danger dark:border-rose-800/40'
                   : lead.tag === 'Returning'
                   ? 'text-sky-700 bg-sky-50 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/40'
                   : lead.tag === 'Follow-up'
-                  ? 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/40'
+                  ? 'text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-warn dark:border-amber-800/40'
                   : 'text-slate-700 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300'
               }`}>
                 {lead.tag || 'New lead'}
               </span>
-              <span className="text-xs text-slate-400 dark:text-[#A9BFA5]/70 font-mono">
+              <span className="text-xs text-slate-400 dark:text-ink-2 ">
                 ID: {lead.id}
               </span>
             </div>
             <h2 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-              isLight ? 'text-slate-900' : 'text-white'
+              isLight ? 'text-slate-900' : 'text-ink'
             }`}>
               {lead.company || lead.name}
             </h2>
             <p className={`text-xs mt-1 ${
-              isLight ? 'text-slate-500' : 'text-[#A9BFA5]/80'
+              isLight ? 'text-slate-500' : 'text-ink-2'
             }`}>
               {lead.description || 'Enterprise prospect inquiry requiring bespoke onboarding.'}
             </p>
@@ -113,7 +113,7 @@ export default function LeadDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:text-ink dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,10 +121,10 @@ export default function LeadDetailModal({
 
         {/* Stage Advancement Flow */}
         <div className={`px-6 py-4 border-b ${
-          isLight ? 'bg-white border-slate-200' : 'bg-[#071C1A] border-[rgba(169,191,165,0.15)]'
+          isLight ? 'bg-white border-slate-200' : 'bg-surface border-line-subtle'
         }`}>
           <span className={`text-[11px] font-semibold uppercase tracking-wider block mb-2 ${
-            isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+            isLight ? 'text-slate-500' : 'text-ink-3'
           }`}>
             Pipeline Stage Progression
           </span>
@@ -141,14 +141,14 @@ export default function LeadDetailModal({
                   onClick={() => handleStageChange(st)}
                   className={`py-2 px-2 text-center rounded-lg border text-xs font-medium transition-all cursor-pointer ${
                     isCurrent
-                      ? 'bg-teal-600 border-teal-600 text-white font-semibold shadow-xs'
+                      ? 'bg-teal-600 border-teal-600 text-ink font-semibold shadow-xs'
                       : isPast
                       ? isLight 
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-emerald-500/30 bg-emerald-950/20 text-emerald-300'
+                        : 'border-emerald-500/30 bg-emerald-950/20 text-ok'
                       : isLight
                         ? 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                        : 'border-[rgba(169,191,165,0.15)] bg-[#061816] text-[#A9BFA5]/60 hover:text-[#A9BFA5]'
+                        : 'border-line-subtle bg-surface-raised text-ink-3 hover:text-ink-2'
                   }`}
                 >
                   <div className={`text-[10px] uppercase font-bold mb-0.5 ${
@@ -167,50 +167,50 @@ export default function LeadDetailModal({
         <div className="p-6 space-y-6">
           {/* Key Metrics */}
           <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl border ${
-            isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-[#061816] border-[rgba(169,191,165,0.15)]'
+            isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-surface-raised border-line-subtle'
           }`}>
             <div>
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Estimated Value
               </span>
               <span className={`text-lg font-bold mt-0.5 block ${
-                isLight ? 'text-slate-900' : 'text-white'
+                isLight ? 'text-slate-900' : 'text-ink'
               }`}>
                 {lead.value || '₹4.5L'}
               </span>
             </div>
             <div>
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Intent Score
               </span>
-              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
+              <span className="text-base font-bold text-emerald-600 dark:text-ok mt-0.5 block">
                 {lead.score} / 100
               </span>
             </div>
             <div>
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Source
               </span>
               <span className={`text-xs font-medium mt-0.5 block truncate ${
-                isLight ? 'text-slate-700' : 'text-[#E8E9D8]'
+                isLight ? 'text-slate-700' : 'text-ink'
               }`}>
                 {lead.source}
               </span>
             </div>
             <div>
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Last Activity
               </span>
               <span className={`text-xs mt-0.5 block ${
-                isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
+                isLight ? 'text-slate-600' : 'text-ink-2'
               }`}>
                 {lead.lastActivity || 'Today'}
               </span>
@@ -221,21 +221,21 @@ export default function LeadDetailModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Assigned Team Lead
               </span>
               <div className={`flex items-center space-x-3 p-3.5 rounded-xl border ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#061816] border-[rgba(169,191,165,0.15)]'
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-surface-raised border-line-subtle'
               }`}>
-                <div className="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+                <div className="w-9 h-9 rounded-full bg-teal-600 text-ink flex items-center justify-center text-xs font-bold">
                   {lead.assignee?.name ? lead.assignee.name.charAt(0) : 'R'}
                 </div>
                 <div>
-                  <h4 className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <h4 className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-ink'}`}>
                     {lead.assignee?.name || 'Rahul — Sales'}
                   </h4>
-                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#A9BFA5]/70'}`}>
+                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
                     {lead.assignee?.role || 'Lead Manager'}
                   </p>
                 </div>
@@ -244,18 +244,18 @@ export default function LeadDetailModal({
 
             <div className="space-y-2">
               <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
-                isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Primary Contact
               </span>
               <div className={`p-3.5 rounded-xl border space-y-1.5 text-xs ${
-                isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#061816] border-[rgba(169,191,165,0.15)]'
+                isLight ? 'bg-slate-50 border-slate-200' : 'bg-surface-raised border-line-subtle'
               }`}>
-                <div className={`flex items-center space-x-2 font-medium ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                <div className={`flex items-center space-x-2 font-medium ${isLight ? 'text-slate-800' : 'text-ink'}`}>
                   <Mail className="w-3.5 h-3.5 text-teal-600" />
                   <span>{lead.email}</span>
                 </div>
-                <div className={`flex items-center space-x-2 text-[11px] ${isLight ? 'text-slate-500' : 'text-[#A9BFA5]/70'}`}>
+                <div className={`flex items-center space-x-2 text-[11px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Scheduled date: {lead.date || 'Today'}</span>
                 </div>
@@ -265,13 +265,13 @@ export default function LeadDetailModal({
 
           {/* AI Response Generator */}
           <div className={`p-4 rounded-xl border space-y-3 ${
-            isLight ? 'bg-teal-50/50 border-teal-200/80' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+            isLight ? 'bg-teal-50/50 border-teal-200/80' : 'bg-surface-raised border-line'
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                 <span className={`text-xs font-bold uppercase tracking-wider ${
-                  isLight ? 'text-teal-900' : 'text-white'
+                  isLight ? 'text-teal-900' : 'text-ink'
                 }`}>
                   TECAVY AI Follow-up Composer
                 </span>
@@ -294,7 +294,7 @@ export default function LeadDetailModal({
                   className={`w-full p-3 rounded-lg text-xs leading-relaxed resize-none focus:outline-none focus:border-teal-600 border ${
                     isLight 
                       ? 'bg-white border-slate-200 text-slate-800' 
-                      : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+                      : 'bg-surface border-line text-ink'
                   }`}
                 />
                 <div className="flex justify-end space-x-3">
@@ -304,7 +304,7 @@ export default function LeadDetailModal({
                       onDispatchResponse?.(lead.company || lead.name);
                       onClose();
                     }}
-                    className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-xs shadow-xs transition-colors cursor-pointer flex items-center space-x-2"
+                    className="bg-teal-600 hover:bg-teal-700 text-ink px-4 py-2 rounded-lg font-semibold text-xs shadow-xs transition-colors cursor-pointer flex items-center space-x-2"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send Follow-up Note</span>
@@ -317,17 +317,17 @@ export default function LeadDetailModal({
 
         {/* Footer Actions */}
         <div className={`p-4 border-t flex items-center justify-between ${
-          isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+          isLight ? 'bg-slate-50 border-slate-200' : 'bg-surface-raised border-line'
         }`}>
           <button
             type="button"
             onClick={handleTogglePriority}
             className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
               lead.isPriority
-                ? 'border-rose-300 text-rose-700 bg-rose-50 dark:border-rose-700 dark:text-rose-300 dark:bg-rose-950/40'
+                ? 'border-rose-300 text-rose-700 bg-rose-50 dark:border-rose-700 dark:text-danger dark:bg-rose-950/40'
                 : isLight
                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5] hover:text-white'
+                : 'border-line text-ink-2 hover:text-ink'
             }`}
           >
             {lead.isPriority ? '★ Priority Lead' : '☆ Mark Priority'}
@@ -339,7 +339,7 @@ export default function LeadDetailModal({
             className={`px-4 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
               isLight
                 ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                : 'border-[rgba(169,191,165,0.3)] text-[#E8E9D8] hover:bg-[#0D2D2A]'
+                : 'border-line text-ink hover:bg-surface-hover'
             }`}
           >
             Close

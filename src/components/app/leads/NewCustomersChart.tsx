@@ -93,36 +93,36 @@ export default function NewCustomersChart({
   const showReferral = activeChannel === 'all' || activeChannel === 'referral';
 
   return (
-    <div className="border border-[rgba(169,191,165,0.2)] bg-[#071C1A] p-5 flex flex-col justify-between h-full relative overflow-hidden group">
+    <div className="border border-line bg-surface p-5 flex flex-col justify-between h-full relative overflow-hidden group">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
         <div className="flex items-center space-x-3">
-          <h3 className="serif text-xl sm:text-2xl font-light text-[#E8E9D8] tracking-tight">
+          <h3 className="font-display font-bold text-xl sm:text-2xl font-light text-ink tracking-tight">
             New customers
           </h3>
           {onToggleActivity && (
             <button
               type="button"
               onClick={onToggleActivity}
-              className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-[2px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
+              className={`text-[10px]  uppercase tracking-wider px-2.5 py-1 rounded-[9px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
                 isActivityVisible
-                  ? 'border-[#A9BFA5] text-[#E8E9D8] bg-[#072421]'
-                  : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/70 hover:text-[#E8E9D8] hover:border-[rgba(169,191,165,0.4)]'
+                  ? 'border-line-strong text-ink bg-[#072421]'
+                  : 'border-line text-ink-2 hover:text-ink hover:border-line'
               }`}
             >
-              <Activity className="w-3 h-3 text-[#A9BFA5]" />
+              <Activity className="w-3 h-3 text-ink-2" />
               <span>{isActivityVisible ? 'Hide Activity Graph' : 'Show Activity Graph'}</span>
             </button>
           )}
         </div>
 
         {/* Legend with interactive channel filters */}
-        <div className="flex items-center space-x-3 text-[10px] font-mono text-[#A9BFA5]/80 select-none">
+        <div className="flex items-center space-x-3 text-[10px]  text-ink-2 select-none">
           <button
             type="button"
             onClick={() => setActiveChannel(activeChannel === 'website' ? 'all' : 'website')}
             className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
-              showWebsite ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+              showWebsite ? 'opacity-100 font-medium text-ink' : 'opacity-35'
             }`}
             title="Filter by Website"
           >
@@ -133,18 +133,18 @@ export default function NewCustomersChart({
             type="button"
             onClick={() => setActiveChannel(activeChannel === 'ads' ? 'all' : 'ads')}
             className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
-              showAds ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+              showAds ? 'opacity-100 font-medium text-ink' : 'opacity-35'
             }`}
             title="Filter by Ads"
           >
-            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-[#1B6350]' : 'bg-[#A9BFA5]'}`} />
+            <span className={`w-2 h-2 rounded-full ${isLight ? 'bg-[#1B6350]' : 'bg-brand'}`} />
             <span>Ads</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveChannel(activeChannel === 'referral' ? 'all' : 'referral')}
             className={`flex items-center space-x-1.5 cursor-pointer transition-opacity ${
-              showReferral ? 'opacity-100 font-medium text-[#E8E9D8]' : 'opacity-35'
+              showReferral ? 'opacity-100 font-medium text-ink' : 'opacity-35'
             }`}
             title="Filter by Referral"
           >
@@ -309,7 +309,7 @@ export default function NewCustomersChart({
                   fill={isSelected ? (isLight ? '#0F172A' : '#F8FAFC') : labelFill}
                   fontSize="11"
                   fontWeight={isSelected ? '600' : '500'}
-                  fontFamily="sans-serif"
+                  fontFamily="sans-font-display font-bold"
                   textAnchor="middle"
                 >
                   {d.day}
@@ -340,7 +340,7 @@ export default function NewCustomersChart({
             transform: activeDayIndex > 1 && activeDayIndex < 5 ? 'translateX(-50%)' : 'none'
           }}
         >
-          <div className="bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-2xl px-3 py-2 rounded-[2px] text-[11px] font-mono space-y-1 min-w-[110px]">
+          <div className="bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-2xl px-3 py-2 rounded-[9px] text-[11px]  space-y-1 min-w-[110px]">
             <div className="flex items-center space-x-2 text-[var(--text-primary)]">
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: websiteStroke }} />
               <span className="text-[var(--text-secondary)]">Website -</span>

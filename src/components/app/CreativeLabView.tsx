@@ -1,3 +1,4 @@
+import { copyText } from './settings/store';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Sparkles, 
@@ -1286,7 +1287,7 @@ Audio: Solo cello harmonics and tactile room tone
   };
 
   const handleCopyAsset = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+    void copyText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };

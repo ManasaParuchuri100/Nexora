@@ -46,31 +46,31 @@ export default function CommandPalette({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-xl bg-[#061816] border border-[rgba(169,191,165,0.3)] shadow-2xl rounded-[2px] overflow-hidden font-mono text-xs text-[#E8E9D8]"
+        className="w-full max-w-xl bg-surface-raised border border-line shadow-2xl rounded-[9px] overflow-hidden  text-xs text-ink"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar (Page 9 spec) */}
-        <div className="flex items-center px-4 py-3.5 border-b border-[rgba(169,191,165,0.2)] bg-[#071C1A]">
-          <Search className="w-4 h-4 text-[#A9BFA5] mr-3 shrink-0" />
+        <div className="flex items-center px-4 py-3.5 border-b border-line bg-surface">
+          <Search className="w-4 h-4 text-ink-2 mr-3 shrink-0" />
           <input
             type="text"
             autoFocus
             placeholder="Search leads, conversations, campaigns, or actions"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-[#E8E9D8] text-xs focus:outline-none placeholder-[#A9BFA5]/50 font-light"
+            className="w-full bg-transparent text-ink text-xs focus:outline-none placeholder:text-ink-3 font-light"
           />
-          <button type="button" onClick={onClose} className="text-[#A9BFA5] hover:text-white p-1">
+          <button type="button" onClick={onClose} className="text-ink-2 hover:text-ink p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content sections */}
-        <div className="max-h-96 overflow-y-auto p-4 space-y-4 divide-y divide-[rgba(169,191,165,0.12)]">
+        <div className="max-h-96 overflow-y-auto p-4 space-y-4 divide-y divide-line-subtle">
           
           {/* ACTIONS */}
           <div className="space-y-2">
-            <span className="text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold block">
+            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
               ACTIONS
             </span>
             <div className="flex flex-wrap gap-2">
@@ -80,7 +80,7 @@ export default function CommandPalette({
                   onClose();
                   onTriggerQuickAction('lead');
                 }}
-                className="px-2.5 py-1 bg-[#0D2D2A] hover:bg-[#A9BFA5]/20 border border-[rgba(169,191,165,0.25)] rounded text-[#E8E9D8] cursor-pointer"
+                className="px-2.5 py-1 bg-surface-hover hover:bg-brand border border-line rounded text-ink cursor-pointer"
               >
                 + New lead
               </button>
@@ -90,7 +90,7 @@ export default function CommandPalette({
                   onClose();
                   onTriggerQuickAction('schedule');
                 }}
-                className="px-2.5 py-1 bg-[#0D2D2A] hover:bg-[#A9BFA5]/20 border border-[rgba(169,191,165,0.25)] rounded text-[#E8E9D8] cursor-pointer"
+                className="px-2.5 py-1 bg-surface-hover hover:bg-brand border border-line rounded text-ink cursor-pointer"
               >
                 + New post
               </button>
@@ -100,7 +100,7 @@ export default function CommandPalette({
                   onClose();
                   onTriggerQuickAction('campaign');
                 }}
-                className="px-2.5 py-1 bg-[#0D2D2A] hover:bg-[#A9BFA5]/20 border border-[rgba(169,191,165,0.25)] rounded text-[#E8E9D8] cursor-pointer"
+                className="px-2.5 py-1 bg-surface-hover hover:bg-brand border border-line rounded text-ink cursor-pointer"
               >
                 + New campaign
               </button>
@@ -109,7 +109,7 @@ export default function CommandPalette({
 
           {/* LEADS */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold block">
+            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
               LEADS
             </span>
             <div 
@@ -117,19 +117,19 @@ export default function CommandPalette({
                 onClose();
                 onSelectNav('leads', 'all-leads');
               }}
-              className="p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer flex items-center justify-between"
+              className="p-2 hover:bg-surface-hover rounded cursor-pointer flex items-center justify-between"
             >
               <div>
-                <span className="font-semibold text-white">Aster Labs</span>
-                <span className="text-[#A9BFA5] ml-2">· Qualified · Hot</span>
+                <span className="font-semibold text-ink">Aster Labs</span>
+                <span className="text-ink-2 ml-2">· Qualified · Hot</span>
               </div>
-              <span className="text-[#A9BFA5]/60 text-[10px]">92 score</span>
+              <span className="text-ink-3 text-[10px]">92 score</span>
             </div>
           </div>
 
           {/* CONVERSATIONS */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold block">
+            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
               CONVERSATIONS
             </span>
             <div 
@@ -137,19 +137,19 @@ export default function CommandPalette({
                 onClose();
                 onSelectNav('inbox', 'inbox');
               }}
-              className="p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer flex items-center justify-between"
+              className="p-2 hover:bg-surface-hover rounded cursor-pointer flex items-center justify-between"
             >
               <div>
-                <span className="font-semibold text-white">Rahul Sharma</span>
-                <span className="text-[#A9BFA5] ml-2">· WhatsApp · 4 min ago</span>
+                <span className="font-semibold text-ink">Rahul Sharma</span>
+                <span className="text-ink-2 ml-2">· WhatsApp · 4 min ago</span>
               </div>
-              <span className="text-amber-300 text-[10px]">Needs you</span>
+              <span className="text-warn text-[10px]">Needs you</span>
             </div>
           </div>
 
           {/* PAGES */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-[#A9BFA5]/60 font-semibold block">
+            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
               PAGES
             </span>
             {[
@@ -173,10 +173,10 @@ export default function CommandPalette({
                     onClose();
                     onSelectNav(page.category, page.sub);
                   }}
-                  className="w-full text-left p-2 hover:bg-[#0D2D2A]/40 rounded cursor-pointer text-xs flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+                  className="w-full text-left p-2 hover:bg-surface-hover rounded cursor-pointer text-xs flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
                 >
-                  <span className="text-[#E8E9D8]">{page.label}</span>
-                  <span className="text-[#A9BFA5]/60 text-[10px]">Jump to page</span>
+                  <span className="text-ink">{page.label}</span>
+                  <span className="text-ink-3 text-[10px]">Jump to page</span>
                 </button>
               ))}
           </div>
@@ -184,7 +184,7 @@ export default function CommandPalette({
         </div>
 
         {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-[rgba(169,191,165,0.15)] bg-[#071C1A] text-[10px] text-[#A9BFA5]/60 flex items-center justify-between">
+        <div className="px-4 py-2 border-t border-line-subtle bg-surface text-[10px] text-ink-3 flex items-center justify-between">
           <span>↑↓ to move</span>
           <span>↵ to open</span>
           <span>esc to close</span>

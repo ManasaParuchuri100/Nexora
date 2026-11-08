@@ -403,23 +403,23 @@ export default function StatsView() {
   }, [socialMetric, socialPlatform]);
 
   return (
-    <div className="space-y-20 py-4 max-w-5xl mx-auto animate-fadeIn text-[#E8E9D8]">
+    <div className="space-y-20 py-4 max-w-5xl mx-auto animate-fadeIn text-ink">
       {/* =====================================================================
           HEADER & TIME FILTER
           ===================================================================== */}
-      <header className="border-b border-[rgba(169,191,165,0.2)] pb-8">
+      <header className="border-b border-line pb-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
-            <h1 className="serif text-4xl sm:text-5xl lg:text-6xl font-light text-[#E8E9D8] tracking-tight">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl font-light text-ink tracking-tight">
               Stats
             </h1>
-            <p className="mt-3 text-xs sm:text-sm text-[#A9BFA5]/80 font-light leading-relaxed">
+            <p className="mt-3 text-xs sm:text-sm text-ink-2 font-light leading-relaxed">
               A clear view of how your workspace is performing.
             </p>
           </div>
 
           {/* Time filter: 7D 30D 90D 1Y */}
-          <div className="flex items-center space-x-6 text-xs uppercase tracking-widest font-mono">
+          <div className="flex items-center space-x-6 text-xs uppercase tracking-widest ">
             {(['7D', '30D', '90D', '1Y'] as TimeRange[]).map((period) => {
               const isSelected = timeRange === period && leadRangeMode !== 'CUSTOM';
               return (
@@ -429,8 +429,8 @@ export default function StatsView() {
                   onClick={() => handleGlobalTimeRangeChange(period)}
                   className={`pb-1 transition-colors cursor-pointer border-b ${
                     isSelected
-                      ? 'text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                      : 'text-[#A9BFA5]/50 border-transparent hover:text-[#A9BFA5]'
+                      ? 'text-ink border-line-strong font-semibold'
+                      : 'text-ink-3 border-transparent hover:text-ink-2'
                   }`}
                 >
                   {period}
@@ -448,33 +448,33 @@ export default function StatsView() {
         {/* Section Heading & Stat */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-mono block mb-1">
+            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               01 // LEAD GROWTH
             </span>
-            <h2 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
               Lead Growth
             </h2>
-            <p className="mt-1 text-xs text-[#A9BFA5]/80 font-light">
+            <p className="mt-1 text-xs text-ink-2 font-light">
               Track how your incoming leads are changing over time.
             </p>
           </div>
 
           {/* Metric Callout */}
           <div className="text-left md:text-right">
-            <span className="serif text-3xl sm:text-4xl font-light text-[#E8E9D8] block">
+            <span className="font-display font-bold text-3xl sm:text-4xl font-light text-ink block">
               {leadGrowthData.stat}
             </span>
-            <span className="text-[11px] font-mono text-[#A9BFA5]/70 block mt-0.5">
+            <span className="text-[11px]  text-ink-2 block mt-0.5">
               {leadGrowthData.comparison}
             </span>
           </div>
         </div>
 
         {/* Lead Growth Filter Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-1 text-xs font-mono border-t border-[rgba(169,191,165,0.12)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-1 text-xs  border-t border-line-subtle">
           {/* Preset Buttons & Custom Button */}
           <div className="flex items-center flex-wrap gap-2">
-            <span className="text-[#A9BFA5]/60 uppercase tracking-wider text-[10px] mr-1 hidden sm:inline">
+            <span className="text-ink-3 uppercase tracking-wider text-[10px] mr-1 hidden sm:inline">
               Range:
             </span>
             {(['7D', '30D', '90D', '1Y'] as TimeRange[]).map((period) => {
@@ -489,8 +489,8 @@ export default function StatsView() {
                   }}
                   className={`px-2.5 py-1 text-xs transition-colors cursor-pointer border ${
                     isSelected
-                      ? 'bg-[#A9BFA5]/15 text-[#E8E9D8] border-[#A9BFA5]'
-                      : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5] hover:border-[rgba(169,191,165,0.2)]'
+                      ? 'bg-brand text-ink border-line-strong'
+                      : 'text-ink-3 border-transparent hover:text-ink-2 hover:border-line'
                   }`}
                 >
                   {period}
@@ -505,15 +505,15 @@ export default function StatsView() {
               onClick={() => setIsCalendarModalOpen(true)}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs transition-colors cursor-pointer border ${
                 leadRangeMode === 'CUSTOM'
-                  ? 'bg-[#A9BFA5]/20 text-[#E8E9D8] border-[#A9BFA5] font-medium'
-                  : 'text-[#A9BFA5]/70 border-[rgba(169,191,165,0.25)] hover:text-[#E8E9D8] hover:border-[#A9BFA5]'
+                  ? 'bg-brand text-ink border-line-strong font-medium'
+                  : 'text-ink-2 border-line hover:text-ink hover:border-line-strong'
               }`}
               title="Click to decide start and end date on calendar and sort on that basis"
             >
-              <Calendar className="w-3.5 h-3.5 text-[#A9BFA5]" />
+              <Calendar className="w-3.5 h-3.5 text-ink-2" />
               <span>Custom Dates 📅</span>
               {leadRangeMode === 'CUSTOM' && (
-                <span className="ml-1 text-[10px] bg-[#071C1A] text-[#A9BFA5] px-1.5 py-0.2 border border-[rgba(169,191,165,0.3)]">
+                <span className="ml-1 text-[10px] bg-surface text-ink-2 px-1.5 py-0.2 border border-line">
                   {customStartDate.slice(5)} → {customEndDate.slice(5)}
                 </span>
               )}
@@ -521,15 +521,15 @@ export default function StatsView() {
           </div>
 
           {/* Quick Metrics & Current Span Badge */}
-          <div className="flex items-center gap-3 text-[11px] text-[#A9BFA5]/80">
-            <span className="hidden lg:inline text-[#A9BFA5]/50">
+          <div className="flex items-center gap-3 text-[11px] text-ink-2">
+            <span className="hidden lg:inline text-ink-3">
               {leadGrowthData.formattedRange}
             </span>
-            <span className="border-l border-[rgba(169,191,165,0.2)] pl-3 hidden sm:inline">
-              Total: <strong className="text-[#E8E9D8] font-normal">{leadGrowthData.totalCount} leads</strong>
+            <span className="border-l border-line pl-3 hidden sm:inline">
+              Total: <strong className="text-ink font-normal">{leadGrowthData.totalCount} leads</strong>
             </span>
-            <span className="border-l border-[rgba(169,191,165,0.2)] pl-3 hidden md:inline">
-              Peak: <strong className="text-[#E8E9D8] font-normal">{leadGrowthData.peak?.count}</strong> ({leadGrowthData.peak?.label})
+            <span className="border-l border-line pl-3 hidden md:inline">
+              Peak: <strong className="text-ink font-normal">{leadGrowthData.peak?.count}</strong> ({leadGrowthData.peak?.label})
             </span>
             {leadRangeMode === 'CUSTOM' && (
               <button
@@ -538,7 +538,7 @@ export default function StatsView() {
                   setLeadRangeMode('30D');
                   setIsCustomPickerOpen(false);
                 }}
-                className="text-[10px] text-[#A9BFA5]/60 hover:text-[#E8E9D8] underline cursor-pointer ml-1"
+                className="text-[10px] text-ink-3 hover:text-ink underline cursor-pointer ml-1"
                 title="Reset to standard 30-day view"
               >
                 Reset
@@ -549,18 +549,18 @@ export default function StatsView() {
 
         {/* Expandable Custom Date Picker Panel */}
         {isCustomPickerOpen && (
-          <div className="p-4 sm:p-5 bg-[#061816] border border-[rgba(169,191,165,0.3)] rounded-[2px] space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between pb-3 border-b border-[rgba(169,191,165,0.15)]">
+          <div className="p-4 sm:p-5 bg-surface-raised border border-line rounded-[9px] space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-line-subtle">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#A9BFA5]" />
-                <span className="text-xs font-mono uppercase tracking-wider text-[#E8E9D8]">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-ink-2" />
+                <span className="text-xs  uppercase tracking-wider text-ink">
                   Filter Lead Growth By Date Range
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCustomPickerOpen(false)}
-                className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] p-1 cursor-pointer"
+                className="text-ink-3 hover:text-ink p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -571,7 +571,7 @@ export default function StatsView() {
               {/* Native Date Pickers */}
               <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#A9BFA5]/70 mb-1.5">
+                  <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
                     Start Date (From)
                   </label>
                   <input
@@ -579,12 +579,12 @@ export default function StatsView() {
                     value={pendingStartDate}
                     onChange={(e) => setPendingStartDate(e.target.value)}
                     max={pendingEndDate}
-                    className="w-full bg-[#071C1A] text-[#E8E9D8] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface text-ink border border-line px-3 py-1.5 text-xs  focus:outline-none focus:border-line-strong"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-[#A9BFA5]/70 mb-1.5">
+                  <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
                     End Date (To)
                   </label>
                   <input
@@ -592,14 +592,14 @@ export default function StatsView() {
                     value={pendingEndDate}
                     onChange={(e) => setPendingEndDate(e.target.value)}
                     min={pendingStartDate}
-                    className="w-full bg-[#071C1A] text-[#E8E9D8] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface text-ink border border-line px-3 py-1.5 text-xs  focus:outline-none focus:border-line-strong"
                   />
                 </div>
               </div>
 
               {/* Quick Preset Chips */}
               <div className="md:col-span-5">
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#A9BFA5]/70 mb-1.5">
+                <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
                   Quick Ranges
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -618,10 +618,10 @@ export default function StatsView() {
                         setPendingStartDate(preset.start);
                         setPendingEndDate(preset.end);
                       }}
-                      className={`text-[10px] font-mono px-2 py-1 border transition-colors cursor-pointer ${
+                      className={`text-[10px]  px-2 py-1 border transition-colors cursor-pointer ${
                         pendingStartDate === preset.start && pendingEndDate === preset.end
-                          ? 'bg-[#A9BFA5]/20 text-[#E8E9D8] border-[#A9BFA5]'
-                          : 'bg-[#071C1A] text-[#A9BFA5]/70 border-[rgba(169,191,165,0.2)] hover:text-[#E8E9D8]'
+                          ? 'bg-brand text-ink border-line-strong'
+                          : 'bg-surface text-ink-2 border-line hover:text-ink'
                       }`}
                     >
                       {preset.label}
@@ -632,9 +632,9 @@ export default function StatsView() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[rgba(169,191,165,0.12)]">
-              <div className="text-[11px] font-mono text-[#A9BFA5]/70">
-                Range preview: <span className="text-[#E8E9D8]">{pendingStartDate}</span> &rarr; <span className="text-[#E8E9D8]">{pendingEndDate}</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-line-subtle">
+              <div className="text-[11px]  text-ink-2">
+                Range preview: <span className="text-ink">{pendingStartDate}</span> &rarr; <span className="text-ink">{pendingEndDate}</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -647,7 +647,7 @@ export default function StatsView() {
                     setLeadRangeMode('30D');
                     setIsCustomPickerOpen(false);
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-mono text-[#A9BFA5]/60 hover:text-[#E8E9D8] transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs  text-ink-3 hover:text-ink transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>Reset Default</span>
@@ -660,7 +660,7 @@ export default function StatsView() {
                     setLeadRangeMode('CUSTOM');
                     setIsCustomPickerOpen(false);
                   }}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-[#E8E9D8] text-[#071C1A] text-xs font-mono font-medium hover:bg-white transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-brand text-on-brand text-xs  font-medium hover:bg-brand-hover transition-colors cursor-pointer"
                 >
                   <Check className="w-3.5 h-3.5" />
                   <span>Apply Date Filter</span>
@@ -671,19 +671,19 @@ export default function StatsView() {
         )}
 
         {/* Large Line Graph Container (Integrated, no card, subtle grid lines) */}
-        <div className="pt-4 pb-2 border-t border-b border-[rgba(169,191,165,0.15)] relative select-none">
+        <div className="pt-4 pb-2 border-t border-b border-line-subtle relative select-none">
           {/* Active Hover Indicator Display */}
-          <div className="h-6 flex items-center justify-between text-xs font-mono text-[#A9BFA5] mb-2 px-2">
+          <div className="h-6 flex items-center justify-between text-xs  text-ink-2 mb-2 px-2">
             <span>Y: Number of leads</span>
             {leadHoverIndex !== null && leadGrowthData.points[leadHoverIndex] ? (
-              <span className="text-[#E8E9D8] font-medium bg-[#0D2D2A]/60 px-2.5 py-0.5 border border-[rgba(169,191,165,0.3)]">
+              <span className="text-ink font-medium bg-surface-hover px-2.5 py-0.5 border border-line">
                 {leadGrowthData.points[leadHoverIndex].date} &rarr;{' '}
-                <strong className="text-emerald-400">
+                <strong className="text-ok">
                   {leadGrowthData.points[leadHoverIndex].count} leads
                 </strong>
               </span>
             ) : (
-              <span className="text-[#A9BFA5]/50 text-[11px]">
+              <span className="text-ink-3 text-[11px]">
                 Hover over data points to inspect cadence
               </span>
             )}
@@ -701,26 +701,26 @@ export default function StatsView() {
       </section>
 
       {/* Thin Horizontal Separator */}
-      <div className="w-full border-b border-[rgba(169,191,165,0.2)]" />
+      <div className="w-full border-b border-line" />
 
       {/* =====================================================================
           02 — LEAD SOURCES (HORIZONTAL BAR GRAPH)
           ===================================================================== */}
       <section className="space-y-8">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-mono block mb-1">
+          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
             02 // LEAD SOURCES
           </span>
-          <h2 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+          <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
             Lead Sources
           </h2>
-          <p className="mt-1 text-xs text-[#A9BFA5]/80 font-light">
+          <p className="mt-1 text-xs text-ink-2 font-light">
             See which channels are bringing in the most leads.
           </p>
         </div>
 
         {/* Horizontal Bar Chart (Open layout, thin separators, no rounded cards) */}
-        <div className="border-t border-[rgba(169,191,165,0.15)] divide-y divide-[rgba(169,191,165,0.12)]">
+        <div className="border-t border-line-subtle divide-y divide-line-subtle">
           {leadSourcesData.map((item) => {
             const widthPercent = (item.count / maxSourceCount) * 100;
             const isHovered = hoveredSource === item.name;
@@ -731,36 +731,36 @@ export default function StatsView() {
                 onMouseEnter={() => setHoveredSource(item.name)}
                 onMouseLeave={() => setHoveredSource(null)}
                 className={`py-4 px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors cursor-default ${
-                  isHovered ? 'bg-[#0D2D2A]/30' : ''
+                  isHovered ? 'bg-surface-hover' : ''
                 }`}
               >
                 {/* Channel Label */}
                 <div className="w-36 shrink-0">
-                  <span className="text-xs font-medium text-[#E8E9D8] tracking-wide block">
+                  <span className="text-xs font-medium text-ink tracking-wide block">
                     {item.name}
                   </span>
-                  <span className="text-[10px] font-mono text-[#A9BFA5]/60 block mt-0.5">
+                  <span className="text-[10px]  text-ink-3 block mt-0.5">
                     {item.share} of total
                   </span>
                 </div>
 
                 {/* Horizontal Bar Track */}
                 <div className="flex-1 flex items-center space-x-4">
-                  <div className="flex-1 h-3 bg-[#061816] border border-[rgba(169,191,165,0.2)] relative overflow-hidden">
+                  <div className="flex-1 h-3 bg-surface-raised border border-line relative overflow-hidden">
                     <div
                       className={`h-full transition-all duration-500 ${
-                        isHovered ? 'bg-[#E8E9D8]' : 'bg-[#A9BFA5]'
+                        isHovered ? 'bg-brand' : 'bg-brand'
                       }`}
                       style={{ width: `${Math.max(widthPercent, 2)}%` }}
                     />
                   </div>
 
                   {/* Exact Count on hover / inline */}
-                  <div className="w-28 text-right font-mono text-xs">
-                    <span className="text-[#E8E9D8] font-medium block">
+                  <div className="w-28 text-right  text-xs">
+                    <span className="text-ink font-medium block">
                       {item.count.toLocaleString()} leads
                     </span>
-                    <span className="text-[10px] text-emerald-400">
+                    <span className="text-[10px] text-ok">
                       {item.change}
                     </span>
                   </div>
@@ -772,7 +772,7 @@ export default function StatsView() {
       </section>
 
       {/* Thin Horizontal Separator */}
-      <div className="w-full border-b border-[rgba(169,191,165,0.2)]" />
+      <div className="w-full border-b border-line" />
 
       {/* =====================================================================
           03 — CAMPAIGN PERFORMANCE (HORIZONTAL BAR GRAPH WITH SWITCHER & FILTERS)
@@ -780,19 +780,19 @@ export default function StatsView() {
       <section className="space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-mono block mb-1">
+            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               03 // CAMPAIGN PERFORMANCE
             </span>
-            <h2 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
               Campaign Performance
             </h2>
-            <p className="mt-1 text-xs text-[#A9BFA5]/80 font-light">
+            <p className="mt-1 text-xs text-ink-2 font-light">
               Compare the performance of your campaigns across timeline windows and progress stages.
             </p>
           </div>
 
           {/* Metric Switcher: Leads | Engagement | Conversions */}
-          <div className="flex items-center space-x-5 text-xs uppercase tracking-widest font-mono">
+          <div className="flex items-center space-x-5 text-xs uppercase tracking-widest ">
             {(['Conversions', 'Leads', 'Engagement'] as CampaignMetric[]).map((m) => {
               const isSelected = campaignMetric === m;
               return (
@@ -802,8 +802,8 @@ export default function StatsView() {
                   onClick={() => setCampaignMetric(m)}
                   className={`pb-1 transition-colors cursor-pointer border-b ${
                     isSelected
-                      ? 'text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                      : 'text-[#A9BFA5]/50 border-transparent hover:text-[#A9BFA5]'
+                      ? 'text-ink border-line-strong font-semibold'
+                      : 'text-ink-3 border-transparent hover:text-ink-2'
                   }`}
                 >
                   {m}
@@ -814,11 +814,11 @@ export default function StatsView() {
         </div>
 
         {/* Dual Filter Toolbar: Timeline & Progress */}
-        <div className="p-3 bg-[#061816] border border-[rgba(169,191,165,0.18)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="p-3 bg-surface-raised border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center flex-wrap gap-4">
             {/* Timeline Filter */}
             <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#A9BFA5]">Timeline:</span>
+              <span className="text-[10px]  uppercase tracking-wider text-ink-2">Timeline:</span>
               {(['All', 'Active', 'Upcoming', 'Concluded'] as const).map((t) => {
                 const isSelected = campaignTimelineFilter === t;
                 return (
@@ -826,10 +826,10 @@ export default function StatsView() {
                     key={t}
                     type="button"
                     onClick={() => setCampaignTimelineFilter(t)}
-                    className={`px-2 py-0.5 text-[10px] font-mono rounded-[2px] border transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 text-[10px]  rounded-[9px] border transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                        : 'bg-[#071C1A] text-[#A9BFA5]/60 border-[rgba(169,191,165,0.15)] hover:text-[#E8E9D8]'
+                        ? 'bg-surface-hover text-ink border-line-strong font-semibold'
+                        : 'bg-surface text-ink-3 border-line-subtle hover:text-ink'
                     }`}
                   >
                     {t}
@@ -840,7 +840,7 @@ export default function StatsView() {
 
             {/* Progress Filter */}
             <div className="flex items-center space-x-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#A9BFA5]">Progress:</span>
+              <span className="text-[10px]  uppercase tracking-wider text-ink-2">Progress:</span>
               {(
                 [
                   { id: 'All', label: 'All' },
@@ -855,10 +855,10 @@ export default function StatsView() {
                     key={p.id}
                     type="button"
                     onClick={() => setCampaignProgressFilter(p.id)}
-                    className={`px-2 py-0.5 text-[10px] font-mono rounded-[2px] border transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 text-[10px]  rounded-[9px] border transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                        : 'bg-[#071C1A] text-[#A9BFA5]/60 border-[rgba(169,191,165,0.15)] hover:text-[#E8E9D8]'
+                        ? 'bg-surface-hover text-ink border-line-strong font-semibold'
+                        : 'bg-surface text-ink-3 border-line-subtle hover:text-ink'
                     }`}
                   >
                     {p.label}
@@ -876,7 +876,7 @@ export default function StatsView() {
                 setCampaignTimelineFilter('All');
                 setCampaignProgressFilter('All');
               }}
-              className="text-[10px] font-mono text-[#A9BFA5] hover:text-white underline cursor-pointer shrink-0"
+              className="text-[10px]  text-ink-2 hover:text-ink underline cursor-pointer shrink-0"
             >
               Reset Filters
             </button>
@@ -884,9 +884,9 @@ export default function StatsView() {
         </div>
 
         {/* Campaign Horizontal Bars */}
-        <div className="border-t border-[rgba(169,191,165,0.15)] divide-y divide-[rgba(169,191,165,0.12)]">
+        <div className="border-t border-line-subtle divide-y divide-line-subtle">
           {campaignData.length === 0 ? (
-            <div className="py-12 text-center text-xs text-[#A9BFA5]/60 font-mono">
+            <div className="py-12 text-center text-xs text-ink-3 ">
               No campaigns match the selected timeline and progress filters.
             </div>
           ) : (
@@ -900,27 +900,27 @@ export default function StatsView() {
                   onMouseEnter={() => setHoveredCampaign(campaign.name)}
                   onMouseLeave={() => setHoveredCampaign(null)}
                   className={`py-4 px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors cursor-default ${
-                    isHovered ? 'bg-[#0D2D2A]/30' : ''
+                    isHovered ? 'bg-surface-hover' : ''
                   }`}
                 >
                   {/* Campaign Name & Metadata */}
                   <div className="w-56 shrink-0">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs font-medium text-[#E8E9D8] tracking-wide block">
+                      <span className="text-xs font-medium text-ink tracking-wide block">
                         {campaign.name}
                       </span>
-                      <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border ${
+                      <span className={`text-[9px]  px-1.5 py-0.2 rounded border ${
                         campaign.timeline === 'Active'
-                          ? 'border-emerald-500/30 text-emerald-400 bg-emerald-950/30'
+                          ? 'border-emerald-500/30 text-ok bg-emerald-950/30'
                           : campaign.timeline === 'Upcoming'
                           ? 'border-sky-500/30 text-sky-400 bg-sky-950/30'
-                          : 'border-[#A9BFA5]/30 text-[#A9BFA5] bg-[#0D2D2A]/40'
+                          : 'border-line-strong text-ink-2 bg-surface-hover'
                       }`}>
                         {campaign.timeline}
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/60 mt-0.5">
+                    <div className="flex items-center space-x-2 text-[10px]  text-ink-3 mt-0.5">
                       <span>{campaign.dates}</span>
                       <span>•</span>
                       <span>{campaign.progress}% prog</span>
@@ -929,21 +929,21 @@ export default function StatsView() {
 
                   {/* Horizontal Bar */}
                   <div className="flex-1 flex items-center space-x-4">
-                    <div className="flex-1 h-3 bg-[#061816] border border-[rgba(169,191,165,0.2)] relative overflow-hidden">
+                    <div className="flex-1 h-3 bg-surface-raised border border-line relative overflow-hidden">
                       <div
                         className={`h-full transition-all duration-500 ${
-                          isHovered ? 'bg-[#E8E9D8]' : 'bg-[#A9BFA5]'
+                          isHovered ? 'bg-brand' : 'bg-brand'
                         }`}
                         style={{ width: `${Math.max(widthPercent, 2)}%` }}
                       />
                     </div>
 
                     {/* Metric Value Display */}
-                    <div className="w-36 text-right font-mono text-xs">
-                      <span className="text-[#E8E9D8] font-medium block">
+                    <div className="w-36 text-right  text-xs">
+                      <span className="text-ink font-medium block">
                         {campaign.display}
                       </span>
-                      <span className="text-[10px] text-[#A9BFA5]/60 uppercase tracking-wider">
+                      <span className="text-[10px] text-ink-3 uppercase tracking-wider">
                         {campaignMetric}
                       </span>
                     </div>
@@ -968,7 +968,7 @@ export default function StatsView() {
       </section>
 
       {/* Thin Horizontal Separator */}
-      <div className="w-full border-b border-[rgba(169,191,165,0.2)]" />
+      <div className="w-full border-b border-line" />
 
       {/* =====================================================================
           04 — SOCIAL ENGAGEMENT (LARGE LINE GRAPH WITH METRIC & PLATFORM FILTER)
@@ -977,22 +977,22 @@ export default function StatsView() {
         {/* Section Heading & Dual Controls */}
         <div className="space-y-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-mono block mb-1">
+            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               04 // SOCIAL ENGAGEMENT
             </span>
-            <h2 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
               Social Engagement
             </h2>
-            <p className="mt-1 text-xs text-[#A9BFA5]/80 font-light">
+            <p className="mt-1 text-xs text-ink-2 font-light">
               Track how your audience is responding to your content.
             </p>
           </div>
 
           {/* Simple Text Controls (No pill-shaped buttons) */}
-          <div className="pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[rgba(169,191,165,0.15)] pb-3">
+          <div className="pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line-subtle pb-3">
             {/* Metric Switcher: Engagement | Reach | Clicks */}
-            <div className="flex items-center space-x-6 text-xs uppercase tracking-widest font-mono">
-              <span className="text-[10px] text-[#A9BFA5]/60 uppercase tracking-widest mr-2">
+            <div className="flex items-center space-x-6 text-xs uppercase tracking-widest ">
+              <span className="text-[10px] text-ink-3 uppercase tracking-widest mr-2">
                 Metric:
               </span>
               {(['Engagement', 'Reach', 'Clicks'] as SocialMetric[]).map((m) => {
@@ -1004,8 +1004,8 @@ export default function StatsView() {
                     onClick={() => setSocialMetric(m)}
                     className={`pb-0.5 transition-colors cursor-pointer border-b ${
                       isSelected
-                        ? 'text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                        : 'text-[#A9BFA5]/50 border-transparent hover:text-[#A9BFA5]'
+                        ? 'text-ink border-line-strong font-semibold'
+                        : 'text-ink-3 border-transparent hover:text-ink-2'
                     }`}
                   >
                     {m}
@@ -1015,8 +1015,8 @@ export default function StatsView() {
             </div>
 
             {/* Platform Filters: All | Instagram | LinkedIn | X | Facebook */}
-            <div className="flex items-center space-x-5 text-xs uppercase tracking-widest font-mono">
-              <span className="text-[10px] text-[#A9BFA5]/60 uppercase tracking-widest mr-1">
+            <div className="flex items-center space-x-5 text-xs uppercase tracking-widest ">
+              <span className="text-[10px] text-ink-3 uppercase tracking-widest mr-1">
                 Platform:
               </span>
               {(['All', 'Instagram', 'LinkedIn', 'X', 'Facebook'] as SocialPlatform[]).map((plat) => {
@@ -1028,8 +1028,8 @@ export default function StatsView() {
                     onClick={() => setSocialPlatform(plat)}
                     className={`pb-0.5 transition-colors cursor-pointer border-b ${
                       isSelected
-                        ? 'text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                        : 'text-[#A9BFA5]/50 border-transparent hover:text-[#A9BFA5]'
+                        ? 'text-ink border-line-strong font-semibold'
+                        : 'text-ink-3 border-transparent hover:text-ink-2'
                     }`}
                   >
                     {plat}
@@ -1043,33 +1043,33 @@ export default function StatsView() {
         {/* Aggregate Stat & Indicator */}
         <div className="flex items-baseline justify-between pt-1">
           <div className="flex items-baseline space-x-3">
-            <span className="serif text-3xl sm:text-4xl font-light text-[#E8E9D8]">
+            <span className="font-display font-bold text-3xl sm:text-4xl font-light text-ink">
               {socialData.total}
             </span>
-            <span className="text-xs font-mono text-[#A9BFA5]/80">
+            <span className="text-xs  text-ink-2">
               total {socialMetric.toLowerCase()} {socialData.unit}
             </span>
           </div>
 
-          <div className="text-xs font-mono text-emerald-400">
+          <div className="text-xs  text-ok">
             {socialData.growth} vs previous window
           </div>
         </div>
 
         {/* Large Line Graph Container (Open layout, subtle grid lines) */}
-        <div className="pt-4 pb-2 border-t border-b border-[rgba(169,191,165,0.15)] relative select-none">
+        <div className="pt-4 pb-2 border-t border-b border-line-subtle relative select-none">
           {/* Active Hover readout */}
-          <div className="h-6 flex items-center justify-between text-xs font-mono text-[#A9BFA5] mb-2 px-2">
+          <div className="h-6 flex items-center justify-between text-xs  text-ink-2 mb-2 px-2">
             <span>Platform: {socialPlatform}</span>
             {socialHoverIndex !== null ? (
-              <span className="text-[#E8E9D8] font-medium bg-[#0D2D2A]/60 px-2.5 py-0.5 border border-[rgba(169,191,165,0.3)]">
+              <span className="text-ink font-medium bg-surface-hover px-2.5 py-0.5 border border-line">
                 {socialData.points[socialHoverIndex].date} &rarr;{' '}
-                <strong className="text-emerald-400">
+                <strong className="text-ok">
                   {socialData.points[socialHoverIndex].value.toLocaleString()} {socialMetric.toLowerCase()}
                 </strong>
               </span>
             ) : (
-              <span className="text-[#A9BFA5]/50 text-[11px]">
+              <span className="text-ink-3 text-[11px]">
                 Hover over data points to inspect
               </span>
             )}

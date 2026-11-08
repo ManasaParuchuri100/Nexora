@@ -94,43 +94,43 @@ export default function AssistantView({
   return (
     <div className="space-y-8 py-4 max-w-4xl mx-auto">
       {/* Header */}
-      <section className="border-b border-[rgba(169,191,165,0.2)] pb-6 flex items-baseline justify-between">
+      <section className="border-b border-line pb-6 flex items-baseline justify-between">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-normal block mb-2">
+          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
             INTELLIGENT COMMAND COPILOT
           </span>
-          <h1 className="serif text-4xl sm:text-5xl font-light text-[#E8E9D8] tracking-tight">
+          <h1 className="font-display font-bold text-4xl sm:text-5xl font-light text-ink tracking-tight">
             AI Assistant
           </h1>
         </div>
-        <div className="flex items-center space-x-2 text-xs font-mono text-[#A9BFA5]">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex items-center space-x-2 text-xs  text-ink-2">
+          <span className="w-2 h-2 rounded-full bg-ok animate-pulse" />
           <span>Context Synchronized</span>
         </div>
       </section>
 
       {/* Chat messages log (Sharp border, no rounded cards) */}
-      <div className="border border-[rgba(169,191,165,0.2)] bg-[#071C1A] divide-y divide-[rgba(169,191,165,0.15)] min-h-[420px] max-h-[560px] overflow-y-auto p-6 space-y-6">
+      <div className="border border-line bg-surface divide-y divide-line-subtle min-h-[420px] max-h-[560px] overflow-y-auto p-6 space-y-6">
         {messages.map((m) => (
           <div key={m.id} className="pt-4 first:pt-0">
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 rounded-[2px] bg-[#0D2D2A] border border-[rgba(169,191,165,0.2)] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-[9px] bg-surface-hover border border-line flex items-center justify-center shrink-0 mt-0.5">
                 {m.sender === 'assistant' ? (
-                  <Sparkles className="w-3.5 h-3.5 text-[#A9BFA5]" />
+                  <Sparkles className="w-3.5 h-3.5 text-ink-2" />
                 ) : (
-                  <User className="w-3.5 h-3.5 text-[#E8E9D8]" />
+                  <User className="w-3.5 h-3.5 text-ink" />
                 )}
               </div>
 
               <div className="flex-1 space-y-2">
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+                  <span className="text-xs uppercase tracking-wider text-ink font-medium">
                     {m.sender === 'assistant' ? 'Nexora Copilot' : 'You'}
                   </span>
-                  <span className="text-[10px] text-[#A9BFA5]/60 font-mono">{m.timestamp}</span>
+                  <span className="text-[10px] text-ink-3 ">{m.timestamp}</span>
                 </div>
 
-                <div className="text-xs sm:text-sm text-[#E8E9D8] font-light leading-relaxed whitespace-pre-wrap">
+                <div className="text-xs sm:text-sm text-ink font-light leading-relaxed whitespace-pre-wrap">
                   {m.content}
                 </div>
 
@@ -142,7 +142,7 @@ export default function AssistantView({
                         key={i}
                         type="button"
                         onClick={() => handleSendMessage(action)}
-                        className="text-[11px] font-light text-[#A9BFA5] hover:text-[#E8E9D8] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5] px-2.5 py-1 transition-colors cursor-pointer"
+                        className="text-[11px] font-light text-ink-2 hover:text-ink border border-line hover:border-line-strong px-2.5 py-1 transition-colors cursor-pointer"
                       >
                         {action} &rarr;
                       </button>
@@ -155,7 +155,7 @@ export default function AssistantView({
         ))}
 
         {isTyping && (
-          <div className="flex items-center space-x-2 text-xs text-[#A9BFA5] font-light pt-2">
+          <div className="flex items-center space-x-2 text-xs text-ink-2 font-light pt-2">
             <RefreshCw className="w-3 h-3 animate-spin" />
             <span>Consulting live workspace telemetry...</span>
           </div>
@@ -163,7 +163,7 @@ export default function AssistantView({
       </div>
 
       {/* Input box */}
-      <div className="border border-[rgba(169,191,165,0.25)] p-2 bg-[#061816] flex items-center space-x-3">
+      <div className="border border-line p-2 bg-surface-raised flex items-center space-x-3">
         <input
           type="text"
           placeholder="Ask anything about leads, campaign performance, or content synthesis..."
@@ -172,14 +172,14 @@ export default function AssistantView({
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleSendMessage();
           }}
-          className="flex-1 bg-transparent text-xs sm:text-sm text-[#E8E9D8] px-3 py-2 focus:outline-none placeholder-[#A9BFA5]/40 font-light"
+          className="flex-1 bg-transparent text-xs sm:text-sm text-ink px-3 py-2 focus:outline-none placeholder:text-ink-3 font-light"
         />
 
         <button
           type="button"
           onClick={() => handleSendMessage()}
           disabled={!inputPrompt.trim() || isTyping}
-          className="bg-[#E8E9D8] text-[#071C1A] px-5 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5"
+          className="bg-brand text-on-brand px-5 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5"
         >
           <span>Send</span>
           <Send className="w-3 h-3" />

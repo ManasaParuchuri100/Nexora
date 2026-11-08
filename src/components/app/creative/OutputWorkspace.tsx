@@ -1,3 +1,4 @@
+import { copyText } from '../settings/store';
 import React, { useState, useRef } from 'react';
 import {
   Copy,
@@ -84,19 +85,19 @@ export default function OutputWorkspace({
   const activeImageUrl = currentVariation?.imageUrl || (isImageCategory ? STOCK_RENDER_ASSETS[activeVariationIndex % STOCK_RENDER_ASSETS.length] : undefined);
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+    void copyText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleCopyPrompt = (promptText: string) => {
-    navigator.clipboard.writeText(promptText);
+    void copyText(promptText);
     setCopiedPrompt(true);
     setTimeout(() => setCopiedPrompt(false), 2000);
   };
 
   const handleCopyImageLink = (url: string) => {
-    navigator.clipboard.writeText(window.location.origin + url);
+    void copyText(window.location.origin + url);
     setCopiedImageUrl(true);
     setTimeout(() => setCopiedImageUrl(false), 2000);
   };

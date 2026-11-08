@@ -511,7 +511,7 @@ export default function EngageView({
                 className={`min-h-0! rounded-[7px]! py-2 px-3 flex items-center gap-1.5 transition-colors cursor-pointer text-[13px] font-bold focus-visible:outline-none ${
                   activeTab === tab.id && specialFilter === 'all'
                     ? 'bg-brand-soft text-brand'
-                    : 'bg-transparent text-[#718196] hover:text-ink'
+                    : 'bg-transparent text-ink-3 hover:text-ink'
                 }`}
               >
                 <span className="truncate">{tab.label}</span>

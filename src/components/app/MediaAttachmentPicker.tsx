@@ -160,34 +160,34 @@ export default function MediaAttachmentPicker({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <div className="flex items-center space-x-2">
-            <Paperclip className="w-3.5 h-3.5 text-[#A9BFA5]" />
-            <label className="text-xs uppercase tracking-wider text-[#E8E9D8] font-medium">
+            <Paperclip className="w-3.5 h-3.5 text-ink-2" />
+            <label className="text-xs uppercase tracking-wider text-ink font-medium">
               {label}
             </label>
             {attachments.length > 0 && (
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#061816] text-[#A9BFA5] border border-[rgba(169,191,165,0.25)] rounded-[2px]">
+              <span className="text-[10px]  px-2 py-0.5 bg-surface-raised text-ink-2 border border-line rounded-[9px]">
                 {attachments.length} attached
               </span>
             )}
           </div>
           {helperText && (
-            <p className="text-[11px] text-[#A9BFA5]/70 font-light mt-0.5">
+            <p className="text-[11px] text-ink-2 font-light mt-0.5">
               {helperText}
             </p>
           )}
         </div>
 
-        <div className="flex items-center space-x-2 text-xs font-mono">
+        <div className="flex items-center space-x-2 text-xs ">
           <button
             type="button"
             onClick={() => setShowAssetDrawer(prev => !prev)}
-            className={`px-2.5 py-1 text-[11px] uppercase tracking-wider border rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-2.5 py-1 text-[11px] uppercase tracking-wider border rounded-[9px] transition-colors cursor-pointer flex items-center space-x-1.5 ${
               showAssetDrawer 
-                ? 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5]' 
-                : 'text-[#A9BFA5]/80 border-[rgba(169,191,165,0.2)] hover:text-[#E8E9D8]'
+                ? 'bg-surface-hover text-ink border-line-strong' 
+                : 'text-ink-2 border-line hover:text-ink'
             }`}
           >
-            <Sparkles className="w-3 h-3 text-[#A9BFA5]" />
+            <Sparkles className="w-3 h-3 text-ink-2" />
             <span>{showAssetDrawer ? 'Hide Sample Assets' : 'Sample Studio Assets'}</span>
           </button>
 
@@ -205,12 +205,12 @@ export default function MediaAttachmentPicker({
 
       {/* Sample Studio Assets Drawer */}
       {showAssetDrawer && (
-        <div className="p-3 bg-[#061816] border border-[rgba(169,191,165,0.25)] rounded-[2px] space-y-2.5 animate-fadeIn">
+        <div className="p-3 bg-surface-raised border border-line rounded-[9px] space-y-2.5 animate-fadeIn">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5] font-mono">
+            <span className="text-[10px] uppercase tracking-widest text-ink-2 ">
               Nexora Creative Lab Presets (Click to attach/detach)
             </span>
-            <span className="text-[10px] text-[#A9BFA5]/50 font-mono">
+            <span className="text-[10px] text-ink-3 ">
               High-resolution editorial media
             </span>
           </div>
@@ -223,13 +223,13 @@ export default function MediaAttachmentPicker({
                   key={sample.id}
                   type="button"
                   onClick={() => handleAddSample(sample)}
-                  className={`group relative text-left p-2 border rounded-[2px] transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`group relative text-left p-2 border rounded-[9px] transition-all cursor-pointer flex flex-col justify-between ${
                     isSelected 
-                      ? 'border-[#A9BFA5] bg-[#0D2D2A]' 
-                      : 'border-[rgba(169,191,165,0.2)] bg-[#071C1A] hover:border-[#A9BFA5]/60'
+                      ? 'border-line-strong bg-surface-hover' 
+                      : 'border-line bg-surface hover:border-line-strong'
                   }`}
                 >
-                  <div className="w-full h-16 bg-[#061816] overflow-hidden rounded-[1px] relative mb-1.5">
+                  <div className="w-full h-16 bg-surface-raised overflow-hidden rounded-[7px] relative mb-1.5">
                     {sample.type === 'image' ? (
                       <img 
                         src={sample.url} 
@@ -238,22 +238,22 @@ export default function MediaAttachmentPicker({
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-[#A9BFA5]/60 bg-[#071C1A]">
-                        <FileText className="w-6 h-6 text-[#A9BFA5]" />
-                        <span className="text-[9px] uppercase tracking-wider mt-1 font-mono">PDF</span>
+                      <div className="w-full h-full flex flex-col items-center justify-center text-ink-3 bg-surface">
+                        <FileText className="w-6 h-6 text-ink-2" />
+                        <span className="text-[9px] uppercase tracking-wider mt-1 ">PDF</span>
                       </div>
                     )}
                     {isSelected && (
-                      <div className="absolute top-1 right-1 bg-emerald-600 text-white p-0.5 rounded-full shadow-sm">
+                      <div className="absolute top-1 right-1 bg-emerald-600 text-ink p-0.5 rounded-full shadow-sm">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-[#E8E9D8] font-medium truncate">
+                    <p className="text-[10px] text-ink font-medium truncate">
                       {sample.name}
                     </p>
-                    <p className="text-[9px] text-[#A9BFA5]/60 font-mono">
+                    <p className="text-[9px] text-ink-3 ">
                       {sample.size}
                     </p>
                   </div>
@@ -271,12 +271,12 @@ export default function MediaAttachmentPicker({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-[2px] transition-all cursor-pointer ${
+        className={`border-2 border-dashed rounded-[9px] transition-all cursor-pointer ${
           compact ? 'p-3' : 'p-5 sm:p-6'
         } flex flex-col items-center justify-center text-center space-y-2 ${
           isDragging 
-            ? 'border-[#A9BFA5] bg-[#0D2D2A]/60 scale-[1.005]' 
-            : 'border-[rgba(169,191,165,0.25)] bg-[#061816]/60 hover:border-[#A9BFA5]/60 hover:bg-[#0D2D2A]/20'
+            ? 'border-line-strong bg-surface-hover scale-[1.005]' 
+            : 'border-line bg-surface-raised hover:border-line-strong hover:bg-surface-hover'
         }`}
       >
         <input 
@@ -288,15 +288,15 @@ export default function MediaAttachmentPicker({
           className="hidden"
         />
 
-        <div className="w-9 h-9 rounded-full bg-[#0D2D2A] border border-[rgba(169,191,165,0.3)] flex items-center justify-center text-[#A9BFA5]">
+        <div className="w-9 h-9 rounded-full bg-surface-hover border border-line flex items-center justify-center text-ink-2">
           <UploadCloud className="w-4 h-4" />
         </div>
 
         <div>
-          <p className="text-xs text-[#E8E9D8] font-medium">
-            <span className="text-[#A9BFA5] underline underline-offset-2">Click to browse</span> or drag and drop media files
+          <p className="text-xs text-ink font-medium">
+            <span className="text-ink-2 underline underline-offset-2">Click to browse</span> or drag and drop media files
           </p>
-          <p className="text-[10px] text-[#A9BFA5]/60 font-mono mt-0.5">
+          <p className="text-[10px] text-ink-3  mt-0.5">
             PNG, JPG, WebP, SVG, MP4, PDF · Up to {maxAttachments} items
           </p>
         </div>
@@ -308,10 +308,10 @@ export default function MediaAttachmentPicker({
           {attachments.map((att, idx) => (
             <div 
               key={att.id}
-              className="group relative bg-[#061816] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]/60 p-2 rounded-[2px] flex items-center space-x-3 transition-colors"
+              className="group relative bg-surface-raised border border-line hover:border-line-strong p-2 rounded-[9px] flex items-center space-x-3 transition-colors"
             >
               {/* Thumbnail / Icon */}
-              <div className="w-12 h-12 bg-[#071C1A] border border-[rgba(169,191,165,0.15)] rounded-[1px] overflow-hidden shrink-0 flex items-center justify-center relative">
+              <div className="w-12 h-12 bg-surface border border-line-subtle rounded-[7px] overflow-hidden shrink-0 flex items-center justify-center relative">
                 {att.type === 'image' && att.url ? (
                   <img 
                     src={att.url} 
@@ -320,24 +320,24 @@ export default function MediaAttachmentPicker({
                     className="w-full h-full object-cover" 
                   />
                 ) : att.type === 'video' ? (
-                  <Film className="w-5 h-5 text-amber-400" />
+                  <Film className="w-5 h-5 text-warn" />
                 ) : (
-                  <FileText className="w-5 h-5 text-[#A9BFA5]" />
+                  <FileText className="w-5 h-5 text-ink-2" />
                 )}
 
                 {/* Index tag */}
-                <span className="absolute bottom-0.5 right-0.5 bg-black/70 text-[8px] font-mono text-[#E8E9D8] px-1 rounded-[1px]">
+                <span className="absolute bottom-0.5 right-0.5 bg-black/70 text-[8px]  text-ink px-1 rounded-[7px]">
                   #{idx + 1}
                 </span>
               </div>
 
               {/* Info */}
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-[#E8E9D8] truncate font-medium" title={att.name}>
+                <p className="text-xs text-ink truncate font-medium" title={att.name}>
                   {att.name}
                 </p>
-                <div className="flex items-center space-x-2 text-[10px] font-mono text-[#A9BFA5]/70 mt-0.5">
-                  <span className="uppercase text-[9px] px-1 py-0.2 bg-[#071C1A] border border-[rgba(169,191,165,0.15)] rounded-[1px]">
+                <div className="flex items-center space-x-2 text-[10px]  text-ink-2 mt-0.5">
+                  <span className="uppercase text-[9px] px-1 py-0.2 bg-surface border border-line-subtle rounded-[7px]">
                     {att.type}
                   </span>
                   {att.size && <span>{att.size}</span>}
@@ -351,7 +351,7 @@ export default function MediaAttachmentPicker({
                     type="button"
                     onClick={() => setPreviewItem(att)}
                     title="Enlarge preview"
-                    className="p-1 text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-[#071C1A] rounded-[2px] transition-colors cursor-pointer"
+                    className="p-1 text-ink-3 hover:text-ink hover:bg-surface rounded-[9px] transition-colors cursor-pointer"
                   >
                     <Maximize2 className="w-3.5 h-3.5" />
                   </button>
@@ -360,7 +360,7 @@ export default function MediaAttachmentPicker({
                   type="button"
                   onClick={() => handleRemove(att.id)}
                   title="Remove attachment"
-                  className="p-1 text-[#A9BFA5]/60 hover:text-red-400 hover:bg-red-950/20 rounded-[2px] transition-colors cursor-pointer"
+                  className="p-1 text-ink-3 hover:text-red-400 hover:bg-red-950/20 rounded-[9px] transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -377,28 +377,28 @@ export default function MediaAttachmentPicker({
           onClick={() => setPreviewItem(null)}
         >
           <div 
-            className="relative max-w-2xl w-full bg-[#071C1A] border border-[rgba(169,191,165,0.3)] p-4 sm:p-6 shadow-2xl space-y-4"
+            className="relative max-w-2xl w-full bg-surface border border-line p-4 sm:p-6 shadow-2xl space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
+            <div className="flex items-center justify-between border-b border-line-subtle pb-3">
               <div>
-                <span className="text-[10px] uppercase tracking-widest text-[#A9BFA5] font-mono block">
+                <span className="text-[10px] uppercase tracking-widest text-ink-2  block">
                   ATTACHMENT PREVIEW
                 </span>
-                <h4 className="text-sm text-[#E8E9D8] font-medium truncate mt-0.5">
+                <h4 className="text-sm text-ink font-medium truncate mt-0.5">
                   {previewItem.name}
                 </h4>
               </div>
               <button
                 type="button"
                 onClick={() => setPreviewItem(null)}
-                className="text-[#A9BFA5] hover:text-[#E8E9D8] p-1 cursor-pointer"
+                className="text-ink-2 hover:text-ink p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="w-full max-h-[60vh] overflow-hidden bg-[#061816] flex items-center justify-center border border-[rgba(169,191,165,0.15)] rounded-[2px]">
+            <div className="w-full max-h-[60vh] overflow-hidden bg-surface-raised flex items-center justify-center border border-line-subtle rounded-[9px]">
               {previewItem.type === 'image' ? (
                 <img 
                   src={previewItem.url} 
@@ -407,22 +407,22 @@ export default function MediaAttachmentPicker({
                   className="max-h-[60vh] w-auto object-contain" 
                 />
               ) : (
-                <div className="p-12 text-center text-[#A9BFA5]">
+                <div className="p-12 text-center text-ink-2">
                   <FileText className="w-12 h-12 mx-auto mb-2 opacity-70" />
-                  <p className="text-xs font-mono">{previewItem.name}</p>
-                  <p className="text-[10px] font-mono text-[#A9BFA5]/60 mt-1">{previewItem.size}</p>
+                  <p className="text-xs ">{previewItem.name}</p>
+                  <p className="text-[10px]  text-ink-3 mt-1">{previewItem.size}</p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs font-mono pt-2 border-t border-[rgba(169,191,165,0.15)]">
-              <span className="text-[#A9BFA5]/70">
-                Format: <span className="text-[#E8E9D8] uppercase">{previewItem.type}</span> · {previewItem.size || 'Standard asset'}
+            <div className="flex items-center justify-between text-xs  pt-2 border-t border-line-subtle">
+              <span className="text-ink-2">
+                Format: <span className="text-ink uppercase">{previewItem.type}</span> · {previewItem.size || 'Standard asset'}
               </span>
               <button
                 type="button"
                 onClick={() => setPreviewItem(null)}
-                className="px-4 py-1.5 bg-[#E8E9D8] text-[#071C1A] text-xs uppercase tracking-wider font-semibold rounded-[2px] hover:bg-white cursor-pointer"
+                className="px-4 py-1.5 bg-brand text-on-brand text-xs uppercase tracking-wider font-semibold rounded-[9px] hover:bg-brand-hover cursor-pointer"
               >
                 Done
               </button>

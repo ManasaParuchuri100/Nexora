@@ -1,4 +1,6 @@
 import { PageHeader } from '../ui';
+import { readSaved, writeSaved } from './settings/store';
+import { AutomationSection, BillingSection, ChannelsSection, NotificationsSection, TeamSection } from './settings/SettingsSections';
 import React, { useState } from 'react';
 import { 
   Building2, 
@@ -37,6 +39,12 @@ interface SettingsViewProps {
   onNotify?: (title: string, desc: string) => void;
 }
 
+const SETTINGS_KEY = 'nexora_settings_v1';
+interface SavedSettings {
+  businessName: string; website: string; industry: string; location: string;
+  whatYouSell: string; workingHours: string; outsideHoursPolicy: 'ai' | 'callback'; toneOfVoice: string;
+}
+
 export type SettingsSection = 'business' | 'ai' | 'channels' | 'automation' | 'team' | 'billing' | 'notifications';
 
 export default function SettingsView({
@@ -56,16 +64,17 @@ export default function SettingsView({
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
 
   // Business state
-  const [businessName, setBusinessName] = useState('Acme Studio');
-  const [website, setWebsite] = useState('acme.com');
-  const [industry, setIndustry] = useState('Interior design');
-  const [location, setLocation] = useState('Pune');
-  const [whatYouSell, setWhatYouSell] = useState('Residential and office interiors…');
-  const [workingHours, setWorkingHours] = useState('Mon–Sat 10:00–19:00');
-  const [outsideHoursPolicy, setOutsideHoursPolicy] = useState<'ai' | 'callback'>('ai');
+  const saved = React.useMemo(() => readSaved<SavedSettings>(SETTINGS_KEY), []);
+  const [businessName, setBusinessName] = useState(saved.businessName ?? 'Acme Studio');
+  const [website, setWebsite] = useState(saved.website ?? 'acme.com');
+  const [industry, setIndustry] = useState(saved.industry ?? 'Interior design');
+  const [location, setLocation] = useState(saved.location ?? 'Pune');
+  const [whatYouSell, setWhatYouSell] = useState(saved.whatYouSell ?? 'Residential and office interiors…');
+  const [workingHours, setWorkingHours] = useState(saved.workingHours ?? 'Mon–Sat 10:00–19:00');
+  const [outsideHoursPolicy, setOutsideHoursPolicy] = useState<'ai' | 'callback'>(saved.outsideHoursPolicy ?? 'ai');
 
   // AI Knowledge state
-  const [toneOfVoice, setToneOfVoice] = useState('Friendly');
+  const [toneOfVoice, setToneOfVoice] = useState(saved.toneOfVoice ?? 'Friendly');
   const [testQuestion, setTestQuestion] = useState('');
   const [testAnswer, setTestAnswer] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -125,30 +134,6 @@ export default function SettingsView({
     if (onNotify) onNotify('Document Removed', 'Organization file removed from AI Knowledge.');
   };
 
-  // Automation state
-  const [handoffThreshold, setHandoffThreshold] = useState('50,000');
-  const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
-  const [qualifyThreshold, setQualifyThreshold] = useState(80);
-
-  // Channels state
-  const [channels, setChannels] = useState([
-    { name: 'WhatsApp', handle: '+91 98201 44820', status: 'Connected', owner: 'Priya', icon: '🟢' },
-    { name: 'Instagram', handle: '@acmestudio', status: 'Connected', owner: 'Aisha', icon: '🟣' },
-    { name: 'Facebook', handle: 'Not connected', status: 'Disconnected', owner: '—', icon: '🔵' },
-    { name: 'LinkedIn', handle: 'Not connected', status: 'Disconnected', owner: '—', icon: '🔷' },
-    { name: 'Email', handle: 'hello@acme.com', status: 'Connected', owner: 'Priya', icon: '✉' }
-  ]);
-
-  // Team state
-  const [team, setTeam] = useState([
-    { id: 't1', name: 'You', email: 'you@acme.com', role: 'Owner' },
-    { id: 't2', name: 'Priya Shah', email: 'priya@acme.com', role: 'Sales' },
-    { id: 't3', name: 'Aisha Khan', email: 'aisha@acme.com', role: 'Marketing' }
-  ]);
-  const [inviteName, setInviteName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('Sales');
-
   // Test the AI sandbox handler (Page 35 spec)
   const handleTestAi = () => {
     if (!testQuestion.trim()) return;
@@ -162,7 +147,8 @@ export default function SettingsView({
   };
 
   const handleSave = () => {
-    if (onNotify) onNotify('Settings Saved', 'Configuration and policies have been updated.');
+    writeSaved(SETTINGS_KEY, { businessName, website, industry, location, whatYouSell, workingHours, outsideHoursPolicy, toneOfVoice });
+    if (onNotify) onNotify('Settings saved', 'Your business profile and AI settings were saved.');
   };
 
   return (
@@ -522,271 +508,11 @@ export default function SettingsView({
           {/* ========================================================
               SECTION: CHANNELS (Page 35 spec)
              ======================================================== */}
-          {activeSection === 'channels' && (
-            <div className="space-y-4">
-              <div className="border-b border-line-subtle pb-3">
-                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
-                  CONNECTED CHANNELS (WHATSAPP FIRST)
-                </span>
-              </div>
-
-              <div className="divide-y divide-line-subtle text-xs">
-                {channels.map((ch, i) => (
-                  <div key={i} className="py-3 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span>{ch.icon}</span>
-                      <div>
-                        <span className="font-semibold text-ink block">{ch.name}</span>
-                        <span className="text-[11px] text-ink-2">{ch.handle}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-ok border border-ok/30' : 'text-ink-3'}`}>
-                        {ch.status}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onNotify) onNotify('Channel Status', `Configured settings for ${ch.name}.`);
-                        }}
-                        className="px-3 py-1 bg-surface-raised hover:bg-surface-hover border border-line rounded text-ink cursor-pointer"
-                      >
-                        {ch.status === 'Connected' ? 'Manage' : 'Connect'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================
-              SECTION: AUTOMATION (Page 36 spec with Handoff sentence rules)
-             ======================================================== */}
-          {activeSection === 'automation' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-line-subtle pb-3">
-                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
-                  AUTOMATION & HANDOFF RULES
-                </span>
-                <span className="text-xs text-ok font-semibold cursor-pointer">[+ New rule]</span>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold text-ink block">● On: Auto-reply on all channels</span>
-                    <span className="text-[11px] text-ink-2">Last fired: 2m ago</span>
-                  </div>
-                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
-                </div>
-
-                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold text-ink block">● On: Qualify leads, Hot at score ≥ 80</span>
-                    <span className="text-[11px] text-ink-2">Last fired: 22m ago</span>
-                  </div>
-                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
-                </div>
-
-                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold text-ink block">● On: Follow up after 2 days of silence</span>
-                    <span className="text-[11px] text-ink-2">Last fired: 1h ago</span>
-                  </div>
-                  <input type="checkbox" defaultChecked className="accent-emerald-400" />
-                </div>
-
-                {/* Handoff Sentence Rule (Page 37 spec) */}
-                <div className="p-4 bg-surface-raised rounded border border-amber-500/30 space-y-2">
-                  <span className="text-warn font-semibold block text-[11px] uppercase">
-                    Sentence Handoff Rule
-                  </span>
-                  <p className="text-ink leading-relaxed">
-                    "Hand to a human when: <span className="text-warn font-semibold">customer asks for a person</span> / deal value exceeds <span className="text-warn font-semibold">₹{handoffThreshold}</span> / AI confidence is low, and notify <span className="text-ok font-semibold">Sales team</span>."
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================
-              SECTION: TEAM (Page 36 spec)
-             ======================================================== */}
-          {activeSection === 'team' && (
-            <div className="space-y-4">
-              <div className="border-b border-line-subtle pb-3">
-                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
-                  TEAM MEMBERS & ROLES
-                </span>
-              </div>
-
-              {/* Invite Form */}
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                  className="bg-surface-raised border border-line text-xs text-ink px-3 py-1.5 rounded sm:w-1/3"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="bg-surface-raised border border-line text-xs text-ink px-3 py-1.5 rounded flex-1"
-                />
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value)}
-                  className="bg-surface-raised border border-line text-xs text-ink px-2 py-1.5 rounded"
-                >
-                  <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Viewer">Viewer</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (inviteEmail) {
-                      setTeam([...team, { id: `t-${Date.now()}`, name: inviteName || 'Colleague', email: inviteEmail, role: inviteRole }]);
-                      setInviteName('');
-                      setInviteEmail('');
-                      if (onNotify) onNotify('Invite Sent', 'Colleague invited to workspace.');
-                    }
-                  }}
-                  className="px-4 py-1.5 bg-brand text-on-brand text-xs font-semibold rounded cursor-pointer"
-                >
-                  Invite
-                </button>
-              </div>
-
-              <div className="divide-y divide-line-subtle text-xs pt-2">
-                {team.map(m => (
-                  <div key={m.id} className="py-2.5 flex items-center justify-between">
-                    <div>
-                      <span className="font-semibold text-ink block">{m.name}</span>
-                      <span className="text-[11px] text-ink-2">{m.email}</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded bg-surface-raised border border-line text-[11px]">
-                      {m.role}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================
-              SECTION: BILLING (Page 36 spec)
-             ======================================================== */}
-          {activeSection === 'billing' && (
-            <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between border-b border-line-subtle pb-3">
-                <span className="uppercase tracking-widest text-ink-2 font-semibold">
-                  PLAN & USAGE
-                </span>
-                <span className="text-ok font-semibold cursor-pointer">[Change plan]</span>
-              </div>
-
-              <div className="p-4 bg-surface-raised rounded border border-line space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-ink font-semibold">Plan: Growth</span>
-                  <span className="text-ok font-bold">₹4,999 / month</span>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-line-subtle">
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>Conversations: 612 / 1,000</span>
-                      <span>61%</span>
-                    </div>
-                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
-                      <div className="bg-ok h-full w-[61%]" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>AI replies: 3,140 / 5,000</span>
-                      <span>63%</span>
-                    </div>
-                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
-                      <div className="bg-ok h-full w-[63%]" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>Seats: 4 / 5</span>
-                      <span>80%</span>
-                    </div>
-                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
-                      <div className="bg-ok h-full w-[80%]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <span className="text-ink-2 uppercase text-[10px] block font-semibold">Invoices</span>
-                <div className="flex items-center justify-between p-2.5 bg-surface-raised rounded border border-line-subtle">
-                  <span>Sep 2026 · ₹4,999</span>
-                  <span className="text-ok cursor-pointer">[PDF]</span>
-                </div>
-                <div className="flex items-center justify-between p-2.5 bg-surface-raised rounded border border-line-subtle">
-                  <span>Aug 2026 · ₹4,999</span>
-                  <span className="text-ok cursor-pointer">[PDF]</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================
-              SECTION: NOTIFICATIONS (Page 36 spec)
-             ======================================================== */}
-          {activeSection === 'notifications' && (
-            <div className="space-y-4 text-xs">
-              <div className="border-b border-line-subtle pb-3">
-                <span className="uppercase tracking-widest text-ink-2 font-semibold">
-                  NOTIFICATION CHANNELS MATRIX
-                </span>
-              </div>
-
-              <div className="divide-y divide-line-subtle">
-                <div className="grid grid-cols-12 py-2 font-semibold text-ink-2 text-[11px]">
-                  <div className="col-span-6">Event</div>
-                  <div className="col-span-2 text-center">In-app</div>
-                  <div className="col-span-2 text-center">Email</div>
-                  <div className="col-span-2 text-center">WhatsApp</div>
-                </div>
-
-                <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-ink">Conversation needs me</div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                </div>
-
-                <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-ink">New Hot lead</div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                </div>
-
-                <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-ink">Follow-up due</div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
-                  <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeSection === 'channels' && <ChannelsSection onNotify={onNotify} />}
+          {activeSection === 'automation' && <AutomationSection onNotify={onNotify} />}
+          {activeSection === 'team' && <TeamSection onNotify={onNotify} />}
+          {activeSection === 'billing' && <BillingSection onNotify={onNotify} />}
+          {activeSection === 'notifications' && <NotificationsSection onNotify={onNotify} />}
 
         </div>
 

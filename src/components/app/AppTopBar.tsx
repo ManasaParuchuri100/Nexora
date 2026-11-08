@@ -1,3 +1,4 @@
+import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Search, 
@@ -15,7 +16,6 @@ import {
   Megaphone,
 } from 'lucide-react';
 import { NavCategory, SubCategory } from '../../types';
-import { useTheme } from '../../context/ThemeContext';
 import { BRAND_NAME, BRAND_COMPANY } from '../../config/brand';
 
 interface AppTopBarProps {

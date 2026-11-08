@@ -156,7 +156,7 @@ export default function ActionModals({
         className={`relative w-full max-w-lg rounded-2xl p-6 sm:p-8 shadow-2xl animate-scaleUp max-h-[92vh] overflow-y-auto border transition-colors ${
           isLight
             ? 'bg-white border-slate-200 text-slate-900'
-            : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8]'
+            : 'bg-surface border-line text-ink'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -167,7 +167,7 @@ export default function ActionModals({
           className={`absolute top-6 right-6 p-1.5 rounded-lg transition-colors cursor-pointer ${
             isLight
               ? 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-              : 'text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-slate-800'
+              : 'text-ink-3 hover:text-ink hover:bg-slate-800'
           }`}
           aria-label="Close modal"
         >
@@ -182,7 +182,7 @@ export default function ActionModals({
                 PIPELINE REGISTRATION
               </span>
               <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-                isLight ? 'text-slate-900' : 'text-white'
+                isLight ? 'text-slate-900' : 'text-ink'
               }`}>
                 Add Inbound Lead
               </h3>
@@ -191,7 +191,7 @@ export default function ActionModals({
             <div className="space-y-4 text-xs">
               <div>
                 <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
-                  isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
+                  isLight ? 'text-slate-600' : 'text-ink-2'
                 }`}>
                   Contact Full Name
                 </label>
@@ -204,14 +204,14 @@ export default function ActionModals({
                   className={`w-full px-3 py-2 rounded-lg border text-xs focus:outline-none focus:border-teal-600 transition-colors ${
                     isLight
                       ? 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                      : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+                      : 'bg-surface-raised border-line text-ink'
                   }`}
                 />
               </div>
 
               <div>
                 <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
-                  isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
+                  isLight ? 'text-slate-600' : 'text-ink-2'
                 }`}>
                   Company / Organization
                 </label>
@@ -223,7 +223,7 @@ export default function ActionModals({
                   className={`w-full px-3 py-2 rounded-lg border text-xs focus:outline-none focus:border-teal-600 transition-colors ${
                     isLight
                       ? 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                      : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+                      : 'bg-surface-raised border-line text-ink'
                   }`}
                 />
               </div>
@@ -231,7 +231,7 @@ export default function ActionModals({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
-                    isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
+                    isLight ? 'text-slate-600' : 'text-ink-2'
                   }`}>
                     Acquisition Channel
                   </label>
@@ -241,7 +241,7 @@ export default function ActionModals({
                     className={`w-full px-2.5 py-2 rounded-lg border text-xs focus:outline-none focus:border-teal-600 transition-colors cursor-pointer ${
                       isLight
                         ? 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                        : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+                        : 'bg-surface-raised border-line text-ink'
                     }`}
                   >
                     <option value="LinkedIn">LinkedIn</option>
@@ -254,7 +254,7 @@ export default function ActionModals({
 
                 <div>
                   <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
-                    isLight ? 'text-slate-600' : 'text-[#A9BFA5]'
+                    isLight ? 'text-slate-600' : 'text-ink-2'
                   }`}>
                     Estimated Retainer Value
                   </label>
@@ -265,7 +265,7 @@ export default function ActionModals({
                     className={`w-full px-3 py-2 rounded-lg border text-xs focus:outline-none focus:border-teal-600 transition-colors ${
                       isLight
                         ? 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
-                        : 'bg-[#061816] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+                        : 'bg-surface-raised border-line text-ink'
                     }`}
                   />
                 </div>
@@ -273,20 +273,20 @@ export default function ActionModals({
             </div>
 
             <div className={`pt-4 border-t flex items-center justify-end space-x-3 ${
-              isLight ? 'border-slate-200' : 'border-[rgba(169,191,165,0.15)]'
+              isLight ? 'border-slate-200' : 'border-line-subtle'
             }`}>
               <button
                 type="button"
                 onClick={onClose}
                 className={`px-4 py-2 text-xs font-semibold cursor-pointer transition-colors ${
-                  isLight ? 'text-slate-500 hover:text-slate-800' : 'text-[#A9BFA5] hover:text-[#E8E9D8]'
+                  isLight ? 'text-slate-500 hover:text-slate-800' : 'text-ink-2 hover:text-ink'
                 }`}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors cursor-pointer shadow-xs"
+                className="bg-teal-600 hover:bg-teal-700 text-ink px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors cursor-pointer shadow-xs"
               >
                 Register Lead
               </button>
@@ -298,17 +298,17 @@ export default function ActionModals({
         {activeModal === 'campaign' && (
           <form onSubmit={handleCreateCampaignSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] block mb-1">
+              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 DISTRIBUTION SETUP
               </span>
-              <h3 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
                 Create Campaign
               </h3>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Campaign Title
                 </label>
                 <input
@@ -317,48 +317,48 @@ export default function ActionModals({
                   placeholder="e.g. Kyoto Spatial Architectural Narrative"
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                  className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Broadcast Channels
                   </label>
                   <input
                     type="text"
                     value={campaignChannel}
                     onChange={(e) => setCampaignChannel(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Allocated Budget
                   </label>
                   <input
                     type="text"
                     value={campaignBudget}
                     onChange={(e) => setCampaignBudget(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[rgba(169,191,165,0.15)] flex items-center justify-end space-x-3">
+            <div className="pt-4 border-t border-line-subtle flex items-center justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs uppercase tracking-widest text-[#A9BFA5] hover:text-[#E8E9D8] cursor-pointer"
+                className="px-4 py-2 text-xs uppercase tracking-widest text-ink-2 hover:text-ink cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
               >
                 Launch Cadence
               </button>
@@ -370,23 +370,23 @@ export default function ActionModals({
         {activeModal === 'content' && (
           <form onSubmit={handleGenerateContentSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] block mb-1">
+              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 RAPID SYNTHESIS
               </span>
-              <h3 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
                 Generate Content
               </h3>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Format
                 </label>
                 <select
                   value={contentType}
                   onChange={(e) => setContentType(e.target.value)}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-2.5 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                  className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                 >
                   <option value="Social Broadcast">Social Broadcast (X & LinkedIn)</option>
                   <option value="Direct Outreach Email">Direct Outreach Email</option>
@@ -395,7 +395,7 @@ export default function ActionModals({
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Topic or Key Thesis
                 </label>
                 <textarea
@@ -404,22 +404,22 @@ export default function ActionModals({
                   placeholder="e.g. Announce our upcoming digital residency. Highlight the balance between zero latency and aesthetic calm."
                   value={contentPrompt}
                   onChange={(e) => setContentPrompt(e.target.value)}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] p-3 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] resize-none font-light"
+                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[9px] focus:outline-none focus:border-line-strong resize-none font-light"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[rgba(169,191,165,0.15)] flex items-center justify-end space-x-3">
+            <div className="pt-4 border-t border-line-subtle flex items-center justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs uppercase tracking-widest text-[#A9BFA5] hover:text-[#E8E9D8] cursor-pointer"
+                className="px-4 py-2 text-xs uppercase tracking-widest text-ink-2 hover:text-ink cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
               >
                 Generate & Save
               </button>
@@ -431,10 +431,10 @@ export default function ActionModals({
         {activeModal === 'schedule' && (
           <form onSubmit={handleSchedulePostSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] block mb-1">
+              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 QUEUE DISPATCH
               </span>
-              <h3 className="serif text-2xl sm:text-3xl font-light text-[#E8E9D8]">
+              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
                 Schedule Post
               </h3>
             </div>
@@ -443,22 +443,22 @@ export default function ActionModals({
               {/* Multi-Platform Selection */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] font-medium">
+                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 font-medium">
                     Destination Platforms ({schedulePlatforms.length} selected)
                   </label>
-                  <div className="flex items-center space-x-2 text-[10px] font-mono">
+                  <div className="flex items-center space-x-2 text-[10px] ">
                     <button
                       type="button"
                       onClick={() => setSchedulePlatforms(['LinkedIn', 'X (Twitter)', 'Substack', 'Instagram', 'Threads'])}
-                      className="text-[#A9BFA5] hover:text-[#E8E9D8] underline cursor-pointer"
+                      className="text-ink-2 hover:text-ink underline cursor-pointer"
                     >
                       Select All
                     </button>
-                    <span className="text-[#A9BFA5]/30">·</span>
+                    <span className="text-ink-3">·</span>
                     <button
                       type="button"
                       onClick={() => setSchedulePlatforms([])}
-                      className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] underline cursor-pointer"
+                      className="text-ink-3 hover:text-ink underline cursor-pointer"
                     >
                       Clear
                     </button>
@@ -473,20 +473,20 @@ export default function ActionModals({
                         key={p}
                         type="button"
                         onClick={() => toggleModalSchedulePlatform(p)}
-                        className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1.5 font-mono ${
+                        className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[9px] transition-colors cursor-pointer flex items-center space-x-1.5  ${
                           isSelected 
-                            ? 'text-[#E8E9D8] border-[#A9BFA5] bg-[#0D2D2A]' 
-                            : 'text-[#A9BFA5]/60 border-[rgba(169,191,165,0.2)] hover:text-[#E8E9D8]'
+                            ? 'text-ink border-line-strong bg-surface-hover' 
+                            : 'text-ink-3 border-line hover:text-ink'
                         }`}
                       >
-                        {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
+                        {isSelected && <Check className="w-3 h-3 text-ok" />}
                         <span>{p}</span>
                       </button>
                     );
                   })}
                 </div>
                 {schedulePlatforms.length === 0 && (
-                  <p className="text-[10px] text-amber-400 mt-1 font-mono">
+                  <p className="text-[10px] text-warn mt-1 ">
                     Select at least one destination platform.
                   </p>
                 )}
@@ -494,7 +494,7 @@ export default function ActionModals({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Broadcast Topic / Title
                   </label>
                   <input
@@ -502,25 +502,25 @@ export default function ActionModals({
                     placeholder="e.g., Atelier Architecture Insights"
                     value={scheduleTitle}
                     onChange={(e) => setScheduleTitle(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Dispatch Slot
                   </label>
                   <input
                     type="text"
                     value={scheduleTime}
                     onChange={(e) => setScheduleTime(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#A9BFA5]"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#A9BFA5] mb-1.5 font-medium">
+                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Message Content
                 </label>
                 <textarea
@@ -529,12 +529,12 @@ export default function ActionModals({
                   placeholder="Type post copy or paste from Creative Lab..."
                   value={scheduleText}
                   onChange={(e) => setScheduleText(e.target.value)}
-                  className="w-full bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[#E8E9D8] p-3 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] resize-none font-light"
+                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[9px] focus:outline-none focus:border-line-strong resize-none font-light"
                 />
               </div>
 
               {/* Media Attachment Picker */}
-              <div className="pt-2 border-t border-[rgba(169,191,165,0.15)]">
+              <div className="pt-2 border-t border-line-subtle">
                 <MediaAttachmentPicker
                   attachments={scheduleAttachments}
                   onChange={setScheduleAttachments}
@@ -545,18 +545,18 @@ export default function ActionModals({
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[rgba(169,191,165,0.15)] flex items-center justify-end space-x-3">
+            <div className="pt-4 border-t border-line-subtle flex items-center justify-end space-x-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs uppercase tracking-widest text-[#A9BFA5] hover:text-[#E8E9D8] cursor-pointer"
+                className="px-4 py-2 text-xs uppercase tracking-widest text-ink-2 hover:text-ink cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={schedulePlatforms.length === 0 || !scheduleText.trim()}
-                className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer disabled:opacity-40"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40"
               >
                 Schedule Release
               </button>
@@ -573,70 +573,70 @@ export default function ActionModals({
                   LEAD PROFILE · SCORE {selectedLead.score}/100
                 </span>
                 <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
-                  isLight ? 'text-slate-900' : 'text-white'
+                  isLight ? 'text-slate-900' : 'text-ink'
                 }`}>
                   {selectedLead.name}
                 </h3>
                 <p className={`text-xs mt-0.5 ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]'
+                  isLight ? 'text-slate-500' : 'text-ink-2'
                 }`}>
                   {selectedLead.company}
                 </p>
               </div>
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${
-                isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'border-[#A9BFA5]/30 text-[#E8E9D8]'
+                isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'border-line-strong text-ink'
               }`}>
                 {selectedLead.status}
               </span>
             </div>
 
             <div className={`grid grid-cols-2 gap-4 p-4 rounded-xl border text-xs ${
-              isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+              isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-surface-raised border-line'
             }`}>
               <div>
                 <p className={`text-[10px] font-semibold uppercase tracking-wider ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                  isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Channel
                 </p>
-                <p className={`font-semibold mt-0.5 ${isLight ? 'text-slate-900' : 'text-[#E8E9D8]'}`}>
+                <p className={`font-semibold mt-0.5 ${isLight ? 'text-slate-900' : 'text-ink'}`}>
                   {selectedLead.source}
                 </p>
               </div>
               <div>
                 <p className={`text-[10px] font-semibold uppercase tracking-wider ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                  isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Retainer Value
                 </p>
-                <p className={`font-semibold mt-0.5 ${isLight ? 'text-slate-900' : 'text-[#E8E9D8]'}`}>
+                <p className={`font-semibold mt-0.5 ${isLight ? 'text-slate-900' : 'text-ink'}`}>
                   {selectedLead.value}
                 </p>
               </div>
               <div className="col-span-2">
                 <p className={`text-[10px] font-semibold uppercase tracking-wider ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                  isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Email
                 </p>
-                <p className={`font-medium mt-0.5 ${isLight ? 'text-slate-800' : 'text-[#E8E9D8]'}`}>
+                <p className={`font-medium mt-0.5 ${isLight ? 'text-slate-800' : 'text-ink'}`}>
                   {selectedLead.email}
                 </p>
               </div>
               <div className="col-span-2">
                 <p className={`text-[10px] font-semibold uppercase tracking-wider ${
-                  isLight ? 'text-slate-500' : 'text-[#A9BFA5]/60'
+                  isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Last Activity
                 </p>
-                <p className={`mt-0.5 ${isLight ? 'text-slate-600' : 'text-[#A9BFA5]'}`}>
+                <p className={`mt-0.5 ${isLight ? 'text-slate-600' : 'text-ink-2'}`}>
                   {selectedLead.lastActivity}
                 </p>
               </div>
             </div>
 
             <div className={`flex items-center justify-end space-x-3 pt-4 border-t ${
-              isLight ? 'border-slate-200' : 'border-[rgba(169,191,165,0.15)]'
+              isLight ? 'border-slate-200' : 'border-line-subtle'
             }`}>
               <button
                 type="button"
@@ -644,7 +644,7 @@ export default function ActionModals({
                   onNotify('Response Queued', `AI draft prepared for ${selectedLead.name}.`);
                   onClose();
                 }}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors cursor-pointer shadow-xs"
+                className="bg-teal-600 hover:bg-teal-700 text-ink px-5 py-2.5 rounded-lg font-semibold text-xs transition-colors cursor-pointer shadow-xs"
               >
                 Send Personalized Reply
               </button>
