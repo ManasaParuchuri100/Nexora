@@ -22,7 +22,7 @@ import {
   Clock3
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { Campaign, CampaignBlueprint, SubCategory } from '../../types';
+import { Campaign, CampaignBlueprint, GeneratedAsset, SubCategory } from '../../types';
 import CampaignCreationFlow from './CampaignCreationFlow';
 import CampaignBlueprintView from './CampaignBlueprintView';
 import Pagination from './Pagination';
@@ -40,6 +40,7 @@ interface CampaignsViewProps {
   onUpdateCampaign?: (updatedCamp: Campaign) => void;
   onNavigateToModule?: (category: string, subCategory?: string) => void;
   isFirstRun?: boolean;
+  assets?: GeneratedAsset[];
 }
 
 function parseCampaignDate(dateStr?: string): Date | null {
@@ -74,7 +75,8 @@ export default function CampaignsView({
   onAddCampaign,
   onUpdateCampaign,
   onNavigateToModule,
-  isFirstRun = false
+  isFirstRun = false,
+  assets = []
 }: CampaignsViewProps) {
   const { theme } = useTheme();
   const isLight = theme === 'light';
@@ -365,6 +367,8 @@ export default function CampaignsView({
     return (
       <CampaignBlueprintView
         blueprint={selectedCampaign.blueprint}
+        campaign={selectedCampaign}
+        linkedAssets={assets.filter(a => a.campaign === selectedCampaign.name)}
         onBack={() => setViewMode('landing')}
         onEdit={() => setViewMode('create')}
         onRegenerate={() => {

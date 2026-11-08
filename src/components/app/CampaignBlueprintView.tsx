@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CampaignBlueprint } from '../../types';
-import { PageHeader } from '../ui';
+import { Campaign, CampaignBlueprint, GeneratedAsset } from '../../types';
+import { AIInsight, PageHeader, StatusBadge, TabPanel, Tabs } from '../ui';
 import { ChannelLogo, ChannelBrand } from '../ui/ChannelLogo';
 
 const BRAND_OF: Record<string, ChannelBrand> = {
@@ -18,16 +18,18 @@ interface CampaignBlueprintViewProps {
   onRegenerate: () => void;
   onStartCampaign?: () => void;
   onNavigateToModule?: (module: string, sub?: string) => void;
+  /** The campaign record, when known. Adds status and results. */
+  campaign?: Campaign;
+  /** Library content linked to this campaign. */
+  linkedAssets?: GeneratedAsset[];
 }
 
-type Tab = 'plan' | 'roadmap' | 'content' | 'execution' | 'leads' | 'kpis';
+type Tab = 'plan' | 'content' | 'leads' | 'results';
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'plan', label: 'Plan' },
-  { id: 'roadmap', label: 'Roadmap' },
   { id: 'content', label: 'Content' },
-  { id: 'execution', label: 'Execution' },
   { id: 'leads', label: 'Leads' },
-  { id: 'kpis', label: 'KPIs & risks' },
+  { id: 'results', label: 'Results' },
 ];
 
 const EXEC_GROUPS: Array<{ key: keyof CampaignBlueprint['execution']; label: string }> = [
@@ -84,6 +86,8 @@ export default function CampaignBlueprintView({
   onRegenerate,
   onStartCampaign,
   onNavigateToModule,
+  campaign,
+  linkedAssets = [],
 }: CampaignBlueprintViewProps) {
   const [tab, setTab] = useState<Tab>('plan');
   const [openPhase, setOpenPhase] = useState<string | null>(blueprint.roadmap[0]?.id ?? null);
@@ -123,7 +127,7 @@ export default function CampaignBlueprintView({
     <div className="w-full animate-fadeIn">
       <PageHeader
         eyebrow="Campaigns / Plan"
-        title={blueprint.campaignName}
+        title={<>{blueprint.campaignName}{campaign && <span className="ml-3 align-middle"><StatusBadge status={campaign.status} /></span>}</>}
         subtitle={`Plan generated ${blueprint.createdAt} from your goals, audience, budget and timeline.`}
         actions={
           <div className="flex flex-wrap gap-2">
@@ -153,15 +157,10 @@ export default function CampaignBlueprintView({
         ))}
       </div>
 
-      <div className="flex gap-1.5 flex-wrap mb-[15px]" role="tablist">
-        {TABS.map(t => (
-          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id}
-            className={`nx-tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Tabs<Tab> idPrefix="campaign" label="Campaign sections" tabs={TABS.map(t => t.id === 'content' && linkedAssets.length ? { ...t, count: linkedAssets.length } : t)} value={tab} onChange={setTab} className="mb-[15px]" />
 
+      <TabPanel idPrefix="campaign" id={tab}>
+      <div className="grid gap-[15px]">
       {tab === 'plan' && (
         <div className="nx-grid nx-two">
           <Panel title="Campaign overview" sub="The essentials at a glance.">
@@ -192,27 +191,10 @@ export default function CampaignBlueprintView({
             <p className="text-[12px] text-ink-2 leading-[1.65] m-0">{s.recommendedApproach}</p>
           </Panel>
 
-          <div className="col-span-full">
-            <Panel title="Next steps" sub="Start with the first one.">
-              <div className="border-t border-line">
-                {blueprint.nextSteps.map(st => (
-                  <button key={st.number} type="button" onClick={() => go(st.actionKey)}
-                    className="nx-row w-full text-left bg-transparent border-0 border-b border-line cursor-pointer min-h-0!">
-                    <div className="nx-alerticon">{st.number}</div>
-                    <div className="flex-1 min-w-0">
-                      <strong>{st.title}</strong>
-                      <p>{st.description}</p>
-                    </div>
-                    <span className="nx-inline-link">Open →</span>
-                  </button>
-                ))}
-              </div>
-            </Panel>
-          </div>
         </div>
       )}
 
-      {tab === 'roadmap' && (
+      {tab === 'plan' && (
         <section className="nx-panel nx-pad">
           <div className="nx-sectionhead"><div><h2>Roadmap</h2><p>{blueprint.roadmap.length} phases from discovery to analysis.</p></div></div>
           <div className="border-t border-line">
@@ -247,6 +229,27 @@ export default function CampaignBlueprintView({
       {tab === 'content' && (
         <div className="grid gap-[15px]">
           <section className="nx-panel nx-pad">
+            <div className="nx-sectionhead">
+              <div><h2>Content in your library</h2><p>Drafts linked to this campaign.</p></div>
+              <button type="button" className="nx-btn sm" onClick={() => onNavigateToModule?.('content', 'create')}>Create content →</button>
+            </div>
+            {linkedAssets.length === 0 ? (
+              <p className="text-[12px] text-ink-3 m-0">Nothing linked yet. Choose this campaign when you create content and it will appear here.</p>
+            ) : (
+              <div className="border-t border-line">
+                {linkedAssets.map(a => (
+                  <div key={a.id} className="nx-row">
+                    <div className="flex-1 min-w-0">
+                      <strong>{a.title}</strong>
+                      <p>{a.type} · {a.platform} · {a.createdAt}</p>
+                    </div>
+                    {a.status && <StatusBadge status={a.status} />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+          <section className="nx-panel nx-pad">
             <div className="nx-sectionhead"><div><h2>Content plan</h2><p>What to publish, where and when.</p></div>
               <button type="button" className="nx-btn sm" onClick={() => onNavigateToModule?.('creative-lab', 'create')}>Create content →</button></div>
             <div className="overflow-x-auto">
@@ -279,7 +282,7 @@ export default function CampaignBlueprintView({
         </div>
       )}
 
-      {tab === 'execution' && (
+      {tab === 'plan' && (
         <section className="nx-panel nx-pad">
           <div className="nx-sectionhead">
             <div><h2>Execution checklist</h2><p>{execDone} of {execTotal} done.</p></div>
@@ -305,8 +308,33 @@ export default function CampaignBlueprintView({
         </section>
       )}
 
+      {tab === 'plan' && (
+            <Panel title="Next steps" sub="Start with the first one.">
+              <div className="border-t border-line">
+                {blueprint.nextSteps.map(st => (
+                  <button key={st.number} type="button" onClick={() => go(st.actionKey)}
+                    className="nx-row w-full text-left bg-transparent border-0 border-b border-line cursor-pointer min-h-0!">
+                    <div className="nx-alerticon">{st.number}</div>
+                    <div className="flex-1 min-w-0">
+                      <strong>{st.title}</strong>
+                      <p>{st.description}</p>
+                    </div>
+                    <span className="nx-inline-link">Open →</span>
+                  </button>
+                ))}
+              </div>
+            </Panel>
+      )}
+
       {tab === 'leads' && (
         <div className="nx-grid nx-two">
+          <div className="col-span-full">
+            <AIInsight
+              observation={`${campaign?.leads ?? 0} leads are recorded against this campaign.`}
+              recommendation="Count a lead for this campaign only when a tracked form, link or conversation shows where it came from. A lead from WhatsApp should not be credited to an ad without that evidence."
+              evidence="Source: campaign records"
+            />
+          </div>
           <Panel title="Lead strategy" sub="From first touch to qualified lead.">
             <KV k="Capture">{blueprint.leadStrategy.captureStrategy}</KV>
             <KV k="Qualification">{blueprint.leadStrategy.qualification}</KV>
@@ -321,7 +349,24 @@ export default function CampaignBlueprintView({
         </div>
       )}
 
-      {tab === 'kpis' && (
+      {tab === 'results' && (
+        <div className="nx-grid nx-metrics">
+          {[
+            { l: 'Impressions', v: campaign?.impressions ?? '—' },
+            { l: 'Leads', v: campaign ? String(campaign.leads) : '—' },
+            { l: 'Conversion', v: campaign?.conversion ?? '—' },
+            { l: 'Budget', v: campaign?.budget ?? o.budget },
+          ].map(m => (
+            <div key={m.l} className="nx-panel nx-metric">
+              <div className="nx-label">{m.l}</div>
+              <div className="nx-number">{m.v}</div>
+              <div className="nx-delta neutral">From campaign records</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === 'results' && (
         <div className="nx-grid nx-two">
           <Panel title="KPIs" sub="Targets to track from day one.">
             {blueprint.kpis.map(k => (
@@ -344,6 +389,8 @@ export default function CampaignBlueprintView({
           </Panel>
         </div>
       )}
+      </div>
+      </TabPanel>
     </div>
   );
 }

@@ -39,6 +39,8 @@ interface OutputWorkspaceProps {
   onRegenerate: () => void;
   onRefine: (instruction: string) => void;
   isGenerating: boolean;
+  /** When set, a Schedule button is shown (text content only). */
+  onSchedule?: () => void;
 }
 
 const STOCK_RENDER_ASSETS = [
@@ -58,6 +60,7 @@ export default function OutputWorkspace({
   onUpdateVariationImage,
   onRegenerate,
   onRefine,
+  onSchedule,
   isGenerating
 }: OutputWorkspaceProps) {
 
@@ -220,7 +223,7 @@ export default function OutputWorkspace({
                 onClick={() => onSelectVariation(idx)}
                 className={`px-3 py-1.5 text-xs font-mono rounded-[9px] border transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-brand border-brand text-white font-medium shadow-sm'
+                    ? 'bg-brand border-brand text-on-brand font-medium shadow-sm'
                     : 'border-line bg-surface-raised text-ink-3 hover:text-ink hover:border-line'
                 }`}
               >
@@ -237,7 +240,7 @@ export default function OutputWorkspace({
             onClick={() => setIsEditing(!isEditing)}
             className={`p-1.5 rounded-[9px] border transition-colors cursor-pointer ${
               isEditing
-                ? 'bg-brand border-brand text-white'
+                ? 'bg-brand border-brand text-on-brand'
                 : 'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
             }`}
             title={isEditing ? 'Save and preview' : 'Edit content'}
@@ -288,6 +291,12 @@ export default function OutputWorkspace({
           >
             <Download className="w-3.5 h-3.5" />
           </button>
+
+          {onSchedule && (
+            <button type="button" onClick={onSchedule} className="nx-btn primary sm">
+              Schedule
+            </button>
+          )}
         </div>
       </div>
 
@@ -371,11 +380,11 @@ export default function OutputWorkspace({
 
                 {/* Subtle hairline vignette overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3 pointer-events-none">
-                  <div className="text-white text-[11px] font-mono">
+                  <div className="text-on-brand text-[11px] font-mono">
                     <span className="font-semibold block">{currentVariation.versionLabel}</span>
                   </div>
 
-                  <span className="bg-surface/20 backdrop-blur-sm px-2 py-0.5 rounded-[7px] text-[10px] text-white font-mono flex items-center space-x-1">
+                  <span className="bg-surface/20 backdrop-blur-sm px-2 py-0.5 rounded-[7px] text-[10px] text-on-brand font-mono flex items-center space-x-1">
                     <Maximize2 className="w-3 h-3" />
                     <span>View 4K</span>
                   </span>
@@ -521,21 +530,21 @@ export default function OutputWorkspace({
         >
           {/* Lightbox Header */}
           <div
-            className="flex items-center justify-between text-white pb-3 border-b border-white/15"
+            className="flex items-center justify-between text-on-brand pb-3 border-b border-white/15"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center space-x-3">
               <span className="text-xs uppercase tracking-widest text-ink-3">
                 {category} · {currentVariation.versionLabel}
               </span>
-              <span className="text-[11px] font-mono text-white/60">3840×2160 UHD</span>
+              <span className="text-[11px] font-mono text-on-brand/60">3840×2160 UHD</span>
             </div>
 
             <div className="flex items-center space-x-3">
               <button
                 type="button"
                 onClick={() => handleDownloadImage(activeImageUrl)}
-                className="px-3 py-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-white text-xs font-mono flex items-center space-x-1.5 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-on-brand text-xs font-mono flex items-center space-x-1.5 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download .jpg</span>
@@ -544,7 +553,7 @@ export default function OutputWorkspace({
               <button
                 type="button"
                 onClick={() => setLightboxOpen(false)}
-                className="p-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-on-brand transition-colors cursor-pointer"
                 title="Close Lightbox"
               >
                 <X className="w-5 h-5" />
@@ -567,7 +576,7 @@ export default function OutputWorkspace({
 
           {/* Lightbox Footer */}
           <div
-            className="text-center text-white/70 text-xs font-mono pt-2 border-t border-white/10"
+            className="text-center text-on-brand/70 text-xs font-mono pt-2 border-t border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <span>Octane Path Traced · 4500K Radiance · 35mm Hasselblad X2D · Nexora Atelier OS</span>

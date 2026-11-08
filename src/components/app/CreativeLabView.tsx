@@ -8,9 +8,11 @@ import {
   SlidersHorizontal,
   Compass
 } from 'lucide-react';
-import { GeneratedAsset, SubCategory } from '../../types';
+import { Campaign, GeneratedAsset, ScheduledPost, SubCategory } from '../../types';
 import Pagination from './Pagination';
-import { PageHeader } from '../ui';
+import { PageHeader, StatusBadge } from '../ui';
+import ContentTabs from './ContentTabs';
+import { Field, NxModal } from './followups/FollowUpKit';
 import BrandContextBanner, { DEFAULT_BRAND_CONTEXT, BrandContext } from './creative/BrandContextBanner';
 import CategoryNav, { CategoryType, MAIN_CATEGORIES, getMainCategoryForSub } from './creative/CategoryNav';
 import QuickGenerateForm from './creative/QuickGenerateForm';
@@ -22,13 +24,75 @@ interface CreativeLabViewProps {
   assets: GeneratedAsset[];
   onNavigateSub: (sub: SubCategory) => void;
   onGenerateSuccess: (newAsset: GeneratedAsset) => void;
+  campaigns?: Campaign[];
+  onSchedulePost?: (post: ScheduledPost) => void;
+  onUpdateAsset?: (id: string, patch: Partial<GeneratedAsset>) => void;
+}
+
+const SCHEDULE_CHANNELS = ['LinkedIn', 'X (Twitter)', 'Instagram', 'Email', 'Substack'];
+
+function ScheduleDialog({
+  title, defaultChannel, onClose, onConfirm,
+}: {
+  title: string;
+  defaultChannel: string;
+  onClose: () => void;
+  onConfirm: (channel: string, when: Date) => void;
+}) {
+  const [channel, setChannel] = useState(SCHEDULE_CHANNELS.includes(defaultChannel) ? defaultChannel : SCHEDULE_CHANNELS[0]);
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [error, setError] = useState('');
+
+  const submit = () => {
+    if (!date) return setError('Choose a date.');
+    if (!time) return setError('Choose a time.');
+    const when = new Date(`${date}T${time}`);
+    if (Number.isNaN(when.getTime()) || when.getTime() < Date.now()) return setError('Pick a time in the future.');
+    onConfirm(channel, when);
+  };
+
+  return (
+    <NxModal
+      title="Schedule post"
+      subtitle={title}
+      onClose={onClose}
+      width={460}
+      footer={
+        <>
+          <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
+          <button type="button" className="nx-btn primary" onClick={submit}>Schedule</button>
+        </>
+      }
+    >
+      <Field label="Publish to">
+        <div className="flex flex-wrap gap-[7px]">
+          {SCHEDULE_CHANNELS.map(c => (
+            <button key={c} type="button" aria-pressed={channel === c} className={`nx-chip ${channel === c ? 'active' : ''}`} onClick={() => setChannel(c)}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </Field>
+      <Field label="Date & time">
+        <div className="grid grid-cols-2 gap-[10px]">
+          <input type="date" value={date} min={new Date().toISOString().slice(0, 10)} onChange={e => { setDate(e.target.value); setError(''); }} aria-label="Date" />
+          <input type="time" value={time} onChange={e => { setTime(e.target.value); setError(''); }} aria-label="Time" />
+        </div>
+      </Field>
+      {error && <p className="text-[12px] text-danger m-0 mb-2" role="alert">{error}</p>}
+    </NxModal>
+  );
 }
 
 export default function CreativeLabView({
   activeSubCategory,
   assets,
   onNavigateSub,
-  onGenerateSuccess
+  onGenerateSuccess,
+  campaigns = [],
+  onSchedulePost,
+  onUpdateAsset
 }: CreativeLabViewProps) {
 
   const isAssetsView = activeSubCategory === 'generated-assets' || activeSubCategory === 'content-library';
@@ -46,6 +110,10 @@ export default function CreativeLabView({
   const [variationsCount, setVariationsCount] = useState<number>(3);
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [campaignId, setCampaignId] = useState('');
+  const [lastAssetId, setLastAssetId] = useState<string | null>(null);
+  const [scheduling, setScheduling] = useState(false);
+  const [libQuery, setLibQuery] = useState('');
   const [variations, setVariations] = useState<GeneratedVariation[]>([]);
   const [activeVariationIndex, setActiveVariationIndex] = useState<number>(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -119,15 +187,19 @@ export default function CreativeLabView({
   const [assetPage, setAssetPage] = useState<number>(1);
   const [assetPageSize, setAssetPageSize] = useState<number>(4);
   const [typeFilter, setTypeFilter] = useState<string>('All');
+  const campaign = campaigns.find(c => c.id === campaignId);
 
   useEffect(() => {
     setAssetPage(1);
-  }, [typeFilter]);
+  }, [typeFilter, libQuery]);
 
   const filteredAssets = useMemo(() => {
-    if (typeFilter === 'All') return assets;
-    return assets.filter(a => getMainCategoryForSub(a.type as CategoryType) === typeFilter);
-  }, [assets, typeFilter]);
+    const q = libQuery.trim().toLowerCase();
+    return assets.filter(a =>
+      (typeFilter === 'All' || getMainCategoryForSub(a.type as CategoryType) === typeFilter) &&
+      (!q || `${a.title} ${a.preview} ${a.platform} ${a.campaign || ''} ${a.tags.join(' ')}`.toLowerCase().includes(q)),
+    );
+  }, [assets, typeFilter, libQuery]);
 
   const paginatedAssets = useMemo(() => {
     const start = (assetPage - 1) * assetPageSize;
@@ -1145,8 +1217,11 @@ Audio: Solo cello harmonics and tactile room tone
           preview: generated[0].content.slice(0, 140) + '...',
           createdAt: 'Just now',
           tags: [cat.split(' ')[0], brandContext.productName.split(' ')[0], 'Studio'],
-          imageUrl: generated[0].imageUrl
+          imageUrl: generated[0].imageUrl,
+          campaign: campaign?.name,
+          status: 'Draft'
         };
+        setLastAssetId(newAsset.id);
         onGenerateSuccess(newAsset);
       }
     }, 750);
@@ -1219,24 +1294,39 @@ Audio: Solo cello harmonics and tactile room tone
   return (
     <div className="w-full animate-fadeIn space-y-[15px]">
       <PageHeader
-        eyebrow={`AI & Marketing / ${isAssetsView ? 'Library' : 'Content Studio'}`}
-        title={isAssetsView ? 'Library' : 'Content Studio'}
+        eyebrow="Marketing / Content"
+        title="Content"
         subtitle={
           isAssetsView
-            ? 'Everything you have generated, ready to reuse.'
-            : 'Synthesize copy, visual artwork, and video storyboards.'
-        }
-        actions={
-          <div className="flex gap-1.5">
-            <button type="button" className={`nx-tab ${!isAssetsView ? 'active' : ''}`} onClick={() => onNavigateSub('create')}>
-              Studio
-            </button>
-            <button type="button" className={`nx-tab ${isAssetsView ? 'active' : ''}`} onClick={() => onNavigateSub('generated-assets')}>
-              Archive <span className="nx-tab-count">{assets.length}</span>
-            </button>
-          </div>
+            ? 'Everything you have created, ready to reuse or schedule.'
+            : 'Create marketing content from a brief, then edit, save or schedule it.'
         }
       />
+      <ContentTabs active={isAssetsView ? 'library' : 'create'} onNavigate={onNavigateSub} libraryCount={assets.length} />
+
+      {scheduling && variations[activeVariationIndex] && (
+        <ScheduleDialog
+          title={`${selectedCategory} · ${variations[activeVariationIndex].versionLabel}`}
+          defaultChannel={selectedCategory === 'Social Post' ? formsState.socialForm.platform : selectedCategory === 'Email Copy' ? 'Email' : 'LinkedIn'}
+          onClose={() => setScheduling(false)}
+          onConfirm={(channel, when) => {
+            const v = variations[activeVariationIndex];
+            onSchedulePost?.({
+              id: `post-${Date.now()}`,
+              title: `${selectedCategory} — ${brandContext.productName}`,
+              content: v.content,
+              platforms: [channel],
+              scheduledTime: when.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+              status: 'Scheduled',
+              tags: campaign ? [campaign.name] : undefined,
+              author: 'You',
+              createdAt: 'Just now',
+            });
+            if (lastAssetId) onUpdateAsset?.(lastAssetId, { status: 'Scheduled' });
+            setScheduling(false);
+          }}
+        />
+      )}
 
       {!isAssetsView ? (
         /* CREATE EXPERIENCE */
@@ -1255,6 +1345,21 @@ Audio: Solo cello harmonics and tactile room tone
                 <span>Structured Brief</span>
               </button>
             </div>
+
+            {campaigns.length > 0 && (
+              <label className="flex items-center gap-2 text-[11px] font-bold text-ink-3 shrink-0">
+                Campaign
+                <select
+                  value={campaignId}
+                  onChange={e => setCampaignId(e.target.value)}
+                  aria-label="Link to campaign"
+                  className="max-w-[200px]"
+                >
+                  <option value="">None</option>
+                  {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </label>
+            )}
 
             <div className="flex-1 sm:max-w-md w-full">
               <BrandContextBanner
@@ -1312,6 +1417,11 @@ Audio: Solo cello harmonics and tactile room tone
                 onRegenerate={() => handleGenerate()}
                 onRefine={handleRefine}
                 isGenerating={isGenerating}
+                onSchedule={
+                  onSchedulePost && variations[activeVariationIndex] && getMainCategoryForSub(selectedCategory) === 'text'
+                    ? () => setScheduling(true)
+                    : undefined
+                }
               />
             </div>
           </div>
@@ -1345,6 +1455,14 @@ Audio: Solo cello harmonics and tactile room tone
               })}
             </div>
 
+            <input
+              type="search"
+              value={libQuery}
+              onChange={e => setLibQuery(e.target.value)}
+              placeholder="Search library"
+              aria-label="Search library"
+              className="nx-input w-full sm:w-[220px] sm:ml-auto"
+            />
             <div
               className={`text-[11px] font-mono shrink-0 ${
                 'text-ink-2'
@@ -1408,6 +1526,13 @@ Audio: Solo cello harmonics and tactile room tone
                         {asset.createdAt}
                       </span>
                     </div>
+
+                    {(asset.status || asset.campaign) && (
+                      <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                        {asset.status && <StatusBadge status={asset.status} />}
+                        {asset.campaign && <span className="nx-tag teal">{asset.campaign}</span>}
+                      </div>
+                    )}
 
                     <h4
                       className={`font-display font-bold tracking-[-0.3px] mb-3 ${

@@ -365,6 +365,9 @@ export interface GeneratedAsset {
   createdAt: string;
   tags: string[];
   imageUrl?: string;
+  /** Campaign this content belongs to, when linked. */
+  campaign?: string;
+  status?: 'Draft' | 'Scheduled' | 'Published';
 }
 
 export interface SocialAccount {
