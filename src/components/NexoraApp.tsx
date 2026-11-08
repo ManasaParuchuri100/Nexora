@@ -32,6 +32,7 @@ import EngageView from './app/EngageView';
 import LeadsView from './app/LeadsView';
 import CreativeLabView from './app/CreativeLabView';
 import SocialHubView from './app/SocialHubView';
+import { contentTabFor } from './app/ContentTabs';
 import CampaignsView from './app/CampaignsView';
 import AnalyticsView from './app/AnalyticsView';
 import SettingsView from './app/SettingsView';
@@ -55,6 +56,9 @@ interface NexoraAppProps {
   onOpenLogin?: () => void;
   initialFirstRun?: boolean;
 }
+
+/** Destinations with local tabs reopen on the tab last used in this session. */
+const REMEMBER_TABS: NavCategory[] = ['leads', 'content', 'analytics', 'settings'];
 
 export default function NexoraApp({
   onReturnToLanding,
@@ -144,6 +148,20 @@ export default function NexoraApp({
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Sidebar: 232px, or a 72px rail. Narrow desktops and tablets start collapsed until a choice is saved.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('nexora_sidebar_collapsed');
+      if (saved === '1' || saved === '0') return saved === '1';
+    } catch { /* storage unavailable */ }
+    return typeof window !== 'undefined' && window.innerWidth < 1024;
+  });
+  const toggleSidebar = () =>
+    setSidebarCollapsed(prev => {
+      try { localStorage.setItem('nexora_sidebar_collapsed', prev ? '0' : '1'); } catch { /* storage unavailable */ }
+      return !prev;
+    });
+  const lastTab = useRef<Partial<Record<NavCategory, SubCategory>>>({});
   const handleSelectNav = (category: NavCategory, subCategory?: SubCategory) => {
     if (activeModal === 'lead-details') setActiveModal(null);
 
@@ -164,8 +182,8 @@ export default function NexoraApp({
       targetSub = 'schedule';
     }
 
-    // Default subcategory per main tab
-    const resolvedSub: SubCategory = targetSub || (
+    // Default subcategory per main tab. Destinations with local tabs reopen on the last tab used.
+    const resolvedSub: SubCategory = targetSub || (REMEMBER_TABS.includes(targetCategory) ? lastTab.current[targetCategory] : undefined) || (
       targetCategory === 'overview'
         ? 'overview'
         : targetCategory === 'inbox'
@@ -194,6 +212,9 @@ export default function NexoraApp({
       setSelectedLead(null);
     }
 
+    if (REMEMBER_TABS.includes(targetCategory) && resolvedSub !== 'lead-page' && resolvedSub !== 'lead-details') {
+      lastTab.current[targetCategory] = resolvedSub;
+    }
     setActiveCategory(targetCategory);
     setActiveSubCategory(resolvedSub);
 
@@ -363,12 +384,14 @@ export default function NexoraApp({
         userName={currentUser?.name || 'Alex'}
         userRole={currentUser?.role || 'Owner'}
         workspaceName={currentUser?.workspace || `${BRAND_NAME} Workspace`}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={toggleSidebar}
       />
 
       {/* Main Workspace Frame */}
       {(() => {
         return (
-          <div className={`md:pl-[232px] flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
+          <div className={`${sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-[232px]'} transition-[padding] duration-200 flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
             {/* Top Navigation Bar with Dynamic Breadcrumb */}
             <AppTopBar
               activeCategory={activeCategory}
@@ -470,12 +493,19 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
+                    campaigns={campaigns}
+                    onSchedulePost={handleAddScheduledPost}
+                    onUpdateAsset={(id, patch) => setAssets(prev => prev.map(a => (a.id === id ? { ...a, ...patch } : a)))}
                   />
                 )}
 
-                {(activeSubCategory === 'schedule' || activeSubCategory === 'social-posts') && (
+                {contentTabFor(activeSubCategory) === 'schedule' && (
                   <SocialHubView
-                    activeSubCategory="ai-guided-creation"
+                    activeSubCategory={
+                      activeSubCategory === 'connect' || activeSubCategory === 'ai-guided-creation'
+                        ? activeSubCategory
+                        : 'manual-scheduling'
+                    }
                     accounts={accounts}
                     scheduledPosts={scheduledPosts}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
@@ -484,6 +514,7 @@ export default function NexoraApp({
                     onDeleteScheduledPost={handleDeleteScheduledPost}
                     onUpdateScheduledPost={handleUpdateScheduledPost}
                     isFirstRun={isFirstRun}
+                    libraryCount={assets.length}
                   />
                 )}
 
@@ -493,6 +524,9 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
+                    campaigns={campaigns}
+                    onSchedulePost={handleAddScheduledPost}
+                    onUpdateAsset={(id, patch) => setAssets(prev => prev.map(a => (a.id === id ? { ...a, ...patch } : a)))}
                   />
                 )}
               </>
@@ -509,6 +543,7 @@ export default function NexoraApp({
                 }}
                 onNavigateToModule={(cat, sub) => handleSelectNav(cat as NavCategory, (sub as SubCategory) || 'overview')}
                 isFirstRun={isFirstRun}
+                assets={assets}
               />
             )}
 

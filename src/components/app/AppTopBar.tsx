@@ -166,7 +166,7 @@ export default function AppTopBar({
       case 'inbox': return 'Inbox';
       case 'leads': return 'Leads';
       case 'agent': return 'Engagement Agent';
-      case 'content': return 'Content Studio';
+      case 'content': return 'Content';
       case 'campaigns': return 'Campaigns';
       case 'analytics': return 'Analytics';
       case 'settings': return 'Settings';
