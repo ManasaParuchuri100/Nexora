@@ -1,3 +1,4 @@
+import { PageHeader, Tabs } from '../ui';
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -37,110 +38,50 @@ export default function AnalyticsView({
   const [dateRange, setDateRange] = useState('Last 30 days');
 
   return (
-    <div className="space-y-6 pb-12 animate-fadeIn text-[#E8E9D8] select-text font-mono">
-      
-      {/* ========================================================
-          HEADER & 4 TABS (Page 32 spec)
-          Analytics [Overview] [Leads] [Channels] [Activity] [Last 30 days ▼] [Export ▼]
-         ======================================================== */}
-      <div className="border-b border-[rgba(169,191,165,0.2)] pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        {/* Left: Title & 4 Tabs */}
-        <div className="flex items-center space-x-2 sm:space-x-3 overflow-x-auto pb-1 sm:pb-0">
-          <span className="serif text-2xl font-light text-white mr-1 tracking-tight">
-            Analytics
-          </span>
+    <div className="space-y-[15px] pb-12 animate-fadeIn text-ink select-text">
+      <PageHeader
+        eyebrow="Intelligence / Analytics"
+        title="Analytics"
+        subtitle="See what is producing leads and where they are in the funnel."
+        actions={
+          <>
+            <div className="relative">
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                aria-label="Date range"
+                className="bg-surface border border-line text-ink px-3 py-1.5 rounded-[9px] focus:outline-none cursor-pointer"
+              >
+                <option value="Today">Today</option>
+                <option value="7 days">7 days</option>
+                <option value="Last 30 days">Last 30 days</option>
+                <option value="90 days">90 days</option>
+                <option value="This quarter">This quarter</option>
+              </select>
+            </div>
+            <button type="button" onClick={() => alert('Exporting CSV analytics data...')} className="nx-btn inline-flex items-center gap-1.5">
+              <Download className="w-3.5 h-3.5" />
+              <span>Export</span>
+            </button>
+          </>
+        }
+      />
 
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentTab('overview');
-              onNavigateSub('overview');
-            }}
-            className={`px-3 py-1.5 rounded-[2px] text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-              currentTab === 'overview'
-                ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold'
-                : 'bg-[#061816] text-[#A9BFA5] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]'
-            }`}
-          >
-            Overview
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentTab('leads');
-              onNavigateSub('leads');
-            }}
-            className={`px-3 py-1.5 rounded-[2px] text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-              currentTab === 'leads'
-                ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold'
-                : 'bg-[#061816] text-[#A9BFA5] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]'
-            }`}
-          >
-            Leads
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentTab('channels');
-              onNavigateSub('channels');
-            }}
-            className={`px-3 py-1.5 rounded-[2px] text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-              currentTab === 'channels'
-                ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold'
-                : 'bg-[#061816] text-[#A9BFA5] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]'
-            }`}
-          >
-            Channels
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentTab('activity');
-              onNavigateSub('activity-log');
-            }}
-            className={`px-3 py-1.5 rounded-[2px] text-xs uppercase tracking-wider transition-colors cursor-pointer ${
-              currentTab === 'activity'
-                ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold'
-                : 'bg-[#061816] text-[#A9BFA5] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5]'
-            }`}
-          >
-            Activity
-          </button>
-        </div>
-
-        {/* Right: Date Range & Export */}
-        <div className="flex items-center space-x-2.5 shrink-0 text-xs">
-          <div className="relative">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-1.5 rounded-[2px] focus:outline-none cursor-pointer pr-7 appearance-none font-mono"
-            >
-              <option value="Today">Today</option>
-              <option value="7 days">7 days</option>
-              <option value="Last 30 days">Last 30 days</option>
-              <option value="90 days">90 days</option>
-              <option value="This quarter">This quarter</option>
-              <option value="Custom">Custom</option>
-            </select>
-            <ChevronDown className="w-3 h-3 text-[#A9BFA5]/60 absolute right-2 top-2.5 pointer-events-none" />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => alert('Exporting CSV analytics data...')}
-            className="px-3 py-1.5 bg-[#061816] hover:bg-[#0D2D2A] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] rounded-[2px] cursor-pointer flex items-center space-x-1"
-          >
-            <Download className="w-3 h-3" />
-            <span>Export ▼</span>
-          </button>
-        </div>
-
-      </div>
+      <Tabs<AnalyticsTab>
+        idPrefix="analytics"
+        label="Analytics sections"
+        value={currentTab}
+        onChange={id => {
+          setCurrentTab(id);
+          onNavigateSub(id === 'activity' ? 'activity-log' : id);
+        }}
+        tabs={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'leads', label: 'Leads' },
+          { id: 'channels', label: 'Channels' },
+          { id: 'activity', label: 'Activity' },
+        ]}
+      />
 
       {/* ========================================================
           TAB 1: OVERVIEW (Page 32 spec)
@@ -150,58 +91,58 @@ export default function AnalyticsView({
           
           {/* 5 KPI Cards Row (Page 32 spec) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <div className="p-4 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px]">
-              <span className="text-[10px] text-[#A9BFA5]/70 uppercase font-semibold block">LEADS</span>
+            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
+              <span className="text-[10px] text-ink-2 uppercase font-semibold block">LEADS</span>
               <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-white font-light">86</span>
-                <span className="text-xs text-emerald-400 font-semibold">↑ 18%</span>
+                <span className="text-2xl text-ink font-light">86</span>
+                <span className="text-xs text-ok font-semibold">↑ 18%</span>
               </div>
             </div>
 
-            <div className="p-4 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px]">
-              <span className="text-[10px] text-[#A9BFA5]/70 uppercase font-semibold block">QUALIFIED</span>
+            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
+              <span className="text-[10px] text-ink-2 uppercase font-semibold block">QUALIFIED</span>
               <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-white font-light">31</span>
-                <span className="text-xs text-[#A9BFA5]/80">36%</span>
+                <span className="text-2xl text-ink font-light">31</span>
+                <span className="text-xs text-ink-2">36%</span>
               </div>
             </div>
 
-            <div className="p-4 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px]">
-              <span className="text-[10px] text-[#A9BFA5]/70 uppercase font-semibold block">WON</span>
+            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
+              <span className="text-[10px] text-ink-2 uppercase font-semibold block">WON</span>
               <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-white font-light">9</span>
-                <span className="text-xs text-emerald-400 font-semibold">10.5%</span>
+                <span className="text-2xl text-ink font-light">9</span>
+                <span className="text-xs text-ok font-semibold">10.5%</span>
               </div>
             </div>
 
-            <div className="p-4 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px]">
-              <span className="text-[10px] text-[#A9BFA5]/70 uppercase font-semibold block">REVENUE</span>
+            <div className="p-4 bg-surface-raised border border-line rounded-[9px]">
+              <span className="text-[10px] text-ink-2 uppercase font-semibold block">REVENUE</span>
               <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-white font-light">₹8.6L</span>
-                <span className="text-xs text-emerald-400 font-semibold">↑ 24%</span>
+                <span className="text-2xl text-ink font-light">₹8.6L</span>
+                <span className="text-xs text-ok font-semibold">↑ 24%</span>
               </div>
             </div>
 
-            <div className="p-4 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] col-span-2 sm:col-span-1">
-              <span className="text-[10px] text-[#A9BFA5]/70 uppercase font-semibold block">AI HANDLED</span>
+            <div className="p-4 bg-surface-raised border border-line rounded-[9px] col-span-2 sm:col-span-1">
+              <span className="text-[10px] text-ink-2 uppercase font-semibold block">AI HANDLED</span>
               <div className="flex items-baseline justify-between mt-2">
-                <span className="text-2xl text-emerald-400 font-light">71%</span>
-                <span className="text-xs text-[#A9BFA5]/80">Auto</span>
+                <span className="text-2xl text-ok font-light">71%</span>
+                <span className="text-xs text-ink-2">Auto</span>
               </div>
             </div>
           </div>
 
           {/* Leads Over Time Chart Box */}
-          <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] space-y-3">
-            <div className="flex items-center justify-between text-xs pb-2 border-b border-[rgba(169,191,165,0.12)]">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold">LEADS OVER TIME</span>
+          <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
+            <div className="flex items-center justify-between text-xs pb-2 border-b border-line-subtle">
+              <span className="uppercase text-ink-2 font-semibold">LEADS OVER TIME</span>
               <div className="flex items-center space-x-4 text-[11px]">
-                <span className="flex items-center space-x-1.5 text-white">
-                  <span className="w-3 h-0.5 bg-emerald-400" />
+                <span className="flex items-center space-x-1.5 text-ink">
+                  <span className="w-3 h-0.5 bg-ok" />
                   <span>This period</span>
                 </span>
-                <span className="flex items-center space-x-1.5 text-[#A9BFA5]/50">
-                  <span className="w-3 h-0.5 border-t border-dashed border-[#A9BFA5]" />
+                <span className="flex items-center space-x-1.5 text-ink-3">
+                  <span className="w-3 h-0.5 border-t border-dashed border-line-strong" />
                   <span>Previous</span>
                 </span>
               </div>
@@ -212,10 +153,10 @@ export default function AnalyticsView({
               {[22, 34, 45, 68, 52, 78, 86, 74, 62, 88, 92, 104, 96, 112].map((val, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-1 group">
                   <div 
-                    className="w-full bg-[#0D2D2A] group-hover:bg-emerald-400 transition-colors rounded-t-[1px]"
+                    className="w-full bg-brand/30 group-hover:bg-brand transition-colors rounded-t-[1px]"
                     style={{ height: `${(val / 112) * 100}%` }}
                   />
-                  <span className="text-[9px] text-[#A9BFA5]/40">{idx + 1}</span>
+                  <span className="text-[9px] text-ink-3">{idx + 1}</span>
                 </div>
               ))}
             </div>
@@ -223,35 +164,35 @@ export default function AnalyticsView({
 
           {/* 2-Column: Funnel & Response */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 text-xs">
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] space-y-3">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-2 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
+              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
                 FUNNEL CONVERSION
               </span>
-              <div className="space-y-2 text-[#E8E9D8]">
+              <div className="space-y-2 text-ink">
                 <div className="flex justify-between"><span>New (86)</span><span>100%</span></div>
                 <div className="flex justify-between"><span>Engaged (54)</span><span>63%</span></div>
                 <div className="flex justify-between"><span>Qualified (31)</span><span>36%</span></div>
                 <div className="flex justify-between"><span>Contacted (18)</span><span>21%</span></div>
-                <div className="flex justify-between text-emerald-300 font-semibold"><span>Won (9)</span><span>10.5%</span></div>
+                <div className="flex justify-between text-ok font-semibold"><span>Won (9)</span><span>10.5%</span></div>
               </div>
             </div>
 
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded-[2px] space-y-3">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-2 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded-[9px] space-y-3">
+              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
                 SPEED & RESPONSE METRICS
               </span>
               <div className="space-y-3 pt-1">
                 <div className="flex justify-between items-baseline">
-                  <span className="text-[#A9BFA5]">Median first reply</span>
-                  <span className="text-emerald-400 font-bold text-sm">40 s</span>
+                  <span className="text-ink-2">Median first reply</span>
+                  <span className="text-ok font-bold text-sm">40 s</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-[#A9BFA5]">Handoffs triggered</span>
-                  <span className="text-white font-bold text-sm">23</span>
+                  <span className="text-ink-2">Handoffs triggered</span>
+                  <span className="text-ink font-bold text-sm">23</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-[#A9BFA5]">Median human reply</span>
-                  <span className="text-amber-300 font-bold text-sm">6 min</span>
+                  <span className="text-ink-2">Median human reply</span>
+                  <span className="text-warn font-bold text-sm">6 min</span>
                 </div>
               </div>
             </div>
@@ -267,53 +208,53 @@ export default function AnalyticsView({
         <div className="space-y-5 text-xs">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* By Source */}
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded space-y-3">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-2 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded space-y-3">
+              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
                 BY SOURCE
               </span>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="w-24">WhatsApp</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-emerald-400 h-full w-[100%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-ok h-full w-[100%]" /></div>
                   <span className="w-8 text-right font-bold">42</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="w-24">Instagram</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-pink-400 h-full w-[64%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-pink-400 h-full w-[64%]" /></div>
                   <span className="w-8 text-right font-bold">27</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="w-24">Website</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-teal-400 h-full w-[43%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-teal-400 h-full w-[43%]" /></div>
                   <span className="w-8 text-right font-bold">18</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="w-24">LinkedIn</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-sky-400 h-full w-[26%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-sky-400 h-full w-[26%]" /></div>
                   <span className="w-8 text-right font-bold">11</span>
                 </div>
               </div>
             </div>
 
             {/* By Campaign */}
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded space-y-3">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-2 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded space-y-3">
+              <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
                 BY CAMPAIGN
               </span>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="w-32 truncate">Diwali offer</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-amber-400 h-full w-[100%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-amber-400 h-full w-[100%]" /></div>
                   <span className="w-8 text-right font-bold">42</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="w-32 truncate">Reactivate 2025</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-emerald-400 h-full w-[42%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-ok h-full w-[42%]" /></div>
                   <span className="w-8 text-right font-bold">18</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="w-32 truncate">No campaign</span>
-                  <div className="flex-1 bg-[#071C1A] h-2.5 mx-3 rounded"><div className="bg-[#A9BFA5] h-full w-[61%]" /></div>
+                  <div className="flex-1 bg-surface h-2.5 mx-3 rounded"><div className="bg-brand h-full w-[61%]" /></div>
                   <span className="w-8 text-right font-bold">26</span>
                 </div>
               </div>
@@ -321,20 +262,20 @@ export default function AnalyticsView({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded space-y-2">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-1 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded space-y-2">
+              <span className="uppercase text-ink-2 font-semibold block pb-1 border-b border-line-subtle">
                 TIME IN STAGE (MEDIAN DAYS)
               </span>
-              <p className="text-white pt-2 leading-relaxed">
+              <p className="text-ink pt-2 leading-relaxed">
                 New: 0.5d · Engaged: 1.2d · Qualified: 3.4d · Contacted: 6.0d
               </p>
             </div>
 
-            <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded space-y-2">
-              <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-1 border-b border-[rgba(169,191,165,0.12)]">
+            <div className="p-5 bg-surface-raised border border-line rounded space-y-2">
+              <span className="uppercase text-ink-2 font-semibold block pb-1 border-b border-line-subtle">
                 LOST REASONS
               </span>
-              <p className="text-[#A9BFA5] pt-2 leading-relaxed">
+              <p className="text-ink-2 pt-2 leading-relaxed">
                 Price: 9 · No reply: 7 · Timing: 4 · Chose competitor: 3
               </p>
             </div>
@@ -347,8 +288,8 @@ export default function AnalyticsView({
          ======================================================== */}
       {currentTab === 'channels' && (
         <div className="space-y-4 text-xs">
-          <div className="border border-[rgba(169,191,165,0.2)] bg-[#061816] rounded overflow-x-auto">
-            <div className="min-w-[700px] grid grid-cols-12 px-5 py-3 bg-[#071C1A] border-b border-[rgba(169,191,165,0.15)] text-[10px] uppercase font-semibold text-[#A9BFA5]">
+          <div className="border border-line bg-surface-raised rounded overflow-x-auto">
+            <div className="min-w-[700px] grid grid-cols-12 px-5 py-3 bg-surface border-b border-line-subtle text-[10px] uppercase font-semibold text-ink-2">
               <div className="col-span-3">Channel</div>
               <div className="col-span-2 text-right">Conversations</div>
               <div className="col-span-2 text-right">Leads</div>
@@ -358,27 +299,27 @@ export default function AnalyticsView({
               <div className="col-span-1 text-right">Avg reply</div>
             </div>
 
-            <div className="divide-y divide-[rgba(169,191,165,0.1)]">
+            <div className="divide-y divide-line-subtle">
               {[
                 { name: 'WhatsApp', conv: 120, leads: 42, qual: 18, won: 4, convRate: '43%', reply: '35 s' },
                 { name: 'Instagram', conv: 84, leads: 27, qual: 8, won: 2, convRate: '30%', reply: '1m 10s' },
                 { name: 'Website', conv: 51, leads: 18, qual: 4, won: 2, convRate: '22%', reply: '50 s' },
                 { name: 'LinkedIn', conv: 30, leads: 11, qual: 5, won: 1, convRate: '45%', reply: '4 min' }
               ].map(c => (
-                <div key={c.name} className="min-w-[700px] grid grid-cols-12 px-5 py-3 items-center hover:bg-[#0D2D2A]/30">
-                  <div className="col-span-3 font-semibold text-white">{c.name}</div>
-                  <div className="col-span-2 text-right text-[#A9BFA5]">{c.conv}</div>
-                  <div className="col-span-2 text-right text-white font-bold">{c.leads}</div>
-                  <div className="col-span-2 text-right text-emerald-400 font-bold">{c.qual}</div>
-                  <div className="col-span-1 text-right text-white">{c.won}</div>
-                  <div className="col-span-1 text-right text-emerald-300">{c.convRate}</div>
-                  <div className="col-span-1 text-right text-[#A9BFA5]/80">{c.reply}</div>
+                <div key={c.name} className="min-w-[700px] grid grid-cols-12 px-5 py-3 items-center hover:bg-surface-hover">
+                  <div className="col-span-3 font-semibold text-ink">{c.name}</div>
+                  <div className="col-span-2 text-right text-ink-2">{c.conv}</div>
+                  <div className="col-span-2 text-right text-ink font-bold">{c.leads}</div>
+                  <div className="col-span-2 text-right text-ok font-bold">{c.qual}</div>
+                  <div className="col-span-1 text-right text-ink">{c.won}</div>
+                  <div className="col-span-1 text-right text-ok">{c.convRate}</div>
+                  <div className="col-span-1 text-right text-ink-2">{c.reply}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="p-4 bg-[#061816] border border-emerald-500/30 rounded text-xs text-emerald-200">
+          <div className="p-4 bg-surface-raised border border-emerald-500/30 rounded text-xs text-emerald-200">
             ✦ Insight: WhatsApp brings the most qualified leads; LinkedIn converts best.
           </div>
         </div>
@@ -389,37 +330,37 @@ export default function AnalyticsView({
          ======================================================== */}
       {currentTab === 'activity' && (
         <div className="space-y-4 text-xs">
-          <div className="p-5 bg-[#061816] border border-[rgba(169,191,165,0.2)] rounded space-y-4">
-            <span className="uppercase text-[#A9BFA5]/80 font-semibold block pb-2 border-b border-[rgba(169,191,165,0.12)]">
+          <div className="p-5 bg-surface-raised border border-line rounded space-y-4">
+            <span className="uppercase text-ink-2 font-semibold block pb-2 border-b border-line-subtle">
               TODAY'S ACTIVITY LOG
             </span>
 
-            <div className="divide-y divide-[rgba(169,191,165,0.1)]">
+            <div className="divide-y divide-line-subtle">
               <div className="py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <span className="text-[#A9BFA5]/70">10:42</span>
-                  <span className="text-emerald-400">＋</span>
-                  <span className="text-white">New WhatsApp lead · Rahul Sharma</span>
+                  <span className="text-ink-2">10:42</span>
+                  <span className="text-ok">＋</span>
+                  <span className="text-ink">New WhatsApp lead · Rahul Sharma</span>
                 </div>
-                <span className="text-emerald-300 hover:underline cursor-pointer">[Open]</span>
+                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
               </div>
 
               <div className="py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <span className="text-[#A9BFA5]/70">10:36</span>
-                  <span className="text-emerald-400">✦</span>
-                  <span className="text-white">AI qualified Aster Labs as Hot · score 92</span>
+                  <span className="text-ink-2">10:36</span>
+                  <span className="text-ok">✦</span>
+                  <span className="text-ink">AI qualified Aster Labs as Hot · score 92</span>
                 </div>
-                <span className="text-emerald-300 hover:underline cursor-pointer">[Open]</span>
+                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
               </div>
 
               <div className="py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  <span className="text-[#A9BFA5]/70">10:18</span>
-                  <span className="text-amber-400">👤</span>
-                  <span className="text-white">Handoff requested · John Carter · Instagram</span>
+                  <span className="text-ink-2">10:18</span>
+                  <span className="text-warn">👤</span>
+                  <span className="text-ink">Handoff requested · John Carter · Instagram</span>
                 </div>
-                <span className="text-emerald-300 hover:underline cursor-pointer">[Open]</span>
+                <span className="text-ok hover:underline cursor-pointer">[Open]</span>
               </div>
             </div>
           </div>

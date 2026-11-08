@@ -1,3 +1,4 @@
+import { PageHeader } from '../ui';
 import React, { useState } from 'react';
 import { 
   Building2, 
@@ -165,23 +166,19 @@ export default function SettingsView({
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-fadeIn text-[#E8E9D8] select-text font-mono">
+    <div className="space-y-[15px] pb-12 animate-fadeIn text-ink select-text">
       
-      {/* Header */}
-      <div className="border-b border-[rgba(169,191,165,0.2)] pb-4">
-        <h1 className="serif text-3xl font-light text-white tracking-tight font-sans">
-          Settings
-        </h1>
-        <p className="text-xs text-[#A9BFA5] mt-1 font-mono">
-          Teach the AI, connect channels, calibrate qualification, and manage team access.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="System / Settings"
+        title="Settings"
+        subtitle="Teach the AI, connect channels, calibrate qualification, and manage team access."
+      />
 
       {/* 2-Column Layout: Left Nav List + Right Settings Form (Page 35 spec) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left-hand List of Sections (Page 35 spec) */}
-        <div className="lg:col-span-3 border border-[rgba(169,191,165,0.2)] bg-[#061816] rounded-[2px] p-2 space-y-1">
+        <div className="lg:col-span-3 border border-line bg-surface-raised rounded-[9px] p-2 space-y-1">
           {[
             { id: 'business', label: 'Business', icon: Building2 },
             { id: 'ai', label: 'AI Knowledge', icon: Sparkles },
@@ -201,10 +198,10 @@ export default function SettingsView({
                   setActiveSection(sec.id as SettingsSection);
                   onNavigateSub(sec.id as SubCategory);
                 }}
-                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[2px] text-xs transition-colors cursor-pointer text-left ${
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[9px] text-xs transition-colors cursor-pointer text-left ${
                   isActive
-                    ? 'bg-[#0D2D2A] text-white font-semibold border-l-2 border-[#A9BFA5]'
-                    : 'text-[#A9BFA5] hover:text-[#E8E9D8] hover:bg-[#0D2D2A]/30'
+                    ? 'bg-surface-hover text-ink font-semibold border-l-2 border-line-strong'
+                    : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -215,15 +212,15 @@ export default function SettingsView({
         </div>
 
         {/* Right Settings Content */}
-        <div className="lg:col-span-9 border border-[rgba(169,191,165,0.2)] bg-[#071C1A] rounded-[2px] p-6 space-y-6">
+        <div className="lg:col-span-9 border border-line bg-surface rounded-[9px] p-6 space-y-6">
           
           {/* ========================================================
               SECTION: BUSINESS (Page 35 spec)
              ======================================================== */}
           {activeSection === 'business' && (
             <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="flex items-center justify-between border-b border-line-subtle pb-3">
+                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
                   BUSINESS PROFILE
                 </span>
                 <button
@@ -234,7 +231,7 @@ export default function SettingsView({
                     setLocation('Pune');
                     if (onNotify) onNotify('Fields Filled', 'Drafted business fields from website.');
                   }}
-                  className="text-xs text-emerald-300 hover:underline cursor-pointer"
+                  className="text-xs text-ok hover:underline cursor-pointer"
                 >
                   ✦ Fill from website
                 </button>
@@ -242,67 +239,67 @@ export default function SettingsView({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <label className="text-[#A9BFA5]/70 block mb-1">Business Name</label>
+                  <label className="text-ink-2 block mb-1">Business Name</label>
                   <input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#A9BFA5]/70 block mb-1">Website</label>
+                  <label className="text-ink-2 block mb-1">Website</label>
                   <input
                     type="text"
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#A9BFA5]/70 block mb-1">Industry</label>
+                  <label className="text-ink-2 block mb-1">Industry</label>
                   <input
                     type="text"
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#A9BFA5]/70 block mb-1">Location</label>
+                  <label className="text-ink-2 block mb-1">Location</label>
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[#A9BFA5]/70 block mb-1">What you sell</label>
+                  <label className="text-ink-2 block mb-1">What you sell</label>
                   <textarea
                     rows={2}
                     value={whatYouSell}
                     onChange={(e) => setWhatYouSell(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[#A9BFA5]/70 block mb-1">Working hours</label>
+                  <label className="text-ink-2 block mb-1">Working hours</label>
                   <input
                     type="text"
                     value={workingHours}
                     onChange={(e) => setWorkingHours(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[#A9BFA5]/70 block mb-1">Outside hours policy</label>
+                  <label className="text-ink-2 block mb-1">Outside hours policy</label>
                   <div className="flex items-center space-x-4 pt-1">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
@@ -328,11 +325,11 @@ export default function SettingsView({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[rgba(169,191,165,0.15)]">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-line-subtle">
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-4 py-2 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded-[2px]"
+                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[9px]"
                 >
                   Save changes
                 </button>
@@ -345,41 +342,41 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'ai' && (
             <div className="space-y-5">
-              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="border-b border-line-subtle pb-3">
+                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
                   AI KNOWLEDGE — WHAT THE AI KNOWS WHEN IT TALKS TO CUSTOMERS
                 </span>
               </div>
 
               <div className="space-y-4 text-xs">
-                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                <div className="flex items-center justify-between p-3 bg-surface-raised rounded border border-line">
                   <span>Products & services</span>
-                  <span className="text-emerald-300 font-semibold">[+ Add] 3 items</span>
+                  <span className="text-ok font-semibold">[+ Add] 3 items</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                <div className="flex items-center justify-between p-3 bg-surface-raised rounded border border-line">
                   <span>Pricing</span>
-                  <span className="text-emerald-300 font-semibold">[Upload price list] or type</span>
+                  <span className="text-ok font-semibold">[Upload price list] or type</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)]">
+                <div className="flex items-center justify-between p-3 bg-surface-raised rounded border border-line">
                   <span>FAQs</span>
-                  <span className="text-emerald-300 font-semibold">[+ Add] 12 items</span>
+                  <span className="text-ok font-semibold">[+ Add] 12 items</span>
                 </div>
 
                 {/* Organization Documents & Uploaded Files */}
-                <div className="p-3.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.25)] space-y-3">
+                <div className="p-3.5 bg-surface-raised rounded border border-line space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-[#E8E9D8] font-bold text-xs uppercase tracking-wider">
+                        <span className="text-ink font-bold text-xs uppercase tracking-wider">
                           Organization Documents & Knowledge Files
                         </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                        <span className="text-[10px]  px-1.5 py-0.5 rounded bg-ok/15 text-ok border border-emerald-500/30">
                           {orgDocs.length} linked
                         </span>
                       </div>
-                      <p className="text-[11px] text-[#A9BFA5]/70 font-light mt-0.5">
+                      <p className="text-[11px] text-ink-2 font-light mt-0.5">
                         Brochures, rate cards, and catalogs uploaded during Step 3 onboarding or directly below.
                       </p>
                     </div>
@@ -387,7 +384,7 @@ export default function SettingsView({
                     <button
                       type="button"
                       onClick={() => orgFileInputRef.current?.click()}
-                      className="px-2.5 py-1 text-[11px] font-mono bg-[#0D2D2A] hover:bg-[#123834] border border-emerald-400/40 hover:border-emerald-400 text-emerald-300 hover:text-white rounded-[2px] transition-colors cursor-pointer flex items-center space-x-1 shrink-0"
+                      className="px-2.5 py-1 text-[11px]  bg-surface-hover hover:bg-surface-hover border border-emerald-400/40 hover:border-emerald-400 text-ok hover:text-ink rounded-[9px] transition-colors cursor-pointer flex items-center space-x-1 shrink-0"
                     >
                       <UploadCloud className="w-3.5 h-3.5" />
                       <span>+ Upload Files</span>
@@ -407,18 +404,18 @@ export default function SettingsView({
                       {orgDocs.map((doc) => (
                         <div
                           key={doc.id}
-                          className="p-2 bg-[#051513] border border-[rgba(169,191,165,0.2)] rounded-[2px] flex items-center justify-between text-xs transition-colors hover:border-emerald-400/40"
+                          className="p-2 bg-surface-raised border border-line rounded-[9px] flex items-center justify-between text-xs transition-colors hover:border-emerald-400/40"
                         >
                           <div className="flex items-center space-x-2.5 min-w-0">
-                            <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <FileText className="w-4 h-4 text-ok shrink-0" />
                             <div className="min-w-0">
-                              <p className="text-[#E8E9D8] font-medium truncate text-xs">
+                              <p className="text-ink font-medium truncate text-xs">
                                 {doc.name}
                               </p>
-                              <div className="flex items-center space-x-2 text-[10px] text-[#A9BFA5]/60 font-mono">
+                              <div className="flex items-center space-x-2 text-[10px] text-ink-3 ">
                                 <span>{doc.size}</span>
                                 <span>·</span>
-                                <span className="text-emerald-400 flex items-center space-x-0.5">
+                                <span className="text-ok flex items-center space-x-0.5">
                                   <Check className="w-2.5 h-2.5" />
                                   <span>Active AI Knowledge</span>
                                 </span>
@@ -429,7 +426,7 @@ export default function SettingsView({
                           <button
                             type="button"
                             onClick={() => handleRemoveOrgDoc(doc.id)}
-                            className="text-[#A9BFA5]/60 hover:text-rose-400 p-1 cursor-pointer transition-colors"
+                            className="text-ink-3 hover:text-danger p-1 cursor-pointer transition-colors"
                             title="Remove document"
                             aria-label="Remove document"
                           >
@@ -439,18 +436,18 @@ export default function SettingsView({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[11px] text-[#A9BFA5]/60 italic font-mono py-1">
+                    <p className="text-[11px] text-ink-3 italic  py-1">
                       No organization documents uploaded yet. Click "+ Upload Files" to train the AI.
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-[#A9BFA5]/70 block mb-1">Tone of voice</label>
+                  <label className="text-ink-2 block mb-1">Tone of voice</label>
                   <select
                     value={toneOfVoice}
                     onChange={(e) => setToneOfVoice(e.target.value)}
-                    className="w-full bg-[#061816] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded focus:outline-none"
                   >
                     <option value="Professional">Professional</option>
                     <option value="Friendly">Friendly</option>
@@ -459,26 +456,26 @@ export default function SettingsView({
                   </select>
                 </div>
 
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)] space-y-1">
-                  <p className="text-[#A9BFA5] font-semibold">AI may say:</p>
-                  <p className="text-white italic">"Prices start at ₹50,000 for bespoke studio architecture."</p>
+                <div className="p-3 bg-surface-raised rounded border border-line-subtle space-y-1">
+                  <p className="text-ink-2 font-semibold">AI may say:</p>
+                  <p className="text-ink italic">"Prices start at ₹50,000 for bespoke studio architecture."</p>
                 </div>
 
-                <div className="p-3 bg-[#061816] rounded border border-rose-500/20 space-y-1">
-                  <p className="text-rose-300 font-semibold">AI must never:</p>
-                  <p className="text-rose-100 italic">"Never discount beyond 10%, promise fixed delivery under 14 days, or give medical advice."</p>
+                <div className="p-3 bg-surface-raised rounded border border-danger/30 space-y-1">
+                  <p className="text-danger font-semibold">AI must never:</p>
+                  <p className="text-ink-2 italic">"Never discount beyond 10%, promise fixed delivery under 14 days, or give medical advice."</p>
                 </div>
 
                 {/* ┌ Test the AI ───────────────────────────────────┐ (Page 35 spec) */}
-                <div className="p-4 rounded-[2px] bg-[#061816] border border-emerald-500/35 space-y-3">
+                <div className="p-4 rounded-[9px] bg-surface-raised border border-emerald-500/35 space-y-3">
                   <div className="flex items-center space-x-2">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-xs uppercase font-semibold text-emerald-400">
+                    <Sparkles className="w-3.5 h-3.5 text-ok" />
+                    <span className="text-xs uppercase font-semibold text-ok">
                       Test the AI
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-[#A9BFA5]">
+                  <p className="text-[11px] text-ink-2">
                     Ask a customer question… → see the AI's instant answer live based on your business knowledge.
                   </p>
 
@@ -489,20 +486,20 @@ export default function SettingsView({
                       value={testQuestion}
                       onChange={(e) => setTestQuestion(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleTestAi(); }}
-                      className="flex-1 bg-[#071C1A] border border-[rgba(169,191,165,0.3)] text-xs text-[#E8E9D8] px-3 py-2 rounded focus:outline-none"
+                      className="flex-1 bg-surface border border-line text-xs text-ink px-3 py-2 rounded focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleTestAi}
-                      className="px-4 py-2 bg-emerald-400 text-[#071C1A] font-semibold rounded text-xs cursor-pointer"
+                      className="px-4 py-2 bg-ok text-on-brand font-semibold rounded text-xs cursor-pointer"
                     >
                       {isTesting ? 'Thinking...' : 'Test'}
                     </button>
                   </div>
 
                   {testAnswer && (
-                    <div className="p-3 bg-[#071C1A] border border-emerald-500/30 rounded text-xs text-emerald-200 leading-relaxed animate-fadeIn">
-                      <span className="text-[10px] text-emerald-400 block font-semibold mb-1">AI Output:</span>
+                    <div className="p-3 bg-surface border border-emerald-500/30 rounded text-xs text-emerald-200 leading-relaxed animate-fadeIn">
+                      <span className="text-[10px] text-ok block font-semibold mb-1">AI Output:</span>
                       {testAnswer}
                     </div>
                   )}
@@ -510,11 +507,11 @@ export default function SettingsView({
 
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[rgba(169,191,165,0.15)]">
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-line-subtle">
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-4 py-2 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded-[2px]"
+                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[9px]"
                 >
                   Save changes
                 </button>
@@ -527,25 +524,25 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'channels' && (
             <div className="space-y-4">
-              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="border-b border-line-subtle pb-3">
+                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
                   CONNECTED CHANNELS (WHATSAPP FIRST)
                 </span>
               </div>
 
-              <div className="divide-y divide-[rgba(169,191,165,0.15)] text-xs">
+              <div className="divide-y divide-line-subtle text-xs">
                 {channels.map((ch, i) => (
                   <div key={i} className="py-3 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <span>{ch.icon}</span>
                       <div>
-                        <span className="font-semibold text-white block">{ch.name}</span>
-                        <span className="text-[11px] text-[#A9BFA5]/70">{ch.handle}</span>
+                        <span className="font-semibold text-ink block">{ch.name}</span>
+                        <span className="text-[11px] text-ink-2">{ch.handle}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-3">
-                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-500/30' : 'text-[#A9BFA5]/60'}`}>
+                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-ok border border-emerald-500/30' : 'text-ink-3'}`}>
                         {ch.status}
                       </span>
                       <button
@@ -553,7 +550,7 @@ export default function SettingsView({
                         onClick={() => {
                           if (onNotify) onNotify('Channel Status', `Configured settings for ${ch.name}.`);
                         }}
-                        className="px-3 py-1 bg-[#061816] hover:bg-[#0D2D2A] border border-[rgba(169,191,165,0.25)] rounded text-[#E8E9D8] cursor-pointer"
+                        className="px-3 py-1 bg-surface-raised hover:bg-surface-hover border border-line rounded text-ink cursor-pointer"
                       >
                         {ch.status === 'Connected' ? 'Manage' : 'Connect'}
                       </button>
@@ -569,45 +566,45 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'automation' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="flex items-center justify-between border-b border-line-subtle pb-3">
+                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
                   AUTOMATION & HANDOFF RULES
                 </span>
-                <span className="text-xs text-emerald-300 font-semibold cursor-pointer">[+ New rule]</span>
+                <span className="text-xs text-ok font-semibold cursor-pointer">[+ New rule]</span>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-white block">● On: Auto-reply on all channels</span>
-                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 2m ago</span>
+                    <span className="font-semibold text-ink block">● On: Auto-reply on all channels</span>
+                    <span className="text-[11px] text-ink-2">Last fired: 2m ago</span>
                   </div>
                   <input type="checkbox" defaultChecked className="accent-emerald-400" />
                 </div>
 
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-white block">● On: Qualify leads, Hot at score ≥ 80</span>
-                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 22m ago</span>
+                    <span className="font-semibold text-ink block">● On: Qualify leads, Hot at score ≥ 80</span>
+                    <span className="text-[11px] text-ink-2">Last fired: 22m ago</span>
                   </div>
                   <input type="checkbox" defaultChecked className="accent-emerald-400" />
                 </div>
 
-                <div className="p-3 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] flex items-center justify-between">
+                <div className="p-3 bg-surface-raised rounded border border-line flex items-center justify-between">
                   <div>
-                    <span className="font-semibold text-white block">● On: Follow up after 2 days of silence</span>
-                    <span className="text-[11px] text-[#A9BFA5]">Last fired: 1h ago</span>
+                    <span className="font-semibold text-ink block">● On: Follow up after 2 days of silence</span>
+                    <span className="text-[11px] text-ink-2">Last fired: 1h ago</span>
                   </div>
                   <input type="checkbox" defaultChecked className="accent-emerald-400" />
                 </div>
 
                 {/* Handoff Sentence Rule (Page 37 spec) */}
-                <div className="p-4 bg-[#061816] rounded border border-amber-500/30 space-y-2">
-                  <span className="text-amber-400 font-semibold block text-[11px] uppercase">
+                <div className="p-4 bg-surface-raised rounded border border-amber-500/30 space-y-2">
+                  <span className="text-warn font-semibold block text-[11px] uppercase">
                     Sentence Handoff Rule
                   </span>
-                  <p className="text-white leading-relaxed">
-                    "Hand to a human when: <span className="text-amber-300 font-semibold">customer asks for a person</span> / deal value exceeds <span className="text-amber-300 font-semibold">₹{handoffThreshold}</span> / AI confidence is low, and notify <span className="text-emerald-300 font-semibold">Sales team</span>."
+                  <p className="text-ink leading-relaxed">
+                    "Hand to a human when: <span className="text-warn font-semibold">customer asks for a person</span> / deal value exceeds <span className="text-warn font-semibold">₹{handoffThreshold}</span> / AI confidence is low, and notify <span className="text-ok font-semibold">Sales team</span>."
                   </p>
                 </div>
               </div>
@@ -619,8 +616,8 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'team' && (
             <div className="space-y-4">
-              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="text-xs uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="border-b border-line-subtle pb-3">
+                <span className="text-xs uppercase tracking-widest text-ink-2 font-semibold">
                   TEAM MEMBERS & ROLES
                 </span>
               </div>
@@ -632,19 +629,19 @@ export default function SettingsView({
                   placeholder="Name"
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
-                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-3 py-1.5 rounded sm:w-1/3"
+                  className="bg-surface-raised border border-line text-xs text-ink px-3 py-1.5 rounded sm:w-1/3"
                 />
                 <input
                   type="email"
                   placeholder="Email"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-3 py-1.5 rounded flex-1"
+                  className="bg-surface-raised border border-line text-xs text-ink px-3 py-1.5 rounded flex-1"
                 />
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
-                  className="bg-[#061816] border border-[rgba(169,191,165,0.25)] text-xs text-white px-2 py-1.5 rounded"
+                  className="bg-surface-raised border border-line text-xs text-ink px-2 py-1.5 rounded"
                 >
                   <option value="Sales">Sales</option>
                   <option value="Marketing">Marketing</option>
@@ -661,20 +658,20 @@ export default function SettingsView({
                       if (onNotify) onNotify('Invite Sent', 'Colleague invited to workspace.');
                     }
                   }}
-                  className="px-4 py-1.5 bg-[#E8E9D8] text-[#071C1A] text-xs font-semibold rounded cursor-pointer"
+                  className="px-4 py-1.5 bg-brand text-on-brand text-xs font-semibold rounded cursor-pointer"
                 >
                   Invite
                 </button>
               </div>
 
-              <div className="divide-y divide-[rgba(169,191,165,0.15)] text-xs pt-2">
+              <div className="divide-y divide-line-subtle text-xs pt-2">
                 {team.map(m => (
                   <div key={m.id} className="py-2.5 flex items-center justify-between">
                     <div>
-                      <span className="font-semibold text-white block">{m.name}</span>
-                      <span className="text-[11px] text-[#A9BFA5]">{m.email}</span>
+                      <span className="font-semibold text-ink block">{m.name}</span>
+                      <span className="text-[11px] text-ink-2">{m.email}</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-[#061816] border border-[rgba(169,191,165,0.2)] text-[11px]">
+                    <span className="px-2 py-0.5 rounded bg-surface-raised border border-line text-[11px]">
                       {m.role}
                     </span>
                   </div>
@@ -688,27 +685,27 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'billing' && (
             <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="flex items-center justify-between border-b border-line-subtle pb-3">
+                <span className="uppercase tracking-widest text-ink-2 font-semibold">
                   PLAN & USAGE
                 </span>
-                <span className="text-emerald-300 font-semibold cursor-pointer">[Change plan]</span>
+                <span className="text-ok font-semibold cursor-pointer">[Change plan]</span>
               </div>
 
-              <div className="p-4 bg-[#061816] rounded border border-[rgba(169,191,165,0.2)] space-y-3">
+              <div className="p-4 bg-surface-raised rounded border border-line space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">Plan: Growth</span>
-                  <span className="text-emerald-400 font-bold">₹4,999 / month</span>
+                  <span className="text-ink font-semibold">Plan: Growth</span>
+                  <span className="text-ok font-bold">₹4,999 / month</span>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-[rgba(169,191,165,0.1)]">
+                <div className="space-y-2 pt-2 border-t border-line-subtle">
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
                       <span>Conversations: 612 / 1,000</span>
                       <span>61%</span>
                     </div>
-                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-400 h-full w-[61%]" />
+                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
+                      <div className="bg-ok h-full w-[61%]" />
                     </div>
                   </div>
 
@@ -717,8 +714,8 @@ export default function SettingsView({
                       <span>AI replies: 3,140 / 5,000</span>
                       <span>63%</span>
                     </div>
-                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-400 h-full w-[63%]" />
+                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
+                      <div className="bg-ok h-full w-[63%]" />
                     </div>
                   </div>
 
@@ -727,22 +724,22 @@ export default function SettingsView({
                       <span>Seats: 4 / 5</span>
                       <span>80%</span>
                     </div>
-                    <div className="w-full bg-[#071C1A] h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-400 h-full w-[80%]" />
+                    <div className="w-full bg-surface h-2 rounded-full overflow-hidden">
+                      <div className="bg-ok h-full w-[80%]" />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2 pt-2">
-                <span className="text-[#A9BFA5] uppercase text-[10px] block font-semibold">Invoices</span>
-                <div className="flex items-center justify-between p-2.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)]">
+                <span className="text-ink-2 uppercase text-[10px] block font-semibold">Invoices</span>
+                <div className="flex items-center justify-between p-2.5 bg-surface-raised rounded border border-line-subtle">
                   <span>Sep 2026 · ₹4,999</span>
-                  <span className="text-emerald-300 cursor-pointer">[PDF]</span>
+                  <span className="text-ok cursor-pointer">[PDF]</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 bg-[#061816] rounded border border-[rgba(169,191,165,0.15)]">
+                <div className="flex items-center justify-between p-2.5 bg-surface-raised rounded border border-line-subtle">
                   <span>Aug 2026 · ₹4,999</span>
-                  <span className="text-emerald-300 cursor-pointer">[PDF]</span>
+                  <span className="text-ok cursor-pointer">[PDF]</span>
                 </div>
               </div>
             </div>
@@ -753,14 +750,14 @@ export default function SettingsView({
              ======================================================== */}
           {activeSection === 'notifications' && (
             <div className="space-y-4 text-xs">
-              <div className="border-b border-[rgba(169,191,165,0.15)] pb-3">
-                <span className="uppercase tracking-widest text-[#A9BFA5] font-semibold">
+              <div className="border-b border-line-subtle pb-3">
+                <span className="uppercase tracking-widest text-ink-2 font-semibold">
                   NOTIFICATION CHANNELS MATRIX
                 </span>
               </div>
 
-              <div className="divide-y divide-[rgba(169,191,165,0.15)]">
-                <div className="grid grid-cols-12 py-2 font-semibold text-[#A9BFA5] text-[11px]">
+              <div className="divide-y divide-line-subtle">
+                <div className="grid grid-cols-12 py-2 font-semibold text-ink-2 text-[11px]">
                   <div className="col-span-6">Event</div>
                   <div className="col-span-2 text-center">In-app</div>
                   <div className="col-span-2 text-center">Email</div>
@@ -768,21 +765,21 @@ export default function SettingsView({
                 </div>
 
                 <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-white">Conversation needs me</div>
+                  <div className="col-span-6 text-ink">Conversation needs me</div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                 </div>
 
                 <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-white">New Hot lead</div>
+                  <div className="col-span-6 text-ink">New Hot lead</div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                 </div>
 
                 <div className="grid grid-cols-12 py-2.5 items-center">
-                  <div className="col-span-6 text-white">Follow-up due</div>
+                  <div className="col-span-6 text-ink">Follow-up due</div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" defaultChecked className="accent-emerald-400" /></div>
                   <div className="col-span-2 text-center"><input type="checkbox" className="accent-emerald-400" /></div>
