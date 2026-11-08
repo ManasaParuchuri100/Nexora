@@ -1176,41 +1176,134 @@ export const INITIAL_CAMPAIGNS: Campaign[] = [
 
 export const INITIAL_GENERATED_ASSETS: GeneratedAsset[] = [
   {
+    id: 'asset-img-1',
+    title: '3D Spatial Atelier Key Visual',
+    type: 'Hero Brief',
+    platform: 'Studio 3D & Visual',
+    preview: 'Octane path-traced render: Cantilevered dark smoked obsidian glass desk displaying minimal hairline telemetry graph with soft 4500K morning sunlight.',
+    createdAt: 'Just now',
+    tags: ['3D Key Visual', 'Octane 4K', 'Atelier'],
+    imageUrl: '/src/assets/images/spatial_key_visual_1790755715787.jpg'
+  },
+  {
+    id: 'asset-img-2',
+    title: 'Machined Titanium Tactile Hardware Console',
+    type: 'Product Render',
+    platform: 'Studio 3D & Visual',
+    preview: 'Macro studio photography: Billet titanium hardware console with micro-knurled dial, chamfered bevels, and overhead warm rim lighting.',
+    createdAt: '30 mins ago',
+    tags: ['Product Render', 'Macro Hardware', 'Titanium'],
+    imageUrl: '/src/assets/images/titanium_studio_render_1790755733959.jpg'
+  },
+  {
+    id: 'asset-img-3',
+    title: 'Swiss International Typographic Poster',
+    type: 'Brand Specimen',
+    platform: 'Studio 3D & Visual',
+    preview: 'Exhibition specimen sheet: 12-column asymmetric baseline grid with hairline serif scales printed on textured cotton rag paper.',
+    createdAt: '1 hour ago',
+    tags: ['Brand Specimen', 'Swiss Grid', 'Print'],
+    imageUrl: '/src/assets/images/swiss_brand_specimen_1790755749195.jpg'
+  },
+  {
     id: 'asset-1',
-    title: 'Festive offer on home loans',
-    type: 'Social Post',
-    platform: 'Instagram',
-    preview: 'Introducing our festive offer on home loans.\n\nTell us what you need and we will get you started.\n\nBook a free call with our team.\n\n#Festive #Offer #Tecavy',
+    title: 'The Art of Unhurried Productivity',
+    type: 'Email Copy',
+    platform: 'Substack / Newsletter',
+    preview: 'When modern suites add notification badges to your calendar, they are trading your deep tranquility for artificial urgency...',
     createdAt: '2 hours ago',
-    tags: ['Social post', 'Generate leads'],
+    tags: ['Brand Voice', 'Editorial', 'Long-form']
   },
   {
     id: 'asset-2',
-    title: 'Webinar invitation',
-    type: 'Email Copy',
-    platform: 'Email',
-    preview: 'Subject: Join our webinar on smarter lead follow-up\n\nHello,\n\nWe are hosting a short live session on following up with leads faster, and we would love to see you there.\n\nSign up today.\n\nBest regards,\nThe Tecavy team',
+    title: 'Zero Latency, Zero Clutter Post Thread',
+    type: 'Social Post',
+    platform: 'X (Twitter)',
+    preview: '1/4 Why did we strip rounded cards out of our architecture? Because visual clutter slows cognition just as much as CPU latency.',
     createdAt: 'Yesterday',
-    tags: ['Email', 'Generate leads'],
+    tags: ['X Thread', 'Design Philosophy', 'Viral']
   },
   {
     id: 'asset-3',
-    title: 'Search ads for the spring campaign',
+    title: 'Q2 Executive Headline Set',
     type: 'Headline Set',
-    platform: 'Google Ads',
-    preview: 'Headlines\n• Spring offers are here\n• Get started today\n• Talk to an expert\n\nDescription\nA clear, simple way to get more from your leads. Book a free call with our team.\n\nButton\nBook a call',
-    createdAt: '3 days ago',
-    tags: ['Ad copy', 'Drive sales'],
+    platform: 'Landing & Ads',
+    preview: 'A quiet space for deliberate work · Make space for what matters · Complexity subtracted.',
+    createdAt: 'May 28, 2026',
+    tags: ['Headlines', 'PPC', 'A/B Testing']
   },
   {
     id: 'asset-4',
-    title: '3 myths about lead follow-up',
-    type: 'Thought Leadership',
-    platform: 'Blog',
-    preview: '3 myths about lead follow-up\n\nThere is plenty of confusing advice out there. Let us clear a few things up.\n\nMyth 1: it is too complicated\nIt is easier than most people expect when you start in the right place.\n\nMyth 2: it takes too long\nMost people see early results within weeks, not months.\n\nLearn more today.',
-    createdAt: 'Last week',
-    tags: ['Article', 'Build awareness'],
+    title: 'B2B Enterprise Retainer Outreach',
+    type: 'Email Copy',
+    platform: 'Direct Email',
+    preview: 'Julian, we noticed Vanguard Atelier’s recent expansion into Kyoto. Here is how Nexora consolidates the entire campaign cadence...',
+    createdAt: 'May 27, 2026',
+    tags: ['Personalized', 'Outbound', 'High-Touch']
   },
+  {
+    id: 'asset-5',
+    title: 'Kyoto Atelier Workspace Monograph',
+    type: 'Social Post',
+    platform: 'Instagram / Carousel',
+    preview: 'Physical workspace design directly predicts digital composure. A study of 15 timber studios in northern Kyoto...',
+    createdAt: 'May 25, 2026',
+    tags: ['Visual Essay', 'Spatial Design', 'Editorial']
+  },
+  {
+    id: 'asset-6',
+    title: 'Asynchronous Studio Operations Memo',
+    type: 'Email Copy',
+    platform: 'Substack / Newsletter',
+    preview: 'Meeting zero: Why our creative directors produce 3x higher client conversion with strictly asynchronous memoranda...',
+    createdAt: 'May 22, 2026',
+    tags: ['Executive Memo', 'Async Work', 'Leadership']
+  },
+  {
+    id: 'asset-7',
+    title: 'Cognitive Bandwidth Headline Set',
+    type: 'Headline Set',
+    platform: 'X & LinkedIn Ads',
+    preview: 'The silence between decisions · Build what lasts · Uncluttered computing for sovereign minds.',
+    createdAt: 'May 20, 2026',
+    tags: ['Headlines', 'Growth', 'Ad Copy']
+  },
+  {
+    id: 'asset-8',
+    title: 'Enterprise Studio Onboarding Letter',
+    type: 'Email Copy',
+    platform: 'Direct Email',
+    preview: 'Elena, congratulations on initiating your studio migration to Nexora. Your dedicated lead qualifier sandbox is primed...',
+    createdAt: 'May 18, 2026',
+    tags: ['Onboarding', 'Customer Success', 'VIP']
+  },
+  {
+    id: 'asset-9',
+    title: 'Architecture of Stillness 30s Brand Reel',
+    type: 'Ad Script',
+    platform: 'Paid Social & Video',
+    preview: '[00:00-00:05] Macro shot of matte titanium hardware. Voiceover: "We didn\'t subtract features to be minimal. We subtracted them so you could breathe..."',
+    createdAt: 'May 15, 2026',
+    tags: ['Video Script', 'Storyboard', '30-Second']
+  },
+  {
+    id: 'asset-10',
+    title: 'Kyoto Residency Visual Art Direction Brief',
+    type: 'Hero Brief',
+    platform: 'Design Systems & 3D',
+    preview: 'Deliverable: 16:9 3D Hero Render. Aesthetic: Wabi-sabi brutalism with tactile textured cedar and razor-sharp hairline interface glow...',
+    createdAt: 'May 12, 2026',
+    tags: ['Art Direction', '3D Visual', 'Key Visual']
+  },
+  {
+    id: 'asset-11',
+    title: 'The Tyranny of the Unread Notification Badge',
+    type: 'Thought Leadership',
+    platform: 'Substack & Medium',
+    preview: 'How notification badges hijacked executive dopamine cycles, and why high-output ateliers are systematically returning to asynchronous quietude...',
+    createdAt: 'May 08, 2026',
+    tags: ['Long-form Essay', 'Product Strategy', 'Deep Work']
+  }
 ];
 
 export const INITIAL_SOCIAL_ACCOUNTS: SocialAccount[] = [

@@ -470,14 +470,12 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
-                    campaigns={campaigns}
-                    onSchedulePost={handleAddScheduledPost}
                   />
                 )}
 
                 {(activeSubCategory === 'schedule' || activeSubCategory === 'social-posts') && (
                   <SocialHubView
-                    activeSubCategory="manual-scheduling"
+                    activeSubCategory="ai-guided-creation"
                     accounts={accounts}
                     scheduledPosts={scheduledPosts}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
@@ -495,8 +493,6 @@ export default function NexoraApp({
                     assets={assets}
                     onNavigateSub={(sub) => handleSelectNav('content', sub)}
                     onGenerateSuccess={handleAddAsset}
-                    campaigns={campaigns}
-                    onSchedulePost={handleAddScheduledPost}
                   />
                 )}
               </>
