@@ -12,7 +12,7 @@ export const contentTabFor = (sub: SubCategory): ContentTab => {
 
 const TAB_TARGET: Record<ContentTab, SubCategory> = {
   create: 'create',
-  schedule: 'manual-scheduling',
+  schedule: 'calendar',
   library: 'library',
 };
 

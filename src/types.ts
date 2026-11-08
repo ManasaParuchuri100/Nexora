@@ -99,6 +99,7 @@ export type SubCategory =
   | 'connect'
   | 'ai-guided-creation'
   | 'manual-scheduling'
+  | 'calendar'
   | 'lead-automation'
   | 'generated-responses'
   | 'default';
@@ -394,6 +395,8 @@ export interface ScheduledPost {
   content: string;
   platforms: string[]; // Destination platforms to upload to
   scheduledTime: string;
+  /** Exact publish time (ISO 8601). The calendar reads and moves this. */
+  scheduledAt?: string;
   status: 'Queued' | 'Scheduled' | 'Approved' | 'Draft Review' | 'Dispatched';
   tags?: string[];
   mediaCount?: number;

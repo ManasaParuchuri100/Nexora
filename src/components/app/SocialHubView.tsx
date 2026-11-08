@@ -34,6 +34,7 @@ import { SocialAccount, SubCategory, ScheduledPost, MediaAttachment } from '../.
 import { INITIAL_SCHEDULED_POSTS } from '../../data/mockData';
 import Pagination from './Pagination';
 import ContentTabs from './ContentTabs';
+import ContentCalendar from './ContentCalendar';
 import { PageHeader, Tabs } from '../ui';
 import MediaAttachmentPicker from './MediaAttachmentPicker';
 
@@ -104,7 +105,9 @@ export default function SocialHubView({
       ? 'connect' 
       : activeSubCategory === 'manual-scheduling' 
       ? 'manual-scheduling' 
-      : 'ai-guided-creation';
+      : activeSubCategory === 'ai-guided-creation'
+      ? 'ai-guided-creation'
+      : 'calendar';
 
   // Fallback local queue if not provided via props
   const [localQueue, setLocalQueue] = useState<ScheduledPost[]>(INITIAL_SCHEDULED_POSTS);
@@ -350,17 +353,27 @@ export default function SocialHubView({
       />
       <ContentTabs active="schedule" onNavigate={onNavigateSub} libraryCount={libraryCount} />
 
-      <Tabs<'manual-scheduling' | 'ai-guided-creation' | 'connect'>
+      <Tabs<'calendar' | 'manual-scheduling' | 'ai-guided-creation' | 'connect'>
         idPrefix="schedule"
         label="Schedule sections"
         value={currentTab}
         onChange={id => onNavigateSub(id)}
         tabs={[
+          { id: 'calendar', label: 'Calendar' },
           { id: 'manual-scheduling', label: 'Queue', count: queue.length },
           { id: 'ai-guided-creation', label: 'Write with AI' },
           { id: 'connect', label: 'Connected accounts', count: accounts.length },
         ]}
       />
+
+      {currentTab === 'calendar' && (
+        <ContentCalendar
+          posts={queue}
+          onUpdate={post => (onUpdateScheduledPost ? onUpdateScheduledPost(post) : setLocalQueue(prev => prev.map(x => (x.id === post.id ? post : x))))}
+          onAdd={post => (onAddScheduledPost ? onAddScheduledPost(post) : setLocalQueue(prev => [post, ...prev]))}
+          onDelete={id => (onDeleteScheduledPost ? onDeleteScheduledPost(id) : setLocalQueue(prev => prev.filter(x => x.id !== id)))}
+        />
+      )}
 
       {/* First-Run Empty State (Image 6 spec) */}
       {isFirstRun && (

@@ -33,6 +33,7 @@ import LeadsView from './app/LeadsView';
 import CreativeLabView from './app/CreativeLabView';
 import SocialHubView from './app/SocialHubView';
 import { contentTabFor } from './app/ContentTabs';
+import { postDate } from '../data/schedule';
 import CampaignsView from './app/CampaignsView';
 import AnalyticsView from './app/AnalyticsView';
 import SettingsView from './app/SettingsView';
@@ -313,7 +314,8 @@ export default function NexoraApp({
   };
 
   const handleAddScheduledPost = (newPost: ScheduledPost) => {
-    setScheduledPosts(prev => [newPost, ...prev]);
+    const at = newPost.scheduledAt ? undefined : postDate(newPost);
+    setScheduledPosts(prev => [at ? { ...newPost, scheduledAt: at.toISOString() } : newPost, ...prev]);
     showToast('Broadcast Scheduled', `Queued for release across ${newPost.platforms.join(', ')} at ${newPost.scheduledTime}.`);
   };
 
@@ -502,9 +504,9 @@ export default function NexoraApp({
                 {contentTabFor(activeSubCategory) === 'schedule' && (
                   <SocialHubView
                     activeSubCategory={
-                      activeSubCategory === 'connect' || activeSubCategory === 'ai-guided-creation'
+                      activeSubCategory === 'connect' || activeSubCategory === 'ai-guided-creation' || activeSubCategory === 'manual-scheduling'
                         ? activeSubCategory
-                        : 'manual-scheduling'
+                        : 'calendar'
                     }
                     accounts={accounts}
                     scheduledPosts={scheduledPosts}

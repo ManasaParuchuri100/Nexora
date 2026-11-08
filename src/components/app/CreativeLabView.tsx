@@ -1316,6 +1316,7 @@ Audio: Solo cello harmonics and tactile room tone
               title: `${selectedCategory} — ${brandContext.productName}`,
               content: v.content,
               platforms: [channel],
+              scheduledAt: when.toISOString(),
               scheduledTime: when.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
               status: 'Scheduled',
               tags: campaign ? [campaign.name] : undefined,
