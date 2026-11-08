@@ -372,7 +372,7 @@ export default function SettingsView({
                         <span className="text-ink font-bold text-xs uppercase tracking-wider">
                           Organization Documents & Knowledge Files
                         </span>
-                        <span className="text-[10px]  px-1.5 py-0.5 rounded bg-ok/15 text-ok border border-emerald-500/30">
+                        <span className="text-[10px]  px-1.5 py-0.5 rounded bg-ok/15 text-ok border border-ok/30">
                           {orgDocs.length} linked
                         </span>
                       </div>
@@ -498,7 +498,7 @@ export default function SettingsView({
                   </div>
 
                   {testAnswer && (
-                    <div className="p-3 bg-surface border border-emerald-500/30 rounded text-xs text-emerald-200 leading-relaxed animate-fadeIn">
+                    <div className="p-3 bg-surface border border-ok/30 rounded text-xs text-ok leading-relaxed animate-fadeIn">
                       <span className="text-[10px] text-ok block font-semibold mb-1">AI Output:</span>
                       {testAnswer}
                     </div>
@@ -542,7 +542,7 @@ export default function SettingsView({
                     </div>
 
                     <div className="flex items-center space-x-3">
-                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-ok border border-emerald-500/30' : 'text-ink-3'}`}>
+                      <span className={`text-[11px] px-2 py-0.5 rounded ${ch.status === 'Connected' ? 'bg-emerald-950/40 text-ok border border-ok/30' : 'text-ink-3'}`}>
                         {ch.status}
                       </span>
                       <button

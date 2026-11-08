@@ -319,7 +319,7 @@ export default function AnalyticsView({
             </div>
           </div>
 
-          <div className="p-4 bg-surface-raised border border-emerald-500/30 rounded text-xs text-emerald-200">
+          <div className="p-4 bg-surface-raised border border-ok/30 rounded text-xs text-ok">
             ✦ Insight: WhatsApp brings the most qualified leads; LinkedIn converts best.
           </div>
         </div>
