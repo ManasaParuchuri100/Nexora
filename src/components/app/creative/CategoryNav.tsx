@@ -7,7 +7,6 @@ import {
   Check 
 } from 'lucide-react';
 import { CategoryType } from '../../../types';
-import { useTheme } from '../../../context/ThemeContext';
 
 export type { CategoryType };
 export type MainCategory = 'text' | 'images' | 'videos';
@@ -78,8 +77,6 @@ export default function CategoryNav({
   selectedCategory,
   onSelectCategory
 }: CategoryNavProps) {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const activeMain = getMainCategoryForSub(selectedCategory);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -116,27 +113,23 @@ export default function CategoryNav({
 
   return (
     <div
-      className={`border rounded-[2px] p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
-        isLight
-          ? 'bg-white border-[#E2ECE0]'
-          : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)]'
+      className={`border rounded-[15px] p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
+        'bg-surface border-line'
       }`}
     >
       {/* 3 Core Category Tabs: Text, Images, Videos */}
       <div className="flex items-center space-x-1">
         <span
           className={`text-[10px] uppercase font-mono tracking-widest px-2 hidden md:inline-block ${
-            isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
+            'text-ink-3'
           }`}
         >
           Format
         </span>
 
         <div
-          className={`inline-flex rounded-[2px] p-0.5 border ${
-            isLight
-              ? 'bg-[#F8F9F5] border-[#E2ECE0]'
-              : 'bg-[#061816] border-[rgba(169,191,165,0.2)]'
+          className={`inline-flex rounded-[9px] p-0.5 border ${
+            'bg-surface-raised border-line'
           }`}
         >
           {MAIN_CATEGORIES.map((main) => {
@@ -146,14 +139,10 @@ export default function CategoryNav({
                 key={main.id}
                 type="button"
                 onClick={() => handleSelectMain(main.id)}
-                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 rounded-[1px] ${
+                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 rounded-[7px] ${
                   isSelected
-                    ? isLight
-                      ? 'bg-[#143630] text-white font-medium shadow-sm'
-                      : 'bg-[#E8E9D8] text-[#071C1A] font-semibold shadow-sm'
-                    : isLight
-                      ? 'text-[#3E6A5E] hover:text-[#122420]'
-                      : 'text-[#A9BFA5]/70 hover:text-white'
+                    ? 'bg-brand text-on-brand font-medium shadow-sm'
+                    : 'text-ink-3 hover:text-ink'
                 }`}
               >
                 {main.icon}
@@ -168,7 +157,7 @@ export default function CategoryNav({
       <div ref={dropdownRef} className="relative flex items-center space-x-2">
         <span
           className={`text-[10px] uppercase font-mono tracking-wider shrink-0 ${
-            isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
+            'text-ink-3'
           }`}
         >
           Sub-format:
@@ -177,34 +166,28 @@ export default function CategoryNav({
         <button
           type="button"
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className={`px-3 py-1.5 rounded-[2px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[210px] transition-colors cursor-pointer ${
-            isLight
-              ? 'bg-[#F8F9F5] border-[#D0DDD0] text-[#122420] hover:border-[#143630]'
-              : 'bg-[#061816] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] hover:border-[#A9BFA5]'
+          className={`px-3 py-1.5 rounded-[9px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[210px] transition-colors cursor-pointer ${
+            'bg-surface-raised border-line text-ink hover:border-brand'
           }`}
         >
           <span className="truncate font-medium">{currentSubItem.label}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform shrink-0 ${
               dropdownOpen ? 'rotate-180' : ''
-            } ${isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/70'}`}
+            } ${'text-ink-3'}`}
           />
         </button>
 
         {/* Dropdown Menu Popup */}
         {dropdownOpen && (
           <div
-            className={`absolute right-0 top-full mt-1.5 w-64 rounded-[2px] border shadow-lg py-1 z-30 animate-fadeIn ${
-              isLight
-                ? 'bg-white border-[#D0DDD0] text-[#122420]'
-                : 'bg-[#071C1A] border-[rgba(169,191,165,0.3)] text-[#E8E9D8]'
+            className={`absolute right-0 top-full mt-1.5 w-64 rounded-[9px] border shadow-lg py-1 z-30 animate-fadeIn ${
+              'bg-surface border-line text-ink'
             }`}
           >
             <div
               className={`px-3 py-1 text-[9px] uppercase font-mono tracking-widest border-b ${
-                isLight
-                  ? 'text-[#668877] border-[#E2ECE0]'
-                  : 'text-[#A9BFA5]/60 border-[rgba(169,191,165,0.15)]'
+                'text-ink-3 border-line'
               }`}
             >
               {currentMainConfig.label} Formats
@@ -220,19 +203,15 @@ export default function CategoryNav({
                     onClick={() => handleSelectSub(sub.id)}
                     className={`w-full px-3 py-2 text-left text-xs font-mono flex items-center justify-between transition-colors cursor-pointer ${
                       isSelected
-                        ? isLight
-                          ? 'bg-[#EDF3EA] text-[#143630] font-semibold'
-                          : 'bg-[#0D2D2A] text-[#E8E9D8] font-semibold'
-                        : isLight
-                          ? 'hover:bg-[#F8F9F5] text-[#244B40]'
-                          : 'hover:bg-[#061816] text-[#A9BFA5] hover:text-white'
+                        ? 'bg-surface-hover text-brand font-semibold'
+                        : 'hover:bg-surface-raised text-ink-2'
                     }`}
                   >
                     <span>{sub.label}</span>
                     {isSelected && (
                       <Check
                         className={`w-3.5 h-3.5 shrink-0 ${
-                          isLight ? 'text-[#143630]' : 'text-[#A9BFA5]'
+                          'text-brand'
                         }`}
                       />
                     )}

@@ -62,21 +62,21 @@ export default function Pagination({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-3.5 border-t border-[rgba(169,191,165,0.15)] bg-[#061816]/70 text-xs font-mono select-none ${className}`}
+      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-3.5 border-t border-line bg-surface-raised text-xs font-mono select-none ${className}`}
     >
       {/* Left side: Results Count and Page Size Selector */}
-      <div className="flex flex-wrap items-center gap-3 text-[#A9BFA5]">
+      <div className="flex flex-wrap items-center gap-3 text-ink-3">
         <div>
           Showing{' '}
-          <strong className="text-[#E8E9D8] font-medium">{startItem}</strong>–
-          <strong className="text-[#E8E9D8] font-medium">{endItem}</strong> of{' '}
-          <strong className="text-[#E8E9D8] font-medium">{totalItems}</strong>{' '}
+          <strong className="text-ink font-medium">{startItem}</strong>–
+          <strong className="text-ink font-medium">{endItem}</strong> of{' '}
+          <strong className="text-ink font-medium">{totalItems}</strong>{' '}
           {itemName}
         </div>
 
         {showPageSize && onPageSizeChange && totalItems > 0 && (
-          <div className="flex items-center space-x-1.5 pl-2 border-l border-[rgba(169,191,165,0.18)]">
-            <span className="text-[10px] uppercase text-[#A9BFA5]/60 tracking-wider">
+          <div className="flex items-center space-x-1.5 pl-2 border-l border-line">
+            <span className="text-[10px] uppercase text-ink-3 tracking-wider">
               Per page:
             </span>
             <select
@@ -86,10 +86,10 @@ export default function Pagination({
                 onPageSizeChange(newSize);
                 onPageChange(1);
               }}
-              className="bg-[#071C1A] border border-[rgba(169,191,165,0.25)] text-[#E8E9D8] text-[11px] px-2 py-0.5 rounded-[2px] focus:outline-none focus:border-[#A9BFA5] cursor-pointer"
+              className="bg-surface border border-line text-ink text-[11px] px-2 py-0.5 rounded-[9px] focus:outline-none focus:border-brand cursor-pointer"
             >
               {pageSizeOptions.map((opt) => (
-                <option key={opt} value={opt} className="bg-[#071C1A] text-[#E8E9D8]">
+                <option key={opt} value={opt} className="bg-surface text-ink">
                   {opt}
                 </option>
               ))}
@@ -107,7 +107,7 @@ export default function Pagination({
             onClick={() => onPageChange(1)}
             disabled={safePage === 1}
             title="First page"
-            className="p-1 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#071C1A] text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5] transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+            className="p-1 rounded-[9px] border border-line bg-surface text-ink-3 hover:text-ink hover:border-line-strong transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronsLeft className="w-3.5 h-3.5" />
           </button>
@@ -118,7 +118,7 @@ export default function Pagination({
             onClick={() => onPageChange(Math.max(1, safePage - 1))}
             disabled={safePage === 1}
             title="Previous page"
-            className="p-1 px-1.5 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#071C1A] text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5] transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-0.5"
+            className="p-1 px-1.5 rounded-[9px] border border-line bg-surface text-ink-3 hover:text-ink hover:border-line-strong transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-0.5"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             <span className="hidden md:inline text-[11px] pr-0.5">Prev</span>
@@ -131,7 +131,7 @@ export default function Pagination({
                 return (
                   <span
                     key={`ellipsis-${idx}`}
-                    className="px-1 text-[11px] text-[#A9BFA5]/40 select-none"
+                    className="px-1 text-[11px] text-ink-3 select-none"
                   >
                     …
                   </span>
@@ -146,10 +146,10 @@ export default function Pagination({
                   key={pageNum}
                   type="button"
                   onClick={() => onPageChange(pageNum)}
-                  className={`min-w-6 h-6 px-1.5 rounded-[2px] text-[11px] font-mono transition-colors cursor-pointer ${
+                  className={`min-w-6 h-6 px-1.5 rounded-[9px] text-[11px] font-mono transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-[#E8E9D8] text-[#071C1A] font-semibold shadow-sm'
-                      : 'bg-[#071C1A] text-[#A9BFA5] border border-[rgba(169,191,165,0.2)] hover:border-[#A9BFA5] hover:text-[#E8E9D8]'
+                      ? 'bg-brand text-on-brand font-semibold'
+                      : 'bg-surface text-ink-3 border border-line hover:border-line-strong hover:text-ink'
                   }`}
                 >
                   {pageNum}
@@ -164,7 +164,7 @@ export default function Pagination({
             onClick={() => onPageChange(Math.min(totalPages, safePage + 1))}
             disabled={safePage === totalPages}
             title="Next page"
-            className="p-1 px-1.5 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#071C1A] text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5] transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-0.5"
+            className="p-1 px-1.5 rounded-[9px] border border-line bg-surface text-ink-3 hover:text-ink hover:border-line-strong transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center space-x-0.5"
           >
             <span className="hidden md:inline text-[11px] pl-0.5">Next</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -176,7 +176,7 @@ export default function Pagination({
             onClick={() => onPageChange(totalPages)}
             disabled={safePage === totalPages}
             title="Last page"
-            className="p-1 rounded-[2px] border border-[rgba(169,191,165,0.2)] bg-[#071C1A] text-[#A9BFA5] hover:text-[#E8E9D8] hover:border-[#A9BFA5] transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
+            className="p-1 rounded-[9px] border border-line bg-surface text-ink-3 hover:text-ink hover:border-line-strong transition-colors disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
           >
             <ChevronsRight className="w-3.5 h-3.5" />
           </button>

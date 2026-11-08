@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Sparkles, Edit3, Check, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
-import { useTheme } from '../../../context/ThemeContext';
 
 export interface BrandContext {
   productName: string;
@@ -27,8 +26,6 @@ export default function BrandContextBanner({
   context,
   onUpdateContext
 }: BrandContextBannerProps) {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState<BrandContext>(context);
@@ -46,10 +43,8 @@ export default function BrandContextBanner({
 
   return (
     <div
-      className={`border rounded-[2px] transition-all text-xs ${
-        isLight
-          ? 'bg-white border-[#E2ECE0] text-[#122420]'
-          : 'bg-[#071C1A] border-[rgba(169,191,165,0.2)] text-[#E8E9D8]'
+      className={`border rounded-[9px] transition-all text-xs ${
+        'bg-surface border-line text-ink'
       }`}
     >
       {/* Sleek Compact Header Bar */}
@@ -57,12 +52,12 @@ export default function BrandContextBanner({
         <div className="flex items-center space-x-2.5 truncate">
           <Sparkles
             className={`w-3.5 h-3.5 shrink-0 ${
-              isLight ? 'text-[#143630]' : 'text-[#A9BFA5]'
+              'text-brand'
             }`}
           />
           <span
             className={`text-[10px] uppercase font-mono tracking-widest shrink-0 font-medium ${
-              isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+              'text-ink-2'
             }`}
           >
             Brand Context:
@@ -73,7 +68,7 @@ export default function BrandContextBanner({
           <span className="hidden sm:inline opacity-40">·</span>
           <span
             className={`hidden sm:inline truncate text-[11px] font-light ${
-              isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/80'
+              'text-ink-3'
             }`}
           >
             {context.brandVoice}
@@ -87,14 +82,10 @@ export default function BrandContextBanner({
               if (!isOpen) setDraft(context);
               setIsOpen(!isOpen);
             }}
-            className={`inline-flex items-center space-x-1 px-2 py-1 rounded-[2px] border text-[11px] font-mono transition-colors cursor-pointer ${
+            className={`inline-flex items-center space-x-1 px-2 py-1 rounded-[9px] border text-[11px] font-mono transition-colors cursor-pointer ${
               isOpen
-                ? isLight
-                  ? 'border-[#143630] bg-[#143630] text-white'
-                  : 'border-[#E8E9D8] bg-[#E8E9D8] text-[#071C1A]'
-                : isLight
-                  ? 'border-[#D0DDD0] text-[#244B40] hover:bg-[#EDF3EA]'
-                  : 'border-[rgba(169,191,165,0.25)] text-[#A9BFA5] hover:text-white'
+                ? 'border-brand bg-brand text-on-brand'
+                : 'border-line text-ink-2 hover:bg-surface-hover'
             }`}
           >
             <Edit3 className="w-3 h-3" />
@@ -108,16 +99,14 @@ export default function BrandContextBanner({
       {isOpen && (
         <div
           className={`p-4 border-t ${
-            isLight
-              ? 'border-[#E2ECE0] bg-[#F8F9F5]'
-              : 'border-[rgba(169,191,165,0.15)] bg-[#061816]'
+            'border-line bg-surface-raised'
           } space-y-3.5 animate-fadeIn`}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label
                 className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+                  'text-ink-2'
                 }`}
               >
                 Product Name
@@ -128,10 +117,8 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, productName: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[2px] border focus:outline-none ${
-                  isLight
-                    ? 'bg-white border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                  'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
             </div>
@@ -139,7 +126,7 @@ export default function BrandContextBanner({
             <div>
               <label
                 className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+                  'text-ink-2'
                 }`}
               >
                 Brand Voice
@@ -150,10 +137,8 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, brandVoice: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[2px] border focus:outline-none ${
-                  isLight
-                    ? 'bg-white border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                  'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
             </div>
@@ -161,7 +146,7 @@ export default function BrandContextBanner({
             <div>
               <label
                 className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+                  'text-ink-2'
                 }`}
               >
                 Target Audience
@@ -170,10 +155,8 @@ export default function BrandContextBanner({
                 type="text"
                 value={draft.audience}
                 onChange={(e) => setDraft({ ...draft, audience: e.target.value })}
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[2px] border focus:outline-none ${
-                  isLight
-                    ? 'bg-white border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                  'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
             </div>
@@ -181,7 +164,7 @@ export default function BrandContextBanner({
             <div>
               <label
                 className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+                  'text-ink-2'
                 }`}
               >
                 Brand Constraints
@@ -192,10 +175,8 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, brandConstraints: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[2px] border focus:outline-none ${
-                  isLight
-                    ? 'bg-white border-[#D0DDD0] text-[#122420] focus:border-[#244B40]'
-                    : 'bg-[#071C1A] border-[rgba(169,191,165,0.25)] text-[#E8E9D8] focus:border-[#A9BFA5]'
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                  'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
             </div>
@@ -205,10 +186,8 @@ export default function BrandContextBanner({
             <button
               type="button"
               onClick={handleReset}
-              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-[2px] border text-[11px] font-mono transition-colors cursor-pointer ${
-                isLight
-                  ? 'border-[#D0DDD0] text-[#668877] hover:text-[#122420]'
-                  : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/60 hover:text-white'
+              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-[9px] border text-[11px] font-mono transition-colors cursor-pointer ${
+                'border-line text-ink-3 hover:text-ink'
               }`}
               title="Reset to Atelier default"
             >
@@ -219,10 +198,8 @@ export default function BrandContextBanner({
             <button
               type="button"
               onClick={handleSave}
-              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-[2px] text-[11px] font-mono font-medium transition-colors cursor-pointer ${
-                isLight
-                  ? 'bg-[#143630] text-white hover:bg-[#0A1F1B]'
-                  : 'bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-medium'
+              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-[9px] text-[11px] font-mono font-medium transition-colors cursor-pointer ${
+                'bg-brand text-on-brand hover:bg-brand-hover'
               }`}
             >
               <Check className="w-3 h-3" />

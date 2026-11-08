@@ -9,8 +9,8 @@ import {
   Compass
 } from 'lucide-react';
 import { GeneratedAsset, SubCategory } from '../../types';
-import { useTheme } from '../../context/ThemeContext';
 import Pagination from './Pagination';
+import { PageHeader } from '../ui';
 import BrandContextBanner, { DEFAULT_BRAND_CONTEXT, BrandContext } from './creative/BrandContextBanner';
 import CategoryNav, { CategoryType } from './creative/CategoryNav';
 import QuickGenerateForm from './creative/QuickGenerateForm';
@@ -30,8 +30,6 @@ export default function CreativeLabView({
   onNavigateSub,
   onGenerateSuccess
 }: CreativeLabViewProps) {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const isAssetsView = activeSubCategory === 'generated-assets' || activeSubCategory === 'content-library';
 
@@ -81,7 +79,7 @@ export default function CreativeLabView({
       coreTransformation: 'Replaces chaotic, badge-heavy CRM clutter with serene, hairline precision and quiet executive focus.',
       archetype: 'Diverse Mix (All Styles)',
       targetAudience: 'High-taste studio directors, agency leads, and architects',
-      subheadGuidance: 'Max 12 words with serif styling',
+      subheadGuidance: 'Max 12 words with font-display font-bold styling',
       buttonLockup: 'Experience Stillness'
     },
     adScriptForm: {
@@ -174,7 +172,7 @@ export default function CreativeLabView({
           coreTransformation: 'Replaces chaotic, badge-heavy CRM clutter with serene, hairline precision and quiet executive focus.',
           archetype: 'Diverse Mix (All Styles)',
           targetAudience: 'High-taste studio directors, agency leads, and architects',
-          subheadGuidance: 'Max 12 words with serif styling',
+          subheadGuidance: 'Max 12 words with font-display font-bold styling',
           buttonLockup: 'Experience Stillness'
         }
       }));
@@ -242,7 +240,7 @@ export default function CreativeLabView({
         ...prev,
         heroBriefForm: {
           deliverable: 'Brand Identity Lockup & Specimen',
-          focalSubject: 'Minimal Swiss typography specimen sheet showing Nexora hairline serif font scales and mathematical margin grid.',
+          focalSubject: 'Minimal Swiss typography specimen sheet showing Nexora hairline font-display font-bold font scales and mathematical margin grid.',
           aesthetic: 'International Typographic Style + Architectural Minimalism',
           lightingMood: 'Even diffuse gallery daylight (5500K) across heavy tactile paper stock',
           composition: 'Strict asymmetrical grid with 65% negative space and crisp ink boundaries',
@@ -860,7 +858,7 @@ ${b.composition || 'Left-heavy layout with 60% negative space on right for edito
   • Render Engine: Octane / Unreal Engine 5.4 Path Tracing
   • Deliverable: 3840 × 2160 (16:9 4K UHD), 32-bit EXR + sRGB PNG
   • Materials: ${b.materials || 'Micro-brushed titanium, matte black anodized aluminum, anti-reflective glass'}
-  • Constraints: ${b.additionalConstraints || 'No neon glow, maintain 120px left margin for serif typography'}`
+  • Constraints: ${b.additionalConstraints || 'No neon glow, maintain 120px left margin for font-display font-bold typography'}`
       });
 
       if (count >= 2) {
@@ -968,7 +966,7 @@ Deliverable: High-Res Macro Product Visual (1:1 / 16:9)
       }
     } else if (cat === 'Brand Specimen') {
       const b = formsState.heroBriefForm;
-      const promptText = `swiss modernism typography specimen poster, ${b.focalSubject || 'hairline serif typography system with strict asymmetric grid'}, black and ivory ink on textured cotton rag paper, museum archive, 8k uhd`;
+      const promptText = `swiss modernism typography specimen poster, ${b.focalSubject || 'hairline font-display font-bold typography system with strict asymmetric grid'}, black and ivory ink on textured cotton rag paper, museum archive, 8k uhd`;
 
       list.push({
         id: `var-${Date.now()}-1`,
@@ -1219,105 +1217,40 @@ Audio: Solo cello harmonics and tactile room tone
   };
 
   return (
-    <div className="space-y-5 py-2">
-      {/* Header with Subnav Switcher */}
-      <section
-        className={`border-b ${
-          isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.2)]'
-        } pb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3`}
-      >
-        <div>
-          <h1
-            className={`serif text-2xl sm:text-3xl font-light ${
-              isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'
-            } tracking-tight`}
-          >
-            Creative Studio
-          </h1>
-          <p
-            className={`text-xs ${
-              isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/80'
-            } font-light`}
-          >
-            Synthesize copy, visual artwork, and video storyboards.
-          </p>
-        </div>
-
-        {/* Subnav switcher: Studio vs Archive */}
-        <div
-          className={`flex items-center space-x-6 text-xs uppercase tracking-widest border-b ${
-            isLight ? 'border-[#E2ECE0]' : 'border-[rgba(169,191,165,0.2)]'
-          } pb-1`}
-        >
-          <button
-            type="button"
-            onClick={() => onNavigateSub('create')}
-            className={`pb-1 border-b transition-colors cursor-pointer font-mono ${
-              !isAssetsView
-                ? isLight
-                  ? 'text-[#122420] border-[#143630] font-semibold'
-                  : 'text-[#E8E9D8] border-[#E8E9D8] font-medium'
-                : isLight
-                  ? 'text-[#3E6A5E] border-transparent hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
-            }`}
-          >
-            Studio
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigateSub('generated-assets')}
-            className={`pb-1 border-b transition-colors cursor-pointer font-mono ${
-              isAssetsView
-                ? isLight
-                  ? 'text-[#122420] border-[#143630] font-semibold'
-                  : 'text-[#E8E9D8] border-[#E8E9D8] font-medium'
-                : isLight
-                  ? 'text-[#3E6A5E] border-transparent hover:text-[#122420]'
-                  : 'text-[#A9BFA5]/60 border-transparent hover:text-[#A9BFA5]'
-            }`}
-          >
-            Archive ({assets.length})
-          </button>
-        </div>
-      </section>
+    <div className="w-full animate-fadeIn space-y-[15px]">
+      <PageHeader
+        eyebrow={`AI & Marketing / ${isAssetsView ? 'Library' : 'Content Studio'}`}
+        title={isAssetsView ? 'Library' : 'Content Studio'}
+        subtitle={
+          isAssetsView
+            ? 'Everything you have generated, ready to reuse.'
+            : 'Synthesize copy, visual artwork, and video storyboards.'
+        }
+        actions={
+          <div className="flex gap-1.5">
+            <button type="button" className={`nx-tab ${!isAssetsView ? 'active' : ''}`} onClick={() => onNavigateSub('create')}>
+              Studio
+            </button>
+            <button type="button" className={`nx-tab ${isAssetsView ? 'active' : ''}`} onClick={() => onNavigateSub('generated-assets')}>
+              Archive <span className="nx-tab-count">{assets.length}</span>
+            </button>
+          </div>
+        }
+      />
 
       {!isAssetsView ? (
         /* CREATE EXPERIENCE */
         <div className="space-y-4">
           {/* Top Control Bar: Mode Toggle + Compact Brand Context */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="inline-flex rounded-[2px] border border-inherit p-0.5 bg-inherit shrink-0">
-              <button
-                type="button"
-                onClick={() => setCreateMode('quick')}
-                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-                  createMode === 'quick'
-                    ? isLight
-                      ? 'bg-[#143630] text-white font-medium rounded-[1px] shadow-sm'
-                      : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px] shadow-sm'
-                    : isLight
-                      ? 'text-[#3E6A5E] hover:text-[#122420]'
-                      : 'text-[#A9BFA5]/70 hover:text-white'
-                }`}
-              >
+            <div className="flex gap-1.5 shrink-0">
+              <button type="button" onClick={() => setCreateMode('quick')}
+                className={`nx-tab inline-flex items-center gap-1.5 ${createMode === 'quick' ? 'active' : ''}`}>
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Quick Prompt</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => setCreateMode('structured')}
-                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 ${
-                  createMode === 'structured'
-                    ? isLight
-                      ? 'bg-[#143630] text-white font-medium rounded-[1px] shadow-sm'
-                      : 'bg-[#E8E9D8] text-[#071C1A] font-semibold rounded-[1px] shadow-sm'
-                    : isLight
-                      ? 'text-[#3E6A5E] hover:text-[#122420]'
-                      : 'text-[#A9BFA5]/70 hover:text-white'
-                }`}
-              >
+              <button type="button" onClick={() => setCreateMode('structured')}
+                className={`nx-tab inline-flex items-center gap-1.5 ${createMode === 'structured' ? 'active' : ''}`}>
                 <Layers className="w-3.5 h-3.5" />
                 <span>Structured Brief</span>
               </button>
@@ -1389,15 +1322,13 @@ Audio: Solo cello harmonics and tactile room tone
           {/* Filter Bar & Count */}
           <div
             className={`border ${
-              isLight
-                ? 'border-[#E2ECE0] bg-white'
-                : 'border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
-            } p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[2px] transition-colors shadow-sm`}
+              'border-line bg-surface'
+            } p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[9px] transition-colors shadow-sm`}
           >
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
               <span
                 className={`text-[10px] uppercase tracking-widest font-mono mr-2 shrink-0 ${
-                  isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
+                  'text-ink-3'
                 }`}
               >
                 Category:
@@ -1423,14 +1354,10 @@ Audio: Solo cello harmonics and tactile room tone
                     key={f}
                     type="button"
                     onClick={() => setTypeFilter(f)}
-                    className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-[1px] transition-colors cursor-pointer shrink-0 font-mono ${
+                    className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-[7px] transition-colors cursor-pointer shrink-0 font-mono ${
                       isSelected
-                        ? isLight
-                          ? 'bg-[#143630] text-white border-[#143630] font-medium'
-                          : 'bg-[#0D2D2A] text-[#E8E9D8] border-[#A9BFA5] font-semibold'
-                        : isLight
-                          ? 'bg-[#F8F9F5] text-[#3E6A5E] border-[#D0DDD0] hover:text-[#122420]'
-                          : 'text-[#A9BFA5]/60 border-[rgba(169,191,165,0.15)] hover:text-[#E8E9D8]'
+                        ? 'bg-brand text-on-brand border-brand font-medium'
+                        : 'bg-surface-raised text-ink-3 border-line hover:text-ink'
                     }`}
                   >
                     {f}
@@ -1441,7 +1368,7 @@ Audio: Solo cello harmonics and tactile room tone
 
             <div
               className={`text-[11px] font-mono shrink-0 ${
-                isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]/70'
+                'text-ink-2'
               }`}
             >
               Showing{' '}
@@ -1458,21 +1385,19 @@ Audio: Solo cello harmonics and tactile room tone
           {filteredAssets.length === 0 ? (
             <div
               className={`p-12 border ${
-                isLight
-                  ? 'border-[#E2ECE0] bg-white'
-                  : 'border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
-              } text-center text-xs rounded-[2px] space-y-2`}
+                'border-line bg-surface'
+              } text-center text-xs rounded-[9px] space-y-2`}
             >
               <div
-                className={`serif text-base ${
-                  isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'
+                className={`font-display font-bold text-base ${
+                  'text-ink'
                 }`}
               >
                 No assets match this category
               </div>
               <p
                 className={
-                  isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
+                  'text-ink-3'
                 }
               >
                 Select another filter above, or switch to "Create" to synthesize new assets for this category.
@@ -1484,23 +1409,21 @@ Audio: Solo cello harmonics and tactile room tone
                 <div
                   key={asset.id}
                   className={`border ${
-                    isLight
-                      ? 'border-[#E2ECE0] bg-white hover:border-[#D0DDD0]'
-                      : 'border-[rgba(169,191,165,0.2)] bg-[#071C1A] hover:bg-[#0D2D2A]/20'
-                  } p-6 rounded-[2px] transition-colors flex flex-col justify-between shadow-sm`}
+                    'border-line bg-surface hover:border-line'
+                  } p-6 rounded-[9px] transition-colors flex flex-col justify-between shadow-sm`}
                 >
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
                       <span
                         className={`text-[10px] uppercase tracking-widest font-mono font-medium ${
-                          isLight ? 'text-[#143630]' : 'text-[#A9BFA5]'
+                          'text-brand'
                         }`}
                       >
                         {asset.type} · {asset.platform}
                       </span>
                       <span
                         className={`text-[10px] font-mono ${
-                          isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/60'
+                          'text-ink-3'
                         }`}
                       >
                         {asset.createdAt}
@@ -1508,15 +1431,15 @@ Audio: Solo cello harmonics and tactile room tone
                     </div>
 
                     <h4
-                      className={`serif text-lg font-light mb-3 ${
-                        isLight ? 'text-[#122420]' : 'text-[#E8E9D8]'
+                      className={`font-display font-bold tracking-[-0.3px] mb-3 ${
+                        'text-ink'
                       }`}
                     >
                       {asset.title}
                     </h4>
 
                     {asset.imageUrl && (
-                      <div className="mb-3.5 aspect-video w-full rounded-[2px] overflow-hidden border border-inherit bg-black shadow-sm">
+                      <div className="mb-3.5 aspect-video w-full rounded-[9px] overflow-hidden border border-inherit bg-black shadow-sm">
                         <img
                           src={asset.imageUrl}
                           alt={asset.title}
@@ -1528,28 +1451,24 @@ Audio: Solo cello harmonics and tactile room tone
 
                     <p
                       className={`text-xs font-light leading-relaxed mb-4 line-clamp-3 ${
-                        isLight ? 'text-[#3E6A5E]' : 'text-[#A9BFA5]/80'
+                        'text-ink-3'
                       }`}
                     >
-                      {asset.preview}
+                      {asset.preview.replace(/[━─═]{3,}/g, ' ').replace(/\s+/g, ' ')}
                     </p>
                   </div>
 
                   <div
                     className={`pt-4 border-t ${
-                      isLight
-                        ? 'border-[#E2ECE0]'
-                        : 'border-[rgba(169,191,165,0.15)]'
+                      'border-line'
                     } flex items-center justify-between`}
                   >
                     <div className="flex flex-wrap gap-1.5">
                       {asset.tags.map((t) => (
                         <span
                           key={t}
-                          className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 border rounded-[1px] font-mono ${
-                            isLight
-                              ? 'border-[#D0DDD0] bg-[#EDF3EA] text-[#244B40]'
-                              : 'border-[rgba(169,191,165,0.2)] text-[#A9BFA5]/70'
+                          className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 border rounded-[7px] font-mono ${
+                            'border-line bg-surface-hover text-ink-2'
                           }`}
                         >
                           {t}
@@ -1561,9 +1480,7 @@ Audio: Solo cello harmonics and tactile room tone
                       type="button"
                       onClick={() => handleCopyAsset(asset.preview, asset.id)}
                       className={`text-xs uppercase tracking-widest flex items-center space-x-1 cursor-pointer transition-colors ${
-                        isLight
-                          ? 'text-[#143630] hover:text-[#0A1F1B]'
-                          : 'text-[#E8E9D8] hover:text-white'
+                        'text-brand hover:text-brand-hover'
                       }`}
                     >
                       {copiedId === asset.id ? (
@@ -1577,7 +1494,7 @@ Audio: Solo cello harmonics and tactile room tone
                         <>
                           <Copy
                             className={`w-3 h-3 ${
-                              isLight ? 'text-[#244B40]' : 'text-[#A9BFA5]'
+                              'text-ink-2'
                             }`}
                           />
                           <span>Copy</span>
@@ -1594,10 +1511,8 @@ Audio: Solo cello harmonics and tactile room tone
           {filteredAssets.length > 0 && (
             <div
               className={`border ${
-                isLight
-                  ? 'border-[#E2ECE0] bg-white'
-                  : 'border-[rgba(169,191,165,0.2)] bg-[#071C1A]'
-              } rounded-[2px] transition-colors shadow-sm`}
+                'border-line bg-surface'
+              } rounded-[9px] transition-colors shadow-sm`}
             >
               <Pagination
                 currentPage={assetPage}
