@@ -12,7 +12,7 @@ import { GeneratedAsset, SubCategory } from '../../types';
 import Pagination from './Pagination';
 import { PageHeader } from '../ui';
 import BrandContextBanner, { DEFAULT_BRAND_CONTEXT, BrandContext } from './creative/BrandContextBanner';
-import CategoryNav, { CategoryType } from './creative/CategoryNav';
+import CategoryNav, { CategoryType, MAIN_CATEGORIES, getMainCategoryForSub } from './creative/CategoryNav';
 import QuickGenerateForm from './creative/QuickGenerateForm';
 import StructuredBriefForms, { StructuredFormsState } from './creative/StructuredBriefForms';
 import OutputWorkspace, { GeneratedVariation } from './creative/OutputWorkspace';
@@ -126,7 +126,7 @@ export default function CreativeLabView({
 
   const filteredAssets = useMemo(() => {
     if (typeFilter === 'All') return assets;
-    return assets.filter(a => a.type === typeFilter);
+    return assets.filter(a => getMainCategoryForSub(a.type as CategoryType) === typeFilter);
   }, [assets, typeFilter]);
 
   const paginatedAssets = useMemo(() => {
@@ -1326,41 +1326,20 @@ Audio: Solo cello harmonics and tactile room tone
             } p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[9px] transition-colors shadow-sm`}
           >
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
-              <span
-                className={`text-[10px] uppercase tracking-widest font-mono mr-2 shrink-0 ${
-                  'text-ink-3'
-                }`}
-              >
-                Category:
-              </span>
-              {(
-                [
-                  'All',
-                  'Email Copy',
-                  'Social Post',
-                  'Headline Set',
-                  'Thought Leadership',
-                  'Hero Brief',
-                  'Product Render',
-                  'Brand Specimen',
-                  'Ad Script',
-                  'Product Demo',
-                  'Brand Film'
-                ] as const
-              ).map((f) => {
-                const isSelected = typeFilter === f;
+              {[{ id: 'All', label: 'All', count: assets.length }, ...MAIN_CATEGORIES.map(m => ({
+                id: m.id as string,
+                label: m.label,
+                count: assets.filter(x => getMainCategoryForSub(x.type as CategoryType) === m.id).length,
+              }))].map((f) => {
+                const isSelected = typeFilter === f.id;
                 return (
                   <button
-                    key={f}
+                    key={f.id}
                     type="button"
-                    onClick={() => setTypeFilter(f)}
-                    className={`px-3 py-1 text-xs uppercase tracking-wider border rounded-[7px] transition-colors cursor-pointer shrink-0 font-mono ${
-                      isSelected
-                        ? 'bg-brand text-on-brand border-brand font-medium'
-                        : 'bg-surface-raised text-ink-3 border-line hover:text-ink'
-                    }`}
+                    onClick={() => setTypeFilter(f.id)}
+                    className={`nx-tab ${isSelected ? 'active' : ''}`}
                   >
-                    {f}
+                    {f.label} <span className="nx-tab-count">{f.count}</span>
                   </button>
                 );
               })}
