@@ -1,5 +1,5 @@
 import { copyText } from './settings/store';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Sparkles, 
   Copy, 
@@ -115,6 +115,8 @@ export default function CreativeLabView({
   const [lastAssetId, setLastAssetId] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState(false);
   const [libQuery, setLibQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [historyOpen, setHistoryOpen] = useState<string | null>(null);
   const [variations, setVariations] = useState<GeneratedVariation[]>([]);
   const [activeVariationIndex, setActiveVariationIndex] = useState<number>(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -192,15 +194,16 @@ export default function CreativeLabView({
 
   useEffect(() => {
     setAssetPage(1);
-  }, [typeFilter, libQuery]);
+  }, [typeFilter, statusFilter, libQuery]);
 
   const filteredAssets = useMemo(() => {
     const q = libQuery.trim().toLowerCase();
     return assets.filter(a =>
       (typeFilter === 'All' || getMainCategoryForSub(a.type as CategoryType) === typeFilter) &&
+      (statusFilter === 'All' || (a.status ?? 'Draft') === statusFilter) &&
       (!q || `${a.title} ${a.preview} ${a.platform} ${a.campaign || ''} ${a.tags.join(' ')}`.toLowerCase().includes(q)),
     );
-  }, [assets, typeFilter, libQuery]);
+  }, [assets, typeFilter, statusFilter, libQuery]);
 
   const paginatedAssets = useMemo(() => {
     const start = (assetPage - 1) * assetPageSize;
@@ -1220,7 +1223,9 @@ Audio: Solo cello harmonics and tactile room tone
           tags: [cat.split(' ')[0], brandContext.productName.split(' ')[0], 'Studio'],
           imageUrl: generated[0].imageUrl,
           campaign: campaign?.name,
-          status: 'Draft'
+          status: 'Draft',
+          version: 1,
+          versions: []
         };
         setLastAssetId(newAsset.id);
         onGenerateSuccess(newAsset);
@@ -1270,11 +1275,29 @@ Audio: Solo cello harmonics and tactile room tone
     }, 550);
   };
 
+  // Edits to a saved draft become a new version once typing pauses, so history isn't one entry per keystroke.
+  const editBase = useRef<string | null>(null);
+  const editTimer = useRef<number | undefined>(undefined);
   const handleUpdateVariationContent = (idx: number, newContent: string) => {
     const updated = [...variations];
     if (updated[idx]) {
+      if (editBase.current === null) editBase.current = updated[idx].content;
       updated[idx] = { ...updated[idx], content: newContent };
       setVariations(updated);
+      window.clearTimeout(editTimer.current);
+      editTimer.current = window.setTimeout(() => {
+        const base = editBase.current;
+        editBase.current = null;
+        const asset = assets.find(a => a.id === lastAssetId);
+        if (!asset || base === null || base === newContent) return;
+        const v = asset.version ?? 1;
+        onUpdateAsset?.(asset.id, {
+          preview: newContent,
+          version: v + 1,
+          versions: [...(asset.versions ?? []), { version: v, at: 'Just now', text: base }],
+          status: asset.status === 'Scheduled' || asset.status === 'Published' ? asset.status : 'Draft',
+        });
+      }, 900);
     }
   };
 
@@ -1457,13 +1480,16 @@ Audio: Solo cello harmonics and tactile room tone
               })}
             </div>
 
+            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} aria-label="Filter by status" className="w-full sm:w-[170px]">
+              {['All', 'Draft', 'Awaiting approval', 'Approved', 'Scheduled', 'Published'].map(o => <option key={o} value={o}>{o === 'All' ? 'All statuses' : o}</option>)}
+            </select>
             <input
               type="search"
               value={libQuery}
               onChange={e => setLibQuery(e.target.value)}
               placeholder="Search library"
               aria-label="Search library"
-              className="nx-input w-full sm:w-[220px] sm:ml-auto"
+              className="nx-input w-full sm:w-[220px]"
             />
             <div
               className={`text-[11px] font-mono shrink-0 ${
@@ -1563,6 +1589,62 @@ Audio: Solo cello harmonics and tactile room tone
                       {asset.preview.replace(/[━─═]{3,}/g, ' ').replace(/\s+/g, ' ')}
                     </p>
                   </div>
+
+                  {!asset.imageUrl && (
+                    <div className="mb-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {(asset.status ?? 'Draft') === 'Draft' && (
+                          <button type="button" className="nx-btn sm" onClick={() => onUpdateAsset?.(asset.id, { status: 'Awaiting approval' })}>Request approval</button>
+                        )}
+                        {asset.status === 'Awaiting approval' && (
+                          <>
+                            <button type="button" className="nx-btn sm primary" onClick={() => onUpdateAsset?.(asset.id, { status: 'Approved' })}>Approve</button>
+                            <button type="button" className="nx-btn sm" onClick={() => onUpdateAsset?.(asset.id, { status: 'Draft' })}>Send back</button>
+                          </>
+                        )}
+                        {asset.status === 'Approved' && (
+                          <button type="button" className="nx-btn sm" onClick={() => onUpdateAsset?.(asset.id, { status: 'Draft' })}>Reopen as draft</button>
+                        )}
+                        <button
+                          type="button"
+                          className="nx-inline-link ml-auto"
+                          aria-expanded={historyOpen === asset.id}
+                          onClick={() => setHistoryOpen(historyOpen === asset.id ? null : asset.id)}
+                        >
+                          Version {asset.version ?? 1}{(asset.versions?.length ?? 0) > 0 ? ` · History (${asset.versions!.length})` : ''}
+                        </button>
+                      </div>
+                      {historyOpen === asset.id && (
+                        <div className="mt-2 border border-line rounded-[10px] divide-y divide-line">
+                          <div className="px-3 py-2 text-[11px]"><strong className="text-ink">Version {asset.version ?? 1} (current)</strong></div>
+                          {[...(asset.versions ?? [])].reverse().map(v => (
+                            <div key={v.version} className="px-3 py-2 text-[11px] flex items-start gap-2">
+                              <div className="flex-1 min-w-0">
+                                <strong className="text-ink">Version {v.version}</strong> <span className="text-ink-3">· {v.at}</span>
+                                <p className="m-0 mt-0.5 text-ink-3 line-clamp-2">{v.text.replace(/[━─═]{3,}/g, ' ').replace(/\s+/g, ' ')}</p>
+                              </div>
+                              <button
+                                type="button"
+                                className="nx-btn sm shrink-0"
+                                onClick={() => {
+                                  const cur = asset.version ?? 1;
+                                  onUpdateAsset?.(asset.id, {
+                                    preview: v.text,
+                                    version: cur + 1,
+                                    versions: [...(asset.versions ?? []), { version: cur, at: 'Just now', text: asset.preview }],
+                                    status: 'Draft',
+                                  });
+                                }}
+                              >
+                                Restore
+                              </button>
+                            </div>
+                          ))}
+                          {(asset.versions?.length ?? 0) === 0 && <div className="px-3 py-2 text-[11px] text-ink-3">No earlier versions. Edit this draft in the Studio to create one.</div>}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div
                     className={`pt-4 border-t ${

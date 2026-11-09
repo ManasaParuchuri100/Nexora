@@ -32,6 +32,7 @@ const TONES: Record<string, BadgeTone> = {
   Queued: 'brand',
   Approved: 'success',
   'Draft Review': 'warning',
+  'Awaiting approval': 'warning',
   Dispatched: 'success',
   Published: 'success',
   Failed: 'danger',

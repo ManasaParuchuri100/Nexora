@@ -7,6 +7,7 @@ import {
   Wand2,
   Megaphone, 
   BarChart3, 
+  Radar,
   Settings, 
   LogOut, 
   X,
@@ -61,6 +62,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'Intelligence',
     items: [
       { key: 'agent', label: 'Engagement Agent', icon: Sparkles, category: 'agent', sub: 'default', isActive: (cat) => cat === 'agent' },
+      { key: 'market', label: 'Market Intelligence', icon: Radar, category: 'market', sub: 'recommendations', remember: true, isActive: (cat) => cat === 'market' },
       { key: 'analytics', label: 'Analytics', icon: BarChart3, category: 'analytics', sub: 'overview', remember: true, isActive: (cat) => cat === 'analytics' },
     ],
   },

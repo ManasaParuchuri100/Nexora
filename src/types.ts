@@ -28,6 +28,7 @@ export type NavCategory =
   | 'content'
   | 'campaigns'
   | 'analytics'
+  | 'market'
   | 'settings'
   // Backwards-compatible aliases
   | 'insights'
@@ -100,6 +101,10 @@ export type SubCategory =
   | 'ai-guided-creation'
   | 'manual-scheduling'
   | 'calendar'
+  | 'recommendations'
+  | 'competitors'
+  | 'trends'
+  | 'sources'
   | 'lead-automation'
   | 'generated-responses'
   | 'default';
@@ -286,6 +291,7 @@ export interface CampaignBlueprint {
   createdAt: string;
   // A. Campaign Overview
   overview: {
+    offer?: string;
     objective: string;
     targetAudience: string;
     timeline: string;
@@ -368,7 +374,11 @@ export interface GeneratedAsset {
   imageUrl?: string;
   /** Campaign this content belongs to, when linked. */
   campaign?: string;
-  status?: 'Draft' | 'Scheduled' | 'Published';
+  status?: 'Draft' | 'Awaiting approval' | 'Approved' | 'Scheduled' | 'Published';
+  /** Current version number. Starts at 1 and goes up each time the text is edited. */
+  version?: number;
+  /** Earlier versions of the text, oldest first. */
+  versions?: Array<{ version: number; at: string; text: string }>;
 }
 
 export interface SocialAccount {

@@ -142,6 +142,20 @@ export default function CampaignBlueprintView({
 
       {notice && <div className="nx-toast" role="status">{notice}</div>}
 
+      <div className="nx-grid nx-thirds mb-[15px]">
+        {[
+          { l: '1. Plan', v: 'Created by Nexora', d: 'Objective, audience, offer and roadmap are set.' },
+          { l: '2. Content', v: `${linkedAssets.length} linked`, d: `${linkedAssets.filter(a => a.status === 'Scheduled' || a.status === 'Published').length} scheduled or published through Nexora.` },
+          { l: '3. Ad platforms', v: 'Not connected', d: 'Nexora plans and publishes content. It does not run Google or Meta ads yet.' },
+        ].map(m => (
+          <div key={m.l} className="nx-panel nx-metric">
+            <div className="nx-label">{m.l}</div>
+            <div className="nx-number text-[18px]!">{m.v}</div>
+            <div className="nx-delta neutral">{m.d}</div>
+          </div>
+        ))}
+      </div>
+
       <div className="nx-grid nx-metrics mb-[15px]">
         {[
           { l: 'Objective', v: o.objective, d: 'Main goal' },
@@ -165,6 +179,7 @@ export default function CampaignBlueprintView({
         <div className="nx-grid nx-two">
           <Panel title="Campaign overview" sub="The essentials at a glance.">
             <KV k="Objective">{o.objective}</KV>
+            {o.offer && o.offer !== 'No offer' && <KV k="Offer">{o.offer}</KV>}
             <KV k="Audience">{o.targetAudience}</KV>
             <KV k="Timeline">{fmtDate(o.timeline)}</KV>
             <KV k="Budget">{o.budget}</KV>

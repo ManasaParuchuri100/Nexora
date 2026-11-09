@@ -18,6 +18,7 @@ const TARGETS: Record<string, string[]> = {
   'Increase Engagement': ['Grow engagement rate to 5%', 'Grow followers by 30%', 'Reach 50,000 people'],
 };
 const DEFAULT_TARGETS = ['Reach 50,000 people', 'Increase conversions by 20%', 'Grow followers by 30%'];
+const OFFERS = ['Discount', 'Free trial', 'Free consultation', 'Limited-time deal', 'Event invite', 'No offer'];
 const AGES = ['18–24', '25–34', '25–45', '35–54', '55+'];
 const LOCATIONS = ['India', 'North America', 'Europe', 'Asia-Pacific', 'Global'];
 const INDUSTRIES = ['Technology & SaaS', 'Retail & E-commerce', 'Education', 'Healthcare', 'Finance', 'Real estate'];
@@ -192,6 +193,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
     brandVoice: 'Professional',
     visualStyle: 'Modern',
     additionalInstructions: '',
+    offer: 'No offer',
   });
   const set = (patch: Partial<CampaignFormData>) => setForm(prev => ({ ...prev, ...patch }));
   const toggle = (key: 'channels' | 'measurableGoals', v: string) =>
@@ -345,6 +347,14 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
                 isOn={o => form.primaryGoal === o}
                 onPick={o => set({ primaryGoal: o, measurableGoals: TARGETS[o] ? [TARGETS[o][0]] : [] })}
                 custom={text('goal', 'Your goal', o => set({ primaryGoal: o, measurableGoals: [] }))}
+              />
+            </Group>
+            <Group label="Offer" hint="what customers get">
+              <Options
+                options={withExtra('offer', OFFERS)}
+                isOn={o => form.offer === o}
+                onPick={o => set({ offer: o })}
+                custom={text('offer', 'e.g. 10% off the first order', o => set({ offer: o }))}
               />
             </Group>
             <Group label="Targets" hint="pick any">
@@ -512,6 +522,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
             <span className="nx-tag">{form.primaryGoal}</span>
           </div>
           <div className="nx-split" />
+          <div className="nx-kv"><span>Offer</span><strong className="text-ink text-[12px] text-right">{form.offer}</strong></div>
           <div className="nx-kv"><span>Audience</span><strong className="text-ink text-[12px] text-right">{form.audienceType}</strong></div>
           <div className="nx-kv"><span>Reach</span><strong className="text-ink text-[12px] text-right">{form.location}, {form.ageRange}</strong></div>
           <div className="nx-kv"><span>Budget</span><strong className="text-ink text-[12px]">{budgetLabel}</strong></div>

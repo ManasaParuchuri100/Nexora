@@ -24,6 +24,8 @@ export interface CampaignFormData {
   brandVoice: string;
   visualStyle: string;
   additionalInstructions: string;
+  /** The offer customers are given, for example "Free consultation". */
+  offer?: string;
 }
 
 export function generateBlueprintFromForm(data: CampaignFormData): CampaignBlueprint {
@@ -47,6 +49,7 @@ export function generateBlueprintFromForm(data: CampaignFormData): CampaignBluep
 
     // A. Campaign Overview
     overview: {
+      offer: data.offer,
       objective: data.primaryGoal || 'Acquire high-intent inbound prospects and establish market leadership.',
       targetAudience: `${data.audienceType || 'Decision Makers'} in ${data.industry || 'Technology'} (${data.location || 'Global'}, ${data.ageRange || '25–45'})`,
       timeline: `${data.startDate || 'Immediate'} &rarr; ${data.endDate || '60 Days'}`,

@@ -20,6 +20,8 @@ export default function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [isFirstRun, setIsFirstRun] = useState(false);
+  // True when /login, /signup, /reset-password or /onboarding was opened directly: show only the form, not the marketing page.
+  const [standalone, setStandalone] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserSession | null>({
     name: 'Alex Rivera',
     email: 'alex@company.com',
@@ -34,8 +36,15 @@ export default function App() {
     const search = window.location.search;
     const pathname = window.location.pathname;
 
-    if (hash === '#login' || search.includes('auth=login') || pathname === '/login') {
+    if (hash === '#reset-password' || pathname === '/reset-password') {
       setInApp(false);
+      setStandalone(true);
+      setAuthMode('forgot');
+      setIsAuthOpen(true);
+      setIsOnboardingOpen(false);
+    } else if (hash === '#login' || search.includes('auth=login') || pathname === '/login') {
+      setInApp(false);
+      setStandalone(true);
       setAuthMode('login');
       setIsAuthOpen(true);
       setIsOnboardingOpen(false);
@@ -47,6 +56,7 @@ export default function App() {
       pathname === '/onboarding'
     ) {
       setInApp(false);
+      setStandalone(true);
       setIsAuthOpen(false);
       setIsOnboardingOpen(true);
     }
@@ -142,6 +152,28 @@ export default function App() {
           onComplete={handleOnboardingComplete}
         />
       </>
+    );
+  }
+
+  if (standalone) {
+    const leave = () => { setStandalone(false); setIsAuthOpen(false); setIsOnboardingOpen(false); };
+    return (
+      <div className="min-h-screen bg-canvas text-ink font-sans">
+        <AuthModal
+          isOpen={isAuthOpen}
+          initialMode={authMode}
+          onClose={leave}
+          onSuccess={(user) => { setStandalone(false); handleAuthSuccess(user); }}
+          onSwitchToSignup={handleOpenGetStarted}
+        />
+        <OnboardingFlow
+          isOpen={isOnboardingOpen}
+          initialStep="signup"
+          onClose={leave}
+          onOpenLogin={handleOpenLogin}
+          onComplete={(data) => { setStandalone(false); handleOnboardingComplete(data); }}
+        />
+      </div>
     );
   }
 

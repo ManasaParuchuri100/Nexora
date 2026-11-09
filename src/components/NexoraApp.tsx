@@ -36,6 +36,7 @@ import { contentTabFor } from './app/ContentTabs';
 import { postDate } from '../data/schedule';
 import CampaignsView from './app/CampaignsView';
 import AnalyticsView from './app/AnalyticsView';
+import MarketIntelligenceView from './app/MarketIntelligenceView';
 import SettingsView from './app/SettingsView';
 import AssistantView from './app/AssistantView';
 import ActionModals from './app/ActionModals';
@@ -59,7 +60,7 @@ interface NexoraAppProps {
 }
 
 /** Destinations with local tabs reopen on the tab last used in this session. */
-const REMEMBER_TABS: NavCategory[] = ['leads', 'content', 'analytics', 'settings'];
+const REMEMBER_TABS: NavCategory[] = ['leads', 'content', 'analytics', 'market', 'settings'];
 
 export default function NexoraApp({
   onReturnToLanding,
@@ -199,6 +200,8 @@ export default function NexoraApp({
         ? 'campaign-list'
         : targetCategory === 'analytics'
         ? 'overview'
+        : targetCategory === 'market'
+        ? 'recommendations'
         : targetCategory === 'settings'
         ? 'business'
         : 'default'
@@ -558,6 +561,16 @@ export default function NexoraApp({
                 isFirstRun={isFirstRun}
                 onNavigateTo={handleSelectNav}
                 onNotify={showToast}
+              />
+            )}
+
+            {activeCategory === 'market' && (
+              <MarketIntelligenceView
+                activeSubCategory={activeSubCategory}
+                onNavigateSub={(sub) => handleSelectNav('market', sub)}
+                onNavigateTo={handleSelectNav}
+                onNotify={showToast}
+                isFirstRun={isFirstRun}
               />
             )}
 

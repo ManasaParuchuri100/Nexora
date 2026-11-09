@@ -192,13 +192,13 @@ export default function AuthModal({
       aria-modal="true"
       aria-labelledby="auth-modal-title"
     >
-      <div className="relative w-full max-w-md bg-[#071C1A] border border-[rgba(169,191,165,0.25)] p-6 sm:p-8 shadow-2xl rounded-[3px] text-[#E8E9D8] transition-all">
+      <div className="relative w-full max-w-md bg-surface border border-line p-6 sm:p-8 shadow-2xl rounded-[3px] text-ink transition-all">
         
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#A9BFA5]/60 hover:text-[#E8E9D8] p-1.5 rounded-[2px] transition-colors cursor-pointer focus:outline-none hover:bg-[#0D2D2A]/60"
+          className="absolute top-4 right-4 text-ink-3 hover:text-ink p-1.5 rounded-[9px] transition-colors cursor-pointer focus:outline-none hover:bg-surface-hover"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5" strokeWidth={1.5} />
@@ -207,28 +207,28 @@ export default function AuthModal({
         {/* Modal Top Branding */}
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-2">
-            <span className="serif text-xl font-medium tracking-tight text-[#E8E9D8] lowercase">
+            <span className="font-display font-bold text-xl font-medium tracking-tight text-ink lowercase">
               nexora
             </span>
-            <span className="text-[10px] text-[#A9BFA5]/50 font-mono">/</span>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#A9BFA5]/75">
+            <span className="text-[10px] text-ink-3 ">/</span>
+            <span className="text-[10px]  uppercase tracking-widest text-ink-3">
               TECAVY AI WORKSPACE
             </span>
           </div>
 
           {/* Tab Switcher (Log in / Sign up) */}
           {mode !== 'forgot' ? (
-            <div className="flex border-b border-[rgba(169,191,165,0.15)] mt-4">
+            <div className="flex border-b border-line-subtle mt-4">
               <button
                 type="button"
                 onClick={() => {
                   setMode('login');
                   setError(null);
                 }}
-                className={`flex-1 pb-2.5 text-xs uppercase tracking-widest font-mono font-medium transition-all text-center cursor-pointer relative ${
+                className={`flex-1 pb-2.5 text-xs uppercase tracking-widest  font-medium transition-all text-center cursor-pointer relative ${
                   mode === 'login'
-                    ? 'text-[#E8E9D8] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#E8E9D8]'
-                    : 'text-[#A9BFA5]/60 hover:text-[#E8E9D8]'
+                    ? 'text-ink font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-brand'
+                    : 'text-ink-3 hover:text-ink'
                 }`}
               >
                 Log In
@@ -243,10 +243,10 @@ export default function AuthModal({
                     setError(null);
                   }
                 }}
-                className={`flex-1 pb-2.5 text-xs uppercase tracking-widest font-mono font-medium transition-all text-center cursor-pointer relative ${
+                className={`flex-1 pb-2.5 text-xs uppercase tracking-widest  font-medium transition-all text-center cursor-pointer relative ${
                   mode === 'signup'
-                    ? 'text-[#E8E9D8] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#E8E9D8]'
-                    : 'text-[#A9BFA5]/60 hover:text-[#E8E9D8]'
+                    ? 'text-ink font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-brand'
+                    : 'text-ink-3 hover:text-ink'
                 }`}
               >
                 Create Account
@@ -260,7 +260,7 @@ export default function AuthModal({
                 setError(null);
                 setForgotSent(false);
               }}
-              className="inline-flex items-center space-x-1.5 text-xs font-mono text-[#A9BFA5] hover:text-[#E8E9D8] mt-2 transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 text-xs  text-ink-2 hover:text-ink mt-2 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to log in</span>
@@ -270,7 +270,7 @@ export default function AuthModal({
 
         {/* ERROR NOTICE */}
         {error && (
-          <div className="mb-4 p-3 bg-rose-950/40 border border-rose-500/30 rounded-[2px] flex items-center space-x-2 text-rose-300 text-xs font-mono animate-fadeIn">
+          <div className="mb-4 p-3 bg-rose-950/40 border border-rose-500/30 rounded-[9px] flex items-center space-x-2 text-danger text-xs  animate-fadeIn">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -280,20 +280,20 @@ export default function AuthModal({
         {mode === 'forgot' ? (
           <div>
             <div className="mb-5">
-              <h2 id="auth-modal-title" className="serif text-2xl font-light text-[#E8E9D8] mb-1">
+              <h2 id="auth-modal-title" className="font-display font-bold text-2xl font-light text-ink mb-1">
                 Reset your password
               </h2>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
+              <p className="text-xs text-ink-2 font-light leading-relaxed">
                 Enter your verified work email address and we will immediately send a secure recovery link.
               </p>
             </div>
 
             {forgotSent ? (
-              <div className="p-4 bg-[#0D2D2A]/80 border border-[#A9BFA5]/30 rounded-[2px] text-center space-y-3 font-mono text-xs">
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                <p className="font-semibold text-white">Reset instructions dispatched!</p>
-                <p className="text-[#A9BFA5] text-[11px] leading-relaxed">
-                  We sent an email to <span className="text-white font-medium">{email || 'your address'}</span> with a single-use login link.
+              <div className="p-4 bg-surface-hover border border-line-strong/30 rounded-[9px] text-center space-y-3  text-xs">
+                <CheckCircle2 className="w-8 h-8 text-ok mx-auto" />
+                <p className="font-semibold text-ink">Reset instructions dispatched!</p>
+                <p className="text-ink-2 text-[11px] leading-relaxed">
+                  We sent an email to <span className="text-ink font-medium">{email || 'your address'}</span> with a single-use login link.
                 </p>
                 <button
                   type="button"
@@ -301,26 +301,26 @@ export default function AuthModal({
                     setMode('login');
                     setForgotSent(false);
                   }}
-                  className="w-full mt-2 py-2 bg-[#E8E9D8] text-[#071C1A] font-semibold uppercase tracking-wider text-xs hover:bg-white transition-colors cursor-pointer"
+                  className="w-full mt-2 py-2 bg-brand text-on-brand font-semibold uppercase tracking-wider text-xs hover:bg-surface transition-colors cursor-pointer"
                 >
                   Return to Log In
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleForgotPassword} className="space-y-4 font-mono text-xs">
+              <form onSubmit={handleForgotPassword} className="space-y-4  text-xs">
                 <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1.5">
+                  <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1.5">
                     Account Email
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                    <Mail className="w-4 h-4 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@acme.com"
-                      className="w-full pl-9 pr-3 py-2.5 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                      className="w-full pl-9 pr-3 py-2.5 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                     />
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function AuthModal({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-semibold uppercase tracking-widest text-xs rounded-[2px] transition-all cursor-pointer flex items-center justify-center space-x-2"
+                  className="w-full py-2.5 bg-brand text-on-brand hover:bg-surface font-semibold uppercase tracking-widest text-xs rounded-[9px] transition-all cursor-pointer flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>
@@ -346,24 +346,24 @@ export default function AuthModal({
           /* MODE: LOG IN */
           <div>
             <div className="mb-5">
-              <h2 id="auth-modal-title" className="serif text-2xl font-light text-[#E8E9D8] mb-1">
+              <h2 id="auth-modal-title" className="font-display font-bold text-2xl font-light text-ink mb-1">
                 Log in to workspace
               </h2>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
+              <p className="text-xs text-ink-2 font-light leading-relaxed">
                 Welcome back. Access your Acme Studio leads, inbox, and campaign intelligence.
               </p>
             </div>
 
             {/* Quick 1-Click Demo Login Banner */}
-            <div className="mb-5 p-3.5 bg-gradient-to-r from-[#0D2D2A] to-[#0A2321] border border-[#A9BFA5]/30 rounded-[2px] shadow-sm">
+            <div className="mb-5 p-3.5 bg-gradient-to-r from-[#0D2D2A] to-[#0A2321] border border-line-strong/30 rounded-[9px] shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-1.5 text-emerald-300 font-mono text-[11px] font-semibold">
+                <div className="flex items-center space-x-1.5 text-ok  text-[11px] font-semibold">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="uppercase tracking-wider">Instant Demo Access</span>
                 </div>
-                <span className="text-[10px] text-[#A9BFA5]/70 font-mono">No password required</span>
+                <span className="text-[10px] text-ink-2 ">No password required</span>
               </div>
-              <p className="text-[11px] text-[#A9BFA5] font-light leading-snug mb-3">
+              <p className="text-[11px] text-ink-2 font-light leading-snug mb-3">
                 Preloaded with live leads, WhatsApp conversations, scheduled campaigns, and intelligence metrics.
               </p>
               <button
@@ -371,7 +371,7 @@ export default function AuthModal({
                 id="auth-demo-login-btn"
                 onClick={() => handleQuickDemoLogin('owner')}
                 disabled={isLoading}
-                className="w-full py-2 bg-[#E8E9D8] hover:bg-white text-[#071C1A] text-xs font-mono font-bold uppercase tracking-widest rounded-[2px] transition-all cursor-pointer shadow flex items-center justify-center space-x-2"
+                className="w-full py-2 bg-brand hover:bg-surface text-on-brand text-xs  font-bold uppercase tracking-widest rounded-[9px] transition-all cursor-pointer shadow flex items-center justify-center space-x-2"
               >
                 {isLoading ? (
                   <>
@@ -392,7 +392,7 @@ export default function AuthModal({
               type="button"
               onClick={handleGoogleAuth}
               disabled={isLoading}
-              className="w-full py-2.5 px-3 bg-[#061816] hover:bg-[#0D2D2A] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-xs font-mono text-[#E8E9D8] flex items-center justify-center space-x-2.5 transition-colors cursor-pointer mb-4"
+              className="w-full py-2.5 px-3 bg-surface-raised hover:bg-surface-hover border border-line rounded-[9px] text-xs  text-ink flex items-center justify-center space-x-2.5 transition-colors cursor-pointer mb-4"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -417,34 +417,34 @@ export default function AuthModal({
 
             {/* Divider */}
             <div className="relative flex items-center justify-center my-4">
-              <div className="w-full border-t border-[rgba(169,191,165,0.15)]" />
-              <span className="absolute bg-[#071C1A] px-2 text-[10px] font-mono uppercase tracking-widest text-[#A9BFA5]/60">
+              <div className="w-full border-t border-line-subtle" />
+              <span className="absolute bg-surface px-2 text-[10px]  uppercase tracking-widest text-ink-3">
                 or sign in with email
               </span>
             </div>
 
             {/* Email + Password Form */}
-            <form onSubmit={handleSubmitLogin} className="space-y-3.5 font-mono text-xs">
+            <form onSubmit={handleSubmitLogin} className="space-y-3.5  text-xs">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1">
+                <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1">
                   Work Email
                 </label>
                 <div className="relative">
-                  <Mail className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <Mail className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type="email"
                     id="auth-login-email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@acme.com"
-                    className="w-full pl-9 pr-3 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5]">
+                  <label className="block text-[11px] uppercase tracking-wider text-ink-2">
                     Password
                   </label>
                   <button
@@ -453,25 +453,25 @@ export default function AuthModal({
                       setMode('forgot');
                       setError(null);
                     }}
-                    className="text-[10px] text-[#A9BFA5]/80 hover:text-[#E8E9D8] underline transition-colors cursor-pointer"
+                    className="text-[10px] text-ink-2 hover:text-ink underline transition-colors cursor-pointer"
                   >
                     Forgot password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <Lock className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="auth-login-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-9 pr-9 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-9 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#A9BFA5]/60 hover:text-[#E8E9D8] transition-colors cursor-pointer"
+                    className="absolute right-3 top-2.5 text-ink-3 hover:text-ink transition-colors cursor-pointer"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -481,12 +481,12 @@ export default function AuthModal({
 
               {/* Remember Me Checkbox */}
               <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center space-x-2 text-[11px] text-[#A9BFA5] cursor-pointer">
+                <label className="flex items-center space-x-2 text-[11px] text-ink-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-3.5 h-3.5 rounded-[2px] bg-[#051513] border-[rgba(169,191,165,0.3)] text-[#0D2D2A] focus:ring-0 cursor-pointer accent-[#A9BFA5]"
+                    className="w-3.5 h-3.5 rounded-[9px] bg-surface-raised border-line text-[#0D2D2A] focus:ring-0 cursor-pointer accent-[#A9BFA5]"
                   />
                   <span>Remember me for 30 days</span>
                 </label>
@@ -496,7 +496,7 @@ export default function AuthModal({
                 type="submit"
                 id="auth-submit-login-btn"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-mono font-bold uppercase tracking-widest text-xs rounded-[2px] transition-all cursor-pointer flex items-center justify-center space-x-2 shadow"
+                className="w-full py-2.5 bg-brand text-on-brand hover:bg-surface  font-bold uppercase tracking-widest text-xs rounded-[9px] transition-all cursor-pointer flex items-center justify-center space-x-2 shadow"
               >
                 {isLoading ? (
                   <>
@@ -516,84 +516,84 @@ export default function AuthModal({
           /* MODE: SIGN UP */
           <div>
             <div className="mb-5">
-              <h2 id="auth-modal-title" className="serif text-2xl font-light text-[#E8E9D8] mb-1">
+              <h2 id="auth-modal-title" className="font-display font-bold text-2xl font-light text-ink mb-1">
                 Create your workspace
               </h2>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
+              <p className="text-xs text-ink-2 font-light leading-relaxed">
                 Start your 14-day free trial. Full access to AI lead scoring, omni-inbox, and campaign builder.
               </p>
             </div>
 
-            <form onSubmit={handleSubmitSignUp} className="space-y-3 font-mono text-xs">
+            <form onSubmit={handleSubmitSignUp} className="space-y-3  text-xs">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1">
+                <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1">
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <User className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Alex Morgan"
-                    className="w-full pl-9 pr-3 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1">
+                <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1">
                   Work Email
                 </label>
                 <div className="relative">
-                  <Mail className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <Mail className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="alex@acme.com"
-                    className="w-full pl-9 pr-3 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1">
+                <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1">
                   Company / Workspace
                 </label>
                 <div className="relative">
-                  <Building className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <Building className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type="text"
                     required
                     value={workspaceName}
                     onChange={(e) => setWorkspaceName(e.target.value)}
                     placeholder="Acme Studio"
-                    className="w-full pl-9 pr-3 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-3 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#A9BFA5] mb-1">
+                <label className="block text-[11px] uppercase tracking-wider text-ink-2 mb-1">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-3.5 h-3.5 text-[#A9BFA5]/60 absolute left-3 top-3 pointer-events-none" />
+                  <Lock className="w-3.5 h-3.5 text-ink-3 absolute left-3 top-3 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 6 characters"
-                    className="w-full pl-9 pr-9 py-2 bg-[#051513] border border-[rgba(169,191,165,0.25)] rounded-[2px] text-[#E8E9D8] placeholder-[#A9BFA5]/40 text-xs focus:outline-none focus:border-[#A9BFA5] transition-colors"
+                    className="w-full pl-9 pr-9 py-2 bg-surface-raised border border-line rounded-[9px] text-ink placeholder:text-ink-3 text-xs focus:outline-none focus:border-line-strong transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-[#A9BFA5]/60 hover:text-[#E8E9D8] transition-colors cursor-pointer"
+                    className="absolute right-3 top-2.5 text-ink-3 hover:text-ink transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
@@ -604,7 +604,7 @@ export default function AuthModal({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 bg-[#E8E9D8] text-[#071C1A] hover:bg-white font-mono font-bold uppercase tracking-widest text-xs rounded-[2px] transition-all cursor-pointer flex items-center justify-center space-x-2 shadow"
+                  className="w-full py-2.5 bg-brand text-on-brand hover:bg-surface  font-bold uppercase tracking-widest text-xs rounded-[9px] transition-all cursor-pointer flex items-center justify-center space-x-2 shadow"
                 >
                   {isLoading ? (
                     <>
@@ -624,9 +624,9 @@ export default function AuthModal({
         )}
 
         {/* Security badge and switcher footer */}
-        <div className="mt-6 pt-4 border-t border-[rgba(169,191,165,0.15)] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-[#A9BFA5]/75">
+        <div className="mt-6 pt-4 border-t border-line-subtle flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]  text-ink-3">
           <div className="flex items-center space-x-1.5">
-            <Shield className="w-3 h-3 text-[#A9BFA5]" />
+            <Shield className="w-3 h-3 text-ink-2" />
             <span>256-bit encrypted · SOC-2 compliant</span>
           </div>
 
@@ -642,7 +642,7 @@ export default function AuthModal({
                     setError(null);
                   }
                 }}
-                className="hover:text-white underline transition-colors cursor-pointer"
+                className="hover:text-ink underline transition-colors cursor-pointer"
               >
                 Need an account? Sign up
               </button>
@@ -653,7 +653,7 @@ export default function AuthModal({
                   setMode('login');
                   setError(null);
                 }}
-                className="hover:text-white underline transition-colors cursor-pointer"
+                className="hover:text-ink underline transition-colors cursor-pointer"
               >
                 Have an account? Log in
               </button>

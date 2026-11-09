@@ -169,6 +169,7 @@ export default function AppTopBar({
       case 'content': return 'Content';
       case 'campaigns': return 'Campaigns';
       case 'analytics': return 'Analytics';
+      case 'market': return 'Market Intelligence';
       case 'settings': return 'Settings';
       default: return cat;
     }

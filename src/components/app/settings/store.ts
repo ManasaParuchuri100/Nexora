@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /** State that survives page changes and reloads (stored in this browser). */
 export function usePersisted<T>(key: string, initial: T): [T, (next: T | ((prev: T) => T)) => void] {
@@ -9,13 +9,15 @@ export function usePersisted<T>(key: string, initial: T): [T, (next: T | ((prev:
     } catch { /* storage unavailable */ }
     return initial;
   });
+  // Keep the latest value in a ref and write to storage straight away, so a change is saved
+  // even if the page changes before React re-renders.
+  const latest = useRef(value);
   const set = useCallback(
     (next: T | ((prev: T) => T)) => {
-      setValue(prev => {
-        const v = typeof next === 'function' ? (next as (p: T) => T)(prev) : next;
-        try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage unavailable */ }
-        return v;
-      });
+      const v = typeof next === 'function' ? (next as (p: T) => T)(latest.current) : next;
+      latest.current = v;
+      try { localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage unavailable */ }
+      setValue(v);
     },
     [key],
   );
