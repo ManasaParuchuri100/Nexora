@@ -154,7 +154,7 @@ export default function LeadIntelligenceWorkspace({
   const nextCall = openLeadFollowUps.find(f => f.purpose === 'meeting');
   const [showDoneFollowUps, setShowDoneFollowUps] = useState(false);
   const setShowAddFollowUp = (open: boolean) => {
-    if (open) setFuModal({ type: 'add', leadId: lead.id });
+    if (open) setFuModal({ type: 'new', leadId: lead.id });
   };
 
   // Internal Notes
@@ -1193,8 +1193,8 @@ export default function LeadIntelligenceWorkspace({
                     <button type="button" className="nx-btn sm" onClick={() => setFuModal({ type: 'hold', lead })}>
                       Don't contact until…
                     </button>
-                    <button type="button" className="nx-btn sm primary" onClick={() => setFuModal({ type: 'add', leadId: lead.id })}>
-                      + Add follow-up
+                    <button type="button" className="nx-btn sm primary" onClick={() => setFuModal({ type: 'new', leadId: lead.id })}>
+                      + Add
                     </button>
                   </div>
                 </div>
@@ -1406,25 +1406,20 @@ export default function LeadIntelligenceWorkspace({
             </button>
             <button
               type="button"
-              className="nx-btn sm"
-              onClick={() => {
-                setActiveSubTab('notes');
-                setShowAddFollowUp(true);
-              }}
+              className="nx-btn sm primary"
+              onClick={() => setFuModal({ type: 'new', leadId: lead.id })}
             >
-              Add follow-up
+              Add
             </button>
             <button type="button" className="nx-btn sm" onClick={handleToggleHandoff}>
               <UserCheck className="w-3.5 h-3.5" />
               {handlingMode === 'HUMAN' ? 'Hand back to AI' : 'Take over'}
             </button>
-            <button
-              type="button"
-              className="nx-btn sm primary"
-              onClick={() => setFuModal(nextCall ? { type: 'call', editing: nextCall } : { type: 'call', leadId: lead.id })}
-            >
-              {nextCall ? 'Reschedule call' : 'Schedule a call →'}
-            </button>
+            {nextCall && (
+              <button type="button" className="nx-btn sm" onClick={() => setFuModal({ type: 'call', editing: nextCall })}>
+                Reschedule call
+              </button>
+            )}
           </div>
         </div>
       </div>

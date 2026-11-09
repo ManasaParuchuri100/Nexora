@@ -378,14 +378,14 @@ export default function EngageView({
         .filter(f => f.leadId === linkedLead.id && !f.completedAt && f.purpose !== 'meeting')
         .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())[0]
     : undefined;
-  const openScheduler = (kind: 'call' | 'add') => {
+  const openScheduler = (kind: 'call' | 'new') => {
     if (!linkedLead) {
       // Save the lead first by opening its profile; scheduling is available there.
       handleOpenLead();
       return;
     }
     if (kind === 'call') setFuModal(linkedCall ? { type: 'call', editing: linkedCall } : { type: 'call', leadId: linkedLead.id });
-    else setFuModal({ type: 'add', leadId: linkedLead.id });
+    else setFuModal({ type: 'new', leadId: linkedLead.id });
   };
 
   const handleOpenLead = () => {
@@ -1310,30 +1310,18 @@ export default function EngageView({
             {/* 6. Next action & Lead Profile CTAs */}
             <div className="space-y-2 pt-4 border-t border-line-subtle">
               <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleOpenLead}
-                >
+                <Button variant="secondary" size="sm" onClick={handleOpenLead}>
                   Lead profile
                 </Button>
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => openScheduler('add')}
-                >
-                  Add follow-up
+                <Button variant="primary" size="sm" onClick={() => openScheduler('new')}>
+                  Add
                 </Button>
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                className="w-full"
-                onClick={() => openScheduler('call')}
-              >
-                {linkedCall ? 'Reschedule call' : 'Schedule a call'}
-              </Button>
+              {linkedCall && (
+                <Button variant="secondary" size="sm" className="w-full" onClick={() => openScheduler('call')}>
+                  Reschedule call
+                </Button>
+              )}
 
               {(linkedCall || linkedNext) && (
                 <div className="pt-3 space-y-2.5">

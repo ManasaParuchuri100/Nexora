@@ -286,8 +286,8 @@ export default function FollowUpsView({
                 : TABS.find(t => t.id === tab)?.empty}
             </p>
             {!approvalOnly && tab !== 'done' && !query && (
-              <button type="button" className="nx-btn sm mt-4" onClick={() => setModal(callsOnly ? { type: 'call' } : { type: 'add' })}>
-                {callsOnly ? '+ Schedule a call' : '+ Add follow-up'}
+              <button type="button" className="nx-btn sm mt-4" onClick={() => setModal({ type: 'new' })}>
+                + Add
               </button>
             )}
           </div>

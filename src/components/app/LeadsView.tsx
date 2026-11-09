@@ -809,18 +809,13 @@ export default function LeadsView({
               }}
             />
 
-            {topTab === 'follow-ups' && (
-              <Button variant="secondary" size="md" onClick={() => setFollowUpModal({ type: 'call' })}>
-                Schedule a call
-              </Button>
-            )}
             <Button
               variant="primary"
               size="md"
               leadingIcon={<Plus className="w-3.5 h-3.5 stroke-[2.5]" />}
-              onClick={topTab === 'leads' ? onAddLeadModal : () => setFollowUpModal({ type: 'add' })}
+              onClick={topTab === 'leads' ? onAddLeadModal : () => setFollowUpModal({ type: 'new' })}
             >
-              {topTab === 'leads' ? "Add lead" : "Add follow-up"}
+              {topTab === 'leads' ? "Add lead" : "Add"}
             </Button>
           </div>
         }

@@ -384,6 +384,7 @@ export function ScheduleCallModal({
   currentUserName = 'You',
   onClose,
   onNotify,
+  onChangeType,
 }: {
   leads: Lead[];
   leadId?: string;
@@ -392,6 +393,7 @@ export function ScheduleCallModal({
   currentUserName?: string;
   onClose: () => void;
   onNotify?: Notify;
+  onChangeType?: () => void;
 }) {
   const [leadId, setLeadId] = useState(editing?.leadId || fixedLeadId || '');
   const lead = leads.find(l => l.id === leadId);
@@ -439,7 +441,7 @@ export function ScheduleCallModal({
   return (
     <NxModal
       title={editing ? 'Reschedule call' : 'Schedule a call'}
-      subtitle={lead ? <>With <b className="text-ink">{lead.name}</b>{lead.company ? ` · ${lead.company}` : ''} · Host: {host}</> : 'Pick the lead, time and platform.'}
+      subtitle={<>{!editing && onChangeType && <><button type="button" className="nx-inline-link" onClick={onChangeType}>← Change type</button>{' · '}</>}{lead ? <>With <b className="text-ink">{lead.name}</b>{lead.company ? ` · ${lead.company}` : ''} · Host: {host}</> : 'Pick the lead, time and platform.'}</>}
       onClose={onClose}
       width={480}
       footer={
@@ -701,7 +703,8 @@ export function AddFollowUpModal({
   currentUserName = 'You',
   onClose,
   onNotify,
-  onScheduleCall,
+  initialKind,
+  onChangeType,
 }: {
   leads: Lead[];
   initialLeadId?: string;
@@ -709,13 +712,14 @@ export function AddFollowUpModal({
   currentUserName?: string;
   onClose: () => void;
   onNotify?: Notify;
-  onScheduleCall?: (leadId?: string) => void;
+  initialKind?: FollowUpKind;
+  onChangeType?: () => void;
 }) {
   const sortedLeads = useMemo(() => [...leads].sort((a, b) => (a.company || a.name).localeCompare(b.company || b.name)), [leads]);
   const [leadId, setLeadId] = useState(editing?.leadId || initialLeadId || '');
   const lead = leads.find(l => l.id === leadId);
   const [purpose, setPurpose] = useState<FollowUpPurpose>(editing?.purpose || 'follow_up');
-  const [kind, setKind] = useState<FollowUpKind>(editing?.kind || 'message');
+  const [kind, setKind] = useState<FollowUpKind>(editing?.kind || initialKind || 'message');
   const [title, setTitle] = useState(editing?.title || '');
   const [channel, setChannel] = useState(editing?.channel || '');
   const [owner, setOwner] = useState(editing?.owner || 'AI');
@@ -781,6 +785,7 @@ export function AddFollowUpModal({
   return (
     <NxModal
       title={editing ? 'Edit follow-up' : 'New follow-up'}
+      subtitle={!editing && onChangeType ? <button type="button" className="nx-inline-link" onClick={onChangeType}>← Change type</button> : undefined}
       onClose={onClose}
       width={580}
       footer={
@@ -836,11 +841,6 @@ export function AddFollowUpModal({
               {KIND_LABEL[k]}
             </button>
           ))}
-          {!editing && onScheduleCall && (
-            <button type="button" className="nx-chip inline-flex items-center gap-1.5" onClick={() => onScheduleCall(leadId || undefined)}>
-              <Video className="w-3.5 h-3.5" /> Video call…
-            </button>
-          )}
         </div>
       </Field>
 
@@ -957,7 +957,7 @@ export type RowModal =
   | { type: 'hold'; lead: Lead }
   | { type: 'call'; leadId?: string; editing?: FollowUp };
 
-export type AnyFollowUpModal = RowModal | { type: 'add'; leadId?: string } | null;
+export type AnyFollowUpModal = RowModal | { type: 'new'; leadId?: string } | { type: 'add'; leadId?: string; kind?: FollowUpKind } | null;
 
 function copyText(text: string, onNotify?: Notify) {
   const done = () => onNotify?.('Link copied', text);
@@ -1269,6 +1269,45 @@ export function FollowUpRow({
 }
 
 /** Renders whichever follow-up modal is active. */
+/* --------------------------------------------------------------------------
+   Add: one entry point that asks what you want to do first
+   -------------------------------------------------------------------------- */
+const ADD_OPTIONS: Array<{ id: FollowUpKind | 'call'; title: string; hint: string; Icon: React.ComponentType<{ className?: string }> }> = [
+  { id: 'message', title: 'Message', hint: 'Send a WhatsApp message later', Icon: MessageSquare },
+  { id: 'email', title: 'Email', hint: 'Send an email later', Icon: Mail },
+  { id: 'task', title: 'Task', hint: 'A reminder for your team', Icon: CheckSquare },
+  { id: 'call', title: 'Video call', hint: 'A meeting the customer has agreed to', Icon: Video },
+];
+
+export function AddChooserModal({ lead, onClose, onPick }: { lead?: Lead; onClose: () => void; onPick: (kind: FollowUpKind | 'call') => void }) {
+  return (
+    <NxModal
+      title="Add"
+      subtitle={lead ? <>For <b className="text-ink">{lead.name}</b>{lead.company ? ` · ${lead.company}` : ''}. What do you want to do?</> : 'What do you want to do?'}
+      onClose={onClose}
+      width={500}
+      footer={<button type="button" className="nx-btn" onClick={onClose}>Cancel</button>}
+    >
+      <div className="grid grid-cols-2 gap-[10px] pb-2">
+        {ADD_OPTIONS.map(o => (
+          <button
+            key={o.id}
+            type="button"
+            className="nx-option text-left flex! flex-col! items-start! gap-2 p-[16px]! min-h-[104px]!"
+            onClick={() => onPick(o.id)}
+          >
+            <o.Icon className="w-[18px] h-[18px] text-brand" />
+            <span>
+              <strong className="block text-[13px]">{o.title}</strong>
+              <span className="block text-[11px] text-ink-3 font-normal leading-[1.45] mt-0.5">{o.hint}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </NxModal>
+  );
+}
+
 export function FollowUpModals({
   modal,
   leads,
@@ -1300,7 +1339,9 @@ export function FollowUpModals({
     case 'hold':
       return <HoldModal lead={modal.lead} onClose={onClose} onNotify={onNotify} />;
     case 'call':
-      return <ScheduleCallModal leads={leads} leadId={modal.leadId} editing={modal.editing} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} />;
+      return <ScheduleCallModal leads={leads} leadId={modal.leadId} editing={modal.editing} onClose={onClose} onNotify={onNotify} currentUserName={currentUserName} onChangeType={setModal && !modal.editing ? () => setModal({ type: 'new', leadId: modal.leadId }) : undefined} />;
+    case 'new':
+      return <AddChooserModal lead={modal.leadId ? leadOf(modal.leadId) : undefined} onClose={onClose} onPick={kind => setModal?.(kind === 'call' ? { type: 'call', leadId: modal.leadId } : { type: 'add', leadId: modal.leadId, kind })} />;
     case 'add':
       return (
         <AddFollowUpModal
@@ -1309,7 +1350,8 @@ export function FollowUpModals({
           onClose={onClose}
           onNotify={onNotify}
           currentUserName={currentUserName}
-          onScheduleCall={setModal ? leadId => setModal({ type: 'call', leadId }) : undefined}
+          initialKind={modal.kind}
+          onChangeType={setModal ? () => setModal({ type: 'new', leadId: modal.leadId }) : undefined}
         />
       );
     default:
