@@ -111,13 +111,9 @@ export default function StructuredBriefForms({
           'border-line'
         }`}
       >
-        <span
-          className={`text-[10px] uppercase font-mono tracking-widest font-medium ${
-            'text-ink-2'
-          }`}
-        >
-          {category} Brief
-        </span>
+        <h2 className="font-display text-[15px] font-bold text-ink m-0">
+          {category} brief
+        </h2>
 
         <div className="flex items-center space-x-2 text-[11px] font-mono">
           <button
@@ -150,9 +146,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Email angle
               </label>
@@ -178,9 +174,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Subject tone
               </label>
@@ -206,9 +202,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Audience / Persona
             </label>
@@ -230,9 +226,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Key proposition
             </label>
@@ -254,9 +250,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Call to action (CTA)
             </label>
@@ -297,7 +293,7 @@ export default function StructuredBriefForms({
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Sender persona & sign-off
                     </label>
                     <input
@@ -317,7 +313,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Brand tone override
                     </label>
                     <input
@@ -338,7 +334,7 @@ export default function StructuredBriefForms({
                 </div>
 
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Preheader text
                   </label>
                   <input
@@ -370,9 +366,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Channel
               </label>
@@ -397,9 +393,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Format
               </label>
@@ -425,9 +421,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Opening hook
             </label>
@@ -449,9 +445,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Key points
             </label>
@@ -491,7 +487,7 @@ export default function StructuredBriefForms({
                 }`}
               >
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Visual direction
                   </label>
                   <input
@@ -512,7 +508,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Hashtag policy
                     </label>
                     <select
@@ -534,7 +530,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Destination link / CTA
                     </label>
                     <input
@@ -567,9 +563,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Surface
               </label>
@@ -594,9 +590,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Headline archetype
               </label>
@@ -622,9 +618,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Product focus
             </label>
@@ -646,9 +642,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Key benefit
             </label>
@@ -688,7 +684,7 @@ export default function StructuredBriefForms({
                 }`}
               >
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Audience
                   </label>
                   <input
@@ -709,7 +705,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Subhead guidance
                     </label>
                     <input
@@ -729,7 +725,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Button lockup copy
                     </label>
                     <input
@@ -762,9 +758,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Video format
               </label>
@@ -789,9 +785,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Voiceover style
               </label>
@@ -817,9 +813,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Hook scene
             </label>
@@ -841,9 +837,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Core tension
             </label>
@@ -865,9 +861,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Product reveal
             </label>
@@ -907,7 +903,7 @@ export default function StructuredBriefForms({
                 }`}
               >
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Closing CTA & endcard
                   </label>
                   <input
@@ -928,7 +924,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Audio direction
                     </label>
                     <input
@@ -948,7 +944,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Aspect ratio
                     </label>
                     <select
@@ -984,9 +980,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Working title
               </label>
@@ -1008,9 +1004,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Publication
               </label>
@@ -1036,9 +1032,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Core thesis
             </label>
@@ -1060,9 +1056,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Key supporting arguments
             </label>
@@ -1102,7 +1098,7 @@ export default function StructuredBriefForms({
                 }`}
               >
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Pull-quote highlight
                   </label>
                   <input
@@ -1123,7 +1119,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Depth / length
                     </label>
                     <select
@@ -1145,7 +1141,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Author sign-off
                     </label>
                     <input
@@ -1177,9 +1173,9 @@ export default function StructuredBriefForms({
         <div className="space-y-4">
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               What are you creating?
             </label>
@@ -1204,9 +1200,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Concept
             </label>
@@ -1229,9 +1225,9 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Art direction
               </label>
@@ -1253,9 +1249,9 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                  'text-ink'
-                }`}
+                className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
               >
                 Lighting
               </label>
@@ -1278,9 +1274,9 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] uppercase tracking-wider font-mono mb-1.5 ${
-                'text-ink'
-              }`}
+              className={`block text-[11px] font-bold mb-1.5 ${
+ 'text-ink'
+ }`}
             >
               Composition
             </label>
@@ -1320,7 +1316,7 @@ export default function StructuredBriefForms({
                 }`}
               >
                 <div>
-                  <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                     Color palette
                   </label>
                   <input
@@ -1341,7 +1337,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Aspect ratio
                     </label>
                     <select
@@ -1364,7 +1360,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Camera direction
                     </label>
                     <input
@@ -1386,7 +1382,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Material shaders
                     </label>
                     <input
@@ -1406,7 +1402,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[10px] uppercase font-mono mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
                       Additional visual constraints
                     </label>
                     <input
@@ -1440,9 +1436,9 @@ export default function StructuredBriefForms({
         {/* Variations selector: [ 1 ] [ 3 ] [ 5 ] */}
         <div className="flex items-center space-x-2">
           <span
-            className={`text-[11px] uppercase font-mono tracking-wider ${
-              'text-ink-3'
-            }`}
+            className={`text-[11px] font-bold ${
+ 'text-ink-3'
+ }`}
           >
             Variations:
           </span>

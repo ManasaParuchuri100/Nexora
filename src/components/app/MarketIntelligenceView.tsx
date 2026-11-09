@@ -176,7 +176,7 @@ function Trends({ onNavigateTo }: Pick<Props, 'onNavigateTo'>) {
         action={{ label: 'Create content', onClick: () => onNavigateTo?.('content', 'create') }}
       />
       <section className="nx-panel overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+        <table className="w-full min-w-[640px] [&_th]:px-5 [&_td]:px-5 [&_th:first-child]:text-left">
           <thead><tr><th>Keyword</th><th className="text-right">Searches / month</th><th className="text-right">Change</th><th>Trend</th><th className="text-right">Your position</th><th>Intent</th></tr></thead>
           <tbody>
             {KEYWORDS.map(k => (

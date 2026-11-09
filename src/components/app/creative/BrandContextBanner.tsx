@@ -56,9 +56,9 @@ export default function BrandContextBanner({
             }`}
           />
           <span
-            className={`text-[10px] uppercase font-mono tracking-widest shrink-0 font-medium ${
-              'text-ink-2'
-            }`}
+            className={`text-[11px] font-bold shrink-0 font-medium ${
+ 'text-ink-2'
+ }`}
           >
             Brand Context:
           </span>
@@ -105,9 +105,9 @@ export default function BrandContextBanner({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label
-                className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  'text-ink-2'
-                }`}
+                className={`block text-[11px] font-bold mb-1 ${
+ 'text-ink-2'
+ }`}
               >
                 Product Name
               </label>
@@ -125,9 +125,9 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  'text-ink-2'
-                }`}
+                className={`block text-[11px] font-bold mb-1 ${
+ 'text-ink-2'
+ }`}
               >
                 Brand Voice
               </label>
@@ -145,9 +145,9 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  'text-ink-2'
-                }`}
+                className={`block text-[11px] font-bold mb-1 ${
+ 'text-ink-2'
+ }`}
               >
                 Target Audience
               </label>
@@ -163,9 +163,9 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[10px] uppercase font-mono tracking-wider mb-1 ${
-                  'text-ink-2'
-                }`}
+                className={`block text-[11px] font-bold mb-1 ${
+ 'text-ink-2'
+ }`}
               >
                 Brand Constraints
               </label>

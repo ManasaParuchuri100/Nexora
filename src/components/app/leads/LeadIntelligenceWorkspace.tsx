@@ -1240,15 +1240,6 @@ export default function LeadIntelligenceWorkspace({
                 )}
               </section>
 
-              <FollowUpModals
-                modal={fuModal}
-                leads={[lead]}
-                onClose={() => setFuModal(null)}
-                onNotify={onNotify}
-                onUpdateLead={onUpdateLead}
-                setModal={setFuModal}
-              />
-
               {/* Card 2: Internal Notes */}
               <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
@@ -1437,6 +1428,16 @@ export default function LeadIntelligenceWorkspace({
           </div>
         </div>
       </div>
+
+      {/* Always mounted, so the header and footer buttons can open it while the follow-ups section is collapsed. */}
+      <FollowUpModals
+        modal={fuModal}
+        leads={[lead]}
+        onClose={() => setFuModal(null)}
+        onNotify={onNotify}
+        onUpdateLead={onUpdateLead}
+        setModal={setFuModal}
+      />
     </div>
   );
 }

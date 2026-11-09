@@ -1309,21 +1309,7 @@ export default function EngageView({
 
             {/* 6. Next action & Lead Profile CTAs */}
             <div className="space-y-2 pt-4 border-t border-line-subtle">
-              <span className="font-semibold text-ink-3 uppercase text-xs tracking-wider block">
-                Next action
-              </span>
-              
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full justify-between"
-                onClick={() => openScheduler(/call|demo|meeting|walkthrough/i.test(currentConvo.nextAction || '') ? 'call' : 'add')}
-              >
-                <span className="truncate">{currentConvo.nextAction}</span>
-                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-              </Button>
-
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="secondary"
                   size="sm"

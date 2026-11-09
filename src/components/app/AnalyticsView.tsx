@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Download } from 'lucide-react';
 import { NavCategory, StatMetric, SubCategory } from '../../types';
 import { AIInsight, EmptyState, PageHeader, Tabs } from '../ui';
@@ -29,9 +29,20 @@ const ACTIVITY_LABEL: Record<string, string> = {
 /* ---------------------------------------------------------------- */
 function LineChart({ current, previous }: { current: Point[]; previous: Point[] }) {
   const [hover, setHover] = useState<number | null>(null);
-  const W = 720;
-  const H = 220;
-  const pad = { l: 34, r: 10, t: 10, b: 24 };
+  // Draw at the real width of the panel so the chart keeps a steady height and readable text.
+  const box = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(720);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () => setW(Math.max(320, Math.round(el.clientWidth)));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const H = 190;
+  const pad = { l: 34, r: 28, t: 10, b: 24 };
   const max = Math.max(1, ...current.map(p => p.value), ...previous.map(p => p.value));
   const niceMax = Math.ceil(max / 4) * 4 || 4;
   const x = (i: number) => pad.l + (current.length === 1 ? (W - pad.l - pad.r) / 2 : (i / (current.length - 1)) * (W - pad.l - pad.r));
@@ -43,8 +54,8 @@ function LineChart({ current, previous }: { current: Point[]; previous: Point[] 
   const hp = hover !== null ? current[hover] : null;
 
   return (
-    <div className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Leads over time, this period against the previous period"
+    <div className="relative" ref={box}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="block" role="img" aria-label="Leads over time, this period against the previous period"
         onMouseLeave={() => setHover(null)}
         onMouseMove={e => {
           const r = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
@@ -219,7 +230,7 @@ function ChannelsTab({ d }: { d: AnalyticsData }) {
         freshness="Sample workspace data"
       />
       <section className="nx-panel overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+        <table className="w-full min-w-[640px] [&_th]:px-5 [&_td]:px-5 [&_th:first-child]:text-left">
           <thead>
             <tr><th>Channel</th><th className="text-right">Conversations</th><th className="text-right">Leads</th><th className="text-right">Qualified</th><th className="text-right">Won</th><th className="text-right">Conv. %</th><th className="text-right">Avg first reply</th></tr>
           </thead>

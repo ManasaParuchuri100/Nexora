@@ -64,9 +64,9 @@ export default function QuickGenerateForm({
         <div className="flex items-center justify-between">
           <label
             htmlFor="quick-prompt"
-            className={`text-xs uppercase tracking-widest font-mono font-medium ${
-              'text-ink'
-            }`}
+            className={`text-xs font-medium ${
+ 'text-ink'
+ }`}
           >
             Prompt / brief
           </label>
@@ -100,9 +100,9 @@ export default function QuickGenerateForm({
         {/* Quick Inspiration Tags */}
         <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
           <span
-            className={`text-[10px] uppercase font-mono tracking-wider shrink-0 mr-1 ${
-              'text-ink-3'
-            }`}
+            className={`text-[11px] font-bold shrink-0 mr-1 ${
+ 'text-ink-3'
+ }`}
           >
             Try:
           </span>
@@ -128,9 +128,9 @@ export default function QuickGenerateForm({
         >
           <div className="flex items-center space-x-2">
             <span
-              className={`text-[10px] uppercase font-mono tracking-wider ${
-                'text-ink-3'
-              }`}
+              className={`text-[11px] font-bold ${
+ 'text-ink-3'
+ }`}
             >
               Variations:
             </span>
@@ -151,11 +151,11 @@ export default function QuickGenerateForm({
           <button
             type="submit"
             disabled={!prompt.trim() || isGenerating}
-            className={`px-4 py-2 rounded-[9px] text-xs font-mono uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
-              !prompt.trim() || isGenerating
-                ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
-                : 'bg-brand text-on-brand hover:bg-brand-hover shadow-sm'
-            }`}
+            className={`px-4 py-2 rounded-[9px] text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+ !prompt.trim() || isGenerating
+ ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
+ : 'bg-brand text-on-brand hover:bg-brand-hover shadow-sm'
+ }`}
           >
             {isGenerating ? (
               <>

@@ -175,11 +175,11 @@ export default function OutputWorkspace({
         </div>
 
         <span
-          className={`text-[11px] uppercase tracking-widest-plus font-mono font-medium block mb-2 ${
-            'text-ink-2'
-          }`}
+          className={`text-[11px] font-medium block mb-2 ${
+ 'text-ink-2'
+ }`}
         >
-          YOUR CREATIVE OUTPUT
+          Nothing generated yet
         </span>
 
         <h3
@@ -187,7 +187,7 @@ export default function OutputWorkspace({
             'text-ink'
           }`}
         >
-          will appear here
+          Your drafts appear here
         </h3>
 
         <p
@@ -195,7 +195,7 @@ export default function OutputWorkspace({
             'text-ink-3'
           }`}
         >
-          Configure your brief and generate your first version.
+          Fill in the brief, then generate. You will get versions to compare, edit and save.
         </p>
       </div>
     );
@@ -315,9 +315,9 @@ export default function OutputWorkspace({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
               <span
-                className={`text-[10px] uppercase font-mono tracking-widest font-semibold ${
-                  'text-brand'
-                }`}
+                className={`text-[11px] font-bold font-semibold ${
+ 'text-brand'
+ }`}
               >
                 Generated visual
               </span>
@@ -410,7 +410,7 @@ export default function OutputWorkspace({
             {isGeneratingImage && (
               <div className="absolute inset-0 bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-ink z-20">
                 <div className="w-8 h-8 border-2 border-line-strong border-t-transparent rounded-full animate-spin mb-3" />
-                <span className="text-xs uppercase font-mono tracking-widest text-ink font-semibold">
+                <span className="text-xs text-ink font-semibold">
                   Synthesizing Visual
                 </span>
                 <span className="text-[11px] text-ink-3 mt-1">
@@ -425,7 +425,7 @@ export default function OutputWorkspace({
       {/* Generated Content Body (Art Direction Brief or Copy Script) */}
       <div className="space-y-2">
         {isImageCategory && (
-          <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-widest font-medium">
+          <div className="flex items-center justify-between text-[11px] font-bold font-medium">
             <span className={'text-ink-2'}>
               Technical Art Direction Brief
             </span>
@@ -467,9 +467,9 @@ export default function OutputWorkspace({
       >
         <div className="flex items-center justify-between">
           <span
-            className={`text-[10px] uppercase font-mono tracking-widest font-medium ${
-              'text-ink-2'
-            }`}
+            className={`text-[11px] font-bold font-medium ${
+ 'text-ink-2'
+ }`}
           >
             Refine Output
           </span>
@@ -510,11 +510,11 @@ export default function OutputWorkspace({
           <button
             type="submit"
             disabled={!customRefinement.trim() || isGenerating}
-            className={`px-3 py-1.5 text-xs font-mono rounded-[9px] transition-colors cursor-pointer uppercase tracking-wider shrink-0 ${
-              !customRefinement.trim() || isGenerating
-                ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
-                : 'bg-brand text-on-brand hover:bg-brand-hover'
-            }`}
+            className={`px-3 py-1.5 text-xs rounded-[9px] transition-colors cursor-pointer shrink-0 ${
+ !customRefinement.trim() || isGenerating
+ ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
+ : 'bg-brand text-on-brand hover:bg-brand-hover'
+ }`}
           >
             Refine
           </button>
@@ -535,7 +535,7 @@ export default function OutputWorkspace({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center space-x-3">
-              <span className="text-xs uppercase tracking-widest text-ink-3">
+              <span className="text-xs text-ink-3">
                 {category} · {currentVariation.versionLabel}
               </span>
               <span className="text-[11px] font-mono text-on-brand/60">3840×2160 UHD</span>

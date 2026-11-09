@@ -1540,9 +1540,9 @@ Audio: Solo cello harmonics and tactile room tone
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
                       <span
-                        className={`text-[10px] uppercase tracking-widest font-mono font-medium ${
-                          'text-brand'
-                        }`}
+                        className={`text-[11px] font-bold font-medium ${
+ 'text-brand'
+ }`}
                       >
                         {asset.type} · {asset.platform}
                       </span>
@@ -1655,9 +1655,9 @@ Audio: Solo cello harmonics and tactile room tone
                       {asset.tags.map((t) => (
                         <span
                           key={t}
-                          className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 border rounded-[7px] font-mono ${
-                            'border-line bg-surface-hover text-ink-2'
-                          }`}
+                          className={`text-[9px] px-1.5 py-0.5 border rounded-[7px] ${
+ 'border-line bg-surface-hover text-ink-2'
+ }`}
                         >
                           {t}
                         </span>
@@ -1667,9 +1667,9 @@ Audio: Solo cello harmonics and tactile room tone
                     <button
                       type="button"
                       onClick={() => handleCopyAsset(asset.preview, asset.id)}
-                      className={`text-xs uppercase tracking-widest flex items-center space-x-1 cursor-pointer transition-colors ${
-                        'text-brand hover:text-brand-hover'
-                      }`}
+                      className={`text-xs flex items-center space-x-1 cursor-pointer transition-colors ${
+ 'text-brand hover:text-brand-hover'
+ }`}
                     >
                       {copiedId === asset.id ? (
                         <>

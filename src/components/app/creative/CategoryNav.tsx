@@ -120,9 +120,9 @@ export default function CategoryNav({
       {/* 3 Core Category Tabs: Text, Images, Videos */}
       <div className="flex items-center space-x-1">
         <span
-          className={`text-[10px] uppercase font-mono tracking-widest px-2 hidden md:inline-block ${
-            'text-ink-3'
-          }`}
+          className={`text-[11px] font-bold px-2 hidden md:inline-block ${
+ 'text-ink-3'
+ }`}
         >
           Format
         </span>
@@ -156,9 +156,9 @@ export default function CategoryNav({
       {/* Sub-Category Dropdown */}
       <div ref={dropdownRef} className="relative flex items-center space-x-2">
         <span
-          className={`text-[10px] uppercase font-mono tracking-wider shrink-0 ${
-            'text-ink-3'
-          }`}
+          className={`text-[11px] font-bold shrink-0 ${
+ 'text-ink-3'
+ }`}
         >
           Sub-format:
         </span>
@@ -186,9 +186,9 @@ export default function CategoryNav({
             }`}
           >
             <div
-              className={`px-3 py-1 text-[9px] uppercase font-mono tracking-widest border-b ${
-                'text-ink-3 border-line'
-              }`}
+              className={`px-3 py-1 text-[9px] border-b ${
+ 'text-ink-3 border-line'
+ }`}
             >
               {currentMainConfig.label} Formats
             </div>
