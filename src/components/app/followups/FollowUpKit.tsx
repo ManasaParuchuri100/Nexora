@@ -103,6 +103,14 @@ export function aiDraftFor(lead: Lead | undefined, purpose: FollowUpPurpose, tit
   }
 }
 
+/** A fuller version of the AI draft for email: greeting, short paragraphs and a sign-off. */
+export function emailDraftFor(lead: Lead | undefined, purpose: FollowUpPurpose, subject: string, sender: string): string {
+  const name = firstName(lead);
+  const body = aiDraftFor(lead, purpose, subject).replace(/^Hi( there)?[^,]*,\s*/, '');
+  const text = body.charAt(0).toUpperCase() + body.slice(1);
+  return `Hi${name ? ` ${name}` : ' there'},\n\n${text}\n\nIf it's easier to talk it through, just reply and we can set up a call.\n\nBest regards,\n${sender}`;
+}
+
 /* --------------------------------------------------------------------------
    Modal shell
    -------------------------------------------------------------------------- */
@@ -730,10 +738,20 @@ export function AddFollowUpModal({
   const [autoSend, setAutoSend] = useState(editing?.approval === 'approved');
   const [touched, setTouched] = useState(false);
 
+  // Emails always go by email. Messages use the lead's preferred chat channel, never email.
   useEffect(() => {
-    if (!lead || editing) return;
-    setChannel(lead.preferredChannel || (lead.source === 'Instagram' || lead.source === 'WhatsApp' ? lead.source : 'WhatsApp'));
-  }, [leadId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (editing) return;
+    if (kind === 'email') {
+      setChannel('Email');
+      return;
+    }
+    if (kind === 'message') {
+      const preferred = lead?.preferredChannel && lead.preferredChannel !== 'Email'
+        ? lead.preferredChannel
+        : lead?.source === 'Instagram' || lead?.source === 'WhatsApp' ? lead.source : 'WhatsApp';
+      setChannel(preferred);
+    }
+  }, [leadId, kind]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const due = combineDateTime(date, time);
   const isMessage = kind === 'message' || kind === 'email';
@@ -756,7 +774,7 @@ export function AddFollowUpModal({
       leadId,
       title: title.trim(),
       kind,
-      channel: kind === 'task' ? undefined : channel || undefined,
+      channel: kind === 'task' ? undefined : kind === 'email' ? 'Email' : channel || undefined,
       owner,
       purpose,
       dueAt: due.toISOString(),
@@ -821,8 +839,12 @@ export function AddFollowUpModal({
         </div>
       )}
 
-      <Field label="Title">
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Send pricing comparison" />
+      <Field label={kind === 'email' ? 'Subject' : kind === 'task' ? 'Task' : 'Title'}>
+        <input
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          placeholder={kind === 'email' ? 'e.g. Pricing comparison for your team' : kind === 'task' ? 'e.g. Prepare a custom quote' : 'e.g. Send pricing comparison'}
+        />
       </Field>
 
       <Field label="Action">
@@ -845,11 +867,16 @@ export function AddFollowUpModal({
       </Field>
 
       <div className="grid sm:grid-cols-2 gap-x-[16px]">
-        {kind !== 'task' && (
-          <Field label="Channel">
+        {kind === 'message' && (
+          <Field label="Send on">
             <select value={channel} onChange={e => setChannel(e.target.value)}>
-              {['WhatsApp', 'Instagram', 'Email', 'LinkedIn', 'Website'].map(c => <option key={c} value={c}>{c}</option>)}
+              {['WhatsApp', 'Instagram', 'LinkedIn', 'Website'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+          </Field>
+        )}
+        {kind === 'email' && (
+          <Field label="To">
+            <input readOnly value={lead?.email || (leadId ? 'No email on file' : 'Select a lead first')} aria-label="Recipient email" className="text-ink-2" />
           </Field>
         )}
         <Field label="Owner">
@@ -867,16 +894,16 @@ export function AddFollowUpModal({
 
       {isMessage && (
         <Field
-          label="Message"
+          label={kind === 'email' ? 'Email body' : 'Message'}
           hint={
             <div className="flex justify-end">
-              <button type="button" className="nx-link text-[11px] inline-flex items-center gap-1" onClick={() => setDraft(aiDraftFor(lead, purpose, title || 'our last conversation'))} disabled={!lead}>
+              <button type="button" className="nx-link text-[11px] inline-flex items-center gap-1" onClick={() => setDraft(kind === 'email' ? emailDraftFor(lead, purpose, title || 'our last conversation', owner === 'AI' ? 'The team' : owner) : aiDraftFor(lead, purpose, title || 'our last conversation'))} disabled={!lead}>
                 <Sparkles className="w-3.5 h-3.5" /> Draft with AI
               </button>
             </div>
           }
         >
-          <textarea rows={3} value={draft} onChange={e => setDraft(e.target.value)} placeholder="What should we send?" />
+          <textarea rows={kind === 'email' ? 7 : 3} value={draft} onChange={e => setDraft(e.target.value)} placeholder={kind === 'email' ? 'Write the email, or use Draft with AI' : 'A short message. What should we send?'} />
         </Field>
       )}
 
