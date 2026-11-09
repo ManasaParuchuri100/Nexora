@@ -398,6 +398,8 @@ export function ScheduleCallModal({
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [platform, setPlatform] = useState<MeetingPlatform | null>(editing?.meeting?.platform ?? null);
+  // Auto-made titles such as "Zoom call with Priya" start empty so the default keeps following the platform.
+  const [title, setTitle] = useState(editing && !/^(Zoom|Google Meet|Microsoft Teams) call/.test(editing.title) ? editing.title : '');
   const [touched, setTouched] = useState(false);
   const when = combineDateTime(date, time);
   const host = editing?.owner || lead?.assignee?.name || currentUserName;
@@ -413,7 +415,7 @@ export function ScheduleCallModal({
     setTouched(true);
     if (errors.length || !when || !platform) return;
     if (editing) {
-      rescheduleCall(editing.id, when, platform, firstName(lead));
+      rescheduleCall(editing.id, when, platform, firstName(lead), title.trim() || `${PLATFORM_LABELS[platform]} call${lead?.name ? ` with ${lead.name}` : ''}`);
       onNotify?.('Call rescheduled', `${PLATFORM_LABELS[platform]} · ${shortDate(when)}. ${lead?.name || 'The lead'} will get an updated reminder.`);
     } else {
       const { reminder } = scheduleCall({
@@ -423,6 +425,7 @@ export function ScheduleCallModal({
         host,
         leadName: lead?.name,
         leadFirstName: firstName(lead),
+        title,
         previousId,
       });
       onNotify?.(
@@ -463,6 +466,15 @@ export function ScheduleCallModal({
           <span>Currently {shortDate(new Date(editing.dueAt))} on {editing.meeting ? PLATFORM_LABELS[editing.meeting.platform] : 'a call'}.</span>
         </div>
       )}
+      <Field label="Meeting title" hint={`Optional. Shown to your team and in reminders. Default: “${platform ? PLATFORM_LABELS[platform] : 'Video'} call${lead?.name ? ` with ${lead.name}` : ''}”.`}>
+        <input
+          value={title}
+          maxLength={80}
+          onChange={e => setTitle(e.target.value)}
+          placeholder="e.g. Pricing discovery call"
+          aria-label="Meeting title"
+        />
+      </Field>
       <DateTimeFields date={date} time={time} onDate={setDate} onTime={setTime} />
       <Field label="Platform">
         <PlatformPicker value={platform} onChange={setPlatform} />

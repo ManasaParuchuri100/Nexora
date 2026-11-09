@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { StatMetric, Lead, Campaign, TrendingTopic, NavCategory, SubCategory } from '../../types';
 import { useInboxCounts, getTopPricingConversation } from '../../data/conversations';
-import { useFollowUpCounts, useFollowUps, useNow, getUpcomingCalls, formatDue } from '../../data/followUps';
+import { useFollowUpCounts, useFollowUps, useNow, getUpcomingCalls, formatDue, customCallTitle } from '../../data/followUps';
 import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
 import DateRangeCalendarModal, { DateRangeSelection } from './DateRangeCalendarModal';
@@ -786,6 +786,7 @@ export default function OverviewView({
                           <button type="button" className="nx-inline-link text-[13px]" onClick={() => onSelectLead(l)}>
                             {l.name} · {l.company}
                           </button>
+                          {customCallTitle(call) && <p className="text-ink! font-semibold">{customCallTitle(call)}</p>}
                           <p>{formatDue(call, callNow)} · Host: {call.owner}</p>
                           <div className="mt-1.5"><CallChip task={call} onNotify={onNotify} /></div>
                         </div>

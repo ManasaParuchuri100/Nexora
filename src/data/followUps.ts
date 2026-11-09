@@ -727,6 +727,8 @@ export interface ScheduleCallInput {
   host: string;
   leadName?: string;
   leadFirstName?: string;
+  /** Optional meeting title. A default such as "Zoom call with Priya" is used when empty. */
+  title?: string;
   previousId?: string;
 }
 
@@ -735,7 +737,7 @@ export function scheduleCall(input: ScheduleCallInput): { call: FollowUp; remind
   const call = normalise({
     id: newId(),
     leadId: input.leadId,
-    title: `${PLATFORM_NAME[input.platform]} call${input.leadName ? ` with ${input.leadName}` : ''}`,
+    title: input.title?.trim() || `${PLATFORM_NAME[input.platform]} call${input.leadName ? ` with ${input.leadName}` : ''}`,
     kind: 'call',
     channel: PLATFORM_NAME[input.platform],
     owner: input.host,
@@ -759,7 +761,7 @@ export function scheduleCall(input: ScheduleCallInput): { call: FollowUp; remind
         purpose: 'appointment_reminder',
         approval: 'approved',
         dueAt: when.toISOString(),
-        draft: `Hi${input.leadFirstName ? ` ${input.leadFirstName}` : ''}, a quick reminder of our ${PLATFORM_NAME[input.platform]} call on ${timeText}. Join here: ${call.meeting!.link}`,
+        draft: `Hi${input.leadFirstName ? ` ${input.leadFirstName}` : ''}, a quick reminder of ${input.title?.trim() ? `“${input.title.trim()}”` : `our ${PLATFORM_NAME[input.platform]} call`} on ${timeText}. Join here: ${call.meeting!.link}`,
         createdAt: nowIso,
         source: 'auto',
         previousId: call.id,
@@ -769,7 +771,7 @@ export function scheduleCall(input: ScheduleCallInput): { call: FollowUp; remind
   return { call, reminder };
 }
 
-export function rescheduleCall(id: string, at: Date, platform: MeetingPlatform, leadFirstName?: string): void {
+export function rescheduleCall(id: string, at: Date, platform: MeetingPlatform, leadFirstName?: string, title?: string): void {
   const call = followUpsStore.find(t => t.id === id);
   if (!call || !call.meeting) return;
   const samePlatform = call.meeting.platform === platform;
@@ -782,7 +784,7 @@ export function rescheduleCall(id: string, at: Date, platform: MeetingPlatform, 
         ...t,
         dueAt: at.toISOString(),
         channel: PLATFORM_NAME[platform],
-        title: t.title.replace(/^(Zoom|Google Meet|Microsoft Teams) call/, `${PLATFORM_NAME[platform]} call`),
+        title: title?.trim() || t.title.replace(/^(Zoom|Google Meet|Microsoft Teams) call/, `${PLATFORM_NAME[platform]} call`),
         meeting,
         snoozeCount: (t.snoozeCount ?? 0) + 1,
       };
@@ -793,7 +795,7 @@ export function rescheduleCall(id: string, at: Date, platform: MeetingPlatform, 
         ? {
             ...t,
             dueAt: when.toISOString(),
-            draft: `Hi${leadFirstName ? ` ${leadFirstName}` : ''}, a quick reminder of our ${PLATFORM_NAME[platform]} call on ${timeText}. Join here: ${meeting.link}`,
+            draft: `Hi${leadFirstName ? ` ${leadFirstName}` : ''}, a quick reminder of ${title?.trim() && !/^(Zoom|Google Meet|Microsoft Teams) call/.test(title) ? `“${title.trim()}”` : `our ${PLATFORM_NAME[platform]} call`} on ${timeText}. Join here: ${meeting.link}`,
           }
         : { ...t, completedAt: new Date().toISOString(), outcome: 'cancelled' as const, outcomeNote: 'Call moved too close for a reminder.' };
     }
@@ -922,4 +924,10 @@ export function useNow(intervalMs = 60000): Date {
     return () => clearInterval(timer);
   }, [intervalMs]);
   return now;
+}
+
+/** The meeting title when the person typed one. Auto-made titles such as "Zoom call with Priya" return undefined. */
+export function customCallTitle(task: Pick<FollowUp, 'title' | 'purpose'>): string | undefined {
+  if (task.purpose !== 'meeting') return undefined;
+  return /^(Zoom|Google Meet|Microsoft Teams) call/.test(task.title) ? undefined : task.title;
 }

@@ -40,7 +40,7 @@ import {
   stageToStatus 
 } from '../../../lib/leadIntel';
 import { formatRelative } from '../../../lib/time';
-import { useFollowUps, useNow, formatDue } from '../../../data/followUps';
+import { useFollowUps, useNow, formatDue, customCallTitle } from '../../../data/followUps';
 import { FollowUpRow, FollowUpModals, AnyFollowUpModal, CallChip } from '../followups/FollowUpKit';
 import { BRAND_NAME } from '../../../config/brand';
 
@@ -558,7 +558,7 @@ export default function LeadIntelligenceWorkspace({
 
           {nextCall && (
             <div className="nx-callbar mt-3">
-              <span className="text-[11px] font-bold text-ink">Upcoming call</span>
+              <span className="text-[11px] font-bold text-ink">{customCallTitle(nextCall) || 'Upcoming call'}</span>
               <span className="text-[11px] text-ink-2">{formatDue(nextCall, followUpNow)} · Host: {nextCall.owner}</span>
               <CallChip task={nextCall} onNotify={onNotify} />
               <button type="button" className="nx-link text-[11px] ml-auto" onClick={() => setFuModal({ type: 'call', editing: nextCall })}>

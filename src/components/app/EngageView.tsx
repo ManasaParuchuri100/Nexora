@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { Lead, SubCategory } from '../../types';
 import { ConversationItem, useConversations } from '../../data/conversations';
-import { useFollowUps, getBucket, formatDue } from '../../data/followUps';
+import { useFollowUps, getBucket, formatDue, customCallTitle } from '../../data/followUps';
 import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
 import { 
@@ -483,17 +483,17 @@ export default function EngageView({
     specialFilter === 'ready-to-book' ? 'Ready to book a call' : '';
 
   return (
-    <div className="nx-panel flex-1 min-h-[560px] flex flex-row overflow-hidden text-ink select-text">
+    <div className="flex-1 min-h-[560px] flex flex-row gap-[15px] text-ink select-text">
       
       {/* =========================================================================
           PANEL 1: CONVERSATION LIST (LEFT)
           ========================================================================= */}
-      <div className={`w-full md:w-[280px] shrink-0 border-r border-line bg-surface flex flex-col h-full ${
+      <div className={`nx-panel w-full md:w-[288px] shrink-0 overflow-hidden flex flex-col h-full ${
         mobileView === 'list' ? 'flex' : 'hidden md:flex'
       }`}>
         
         {/* Top Header: Tabs */}
-        <div className="p-[15px] border-b border-line space-y-2.5">
+        <div className="p-[18px] border-b border-line space-y-3">
           <div className="flex items-center gap-[5px] flex-wrap">
             {[
               { id: 'needs_you', label: 'Needs you', count: tabCounts.needs_you },
@@ -670,10 +670,10 @@ export default function EngageView({
                   key={convo.id}
                   type="button"
                   onClick={() => handleSelectConversation(convo.id)}
-                  className={`w-full min-h-0! rounded-none! py-[15px] pr-[15px] text-left transition-colors cursor-pointer border-b border-line flex flex-col gap-[7px] focus-visible:outline-none ${
+                  className={`w-full min-h-0! rounded-none! py-[18px] pr-[18px] text-left transition-colors cursor-pointer border-b border-line flex flex-col gap-[9px] focus-visible:outline-none ${
                     isSelected
-                      ? 'bg-[#EFF8F7] dark-selected border-l-[3px] border-l-brand pl-3'
-                      : 'bg-surface hover:bg-surface-hover pl-[15px] border-l-0'
+                      ? 'bg-[#EFF8F7] dark-selected border-l-[3px] border-l-brand pl-[15px]'
+                      : 'bg-surface hover:bg-surface-hover pl-[18px] border-l-0'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -781,13 +781,13 @@ export default function EngageView({
       {/* =========================================================================
           PANEL 2: CONVERSATION WORKSPACE (CENTRE)
           ========================================================================= */}
-      <div className={`flex-1 min-w-0 flex flex-col h-full bg-surface ${
+      <div className={`nx-panel flex-1 min-w-0 overflow-hidden flex flex-col h-full ${
         mobileView === 'chat' ? 'flex' : 'hidden md:flex'
       }`}>
         {currentConvo ? (
           <>
             {/* Conversation Header */}
-            <div className="px-5 py-[17px] border-b border-line flex items-center justify-between gap-3 shrink-0 bg-surface">
+            <div className="px-6 py-[20px] border-b border-line flex items-center justify-between gap-3 shrink-0 bg-surface">
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Mobile back button */}
                 <button
@@ -801,11 +801,11 @@ export default function EngageView({
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[13px] font-bold text-ink truncate">
+                    <span className="text-[13px] font-bold text-ink truncate min-w-[96px]">
                       {currentConvo.name}
                     </span>
-                    <span className="nx-tag teal hidden xl:inline-flex">{currentConvo.stage}</span>
-                    <span className={`nx-tag hidden xl:inline-flex ${currentConvo.score >= 90 ? 'green' : currentConvo.score >= 80 ? 'amber' : 'red'}`}>
+                    <span className="nx-tag teal hidden 2xl:inline-flex">{currentConvo.stage}</span>
+                    <span className={`nx-tag hidden 2xl:inline-flex ${currentConvo.score >= 90 ? 'green' : currentConvo.score >= 80 ? 'amber' : 'red'}`}>
                       Score {currentConvo.score}
                     </span>
                   </div>
@@ -840,7 +840,7 @@ export default function EngageView({
                     }}
                     leadingIcon={<UserCheck className="w-3.5 h-3.5" />}
                   >
-                    <span className="hidden sm:inline">Assign</span>
+                    <span className="hidden 2xl:inline">Assign</span>
                   </Button>
 
                   {showAssignMenu && (
@@ -876,7 +876,7 @@ export default function EngageView({
                     }}
                     leadingIcon={<Clock className="w-3.5 h-3.5" />}
                   >
-                    <span className="hidden sm:inline">Snooze</span>
+                    <span className="hidden 2xl:inline">Snooze</span>
                   </Button>
 
                   {showSnoozeMenu && (
@@ -909,7 +909,7 @@ export default function EngageView({
                   onClick={handleMarkResolved}
                   leadingIcon={<CheckCircle2 className="w-3.5 h-3.5 text-ok" />}
                 >
-                  <span className="hidden sm:inline">Resolve</span>
+                  <span className="hidden 2xl:inline">Resolve</span>
                 </Button>
 
                 {/* Toggle details panel */}
@@ -952,7 +952,7 @@ export default function EngageView({
             )}
 
             {/* Messages Stream */}
-            <div className="flex-1 overflow-y-auto p-[22px] space-y-[18px] nx-messages">
+            <div className="flex-1 overflow-y-auto px-[28px] py-[26px] space-y-[22px] nx-messages">
               {currentConvo.messages.map((m, index) => {
                 const prevMsg = currentConvo.messages[index - 1];
                 const currentDay = getMessageDateGroup(m.time);
@@ -1014,12 +1014,12 @@ export default function EngageView({
             </div>
 
             {/* Composer */}
-            <div className="p-3 sm:p-4 border-t border-line-subtle bg-surface space-y-2.5 shrink-0">
+            <div className="px-5 py-4 border-t border-line-subtle bg-surface space-y-2.5 shrink-0">
               
               {/* Context-Aware Suggestion Chips Toolbar */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-                <span className="text-xs text-ink-3 uppercase tracking-wider shrink-0 font-semibold">
-                  Quick chips:
+                <span className="text-[11px] text-ink-3 shrink-0 font-bold">
+                  Insert
                 </span>
                 
                 {/* Pricing Deck chip: inserts clean sentence + file chip preview */}
@@ -1155,12 +1155,12 @@ export default function EngageView({
           PANEL 3: PROSPECT DETAILS (RIGHT)
           ========================================================================= */}
       {showLeadPanel && currentConvo && (
-        <div className={`w-full md:w-[268px] shrink-0 border-l border-line bg-surface flex flex-col h-full overflow-y-auto ${
+        <div className={`nx-panel w-full md:w-[288px] shrink-0 flex flex-col h-full overflow-y-auto ${
           mobileView === 'details' ? 'flex' : 'hidden lg:flex'
         }`}>
           
           {/* Header */}
-          <div className="p-4 border-b border-line-subtle flex items-center justify-between">
+          <div className="p-[18px] border-b border-line-subtle flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -1185,7 +1185,7 @@ export default function EngageView({
             </button>
           </div>
 
-          <div className="p-4 space-y-5 text-xs">
+          <div className="p-[22px] space-y-6 text-xs">
             
             {/* 1. Contact Info */}
             <div className="space-y-2.5">
@@ -1339,7 +1339,7 @@ export default function EngageView({
                 <div className="pt-3 space-y-2.5">
                   {linkedCall && (
                     <div className="space-y-1.5">
-                      <span className="text-[11px] text-ink-3 block">Upcoming call · {formatDue(linkedCall)} · Host: {linkedCall.owner}</span>
+                      <span className="text-[11px] text-ink-3 block">Upcoming call{customCallTitle(linkedCall) ? ` · ${customCallTitle(linkedCall)}` : ''} · {formatDue(linkedCall)} · Host: {linkedCall.owner}</span>
                       <CallChip task={linkedCall} onNotify={onNotify} />
                     </div>
                   )}

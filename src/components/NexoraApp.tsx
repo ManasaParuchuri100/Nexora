@@ -422,7 +422,7 @@ export default function NexoraApp({
               
               <div className={
                 isInbox
-                  ? "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[37px] pb-6 lg:pb-[39px] flex-1 min-h-0 flex flex-col overflow-y-auto"
+                  ? "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[28px] pb-6 lg:pb-[39px] flex-1 min-h-0 flex flex-col overflow-y-auto"
                   : "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[37px] pb-[90px]"
               }>
             {/* 1. OVERVIEW */}
@@ -448,7 +448,7 @@ export default function NexoraApp({
                 eyebrow="Workspace / Inbox"
                 title="Inbox"
                 subtitle="One conversation, one lead record, one clear owner."
-                className="shrink-0"
+                className="shrink-0 mb-[18px]!"
                 actions={
                   <button type="button" className="nx-btn" onClick={() => handleSelectNav('settings', 'channels')}>
                     Manage channels
