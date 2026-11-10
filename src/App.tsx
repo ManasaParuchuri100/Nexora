@@ -124,6 +124,10 @@ export default function App() {
     }
   };
 
+  if (typeof window !== 'undefined' && window.location.hash === '#ui-gallery') {
+    return <UiGallery />;
+  }
+
   if (inApp) {
     return (
       <>
@@ -154,10 +158,6 @@ export default function App() {
         />
       </>
     );
-  }
-
-  if (typeof window !== 'undefined' && window.location.hash === '#ui-gallery') {
-    return <UiGallery />;
   }
 
   if (standalone) {
