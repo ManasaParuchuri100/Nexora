@@ -46,7 +46,6 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'General',
     items: [
       { key: 'overview', label: 'Overview', icon: LayoutDashboard, category: 'overview', sub: 'overview', isActive: (cat) => cat === 'overview' },
-      { key: 'onboarding', label: 'Onboarding', icon: Rocket, category: 'onboarding', sub: 'default', isActive: (cat) => cat === 'onboarding' },
     ],
   },
   {
@@ -314,18 +313,6 @@ export default function AppSidebar({
                       </span>
                     )}
 
-                    {/* Setup progress badge */}
-                    {item.key === 'onboarding' && setupProgress && setupProgress.done < setupProgress.total && (
-                      <span
-                        className={rail
-                          ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-warn'
-                          : 'bg-warn-soft text-warn rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
-                        aria-label={`Setup ${setupProgress.done} of ${setupProgress.total} done`}
-                      >
-                        {!rail && `${setupProgress.done}/${setupProgress.total}`}
-                      </span>
-                    )}
-
                     {/* Follow-ups overdue badge */}
                     {item.key === 'leads' && followUpCounts.overdue > 0 && (
                       <span
@@ -367,6 +354,39 @@ export default function AppSidebar({
         >
           <Settings strokeWidth={1.8} className={`w-[17px] h-[17px] shrink-0 ${activeCategory === 'settings' ? 'text-brand' : 'text-ink-3'}`} />
           {!rail && <span>Settings</span>}
+        </button>
+
+        {/* Onboarding button (setup progress shows until setup is complete) */}
+        <button
+          type="button"
+          id="sidebar-nav-onboarding"
+          onClick={() => {
+            onSelectNav('onboarding', 'default');
+            onCloseMobile();
+          }}
+          aria-current={activeCategory === 'onboarding' ? 'page' : undefined}
+          aria-label={rail ? 'Onboarding' : undefined}
+          title={rail ? 'Onboarding' : undefined}
+          className={`relative w-full flex items-center ${rail ? 'justify-center' : 'justify-between px-[13px]'} h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+            activeCategory === 'onboarding'
+              ? 'bg-brand-soft text-brand'
+              : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
+          }`}
+        >
+          <span className={`flex items-center ${rail ? '' : 'gap-[11px]'}`}>
+            <Rocket strokeWidth={1.8} className={`w-[17px] h-[17px] shrink-0 ${activeCategory === 'onboarding' ? 'text-brand' : 'text-ink-3'}`} />
+            {!rail && <span>Onboarding</span>}
+          </span>
+          {setupProgress && setupProgress.done < setupProgress.total && (
+            <span
+              className={rail
+                ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-warn'
+                : 'bg-warn-soft text-warn rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
+              aria-label={`Setup ${setupProgress.done} of ${setupProgress.total} done`}
+            >
+              {!rail && `${setupProgress.done}/${setupProgress.total}`}
+            </span>
+          )}
         </button>
 
         {/* Help button */}

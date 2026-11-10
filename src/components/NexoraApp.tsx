@@ -144,7 +144,7 @@ export default function NexoraApp({
     const handlePopState = () => {
       const path = window.location.pathname.replace(/^\//, '');
       const parts = path.split('/');
-      const cat = (parts[0] || 'overview') as NavCategory;
+      const cat = (parts[0] === 'setup' ? 'onboarding' : parts[0] || 'overview') as NavCategory;
       const sub = (parts[1] || (cat === 'overview' ? 'overview' : 'default')) as SubCategory;
       setActiveCategory(cat);
       setActiveSubCategory(sub);
@@ -230,7 +230,8 @@ export default function NexoraApp({
 
     // Sync browser URL history (Rule 1) with safe sandboxed iframe fallback
     try {
-      const newPath = `/${targetCategory}${resolvedSub && resolvedSub !== 'default' && resolvedSub !== targetCategory && resolvedSub !== 'overview' ? `/${resolvedSub}` : ''}`;
+      // /onboarding is the standalone sign-up route, so the in-app Onboarding page uses /setup.
+      const newPath = `/${targetCategory === 'onboarding' ? 'setup' : targetCategory}${resolvedSub && resolvedSub !== 'default' && resolvedSub !== targetCategory && resolvedSub !== 'overview' ? `/${resolvedSub}` : ''}`;
       if (window.location.pathname !== newPath) {
         window.history.pushState(null, '', newPath);
       }
