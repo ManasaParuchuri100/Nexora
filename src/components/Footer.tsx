@@ -1,4 +1,5 @@
 import React from 'react';
+import { BRAND_COMPANY, BRAND_NAME } from '../config/brand';
 
 interface FooterProps {
   onOpenApp: () => void;
@@ -8,56 +9,28 @@ interface FooterProps {
 }
 
 export default function Footer({ onOpenApp, onContactClick, onPrivacyClick, onTermsClick }: FooterProps) {
+  const link = 'text-[14px] text-ink-2 hover:text-ink transition-colors bg-transparent border-0 p-0 min-h-0! cursor-pointer text-left';
   return (
-    <footer className="relative z-10 border-t border-[rgba(169,191,165,0.2)] bg-[#071C1A]/90">
-      <div className="max-w-7xl mx-auto px-6 sm:px-12 py-8 sm:py-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest text-[#A9BFA5]">
-        {/* Brand */}
-        <div className="flex items-center space-x-3">
-          <a 
-            href="#" 
-            className="serif text-xl font-medium tracking-tight text-[#E8E9D8] hover:text-white transition-colors lowercase"
-          >
-            nexora
-          </a>
-          <span className="opacity-40">/</span>
-          <span className="text-[#A9BFA5]/60">&copy; {new Date().getFullYear()} nexora systems</span>
+    <footer className="border-t border-line bg-sidebar">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-10 flex flex-col md:flex-row gap-8 md:items-start md:justify-between">
+        <div className="flex flex-col leading-none">
+          <span className="text-[9px] font-semibold tracking-[3px] text-brand uppercase">{BRAND_COMPANY}</span>
+          <span className="text-[20px] font-semibold tracking-[-0.03em] text-ink uppercase mt-1">{BRAND_NAME}<span className="text-brand">.</span></span>
+          <span className="text-[12px] text-ink-3 mt-3 max-w-[260px] leading-[1.5] normal-case">AI marketing OS. Capture, qualify and follow up on every lead.</span>
         </div>
-
-        {/* Text links */}
-        <div className="flex flex-wrap items-center space-x-8">
-          <a href="#features" className="hover:text-white transition-colors">
-            Features
-          </a>
-          <a href="#how-it-works" className="hover:text-white transition-colors">
-            How it works
-          </a>
-          <a href="#about" className="hover:text-white transition-colors">
-            About
-          </a>
-          <button 
-            type="button" 
-            onClick={onContactClick} 
-            className="hover:text-white transition-colors cursor-pointer uppercase tracking-widest"
-          >
-            Contact
-          </button>
-          <button 
-            type="button" 
-            onClick={onPrivacyClick} 
-            className="hover:text-white transition-colors cursor-pointer uppercase tracking-widest"
-          >
-            Privacy
-          </button>
-          <button 
-            type="button" 
-            onClick={onTermsClick} 
-            className="hover:text-white transition-colors cursor-pointer uppercase tracking-widest"
-          >
-            Terms
-          </button>
-        </div>
+        <nav className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-2" aria-label="Footer">
+          <a href="#features" className={link}>Features</a>
+          <a href="#how-it-works" className={link}>How it works</a>
+          <a href="#about" className={link}>Trust</a>
+          <button type="button" onClick={onOpenApp} className={link}>Get started</button>
+          <button type="button" onClick={onContactClick} className={link}>Contact</button>
+          <button type="button" onClick={onPrivacyClick} className={link}>Privacy</button>
+          <button type="button" onClick={onTermsClick} className={link}>Terms</button>
+        </nav>
+      </div>
+      <div className="border-t border-line">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 text-[12px] text-ink-3">© {new Date().getFullYear()} {BRAND_COMPANY}. All rights reserved.</div>
       </div>
     </footer>
   );
 }
-

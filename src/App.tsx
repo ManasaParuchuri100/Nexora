@@ -11,6 +11,7 @@ import NexoraApp from './components/NexoraApp';
 import InfoModal from './components/InfoModal';
 import AuthModal, { UserSession } from './components/AuthModal';
 import OnboardingFlow, { OnboardingData } from './components/OnboardingFlow';
+import UiGallery from './components/UiGallery';
 
 import { BRAND_NAME } from './config/brand';
 
@@ -155,6 +156,10 @@ export default function App() {
     );
   }
 
+  if (typeof window !== 'undefined' && window.location.hash === '#ui-gallery') {
+    return <UiGallery />;
+  }
+
   if (standalone) {
     const leave = () => { setStandalone(false); setIsAuthOpen(false); setIsOnboardingOpen(false); };
     return (
@@ -178,48 +183,19 @@ export default function App() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#071C1A] text-[#E8E9D8] font-sans-body overflow-x-hidden selection:bg-[#A9BFA5]/25 selection:text-[#E8E9D8]">
-      {/* Abstract visual atmosphere with dark teal gradients, subtle glows, and delicate curved vector lines */}
-      <BackgroundAtmosphere />
-
-      {/* Top Banner for Instant Workspace Switch */}
-      <div className="relative z-30 bg-[#061816] border-b border-[rgba(169,191,165,0.2)] py-1.5 px-4 text-center font-mono text-[11px] text-[#A9BFA5] flex items-center justify-center space-x-3">
-        <span className="hidden sm:inline">✦ Tecavy Lead Intelligence & Autonomous Inbox</span>
-        <button
-          type="button"
-          onClick={handleOpenLogin}
-          className="text-white hover:text-emerald-300 font-semibold underline cursor-pointer"
-        >
-          [Log In to Workspace]
-        </button>
-        <span className="opacity-40">·</span>
-        <button
-          type="button"
-          onClick={handleOpenGetStarted}
-          className="text-amber-300 hover:text-white font-semibold underline cursor-pointer"
-        >
-          [Get Started · 3-Step Setup]
-        </button>
-        <span className="opacity-40">·</span>
-        <button
-          type="button"
-          onClick={handleDirectLaunch}
-          className="text-emerald-300 hover:text-white font-semibold cursor-pointer"
-        >
-          ⚡ Direct 1-Click Launch →
-        </button>
-      </div>
-
+    <div className="relative min-h-screen bg-canvas text-ink font-sans overflow-x-hidden selection:bg-brand-soft">
       {/* Main Landing Page Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar 
-          onOpenApp={(mode) => mode === 'signup' ? handleOpenGetStarted() : handleOpenLogin()} 
+      <div className="relative flex flex-col min-h-screen">
+        <Navbar
+          onOpenApp={(mode) => mode === 'signup' ? handleOpenGetStarted() : handleOpenLogin()}
+          onLaunch={handleDirectLaunch}
         />
         
         <main className="flex-1">
-          <Hero 
+          <Hero
             onGetStarted={handleOpenGetStarted}
             onLearnMore={handleLearnMore}
+            onLaunch={handleDirectLaunch}
           />
           
           <Features onOpenApp={handleOpenGetStarted} />

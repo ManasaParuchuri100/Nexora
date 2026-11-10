@@ -1,66 +1,29 @@
 import React from 'react';
+import { ScrollText, ShieldCheck, UserCheck } from 'lucide-react';
+
+const POINTS = [
+  { Icon: ShieldCheck, title: 'Approved knowledge only', body: 'The AI answers from what you approved. When it is not sure, it says so and hands over to a person.' },
+  { Icon: UserCheck, title: 'People stay in charge', body: 'A conversation is owned by the AI or by a person, never both. Taking over pauses the AI straight away.' },
+  { Icon: ScrollText, title: 'Everything is recorded', body: 'Every reply, follow-up and change is logged, so you can see what happened and why.' },
+];
 
 export default function EditorialPhilosophy() {
   return (
-    <section id="about" className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 py-24 sm:py-36 border-t border-[rgba(169,191,165,0.2)]">
-      {/* Editorial Header */}
-      <div className="max-w-3xl mb-16 sm:mb-24">
-        <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-[#A9BFA5] font-normal block mb-3">
-          ABOUT & PHILOSOPHY
-        </span>
-        <h2 className="serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-[#E8E9D8] tracking-tight leading-[1.08]">
-          Clarity is not found by adding more tools.<br />
-          <span className="italic text-[#A9BFA5] font-normal">It begins when you subtract the noise.</span>
-        </h2>
+    <section id="about" className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 sm:py-24 border-t border-line">
+      <div className="max-w-[640px]">
+        <div className="eyebrow">Trust</div>
+        <h2 className="mt-3 text-[32px] sm:text-[36px] leading-[1.15] font-semibold tracking-[-0.025em] text-ink">Automation you can explain to a customer.</h2>
+        <p className="mt-4 text-[16px] leading-[1.6] text-ink-2">Speed matters, but so does being right. Nexora is built so you always know what it will say and who is responsible.</p>
       </div>
-
-      {/* Editorial Two-Column Text with Central Hairline Divider */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 pt-8 border-t border-[rgba(169,191,165,0.2)]">
-        <div className="lg:col-span-5 space-y-6">
-          <p className="serif text-2xl sm:text-3xl text-[#E8E9D8] font-light leading-snug">
-            We built Nexora out of exhaustion with the relentless complexity of contemporary software.
-          </p>
-          <div className="w-16 h-px bg-[rgba(169,191,165,0.2)]" />
-          <p className="text-xs sm:text-sm text-[#A9BFA5] font-light leading-relaxed">
-            Most productivity suites demand that you spend your working day maintaining the tools themselves — categorizing labels, configuring complex notification trees, and switching across five browser tabs just to plan a single afternoon.
-          </p>
-        </div>
-
-        <div className="lg:col-span-7 space-y-6 lg:pl-8 lg:border-l border-[rgba(169,191,165,0.2)]">
-          <p className="text-xs sm:text-sm text-[#E8E9D8] font-light leading-relaxed">
-            Nexora unifies creating, scheduling, and managing into a single cohesive surface. When your notes, your calendar, and your active projects share the exact same visual vocabulary, your mind ceases context-switching.
-          </p>
-          <p className="text-xs sm:text-sm text-[#A9BFA5]/80 font-light leading-relaxed">
-            There are no flashing notification badges here. No gamified badges or dopamine trackers. Just pure, disciplined negative space, thoughtful typography, and the calm necessary to produce your finest work.
-          </p>
-
-          {/* Editorial Principles List - Clean hairline separation */}
-          <div className="pt-8 mt-8 border-t border-[rgba(169,191,165,0.2)] grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div>
-              <span className="serif text-2xl opacity-40 italic text-[#E8E9D8] block mb-2 font-light">01</span>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#E8E9D8] mb-2">Zero Latency</h4>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
-                Instant keyboard commands and immediate responsiveness.
-              </p>
-            </div>
-            <div>
-              <span className="serif text-2xl opacity-40 italic text-[#E8E9D8] block mb-2 font-light">02</span>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#E8E9D8] mb-2">Dark Botanical</h4>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
-                Subtle organic green tones designed to comfort human vision.
-              </p>
-            </div>
-            <div>
-              <span className="serif text-2xl opacity-40 italic text-[#E8E9D8] block mb-2 font-light">03</span>
-              <h4 className="text-xs uppercase tracking-widest font-bold text-[#E8E9D8] mb-2">Singular Horizon</h4>
-              <p className="text-xs text-[#A9BFA5] font-light leading-relaxed">
-                View only what matters for this present moment.
-              </p>
-            </div>
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        {POINTS.map(p => (
+          <div key={p.title} className="rounded-[10px] border border-line bg-surface p-6">
+            <p.Icon className="w-5 h-5 text-brand" />
+            <h3 className="mt-4 text-[16px] font-semibold text-ink">{p.title}</h3>
+            <p className="mt-2 text-[14px] leading-[1.6] text-ink-2">{p.body}</p>
           </div>
-        </div>
+        ))}
       </div>
     </section>
   );
 }
-
