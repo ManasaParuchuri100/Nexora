@@ -14,3 +14,4 @@ export * from './Tabs';
 export * from './StatusBadge';
 export * from './AIInsight';
 export * from './Input';
+export * from './Skeleton';

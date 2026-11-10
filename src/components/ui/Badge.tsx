@@ -10,7 +10,7 @@ export interface BadgeProps {
 }
 
 export function Badge({ children, tone = 'neutral', size = 'sm', className = '' }: BadgeProps) {
-  const sizeClasses = size === 'sm' ? 'px-2 py-[4px] text-[10px] leading-none' : 'px-2 py-[5px] text-[10px]';
+  const sizeClasses = size === 'sm' ? 'px-2 py-[4px] text-[11px] leading-none' : 'px-2 py-[5px] text-[11px]';
 
   let toneClasses = '';
   switch (tone) {

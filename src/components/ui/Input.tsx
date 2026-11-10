@@ -27,9 +27,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Inp
         {...rest}
       />
       {error ? (
-        <div id={`${inputId}-error`} role="alert" className="text-[11px] text-danger mt-1.5">{error}</div>
+        <div id={`${inputId}-error`} role="alert" className="text-[12px] text-danger mt-1.5">{error}</div>
       ) : hint ? (
-        <div id={`${inputId}-hint`} className="text-[11px] text-ink-3 mt-1.5">{hint}</div>
+        <div id={`${inputId}-hint`} className="text-[12px] text-ink-3 mt-1.5">{hint}</div>
       ) : null}
     </div>
   );

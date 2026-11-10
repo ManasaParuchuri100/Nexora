@@ -12,7 +12,7 @@ export function Card({ children, className = '', onClick, id }: CardProps) {
     <div
       id={id}
       onClick={onClick}
-      className={`bg-surface border border-line rounded-[15px] shadow-card overflow-hidden min-w-0 ${className}`}
+      className={`bg-surface border border-line rounded-[10px] shadow-card overflow-hidden min-w-0 ${className}`}
     >
       {children}
     </div>
@@ -28,13 +28,13 @@ export interface CardHeaderProps {
 
 export function CardHeader({ title, description, action, className = '' }: CardHeaderProps) {
   return (
-    <div className={`px-[22px] pt-[22px] pb-4 flex items-center justify-between gap-3 ${className}`}>
+    <div className={`px-6 pt-6 pb-4 flex items-center justify-between gap-3 ${className}`}>
       <div className="min-w-0">
-        <h3 className="font-display text-[15px] font-bold text-ink tracking-[-0.3px] truncate">
+        <h3 className="font-display text-[16px] font-semibold text-ink tracking-[-0.01em] truncate">
           {title}
         </h3>
         {description && (
-          <p className="text-[11px] leading-[1.65] text-ink-3 mt-1">
+          <p className="text-[13px] leading-[1.6] text-ink-3 mt-1">
             {description}
           </p>
         )}
@@ -42,4 +42,12 @@ export function CardHeader({ title, description, action, className = '' }: CardH
       {action && <div className="shrink-0">{action}</div>}
     </div>
   );
+}
+
+export function CardContent({ children, className = '' }: { children?: React.ReactNode; className?: string }) {
+  return <div className={`px-6 pb-6 ${className}`}>{children}</div>;
+}
+
+export function CardFooter({ children, className = '' }: { children?: React.ReactNode; className?: string }) {
+  return <div className={`px-6 py-4 border-t border-line flex items-center justify-end gap-2 ${className}`}>{children}</div>;
 }

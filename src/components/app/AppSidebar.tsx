@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   LayoutDashboard,
   Inbox as InboxIcon, 
@@ -107,19 +107,32 @@ export default function AppSidebar({
   onToggleCollapsed,
   setupProgress
 }: AppSidebarProps) {
-  const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
-  const [currentWorkspace, setCurrentWorkspace] = useState(workspaceName);
+  // Mobile drawer: focus moves in, Tab stays inside, Escape closes, and focus returns to the menu button.
+  const drawerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpenMobile) return;
+    const opener = document.activeElement as HTMLElement | null;
+    drawerRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { e.stopPropagation(); onCloseMobile(); return; }
+      if (e.key !== 'Tab' || !drawerRef.current) return;
+      const items = (Array.from(drawerRef.current.querySelectorAll('button, [href], input, select, [tabindex]:not([tabindex="-1"])')) as HTMLElement[]).filter(el => !el.hasAttribute('disabled'));
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === drawerRef.current)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      opener?.focus();
+    };
+  }, [isOpenMobile]); // eslint-disable-line react-hooks/exhaustive-deps
   const inboxCounts = useInboxCounts();
   const followUpCounts = useFollowUpCounts();
 
-  const workspaces = [
-    { id: 'ws-1', name: workspaceName || `${BRAND_NAME} Workspace`, role: userRole || 'Owner' },
-    { id: 'ws-2', name: `${BRAND_NAME} Retail Hub`, role: 'Admin' },
-    { id: 'ws-3', name: 'Sterling Creative', role: 'Viewer' }
-  ];
-
   const renderNavContent = (rail = false) => (
-    <div className="flex flex-col h-full bg-surface select-none text-ink">
+    <div className="flex flex-col h-full bg-sidebar select-none text-ink">
       
       {/* 1. BRAND HEADER (Three lines, no logo square) */}
       <div className={`flex items-start justify-between ${rail ? 'flex-col items-center gap-3 px-2 pt-[22px] pb-[18px]' : 'px-[27px] pt-[26px] pb-[27px]'}`}>
@@ -137,13 +150,13 @@ export default function AppSidebar({
             </span>
           ) : (
             <>
-              <span className="text-[9px] leading-none font-extrabold tracking-[3px] text-brand uppercase">
+              <span className="text-[10px] leading-none font-extrabold tracking-[3px] text-brand uppercase">
                 {BRAND_COMPANY}
               </span>
               <span className="font-display text-[25px] leading-[35px] font-extrabold tracking-[-1.2px] text-ink uppercase mt-1">
                 {BRAND_NAME}<span className="text-brand">.</span>
               </span>
-              <span className="text-[9px] tracking-[2px] text-ink-3 uppercase">
+              <span className="text-[10px] tracking-[2px] text-ink-3 uppercase">
                 {BRAND_TAGLINE}
               </span>
             </>
@@ -164,96 +177,12 @@ export default function AppSidebar({
           <button
             type="button"
             onClick={onToggleCollapsed}
-            className={`hidden md:inline-flex p-1.5 min-h-0! rounded-[7px]! text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer ${rail ? '' : '-mt-1'}`}
+            className={`hidden md:inline-flex p-1.5 min-h-0! rounded-[6px]! text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer ${rail ? '' : '-mt-1'}`}
             aria-label={rail ? 'Expand sidebar' : 'Collapse sidebar'}
             title={rail ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {rail ? <PanelLeftOpen className="w-[18px] h-[18px]" /> : <PanelLeftClose className="w-[18px] h-[18px]" />}
           </button>
-        )}
-      </div>
-
-      {/* 2. WORKSPACE CARD */}
-      <div className={`${rail ? 'px-[14px]' : 'px-[17px]'} pb-5 relative`}>
-        <div className={`rounded-[10px] border border-line bg-surface hover:border-line-strong transition-colors ${rail ? 'p-[5px]' : 'p-[11px]'}`}>
-          <button
-            type="button"
-            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-            className={`w-full flex items-center transition-colors cursor-pointer text-left focus-visible:outline-none ${rail ? 'justify-center' : 'justify-between'}`}
-            title={rail ? currentWorkspace : undefined}
-            aria-label={rail ? `Workspace: ${currentWorkspace}` : undefined}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-xs font-extrabold uppercase shrink-0">
-                {currentWorkspace[0]}
-              </span>
-              {!rail && (
-                <div className="min-w-0">
-                  <span className="text-[13px] font-bold text-ink truncate block leading-tight">
-                    {currentWorkspace}
-                  </span>
-                  <span className="text-[10px] text-ink-3 block leading-tight truncate mt-0.5">
-                    {isDemoWorkspace ? 'Demo workspace' : userRole}
-                  </span>
-                </div>
-              )}
-            </div>
-            {!rail && <ChevronsUpDown className="w-4 h-4 text-ink-3 shrink-0 ml-1" />}
-          </button>
-        </div>
-
-        {/* Workspace Switcher Dropdown */}
-        {isWorkspaceMenuOpen && (
-          <div className={`absolute top-full -mt-1 ${rail ? 'left-[10px] w-[230px]' : 'left-[17px] right-[17px]'} bg-surface border border-line rounded-[12px] shadow-pop py-1.5 z-50 text-sm animate-fadeIn`}>
-            <div className="px-3 py-1 text-xs font-medium text-ink-3">
-              Workspaces
-            </div>
-            {workspaces.map(ws => (
-              <button
-                key={ws.id}
-                type="button"
-                onClick={() => {
-                  setCurrentWorkspace(ws.name);
-                  setIsWorkspaceMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-ink hover:bg-surface-hover transition-colors text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-2 truncate">
-                  <span className="truncate font-medium">{ws.name}</span>
-                  <span className="text-xs text-ink-3">({ws.role})</span>
-                </div>
-                {currentWorkspace === ws.name && (
-                  <Check className="w-4 h-4 text-brand shrink-0" />
-                )}
-              </button>
-            ))}
-
-            <div className="border-t border-line-subtle my-1.5" />
-
-            {/* Demo workspace toggle */}
-            <label className="px-3 py-1.5 flex items-center justify-between text-xs text-ink cursor-pointer hover:bg-surface-hover">
-              <span className="font-medium">Demo workspace</span>
-              <input
-                type="checkbox"
-                checked={isDemoWorkspace}
-                onChange={(e) => {
-                  if (onToggleDemoWorkspace) onToggleDemoWorkspace(e.target.checked);
-                }}
-                className="accent-brand cursor-pointer"
-              />
-            </label>
-
-            <div className="border-t border-line-subtle my-1.5" />
-
-            <button
-              type="button"
-              onClick={() => setIsWorkspaceMenuOpen(false)}
-              className="w-full px-3 py-1.5 text-left text-xs font-medium text-brand hover:bg-surface-hover transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New workspace</span>
-            </button>
-          </div>
         )}
       </div>
 
@@ -264,7 +193,7 @@ export default function AppSidebar({
             {rail ? (
               sIndex > 0 && <div className="border-t border-line mx-2 my-2" />
             ) : (
-              <div className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor px-[13px] pt-[14px] pb-[7px]">
+              <div className="text-[10px] font-extrabold uppercase tracking-[1.8px] text-muted-decor px-[13px] pt-[14px] pb-[7px]">
                 {section.title}
               </div>
             )}
@@ -285,7 +214,7 @@ export default function AppSidebar({
                     aria-current={active ? 'page' : undefined}
                     aria-label={rail ? item.label : undefined}
                     title={rail ? item.label : undefined}
-                    className={`relative w-full flex items-center h-[44px] min-h-[44px]! my-px rounded-[9px]! text-[13px] ${rail ? 'justify-center px-0' : 'justify-between px-[13px] gap-3'}  font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+                    className={`relative w-full flex items-center h-[44px] md:h-[40px] min-h-[44px]! md:min-h-[40px]! my-px rounded-[8px]! text-[14px] ${rail ? 'justify-center px-0' : 'justify-between px-[13px] gap-3'}  font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
                       active
                         ? 'bg-brand-soft text-brand'
                         : 'text-ink-2 hover:bg-surface-hover hover:text-ink'
@@ -306,7 +235,7 @@ export default function AppSidebar({
                       <span
                         className={rail
                           ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-brand'
-                          : 'bg-brand text-on-brand rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
+                          : 'bg-brand text-on-brand rounded-[5px] min-w-5 px-1.5 py-px text-[11px] font-bold tabular-nums flex items-center justify-center shrink-0'}
                         aria-label={`${inboxCounts.needsYou} conversations need you`}
                       >
                         {!rail && inboxCounts.needsYou}
@@ -318,7 +247,7 @@ export default function AppSidebar({
                       <span
                         className={rail
                           ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-danger'
-                          : 'bg-danger-soft text-danger rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
+                          : 'bg-danger-soft text-danger rounded-[5px] min-w-5 px-1.5 py-px text-[11px] font-bold tabular-nums flex items-center justify-center shrink-0'}
                         aria-label={`${followUpCounts.overdue} overdue follow-ups`}
                       >
                         {!rail && followUpCounts.overdue}
@@ -346,7 +275,7 @@ export default function AppSidebar({
           aria-current={activeCategory === 'settings' ? 'page' : undefined}
           aria-label={rail ? 'Settings' : undefined}
           title={rail ? 'Settings' : undefined}
-          className={`w-full flex items-center ${rail ? 'justify-center' : 'gap-[11px] px-[13px]'} h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+          className={`w-full flex items-center ${rail ? 'justify-center' : 'gap-[11px] px-[13px]'} h-[44px] md:h-[40px] min-h-[44px]! md:min-h-[40px]! rounded-[8px]! text-[14px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'settings'
               ? 'bg-brand-soft text-brand'
               : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
@@ -367,7 +296,7 @@ export default function AppSidebar({
           aria-current={activeCategory === 'onboarding' ? 'page' : undefined}
           aria-label={rail ? 'Onboarding' : undefined}
           title={rail ? 'Onboarding' : undefined}
-          className={`relative w-full flex items-center ${rail ? 'justify-center' : 'justify-between px-[13px]'} h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
+          className={`relative w-full flex items-center ${rail ? 'justify-center' : 'justify-between px-[13px]'} h-[44px] md:h-[40px] min-h-[44px]! md:min-h-[40px]! rounded-[8px]! text-[14px] font-semibold transition-colors cursor-pointer text-left focus-visible:outline-none ${
             activeCategory === 'onboarding'
               ? 'bg-brand-soft text-brand'
               : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
@@ -381,7 +310,7 @@ export default function AppSidebar({
             <span
               className={rail
                 ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-warn'
-                : 'bg-warn-soft text-warn rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
+                : 'bg-warn-soft text-warn rounded-[5px] min-w-5 px-1.5 py-px text-[11px] font-bold tabular-nums flex items-center justify-center shrink-0'}
               aria-label={`Setup ${setupProgress.done} of ${setupProgress.total} done`}
             >
               {!rail && `${setupProgress.done}/${setupProgress.total}`}
@@ -400,11 +329,18 @@ export default function AppSidebar({
           }}
           aria-label={rail ? 'Help' : undefined}
           title={rail ? 'Help' : undefined}
-          className={`w-full flex items-center ${rail ? 'justify-center' : 'gap-[11px] px-[13px]'} h-[44px] min-h-[44px]! rounded-[9px]! text-[13px] font-semibold text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none`}
+          className={`w-full flex items-center ${rail ? 'justify-center' : 'gap-[11px] px-[13px]'} h-[44px] md:h-[40px] min-h-[44px]! md:min-h-[40px]! rounded-[8px]! text-[14px] font-semibold text-ink-2 hover:text-ink hover:bg-surface-hover transition-colors cursor-pointer text-left focus-visible:outline-none`}
         >
           <HelpCircle strokeWidth={1.8} className="w-[17px] h-[17px] shrink-0 text-ink-3" />
           {!rail && <span>Help</span>}
         </button>
+
+        {/* Current workspace (read-only; switch it from the top bar) */}
+        {!rail && (
+          <div className="mt-3 px-[13px] text-[12px] text-ink-3 truncate" title="Switch workspace from the top bar">
+            Workspace: <span className="text-ink-2 font-medium">{workspaceName}</span>{isDemoWorkspace ? ' · Demo' : ''}
+          </div>
+        )}
 
         {/* User Card */}
         <div className={`mt-3 flex items-center rounded-[10px] border border-line bg-surface-raised ${rail ? 'flex-col gap-1.5 p-1.5' : 'justify-between px-2.5 py-2'}`}>
@@ -414,7 +350,7 @@ export default function AppSidebar({
               <span className="text-xs font-semibold text-ink truncate block">
                 {userName}
               </span>
-              <span className="text-[11px] text-ink-3 truncate block leading-tight">
+              <span className="text-[12px] text-ink-3 truncate block leading-tight">
                 {userRole}
               </span>
             </div>
@@ -422,7 +358,7 @@ export default function AppSidebar({
           <button
             type="button"
             onClick={onLogout}
-            className="p-1.5 min-h-0! rounded-[7px]! text-ink-3 hover:text-danger hover:bg-danger-soft transition-colors cursor-pointer shrink-0"
+            className="p-1.5 min-h-0! rounded-[6px]! text-ink-3 hover:text-danger hover:bg-danger-soft transition-colors cursor-pointer shrink-0"
             title="Log out"
             aria-label="Log out"
           >
@@ -440,7 +376,7 @@ export default function AppSidebar({
       {/* Desktop Fixed Sidebar (w-60 / 240px wide) */}
       <aside 
         id="app-desktop-sidebar"
-        className={`hidden md:block fixed top-0 left-0 bottom-0 z-30 border-r border-line bg-surface transition-[width] duration-200 ${collapsed ? 'w-[72px]' : 'w-[232px]'}`}
+        className={`hidden md:block fixed top-0 left-0 bottom-0 z-30 border-r border-line bg-sidebar transition-[width] duration-200 ${collapsed ? 'w-[72px]' : 'w-[248px]'}`}
       >
         {renderNavContent(collapsed)}
       </aside>
@@ -451,8 +387,13 @@ export default function AppSidebar({
           className="md:hidden fixed inset-0 z-50 bg-overlay backdrop-blur-[2px] transition-opacity"
           onClick={onCloseMobile}
         >
-          <div 
-            className="w-72 max-w-[85vw] h-full border-r border-line shadow-pop animate-slideRight"
+          <div
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            tabIndex={-1}
+            className="w-72 max-w-[85vw] h-full border-r border-line shadow-pop animate-slideRight focus:outline-none"
             onClick={(e) => e.stopPropagation()}
           >
             {renderNavContent()}

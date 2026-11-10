@@ -11,6 +11,8 @@ export interface ButtonProps {
   trailingIcon?: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
+  /** Shows a spinner, blocks clicks and announces that the action is in progress. */
+  loading?: boolean;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   id?: string;
@@ -26,6 +28,7 @@ export function Button({
   trailingIcon,
   onClick,
   disabled = false,
+  loading = false,
   type = 'button',
   className = '',
   id,
@@ -34,8 +37,8 @@ export function Button({
 }: ButtonProps) {
   // Use Tailwind important modifier (e.g. min-h-8!, rounded-lg!) to override index.css button rules
   const sizeClasses = size === 'sm'
-    ? 'min-h-[44px] sm:min-h-[30px]! sm:h-[30px] px-2.5 text-[11px] font-bold gap-1.5'
-    : 'min-h-[44px] sm:min-h-[39px]! sm:h-[39px] px-3.5 text-[13px] font-bold gap-2';
+    ? 'min-h-[44px] sm:min-h-[32px]! sm:h-[32px] px-3 text-[14px] font-medium gap-1.5'
+    : 'min-h-[44px] sm:min-h-[40px]! sm:h-[40px] px-4 text-[14px] font-medium gap-2';
 
   let variantClasses = '';
   switch (variant) {
@@ -58,12 +61,17 @@ export function Button({
       id={id}
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       title={title}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center rounded-[9px]! whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none ${sizeClasses} ${variantClasses} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[8px]! whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none ${sizeClasses} ${variantClasses} ${className}`}
     >
-      {leadingIcon && <span className="inline-flex shrink-0">{leadingIcon}</span>}
+      {loading ? (
+        <span className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" aria-hidden="true" />
+      ) : (
+        leadingIcon && <span className="inline-flex shrink-0">{leadingIcon}</span>
+      )}
       {children && <span className="truncate">{children}</span>}
       {trailingIcon && <span className="inline-flex shrink-0">{trailingIcon}</span>}
     </button>

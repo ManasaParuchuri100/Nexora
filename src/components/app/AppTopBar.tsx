@@ -1,3 +1,4 @@
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { useTheme } from '../../context/ThemeContext';
 import React, { useState, useRef, useEffect } from 'react';
 import { 
@@ -30,6 +31,11 @@ interface AppTopBarProps {
   onOpenLogin?: () => void;
   currentUser?: { name: string; email: string; workspace: string; role?: string } | null;
   currentRecordTitle?: string;
+  workspaceName: string;
+  workspaceBaseName: string;
+  onSelectWorkspace: (name: string) => void;
+  isDemoWorkspace: boolean;
+  onToggleDemoWorkspace?: (v: boolean) => void;
 }
 
 export default function AppTopBar({
@@ -43,7 +49,12 @@ export default function AppTopBar({
   onOpenProfileDrawer,
   onOpenLogin,
   currentUser,
-  currentRecordTitle
+  currentRecordTitle,
+  workspaceName,
+  workspaceBaseName,
+  onSelectWorkspace,
+  isDemoWorkspace,
+  onToggleDemoWorkspace
 }: AppTopBarProps) {
   const { theme, setTheme } = useTheme();
 
@@ -177,16 +188,16 @@ export default function AppTopBar({
   };
 
   const iconBtn =
-    'inline-flex items-center justify-center w-[35px] h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface text-ink-2 hover:bg-surface-hover hover:text-ink transition-colors cursor-pointer focus-visible:outline-none';
+    'inline-flex items-center justify-center w-[35px] h-[35px] min-h-[35px]! rounded-[8px]! border border-line bg-surface text-ink-2 hover:bg-surface-hover hover:text-ink transition-colors cursor-pointer focus-visible:outline-none';
   const menuPanel =
-    'absolute right-0 mt-2 bg-surface border border-line rounded-[13px] shadow-pop z-50 animate-fadeIn text-sm text-ink overflow-hidden';
+    'absolute right-0 mt-2 bg-surface border border-line rounded-[10px] shadow-pop z-50 animate-fadeIn text-sm text-ink overflow-hidden';
   const menuItem =
     'w-full flex items-center justify-between gap-3 px-3.5 py-2 min-h-0! rounded-none! text-left text-ink hover:bg-surface-hover transition-colors cursor-pointer';
-  const kbd = 'text-[10px] px-1.5 py-px border border-line rounded-[4px] text-ink-3 bg-surface-raised font-sans';
+  const kbd = 'text-[11px] px-1.5 py-px border border-line rounded-[4px] text-ink-3 bg-surface-raised font-sans';
 
   return (
-    <header className="sticky top-0 z-20 w-full h-14 sm:h-[67px] shrink-0 border-b border-line bg-surface/95 backdrop-blur-md select-none">
-      <div className="h-full px-3 sm:px-6 lg:px-[39px] flex items-center justify-between gap-3 sm:gap-4">
+    <header className="sticky top-0 z-20 w-full h-16 shrink-0 border-b border-line bg-surface select-none">
+      <div className="h-full px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
 
         {/* Left: Mobile menu + breadcrumb */}
         <div className="flex items-center gap-3 min-w-0">
@@ -199,9 +210,16 @@ export default function AppTopBar({
             <Menu className="w-5 h-5" />
           </button>
 
-          <nav className="hidden sm:flex items-center text-[12px] text-[#8391A3] min-w-0" aria-label="Breadcrumb">
-            <span>{BRAND_COMPANY} workspace</span>
-            <span className="mx-2.5">/</span>
+          <WorkspaceSwitcher
+            current={workspaceName}
+            baseName={workspaceBaseName}
+            role={currentUser?.role || 'Owner'}
+            onSelect={onSelectWorkspace}
+            isDemoWorkspace={isDemoWorkspace}
+            onToggleDemoWorkspace={onToggleDemoWorkspace}
+          />
+
+          <nav className="hidden lg:flex items-center text-[14px] text-ink-3 min-w-0" aria-label="Breadcrumb">
             <button
               type="button"
               onClick={() => onSelectNav(activeCategory, activeSubCategory)}
@@ -227,11 +245,11 @@ export default function AppTopBar({
             type="button"
             id="topbar-search-button"
             onClick={onOpenQuickSearch}
-            className="flex items-center gap-2 h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface-raised text-[#8592A4] hover:border-line-strong transition-colors px-2.5 sm:px-[15px] sm:min-w-[215px] cursor-pointer"
+            className="flex items-center gap-2 h-[35px] min-h-[35px]! rounded-[8px]! border border-line bg-surface-raised text-ink-3 hover:border-line-strong transition-colors px-2.5 sm:px-[16px] sm:min-w-[215px] cursor-pointer"
             title="Search workspace (⌘K or Ctrl+K)"
           >
             <Search className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline text-[13px] flex-1 text-left">Search</span>
+            <span className="hidden sm:inline text-[14px] flex-1 text-left">Search</span>
             <kbd className={`hidden sm:inline ${kbd}`}>⌘K</kbd>
           </button>
 
@@ -286,7 +304,7 @@ export default function AppTopBar({
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand text-on-brand text-[10px] font-semibold leading-4 text-center tabular-nums">
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand text-on-brand text-[11px] font-semibold leading-4 text-center tabular-nums">
                   {unreadCount}
                 </span>
               )}
@@ -295,7 +313,7 @@ export default function AppTopBar({
             {notifMenuOpen && (
               <div className={`${menuPanel} w-80 sm:w-96`}>
                 <div className="px-4 py-3 border-b border-line-subtle flex items-center justify-between">
-                  <span className="font-display font-bold text-ink text-sm">Notifications</span>
+                  <span className="font-display font-semibold text-ink text-sm">Notifications</span>
                   {unreadCount > 0 && (
                     <button
                       type="button"
@@ -326,11 +344,11 @@ export default function AppTopBar({
                           <div className="flex items-center justify-between gap-3">
                             <span className="flex items-center gap-2 min-w-0">
                               {notif.unread && <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />}
-                              <span className={`text-[13px] truncate ${notif.unread ? 'font-semibold text-ink' : 'text-ink-2'}`}>
+                              <span className={`text-[14px] truncate ${notif.unread ? 'font-semibold text-ink' : 'text-ink-2'}`}>
                                 {notif.title}
                               </span>
                             </span>
-                            <span className="text-[11px] text-ink-3 shrink-0">{notif.time}</span>
+                            <span className="text-[12px] text-ink-3 shrink-0">{notif.time}</span>
                           </div>
                           <p className="text-xs text-ink-3 mt-0.5 pl-3.5">{notif.detail}</p>
                         </button>
@@ -373,10 +391,10 @@ export default function AppTopBar({
               type="button"
               id="topbar-user-menu"
               onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-              className="flex items-center gap-1.5 h-[35px] min-h-[35px]! rounded-[9px]! pl-0.5 pr-1.5 hover:bg-surface-hover transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 h-[35px] min-h-[35px]! rounded-[8px]! pl-0.5 pr-1.5 hover:bg-surface-hover transition-colors cursor-pointer"
               aria-label="Account menu"
             >
-              <span className="w-[29px] h-[29px] rounded-[9px] grid place-items-center bg-avatar text-avatar-ink text-[13px] font-extrabold uppercase">
+              <span className="w-[29px] h-[29px] rounded-[8px] grid place-items-center bg-avatar text-avatar-ink text-[14px] font-extrabold uppercase">
                 {(currentUser?.name || currentUser?.workspace || BRAND_NAME).split(/\s+/).map(w => w[0]).slice(0, 2).join('')}
               </span>
                             <ChevronDown className="w-3.5 h-3.5 text-ink-3" />
@@ -385,7 +403,7 @@ export default function AppTopBar({
             {accountMenuOpen && (
               <div className={`${menuPanel} w-60 py-1.5`}>
                 <div className="px-3.5 py-2.5 border-b border-line-subtle mb-1">
-                  <p className="font-semibold text-ink text-[13px] truncate">
+                  <p className="font-semibold text-ink text-[14px] truncate">
                     {currentUser?.workspace || currentUser?.name || `${BRAND_NAME} Workspace`}
                   </p>
                   <p className="text-xs text-ink-3 truncate">
@@ -490,7 +508,7 @@ export default function AppTopBar({
             aria-modal="true"
           >
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-xl font-bold">Keyboard shortcuts</h2>
+              <h2 className="font-display text-xl font-semibold">Keyboard shortcuts</h2>
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
@@ -522,7 +540,7 @@ export default function AppTopBar({
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="h-9 min-h-9! px-4 rounded-[9px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
+                className="h-9 min-h-9! px-4 rounded-[8px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
               >
                 Done
               </button>

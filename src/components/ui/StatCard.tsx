@@ -32,7 +32,7 @@ export function StatCard({
   const content = (
     <div className="px-5 sm:px-[22px] py-5 flex flex-col justify-between h-full gap-2.5 min-h-[121px]">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] text-ink-3">
+        <span className="text-[12px] text-ink-3">
           {label}
         </span>
         {icon && (
@@ -58,7 +58,7 @@ export function StatCard({
         {delta && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
-              className={`inline-flex items-center text-[10px] font-bold tabular-nums ${
+              className={`inline-flex items-center text-[11px] font-bold tabular-nums ${
                 delta.trend === 'up'
                   ? 'text-ok'
                   : delta.trend === 'down'
@@ -68,11 +68,11 @@ export function StatCard({
             >
               {delta.trend === 'up' ? '↑' : delta.trend === 'down' ? '↓' : '→'} {delta.value}
             </span>
-            <span className="text-ink-3 text-[10px]">{periodText}</span>
+            <span className="text-ink-3 text-[11px]">{periodText}</span>
           </div>
         )}
         {hint && (
-          <p className="text-[10px] text-ink-3 truncate">
+          <p className="text-[11px] text-ink-3 truncate">
             {hint}
           </p>
         )}
@@ -80,7 +80,7 @@ export function StatCard({
     </div>
   );
 
-  const baseClasses = `bg-surface border border-line rounded-[15px] shadow-card text-left transition-all ${className}`;
+  const baseClasses = `bg-surface border border-line rounded-[10px] shadow-card text-left transition-all ${className}`;
 
   if (onClick) {
     return (
@@ -88,7 +88,7 @@ export function StatCard({
         id={id}
         type="button"
         onClick={onClick}
-        className={`${baseClasses} min-h-24! rounded-[15px]! hover:border-line-strong hover:-translate-y-px hover:shadow-pop cursor-pointer focus-visible:outline-none`}
+        className={`${baseClasses} min-h-24! rounded-[10px]! hover:border-line-strong hover:-translate-y-px hover:shadow-pop cursor-pointer focus-visible:outline-none`}
       >
         {content}
       </button>

@@ -19,17 +19,17 @@ export function AIInsight({ observation, recommendation, evidence, freshness, ac
     <aside className={`nx-insight ${className}`} aria-label="AI insight">
       <span className="eyebrow">AI insight</span>
       <div className="mt-1.5">
-        <div className="text-[11px] font-bold text-ink-3 uppercase tracking-[0.8px]">Observation</div>
-        <p className="text-[12px]! text-ink! leading-[1.6] mt-0.5!">{observation}</p>
+        <div className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.8px]">Observation</div>
+        <p className="text-[13px]! text-ink! leading-[1.6] mt-0.5!">{observation}</p>
       </div>
       {recommendation && (
         <div className="mt-2.5">
-          <div className="text-[11px] font-bold text-brand uppercase tracking-[0.8px]">Recommendation</div>
-          <p className="text-[12px]! text-ink-2! leading-[1.6] mt-0.5!">{recommendation}</p>
+          <div className="text-[12px] font-bold text-brand uppercase tracking-[0.8px]">Recommendation</div>
+          <p className="text-[13px]! text-ink-2! leading-[1.6] mt-0.5!">{recommendation}</p>
         </div>
       )}
       {(evidence || freshness) && (
-        <p className="text-[11px]! text-ink-3! mt-2.5!">
+        <p className="text-[12px]! text-ink-3! mt-2.5!">
           {evidence}
           {evidence && freshness ? ' · ' : ''}
           {freshness}

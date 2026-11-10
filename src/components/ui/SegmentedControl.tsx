@@ -22,7 +22,7 @@ export function SegmentedControl<T extends string = string>({
   size = 'sm',
 }: SegmentedControlProps<T>) {
   const containerPadding = '';
-  const buttonPadding = size === 'sm' ? 'px-3 py-[7px] text-[12px]' : 'px-3 py-2 text-[13px]';
+  const buttonPadding = size === 'sm' ? 'px-3 py-[7px] text-[13px]' : 'px-3 py-2 text-[14px]';
 
   return (
     <div
@@ -38,16 +38,16 @@ export function SegmentedControl<T extends string = string>({
             role="button"
             aria-pressed={isSelected}
             onClick={() => onChange(option.id)}
-            className={`min-h-[38px] sm:min-h-0! rounded-[7px]! font-bold transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${buttonPadding} ${
+            className={`min-h-[38px] sm:min-h-0! rounded-[6px]! font-bold transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${buttonPadding} ${
               isSelected
                 ? 'bg-brand-soft text-brand'
-                : 'bg-transparent text-[#718196] hover:text-ink hover:bg-surface-hover'
+                : 'bg-transparent text-ink-3 hover:text-ink hover:bg-surface-hover'
             }`}
           >
             <span>{option.label}</span>
             {typeof option.count === 'number' && (
               <span
-                className={`text-[10px] tabular-nums font-bold ${
+                className={`text-[11px] tabular-nums font-bold ${
                   isSelected ? 'text-brand' : 'text-ink-3'
                 }`}
               >

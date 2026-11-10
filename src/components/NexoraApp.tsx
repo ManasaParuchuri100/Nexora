@@ -167,6 +167,13 @@ export default function NexoraApp({
       return !prev;
     });
   const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const workspaceBase = currentUser?.workspace || `${BRAND_NAME} Workspace`;
+  const [workspaceChoice, setWorkspaceChoice] = useState<string | null>(null);
+  const currentWorkspaceName = workspaceChoice ?? workspaceBase;
+  const toggleDemoWorkspace = (val: boolean) => {
+    setIsDemoWorkspace(val);
+    showToast(val ? 'Demo Workspace Active' : 'Live Workspace', val ? 'Showing simulated sample data.' : 'Switched to live production workspace.');
+  };
   // Recomputed on every render, so the sidebar badge follows changes made in Settings or onboarding.
   const setupProgress = getSetupStatus(isFirstRun);
   const lastTab = useRef<Partial<Record<NavCategory, SubCategory>>>({});
@@ -388,14 +395,10 @@ export default function NexoraApp({
         isOpenMobile={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
         isDemoWorkspace={isDemoWorkspace}
-        onToggleDemoWorkspace={(val) => {
-          setIsDemoWorkspace(val);
-          showToast(val ? 'Demo Workspace Active' : 'Live Workspace', val ? 'Showing simulated sample data.' : 'Switched to live production workspace.');
-        }}
         onOpenHelp={() => setIsHelpOpen(true)}
         userName={currentUser?.name || 'Alex'}
         userRole={currentUser?.role || 'Owner'}
-        workspaceName={currentUser?.workspace || `${BRAND_NAME} Workspace`}
+        workspaceName={currentWorkspaceName}
         collapsed={sidebarCollapsed}
         onToggleCollapsed={toggleSidebar}
         setupProgress={setupProgress}
@@ -404,9 +407,14 @@ export default function NexoraApp({
       {/* Main Workspace Frame */}
       {(() => {
         return (
-          <div className={`${sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-[232px]'} transition-[padding] duration-200 flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
+          <div className={`${sidebarCollapsed ? 'md:pl-[72px]' : 'md:pl-[248px]'} transition-[padding] duration-200 flex flex-col ${isInbox ? 'h-full flex-1 min-h-0 overflow-hidden' : 'min-h-screen'}`}>
             {/* Top Navigation Bar with Dynamic Breadcrumb */}
             <AppTopBar
+              workspaceName={currentWorkspaceName}
+              workspaceBaseName={workspaceBase}
+              onSelectWorkspace={name => { setWorkspaceChoice(name); showToast('Workspace switched', `Now viewing ${name}.`); }}
+              isDemoWorkspace={isDemoWorkspace}
+              onToggleDemoWorkspace={toggleDemoWorkspace}
               activeCategory={activeCategory}
               activeSubCategory={activeSubCategory}
               onOpenMobileMenu={() => setMobileMenuOpen(true)}
@@ -430,8 +438,8 @@ export default function NexoraApp({
               
               <div className={
                 isInbox
-                  ? "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[28px] pb-6 lg:pb-[39px] flex-1 min-h-0 flex flex-col overflow-y-auto"
-                  : "max-w-[1430px] w-full mx-auto px-[13px] sm:px-6 lg:px-[39px] pt-6 lg:pt-[37px] pb-[90px]"
+                  ? "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-8 pb-6 lg:pb-8 flex-1 min-h-0 flex flex-col overflow-y-auto"
+                  : "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-8 pb-24"
               }>
             {/* 1. OVERVIEW */}
             {activeCategory === 'overview' && (
@@ -715,7 +723,7 @@ export default function NexoraApp({
                   <div className="eyebrow">Support</div>
                   <h2 className="text-[22px] font-extrabold tracking-tight mt-1.5">Help & documentation</h2>
                 </div>
-                <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="Close help" className="w-9 h-9 min-h-9! grid place-items-center rounded-[9px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
+                <button type="button" onClick={() => setIsHelpOpen(false)} aria-label="Close help" className="w-9 h-9 min-h-9! grid place-items-center rounded-[8px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -726,7 +734,7 @@ export default function NexoraApp({
                   ['Support', 'Email support@tecavy.io · WhatsApp +91 98201 44820'],
                 ].map(([title, desc]) => (
                   <div key={title} className="py-4 first:pt-0">
-                    <h3 className="text-[13px] font-bold text-ink">{title}</h3>
+                    <h3 className="text-[14px] font-bold text-ink">{title}</h3>
                     <p className="text-xs text-ink-3 mt-1 leading-relaxed">{desc}</p>
                   </div>
                 ))}
@@ -735,7 +743,7 @@ export default function NexoraApp({
             <button
               type="button"
               onClick={() => setIsHelpOpen(false)}
-              className="w-full h-10 min-h-10! rounded-[9px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
+              className="w-full h-10 min-h-10! rounded-[8px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
             >
               Close
             </button>
@@ -754,17 +762,17 @@ export default function NexoraApp({
                   <div className="eyebrow">Account</div>
                   <h2 className="text-[22px] font-extrabold tracking-tight mt-1.5">Your profile</h2>
                 </div>
-                <button type="button" onClick={() => setIsProfileOpen(false)} aria-label="Close profile" className="w-9 h-9 min-h-9! grid place-items-center rounded-[9px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
+                <button type="button" onClick={() => setIsProfileOpen(false)} aria-label="Close profile" className="w-9 h-9 min-h-9! grid place-items-center rounded-[8px]! border border-line text-ink-2 hover:bg-surface-hover cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-[11px] font-bold text-ink-3 block mb-1.5">Name</label>
+                  <label className="text-[12px] font-bold text-ink-3 block mb-1.5">Name</label>
                   <input type="text" defaultValue="Aryan Mehta" className="w-full px-3 py-2.5 text-ink" />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-ink-3 block mb-1.5">Email</label>
+                  <label className="text-[12px] font-bold text-ink-3 block mb-1.5">Email</label>
                   <input type="email" defaultValue="you@acme.com" className="w-full px-3 py-2.5 text-ink" />
                 </div>
                 <div className="flex items-center justify-between py-3 border-t border-line">
@@ -781,7 +789,7 @@ export default function NexoraApp({
               <button
                 type="button"
                 onClick={() => setIsProfileOpen(false)}
-                className="h-10 min-h-10! px-4 rounded-[9px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
+                className="h-10 min-h-10! px-4 rounded-[8px]! border border-line bg-surface text-ink-2 font-semibold hover:bg-surface-hover cursor-pointer"
               >
                 Cancel
               </button>
@@ -791,7 +799,7 @@ export default function NexoraApp({
                   setIsProfileOpen(false);
                   showToast('Profile saved', 'Account details updated successfully.');
                 }}
-                className="h-10 min-h-10! px-4 rounded-[9px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
+                className="h-10 min-h-10! px-4 rounded-[8px]! bg-brand text-on-brand font-semibold hover:bg-brand-hover cursor-pointer"
               >
                 Save changes
               </button>
@@ -804,7 +812,7 @@ export default function NexoraApp({
       {toastMessage && (
         <div className="nx-toast fixed top-5 right-5 sm:right-6 z-[80] shadow-pop px-[18px] py-3.5 max-w-sm animate-fadeIn rounded-[10px] flex items-start justify-between gap-3" role="status">
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-semibold mb-0.5 nx-toast-title">
+            <p className="text-[14px] font-semibold mb-0.5 nx-toast-title">
               {toastMessage.title}
             </p>
             <p className="text-xs leading-relaxed nx-toast-desc">

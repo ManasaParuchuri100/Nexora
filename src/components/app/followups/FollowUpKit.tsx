@@ -130,31 +130,52 @@ export function NxModal({
   footer: React.ReactNode;
   width?: number;
 }) {
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  // Focus moves into the dialog, Tab stays inside it, Escape closes it, and focus returns to the opener.
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    const node = dialogRef.current;
+    if (node && !node.contains(document.activeElement)) {
+      const first = node.querySelector('input, select, textarea, button:not([aria-label="Close"])') as HTMLElement | null;
+      (first || node).focus();
+    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
         onClose();
+        return;
       }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const items = (Array.from(dialogRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')) as HTMLElement[]).filter(el => !el.hasAttribute('disabled'));
+      if (!items.length) return;
+      const firstEl = items[0];
+      const lastEl = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === firstEl || document.activeElement === dialogRef.current)) { e.preventDefault(); lastEl.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); firstEl.focus(); }
     };
     window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
+    return () => {
+      window.removeEventListener('keydown', onKey, true);
+      if (opener && document.contains(opener)) opener.focus();
+    };
   }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6" role="presentation">
       <div className="absolute inset-0 bg-overlay backdrop-blur-[2px] animate-fadeIn" onClick={onClose} />
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="nx-modal relative w-full max-h-[90vh] flex flex-col animate-fadeIn"
+        className="nx-modal relative w-full max-h-[90vh] flex flex-col animate-fadeIn focus:outline-none"
         style={{ maxWidth: width }}
       >
         <div className="flex items-start justify-between gap-4 px-[27px] pt-[24px] pb-4">
           <div className="min-w-0">
-            <h2 className="font-display text-[20px] font-bold tracking-[-0.5px] text-ink m-0">{title}</h2>
-            {subtitle && <p className="text-[12px] text-ink-3 mt-1 mb-0">{subtitle}</p>}
+            <h2 className="font-display text-[20px] font-semibold tracking-[-0.5px] text-ink m-0">{title}</h2>
+            {subtitle && <p className="text-[13px] text-ink-3 mt-1 mb-0">{subtitle}</p>}
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="nx-iconbtn">
             <X className="w-4 h-4" />
@@ -174,7 +195,7 @@ export function Field({ label, hint, children }: { label: string; hint?: React.R
     <div className="nx-field">
       <label>{label}</label>
       {children}
-      {hint && <div className="text-[11px] text-ink-3 mt-1.5">{hint}</div>}
+      {hint && <div className="text-[12px] text-ink-3 mt-1.5">{hint}</div>}
     </div>
   );
 }
@@ -286,7 +307,7 @@ export function ReviewSendModal({
         hint={
           <div className="flex items-center justify-between gap-3">
             <span>{draft.trim().length} characters</span>
-            <button type="button" className="nx-link text-[11px] inline-flex items-center gap-1" onClick={() => setDraft(aiDraftFor(lead, task.purpose || 'follow_up', task.title))}>
+            <button type="button" className="nx-link text-[12px] inline-flex items-center gap-1" onClick={() => setDraft(aiDraftFor(lead, task.purpose || 'follow_up', task.title))}>
               <Sparkles className="w-3.5 h-3.5" /> Redraft with AI
             </button>
           </div>
@@ -454,7 +475,7 @@ export function ScheduleCallModal({
       width={480}
       footer={
         <>
-          {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
+          {touched && errors.length > 0 && <span className="text-[12px] text-danger mr-auto">{errors[0]}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
           <button type="button" className="nx-btn primary" onClick={save}>{editing ? 'Save new time' : 'Schedule call'}</button>
         </>
@@ -615,7 +636,7 @@ export function LogOutcomeModal({
       onClose={onClose}
       footer={
         <>
-          {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
+          {touched && errors.length > 0 && <span className="text-[12px] text-danger mr-auto">{errors[0]}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
           <button type="button" className="nx-btn primary" onClick={submit}>Save</button>
         </>
@@ -640,35 +661,35 @@ export function LogOutcomeModal({
           {needsCall || outcome === 'call_connected' ? (
             <div className="nx-next mb-4">
               {outcome === 'call_connected' && (
-                <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                <label className="flex items-center gap-2.5 text-[13px] text-ink cursor-pointer">
                   <input type="checkbox" checked={bookAnother} onChange={e => setBookAnother(e.target.checked)} />
                   Book a follow-up call
                 </label>
               )}
               {needsCall && (
                 <div className={outcome === 'call_connected' ? 'mt-3' : ''}>
-                  {outcome === 'meeting_booked' && <div className="text-[11px] font-bold text-ink-2 mb-2">Schedule the call</div>}
+                  {outcome === 'meeting_booked' && <div className="text-[12px] font-bold text-ink-2 mb-2">Schedule the call</div>}
                   <DateTimeFields date={callDate} time={callTime} onDate={setCallDate} onTime={setCallTime} label="When" />
                   <Field label="Platform">
                     <PlatformPicker value={platform} onChange={setPlatform} />
                   </Field>
-                  <div className="text-[11px] text-ink-3 -mt-2">A reminder with the join link is sent automatically.</div>
+                  <div className="text-[12px] text-ink-3 -mt-2">A reminder with the join link is sent automatically.</div>
                 </div>
               )}
             </div>
           ) : (
             <div className="nx-next mb-4">
-              <div className="text-[11px] font-bold text-ink-2 mb-2">What happens next</div>
+              <div className="text-[12px] font-bold text-ink-2 mb-2">What happens next</div>
               {outcome === 'not_interested' ? (
-                <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                <label className="flex items-center gap-2.5 text-[13px] text-ink cursor-pointer">
                   <input type="checkbox" checked={markLost} onChange={e => setMarkLost(e.target.checked)} />
                   Mark {lead?.name || 'this lead'} as Lost and stop follow-ups
                 </label>
               ) : plan && plan.kind === 'none' ? (
-                <div className="text-[12px] text-ink-2">{plan.label}.</div>
+                <div className="text-[13px] text-ink-2">{plan.label}.</div>
               ) : plan ? (
                 <>
-                  <label className="flex items-center gap-2.5 text-[12px] text-ink cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-[13px] text-ink cursor-pointer">
                     <input type="checkbox" checked={scheduleNext} onChange={e => setScheduleNext(e.target.checked)} />
                     {plan.label}
                   </label>
@@ -678,7 +699,7 @@ export function LogOutcomeModal({
                         <DateTimeFields date={nextDate} time={nextTime} onDate={setNextDate} onTime={setNextTime} label="New date & time" />
                       </div>
                     ) : (
-                      <button type="button" className="nx-link text-[11px] mt-2 ml-[25px]" onClick={() => setChangeDate(true)}>
+                      <button type="button" className="nx-link text-[12px] mt-2 ml-[25px]" onClick={() => setChangeDate(true)}>
                         Choose a different time
                       </button>
                     )
@@ -808,7 +829,7 @@ export function AddFollowUpModal({
       width={580}
       footer={
         <>
-          {touched && errors.length > 0 && <span className="text-[11px] text-danger mr-auto">{errors[0]}</span>}
+          {touched && errors.length > 0 && <span className="text-[12px] text-danger mr-auto">{errors[0]}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
           <button type="button" className="nx-btn primary" onClick={save}>{editing ? 'Save changes' : 'Schedule follow-up'}</button>
         </>
@@ -897,7 +918,7 @@ export function AddFollowUpModal({
           label={kind === 'email' ? 'Email body' : 'Message'}
           hint={
             <div className="flex justify-end">
-              <button type="button" className="nx-link text-[11px] inline-flex items-center gap-1" onClick={() => setDraft(kind === 'email' ? emailDraftFor(lead, purpose, title || 'our last conversation', owner === 'AI' ? 'The team' : owner) : aiDraftFor(lead, purpose, title || 'our last conversation'))} disabled={!lead}>
+              <button type="button" className="nx-link text-[12px] inline-flex items-center gap-1" onClick={() => setDraft(kind === 'email' ? emailDraftFor(lead, purpose, title || 'our last conversation', owner === 'AI' ? 'The team' : owner) : aiDraftFor(lead, purpose, title || 'our last conversation'))} disabled={!lead}>
                 <Sparkles className="w-3.5 h-3.5" /> Draft with AI
               </button>
             </div>
@@ -957,7 +978,7 @@ export function HoldModal({ lead, onClose, onNotify }: { lead: Lead; onClose: ()
       width={460}
       footer={
         <>
-          {touched && error && <span className="text-[11px] text-danger mr-auto">{error}</span>}
+          {touched && error && <span className="text-[12px] text-danger mr-auto">{error}</span>}
           <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
           <button type="button" className="nx-btn primary" onClick={save}>Pause follow-ups</button>
         </>
@@ -1101,7 +1122,7 @@ export function FollowUpRow({
       </div>
 
       <div className="flex-1 min-w-0">
-        <strong className="text-[13px] text-ink">
+        <strong className="text-[14px] text-ink">
           {task.title}
           {!compact && lead && !(isCall && task.title.includes(lead.name)) && (
             <>
@@ -1122,7 +1143,7 @@ export function FollowUpRow({
             </>
           )}
         </strong>
-        <p className="text-[11px] text-ink-3 mt-[3px] mb-0 truncate">
+        <p className="text-[12px] text-ink-3 mt-[3px] mb-0 truncate">
           <span className={bucket === 'overdue' ? 'text-danger font-bold' : bucket === 'today' ? 'text-warn font-bold' : ''}>{meta[0]}</span>
           {meta.slice(1).map((m, i) => (
             <span key={i}> · {m}</span>
@@ -1159,7 +1180,7 @@ export function FollowUpRow({
         </div>
 
         {(task.note || task.outcomeNote) && !compact && (
-          <p className="text-[11px] text-ink-2 mt-2 mb-0 flex items-start gap-1.5">
+          <p className="text-[12px] text-ink-2 mt-2 mb-0 flex items-start gap-1.5">
             <CornerDownRight className="w-3 h-3 mt-[3px] shrink-0 text-ink-3" />
             <span>{task.outcomeNote || task.note}</span>
           </p>
@@ -1325,8 +1346,8 @@ export function AddChooserModal({ lead, onClose, onPick }: { lead?: Lead; onClos
           >
             <o.Icon className="w-[18px] h-[18px] text-brand" />
             <span>
-              <strong className="block text-[13px]">{o.title}</strong>
-              <span className="block text-[11px] text-ink-3 font-normal leading-[1.45] mt-0.5">{o.hint}</span>
+              <strong className="block text-[14px]">{o.title}</strong>
+              <span className="block text-[12px] text-ink-3 font-normal leading-[1.45] mt-0.5">{o.hint}</span>
             </span>
           </button>
         ))}
