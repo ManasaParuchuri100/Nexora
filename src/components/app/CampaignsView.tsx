@@ -423,7 +423,7 @@ export default function CampaignsView({
               key={m.label}
               type="button"
               onClick={() => ('openLeads' in m && m.openLeads ? onNavigateToModule?.('leads', 'all-leads') : setStatusFilter(m.tab))}
-              className="nx-panel nx-metric min-h-[121px]! rounded-[15px]!"
+              className="nx-panel nx-metric min-h-[121px]! rounded-[10px]!"
             >
               <div className="nx-label">{m.label}</div>
               <div className="nx-number tabular-nums">{m.value}</div>
@@ -435,12 +435,12 @@ export default function CampaignsView({
 
       {/* First-Run Empty State (Image 6 spec) */}
       {isFirstRun && (
-        <div className="p-8 sm:p-12 rounded-[9px] bg-surface-raised border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
+        <div className="p-8 sm:p-12 rounded-[8px] bg-surface-raised border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
           <div className="w-12 h-12 rounded-full bg-ok/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-ok">
             <Sparkles className="w-6 h-6" />
           </div>
           <div className="space-y-1.5">
-            <h3 className="font-display font-bold text-xl sm:text-2xl font-light text-ink">
+            <h3 className="font-display font-semibold text-xl sm:text-2xl font-light text-ink">
               No campaigns yet.
             </h3>
             <p className="text-xs text-ink-2 font-light max-w-md mx-auto leading-relaxed">
@@ -452,7 +452,7 @@ export default function CampaignsView({
               type="button"
               id="campaigns-new-campaign-btn"
               onClick={handleOpenCreate}
-              className="px-6 py-2.5 bg-brand text-on-brand hover:bg-brand-hover text-xs  font-bold uppercase tracking-wider rounded-[9px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
+              className="px-6 py-2.5 bg-brand text-on-brand hover:bg-brand-hover text-xs  font-bold uppercase tracking-wider rounded-[8px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>New campaign → /campaigns/new</span>
@@ -475,12 +475,12 @@ export default function CampaignsView({
                 key={tab}
                 type="button"
                 onClick={() => setStatusFilter(tab)}
-                className={`min-h-0! rounded-[7px]! px-3 py-2 text-[13px] font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                className={`min-h-0! rounded-[6px]! px-3 py-2 text-[14px] font-bold transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                   isSelected ? 'bg-brand-soft text-brand' : 'text-ink-3 hover:text-ink'
                 }`}
               >
                 <span>{tab}</span>
-                <span className="text-[10px] tabular-nums opacity-80">
+                <span className="text-[11px] tabular-nums opacity-80">
                   {count}
                 </span>
               </button>
@@ -496,7 +496,7 @@ export default function CampaignsView({
             onChange={(e) => setSearch(e.target.value)}
             className={`${
               'bg-surface border-line text-ink placeholder:text-ink-3 focus:border-line-strong'
-            } text-[13px] px-3 py-2 pl-8 pr-7 border focus:outline-none w-full sm:w-72 transition-colors`}
+            } text-[14px] px-3 py-2 pl-8 pr-7 border focus:outline-none w-full sm:w-72 transition-colors`}
           />
           <Search className={`w-3.5 h-3.5 absolute left-2.5 top-2.5 pointer-events-none ${'text-ink-2'}`} />
           {search && (
@@ -512,7 +512,7 @@ export default function CampaignsView({
       </div>
 
       {/* 3. Streamlined Filter & Controls Toolbar */}
-      <div className={`space-y-3.5 ${'bg-surface border-line'} p-3.5 sm:p-4 rounded-[9px] border transition-colors shadow-sm`}>
+      <div className={`space-y-3.5 ${'bg-surface border-line'} p-3.5 sm:p-4 rounded-[8px] border transition-colors shadow-sm`}>
         {/* Main Controls Row */}
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 text-xs">
           {/* Left: Filter Selectors */}
@@ -534,7 +534,7 @@ export default function CampaignsView({
                 }}
                 className={`${
                   'bg-surface-raised text-ink border-line focus:border-line-strong'
-                } text-xs  px-2.5 py-1.5 rounded-[9px] border focus:outline-none cursor-pointer transition-colors`}
+                } text-xs  px-2.5 py-1.5 rounded-[8px] border focus:outline-none cursor-pointer transition-colors`}
               >
                 <option value="All">Timeline: All</option>
                 <option value="Active">Active Now</option>
@@ -550,7 +550,7 @@ export default function CampaignsView({
                 type="button"
                 id="campaigns-custom-btn"
                 onClick={() => setIsCalendarModalOpen(true)}
-                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-[9px] border text-xs  transition-colors cursor-pointer ${
+                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-[8px] border text-xs  transition-colors cursor-pointer ${
                   timelineFilter === 'Custom'
                     ? ('bg-brand text-ink border-brand')
                     : ('bg-surface text-ink-2 border-line hover:border-line-strong')
@@ -560,7 +560,7 @@ export default function CampaignsView({
                 <Calendar className="w-3 h-3 text-ok" />
                 <span>Custom</span>
                 {timelineFilter === 'Custom' && (
-                  <span className="text-[10px] text-ok/90 ">
+                  <span className="text-[11px] text-ok/90 ">
                     ({customStartDate.slice(5)} → {customEndDate.slice(5)})
                   </span>
                 )}
@@ -575,7 +575,7 @@ export default function CampaignsView({
                 onChange={(e) => setProgressFilter(e.target.value as ProgressFilterOption)}
                 className={`${
                   'bg-surface-raised text-ink border-line focus:border-line-strong'
-                } text-xs  px-2.5 py-1.5 rounded-[9px] border focus:outline-none cursor-pointer transition-colors`}
+                } text-xs  px-2.5 py-1.5 rounded-[8px] border focus:outline-none cursor-pointer transition-colors`}
               >
                 <option value="All">Progress: All</option>
                 <option value="NotStarted">0% (Draft)</option>
@@ -594,7 +594,7 @@ export default function CampaignsView({
                 onChange={(e) => setMinProgress(Number(e.target.value))}
                 className={`${
                   'bg-surface-raised text-ink border-line focus:border-line-strong'
-                } text-xs  px-2.5 py-1.5 rounded-[9px] border focus:outline-none cursor-pointer transition-colors`}
+                } text-xs  px-2.5 py-1.5 rounded-[8px] border focus:outline-none cursor-pointer transition-colors`}
               >
                 <option value={0}>Min Progress: Any</option>
                 <option value={25}>Min Progress: ≥25%</option>
@@ -608,7 +608,7 @@ export default function CampaignsView({
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className={`text-[11px]  flex items-center space-x-1 px-2.5 py-1.5 rounded-[9px] border transition-colors cursor-pointer ${
+                className={`text-[12px]  flex items-center space-x-1 px-2.5 py-1.5 rounded-[8px] border transition-colors cursor-pointer ${
                   'text-ink-2 hover:text-ink border-line hover:bg-surface-hover'
                 }`}
                 title="Reset all filters to default"
@@ -629,7 +629,7 @@ export default function CampaignsView({
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
                 className={`${
                   'bg-surface-raised text-ink border-line focus:border-line-strong'
-                } text-xs  px-2.5 py-1.5 rounded-[9px] border focus:outline-none cursor-pointer transition-colors`}
+                } text-xs  px-2.5 py-1.5 rounded-[8px] border focus:outline-none cursor-pointer transition-colors`}
               >
                 <option value="Default">Sort: Default Order</option>
                 <option value="ProgressDesc">Sort: Progress High → Low</option>
@@ -642,7 +642,7 @@ export default function CampaignsView({
             </div>
 
             {/* Campaign Counters */}
-            <div className={`text-[11px]  px-2.5 py-1 rounded-[9px] border ${
+            <div className={`text-[12px]  px-2.5 py-1 rounded-[8px] border ${
               'bg-surface-hover border-line text-ink-2'
             }`}>
               Showing <strong className={'text-ink'}>{filteredCampaigns.length}</strong> of {campaigns.length}
@@ -652,26 +652,26 @@ export default function CampaignsView({
 
         {/* Expandable Custom Date Range Drawer */}
         {(timelineFilter === 'Custom' || isCustomDateOpen) && (
-          <div className={`p-3.5 ${'bg-surface-raised border-line'} border rounded-[9px] space-y-3 animate-fadeIn`}>
+          <div className={`p-3.5 ${'bg-surface-raised border-line'} border rounded-[8px] space-y-3 animate-fadeIn`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="flex items-center flex-wrap gap-4 text-xs ">
                 <div className="flex items-center space-x-2">
-                  <span className={`${'text-ink-2'} text-[11px] uppercase`}>From:</span>
+                  <span className={`${'text-ink-2'} text-[12px] uppercase`}>From:</span>
                   <input
                     type="date"
                     value={pendingStartDate}
                     onChange={(e) => setPendingStartDate(e.target.value)}
-                    className={`${'bg-surface border-line text-ink'} text-xs px-2.5 py-1 rounded-[9px] border focus:outline-none  cursor-pointer`}
+                    className={`${'bg-surface border-line text-ink'} text-xs px-2.5 py-1 rounded-[8px] border focus:outline-none  cursor-pointer`}
                   />
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className={`${'text-ink-2'} text-[11px] uppercase`}>To:</span>
+                  <span className={`${'text-ink-2'} text-[12px] uppercase`}>To:</span>
                   <input
                     type="date"
                     value={pendingEndDate}
                     onChange={(e) => setPendingEndDate(e.target.value)}
-                    className={`${'bg-surface border-line text-ink'} text-xs px-2.5 py-1 rounded-[9px] border focus:outline-none  cursor-pointer`}
+                    className={`${'bg-surface border-line text-ink'} text-xs px-2.5 py-1 rounded-[8px] border focus:outline-none  cursor-pointer`}
                   />
                 </div>
 
@@ -684,14 +684,14 @@ export default function CampaignsView({
                       setTimelineFilter('Custom');
                       setIsCustomDateOpen(false);
                     }}
-                    className={`${'bg-brand text-ink hover:bg-[#1E4D45]'} px-3 py-1 rounded-[9px] text-[11px]  font-semibold uppercase transition-colors cursor-pointer`}
+                    className={`${'bg-brand text-ink hover:bg-brand-hover'} px-3 py-1 rounded-[8px] text-[12px]  font-semibold uppercase transition-colors cursor-pointer`}
                   >
                     Apply Window
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsCalendarModalOpen(true)}
-                    className="border border-emerald-500/50 bg-surface-hover text-ok hover:text-ink px-2.5 py-1 rounded-[9px] text-[11px]  flex items-center space-x-1 cursor-pointer"
+                    className="border border-emerald-500/50 bg-surface-hover text-ok hover:text-ink px-2.5 py-1 rounded-[8px] text-[12px]  flex items-center space-x-1 cursor-pointer"
                   >
                     <Calendar className="w-3 h-3 text-ok" />
                     <span>Open Calendar 📅</span>
@@ -706,7 +706,7 @@ export default function CampaignsView({
                       setTimelineFilter('All');
                       setIsCustomDateOpen(false);
                     }}
-                    className={`${'border-line text-ink-2 hover:text-ink'} border px-2.5 py-1 rounded-[9px] text-[11px]  transition-colors cursor-pointer`}
+                    className={`${'border-line text-ink-2 hover:text-ink'} border px-2.5 py-1 rounded-[8px] text-[12px]  transition-colors cursor-pointer`}
                   >
                     Reset
                   </button>
@@ -714,7 +714,7 @@ export default function CampaignsView({
               </div>
 
               {/* Quick Preset Buttons */}
-              <div className="flex items-center flex-wrap gap-1.5 text-[10px] ">
+              <div className="flex items-center flex-wrap gap-1.5 text-[11px] ">
                 <span className={`${'text-ink-3'} mr-1`}>Quick:</span>
                 {[
                   { label: 'May–Jul 2026', start: '2026-05-01', end: '2026-07-31' },
@@ -733,7 +733,7 @@ export default function CampaignsView({
                       setCustomEndDate(preset.end);
                       setTimelineFilter('Custom');
                     }}
-                    className={`px-2 py-0.5 border rounded-[9px] cursor-pointer transition-colors ${
+                    className={`px-2 py-0.5 border rounded-[8px] cursor-pointer transition-colors ${
                       'border-line bg-surface text-ink-2 hover:border-line-strong'
                     }`}
                   >
@@ -748,12 +748,12 @@ export default function CampaignsView({
         {/* Active Filter Chips Strip (only displayed when active filters exist) */}
         {isAnyFilterActive && (
           <div className={`flex items-center flex-wrap gap-2 pt-2.5 border-t ${'border-line'} text-xs`}>
-            <span className={`text-[10px]  uppercase tracking-wider ${'text-ink-3'}`}>
+            <span className={`text-[11px]  uppercase tracking-wider ${'text-ink-3'}`}>
               Active Filters:
             </span>
 
             {statusFilter !== 'All' && (
-              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px]  rounded-[9px] ${
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[11px]  rounded-[8px] ${
                 'bg-surface-hover border-line text-ink'
               }`}>
                 <span>Status: {statusFilter}</span>
@@ -768,7 +768,7 @@ export default function CampaignsView({
             )}
 
             {timelineFilter !== 'All' && (
-              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px]  rounded-[9px] ${
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[11px]  rounded-[8px] ${
                 'bg-surface-hover border-line text-ink'
               }`}>
                 <span>
@@ -785,7 +785,7 @@ export default function CampaignsView({
             )}
 
             {progressFilter !== 'All' && (
-              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px]  rounded-[9px] ${
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[11px]  rounded-[8px] ${
                 'bg-surface-hover border-line text-ink'
               }`}>
                 <span>Progress: {progressFilter}</span>
@@ -800,7 +800,7 @@ export default function CampaignsView({
             )}
 
             {minProgress > 0 && (
-              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px]  rounded-[9px] ${
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[11px]  rounded-[8px] ${
                 'bg-surface-hover border-line text-ink'
               }`}>
                 <span>Min: ≥{minProgress}%</span>
@@ -815,7 +815,7 @@ export default function CampaignsView({
             )}
 
             {search && (
-              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[10px]  rounded-[9px] ${
+              <span className={`inline-flex items-center space-x-1 px-2 py-0.5 border text-[11px]  rounded-[8px] ${
                 'bg-surface-hover border-line text-ink'
               }`}>
                 <span>Search: "{search}"</span>
@@ -832,7 +832,7 @@ export default function CampaignsView({
             <button
               type="button"
               onClick={handleResetFilters}
-              className={`text-[10px]  underline underline-offset-2 cursor-pointer flex items-center space-x-1 ml-1 ${
+              className={`text-[11px]  underline underline-offset-2 cursor-pointer flex items-center space-x-1 ml-1 ${
                 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -844,9 +844,9 @@ export default function CampaignsView({
       </div>
 
       {/* 4. Campaigns Table */}
-      <div className={`border ${'border-line divide-[#E2ECE0] bg-surface'} divide-y overflow-x-auto rounded-[9px] transition-colors shadow-sm`}>
+      <div className={`border ${'border-line divide-line bg-surface'} divide-y overflow-x-auto rounded-[8px] transition-colors shadow-sm`}>
         {/* Table Header with interactive sort triggers */}
-        <div className={`min-w-[900px] grid grid-cols-12 px-6 py-3 text-[10px] uppercase tracking-widest  ${
+        <div className={`min-w-[900px] grid grid-cols-12 px-6 py-3 text-[11px] uppercase tracking-widest  ${
           'text-ink-2 bg-surface-raised'
         }`}>
           <div 
@@ -894,14 +894,14 @@ export default function CampaignsView({
         {/* Campaign Rows */}
         {filteredCampaigns.length === 0 ? (
           <div className="py-16 text-center text-xs font-light space-y-3">
-            <div className={`font-display font-bold text-lg ${'text-ink'}`}>No campaigns match the current criteria</div>
-            <p className={`max-w-md mx-auto text-[11px]  ${'text-ink-3'}`}>
+            <div className={`font-display font-semibold text-lg ${'text-ink'}`}>No campaigns match the current criteria</div>
+            <p className={`max-w-md mx-auto text-[12px]  ${'text-ink-3'}`}>
               Try adjusting your timeline window, progress threshold, or status filter to reveal campaigns.
             </p>
             <button
               type="button"
               onClick={handleResetFilters}
-              className={`mt-2 inline-flex items-center space-x-1.5 px-4 py-2 border text-xs  uppercase tracking-wider rounded-[9px] transition-colors cursor-pointer ${
+              className={`mt-2 inline-flex items-center space-x-1.5 px-4 py-2 border text-xs  uppercase tracking-wider rounded-[8px] transition-colors cursor-pointer ${
                 'border-line text-ink hover:bg-surface-hover'
               }`}
             >
@@ -925,18 +925,18 @@ export default function CampaignsView({
                 key={campaign.id}
                 onClick={() => handleSelectCampaignForBlueprint(campaign)}
                 className={`min-w-[900px] grid grid-cols-12 px-6 py-4 items-center transition-colors ${
-                  'hover:bg-[#F4F8F2]'
+                  'hover:bg-surface-hover'
                 } group cursor-pointer`}
               >
                 {/* Campaign Name & Objective */}
                 <div className="col-span-4 pr-4">
-                  <h4 className={`text-xs sm:text-sm font-medium ${'text-ink group-hover:text-[#0A1F1B]'} transition-colors`}>
+                  <h4 className={`text-xs sm:text-sm font-medium ${'text-ink group-hover:text-brand'} transition-colors`}>
                     {campaign.name}
                   </h4>
-                  <p className={`text-[11px] ${'text-ink-3'} font-light mt-0.5 line-clamp-1`}>
+                  <p className={`text-[12px] ${'text-ink-3'} font-light mt-0.5 line-clamp-1`}>
                     {campaign.objective}
                   </p>
-                  <span className={`text-[10px]  ${'text-ink-2/70'} block mt-1`}>
+                  <span className={`text-[11px]  ${'text-ink-2/70'} block mt-1`}>
                     {campaign.channel}
                   </span>
                 </div>
@@ -954,23 +954,23 @@ export default function CampaignsView({
                 <div className={`col-span-2 text-xs  ${'text-ink-2'}`}>
                   <div className="flex items-center space-x-1.5">
                     {timelineState === 'active' && (
-                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
-                        'bg-[#F0FDF4] border-[#86EFAC] text-[#15803D]'
+                      <span className={`inline-flex items-center space-x-1 text-[10px] uppercase px-1.5 py-0.2 rounded border ${
+                        'bg-ok-soft border-ok/30 text-ok'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${'bg-[#15803D]'} animate-pulse`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${'bg-ok'} animate-pulse`} />
                         <span>Active</span>
                       </span>
                     )}
                     {timelineState === 'upcoming' && (
-                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
-                        'bg-[#F0F9FF] border-[#BAE6FD] text-[#0369A1]'
+                      <span className={`inline-flex items-center space-x-1 text-[10px] uppercase px-1.5 py-0.2 rounded border ${
+                        'bg-info-soft border-info/30 text-info'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${'bg-[#0369A1]'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${'bg-info'}`} />
                         <span>Upcoming</span>
                       </span>
                     )}
                     {timelineState === 'concluded' && (
-                      <span className={`inline-flex items-center space-x-1 text-[9px] uppercase px-1.5 py-0.2 rounded border ${
+                      <span className={`inline-flex items-center space-x-1 text-[10px] uppercase px-1.5 py-0.2 rounded border ${
                         'bg-surface-hover border-line text-ink-3'
                       }`}>
                         <span>Concluded</span>
@@ -978,27 +978,27 @@ export default function CampaignsView({
                     )}
                   </div>
                   <div className={`mt-1 font-medium ${'text-ink'}`}>{campaign.startDate}</div>
-                  <div className={`text-[10px] ${'text-ink-3'} mt-0.5`}>
+                  <div className={`text-[11px] ${'text-ink-3'} mt-0.5`}>
                     to {campaign.endDate || 'Ongoing'}
                   </div>
                 </div>
 
                 {/* Progress Column with Dynamic Bar and Stage */}
                 <div className="col-span-2 pr-6">
-                  <div className={`flex items-center justify-between text-[11px]  ${'text-ink'} mb-1.5`}>
-                    <span className={`text-[10px] ${'text-ink-3'}`}>{progressStage}</span>
+                  <div className={`flex items-center justify-between text-[12px]  ${'text-ink'} mb-1.5`}>
+                    <span className={`text-[11px] ${'text-ink-3'}`}>{progressStage}</span>
                     <span className="font-semibold">{campaign.progress}%</span>
                   </div>
-                  <div className={`w-full h-1.5 ${'bg-[#E2ECE0] border-line'} border overflow-hidden rounded-[7px]`}>
+                  <div className={`w-full h-1.5 ${'bg-surface-raised border-line'} border overflow-hidden rounded-[6px]`}>
                     <div 
                       className={`h-full transition-all duration-300 ${
                         campaign.progress === 100
-                          ? 'bg-[#15803D]'
+                          ? 'bg-ok'
                           : campaign.progress >= 75
                           ? 'bg-brand'
                           : campaign.progress >= 25
-                          ? 'bg-[#2E6B5D]'
-                          : 'bg-[#6D9F91]'
+                          ? 'bg-brand'
+                          : 'bg-ink-3'
                       }`}
                       style={{ width: `${campaign.progress}%` }}
                     />
@@ -1011,7 +1011,7 @@ export default function CampaignsView({
                     <span className={`text-xs ${'text-ink'} font-light block`}>
                       {campaign.owner}
                     </span>
-                    <span className={`text-[10px] ${'text-ink-3'} `}>
+                    <span className={`text-[11px] ${'text-ink-3'} `}>
                       Owner
                     </span>
                   </div>
@@ -1022,7 +1022,7 @@ export default function CampaignsView({
                       e.stopPropagation();
                       handleSelectCampaignForBlueprint(campaign);
                     }}
-                    className="px-3 py-1.5 border border-line text-[10px] uppercase  tracking-wider text-ink hover:bg-surface-hover transition-colors cursor-pointer shrink-0"
+                    className="px-3 py-1.5 border border-line text-[11px] uppercase  tracking-wider text-ink hover:bg-surface-hover transition-colors cursor-pointer shrink-0"
                   >
                     Blueprint &rarr;
                   </button>

@@ -178,7 +178,7 @@ export default function ActionModals({
         {activeModal === 'lead' && (
           <form onSubmit={handleCreateLeadSubmit} className="space-y-6">
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
+              <span className="text-[12px] font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
                 PIPELINE REGISTRATION
               </span>
               <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
@@ -190,7 +190,7 @@ export default function ActionModals({
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
+                <label className={`block text-[12px] font-semibold uppercase tracking-wider mb-1.5 ${
                   isLight ? 'text-slate-600' : 'text-ink-2'
                 }`}>
                   Contact Full Name
@@ -210,7 +210,7 @@ export default function ActionModals({
               </div>
 
               <div>
-                <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
+                <label className={`block text-[12px] font-semibold uppercase tracking-wider mb-1.5 ${
                   isLight ? 'text-slate-600' : 'text-ink-2'
                 }`}>
                   Company / Organization
@@ -230,7 +230,7 @@ export default function ActionModals({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
+                  <label className={`block text-[12px] font-semibold uppercase tracking-wider mb-1.5 ${
                     isLight ? 'text-slate-600' : 'text-ink-2'
                   }`}>
                     Acquisition Channel
@@ -253,7 +253,7 @@ export default function ActionModals({
                 </div>
 
                 <div>
-                  <label className={`block text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${
+                  <label className={`block text-[12px] font-semibold uppercase tracking-wider mb-1.5 ${
                     isLight ? 'text-slate-600' : 'text-ink-2'
                   }`}>
                     Estimated Retainer Value
@@ -298,17 +298,17 @@ export default function ActionModals({
         {activeModal === 'campaign' && (
           <form onSubmit={handleCreateCampaignSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
+              <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 DISTRIBUTION SETUP
               </span>
-              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+              <h3 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
                 Create Campaign
               </h3>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Campaign Title
                 </label>
                 <input
@@ -317,32 +317,32 @@ export default function ActionModals({
                   placeholder="e.g. Kyoto Spatial Architectural Narrative"
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
-                  className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                  className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Broadcast Channels
                   </label>
                   <input
                     type="text"
                     value={campaignChannel}
                     onChange={(e) => setCampaignChannel(e.target.value)}
-                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Allocated Budget
                   </label>
                   <input
                     type="text"
                     value={campaignBudget}
                     onChange={(e) => setCampaignBudget(e.target.value)}
-                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
               </div>
@@ -358,7 +358,7 @@ export default function ActionModals({
               </button>
               <button
                 type="submit"
-                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
               >
                 Launch Cadence
               </button>
@@ -370,23 +370,23 @@ export default function ActionModals({
         {activeModal === 'content' && (
           <form onSubmit={handleGenerateContentSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
+              <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 RAPID SYNTHESIS
               </span>
-              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+              <h3 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
                 Generate Content
               </h3>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Format
                 </label>
                 <select
                   value={contentType}
                   onChange={(e) => setContentType(e.target.value)}
-                  className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                  className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                 >
                   <option value="Social Broadcast">Social Broadcast (X & LinkedIn)</option>
                   <option value="Direct Outreach Email">Direct Outreach Email</option>
@@ -395,7 +395,7 @@ export default function ActionModals({
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Topic or Key Thesis
                 </label>
                 <textarea
@@ -404,7 +404,7 @@ export default function ActionModals({
                   placeholder="e.g. Announce our upcoming digital residency. Highlight the balance between zero latency and aesthetic calm."
                   value={contentPrompt}
                   onChange={(e) => setContentPrompt(e.target.value)}
-                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[9px] focus:outline-none focus:border-line-strong resize-none font-light"
+                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[8px] focus:outline-none focus:border-line-strong resize-none font-light"
                 />
               </div>
             </div>
@@ -419,7 +419,7 @@ export default function ActionModals({
               </button>
               <button
                 type="submit"
-                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
               >
                 Generate & Save
               </button>
@@ -431,10 +431,10 @@ export default function ActionModals({
         {activeModal === 'schedule' && (
           <form onSubmit={handleSchedulePostSubmit} className="space-y-6">
             <div>
-              <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
+              <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                 QUEUE DISPATCH
               </span>
-              <h3 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+              <h3 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
                 Schedule Post
               </h3>
             </div>
@@ -443,10 +443,10 @@ export default function ActionModals({
               {/* Multi-Platform Selection */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 font-medium">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 font-medium">
                     Destination Platforms ({schedulePlatforms.length} selected)
                   </label>
-                  <div className="flex items-center space-x-2 text-[10px] ">
+                  <div className="flex items-center space-x-2 text-[11px] ">
                     <button
                       type="button"
                       onClick={() => setSchedulePlatforms(['LinkedIn', 'X (Twitter)', 'Substack', 'Instagram', 'Threads'])}
@@ -473,7 +473,7 @@ export default function ActionModals({
                         key={p}
                         type="button"
                         onClick={() => toggleModalSchedulePlatform(p)}
-                        className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[9px] transition-colors cursor-pointer flex items-center space-x-1.5  ${
+                        className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[8px] transition-colors cursor-pointer flex items-center space-x-1.5  ${
                           isSelected 
                             ? 'text-ink border-line-strong bg-surface-hover' 
                             : 'text-ink-3 border-line hover:text-ink'
@@ -486,7 +486,7 @@ export default function ActionModals({
                   })}
                 </div>
                 {schedulePlatforms.length === 0 && (
-                  <p className="text-[10px] text-warn mt-1 ">
+                  <p className="text-[11px] text-warn mt-1 ">
                     Select at least one destination platform.
                   </p>
                 )}
@@ -494,7 +494,7 @@ export default function ActionModals({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Broadcast Topic / Title
                   </label>
                   <input
@@ -502,25 +502,25 @@ export default function ActionModals({
                     placeholder="e.g., Atelier Architecture Insights"
                     value={scheduleTitle}
                     onChange={(e) => setScheduleTitle(e.target.value)}
-                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                     Dispatch Slot
                   </label>
                   <input
                     type="text"
                     value={scheduleTime}
                     onChange={(e) => setScheduleTime(e.target.value)}
-                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[9px] focus:outline-none focus:border-line-strong"
+                    className="w-full bg-surface-raised border border-line text-ink px-3 py-2 rounded-[8px] focus:outline-none focus:border-line-strong"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
+                <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1.5 font-medium">
                   Message Content
                 </label>
                 <textarea
@@ -529,7 +529,7 @@ export default function ActionModals({
                   placeholder="Type post copy or paste from Creative Lab..."
                   value={scheduleText}
                   onChange={(e) => setScheduleText(e.target.value)}
-                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[9px] focus:outline-none focus:border-line-strong resize-none font-light"
+                  className="w-full bg-surface-raised border border-line text-ink p-3 rounded-[8px] focus:outline-none focus:border-line-strong resize-none font-light"
                 />
               </div>
 
@@ -556,7 +556,7 @@ export default function ActionModals({
               <button
                 type="submit"
                 disabled={schedulePlatforms.length === 0 || !scheduleText.trim()}
-                className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40"
+                className="bg-brand text-on-brand px-6 py-2.5 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40"
               >
                 Schedule Release
               </button>
@@ -569,7 +569,7 @@ export default function ActionModals({
           <div className="space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
+                <span className="text-[12px] font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 block mb-1">
                   LEAD PROFILE · SCORE {selectedLead.score}/100
                 </span>
                 <h3 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
@@ -594,7 +594,7 @@ export default function ActionModals({
               isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-surface-raised border-line'
             }`}>
               <div>
-                <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                <p className={`text-[11px] font-semibold uppercase tracking-wider ${
                   isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Channel
@@ -604,7 +604,7 @@ export default function ActionModals({
                 </p>
               </div>
               <div>
-                <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                <p className={`text-[11px] font-semibold uppercase tracking-wider ${
                   isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Retainer Value
@@ -614,7 +614,7 @@ export default function ActionModals({
                 </p>
               </div>
               <div className="col-span-2">
-                <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                <p className={`text-[11px] font-semibold uppercase tracking-wider ${
                   isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Email
@@ -624,7 +624,7 @@ export default function ActionModals({
                 </p>
               </div>
               <div className="col-span-2">
-                <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                <p className={`text-[11px] font-semibold uppercase tracking-wider ${
                   isLight ? 'text-slate-500' : 'text-ink-3'
                 }`}>
                   Last Activity

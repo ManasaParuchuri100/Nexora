@@ -79,13 +79,13 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
               type="button"
               onClick={onClose}
               title="Hide activity graph"
-              className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-[rgba(169,191,165,0.1)] p-1 rounded transition-colors cursor-pointer"
+              className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] hover:bg-surface-hover p-1 rounded transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
-        <div className="flex items-center space-x-2 text-[10px] font-mono text-[var(--text-secondary)]">
+        <div className="flex items-center space-x-2 text-[11px] font-mono text-[var(--text-secondary)]">
           <span>Less</span>
           <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(0)}`} />
           <span className={`w-2.5 h-2.5 rounded-[1px] ${getCellColor(1)}`} />
@@ -104,7 +104,7 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
             {HOURS.map((hour, rIdx) => (
               <div key={hour} className="flex items-center space-x-2">
                 {/* Y-axis hour label */}
-                <span className="w-10 text-[10px] font-mono text-[#A9BFA5]/70 text-right shrink-0 select-none">
+                <span className="w-10 text-[11px] font-mono text-[#A9BFA5]/70 text-right shrink-0 select-none">
                   {hour}
                 </span>
 
@@ -130,14 +130,14 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
 
           {/* X-axis days footer */}
           <div className="flex items-center space-x-2 mt-2 pt-1 border-t border-[rgba(169,191,165,0.1)]">
-            <span className="w-10 text-[10px] font-mono text-[#A9BFA5] font-medium text-right shrink-0">
+            <span className="w-10 text-[11px] font-mono text-[#A9BFA5] font-medium text-right shrink-0">
               June
             </span>
             <div className="grid grid-cols-13 gap-1.5 flex-1 text-center">
               {DAYS.map(day => (
                 <span
                   key={day}
-                  className="text-[10px] font-mono text-[#A9BFA5]/70"
+                  className="text-[11px] font-mono text-[#A9BFA5]/70"
                 >
                   {day}
                 </span>
@@ -148,7 +148,7 @@ export default function ActivityHeatmap({ onClose }: ActivityHeatmapProps = {}) 
 
         {/* Hover Tooltip */}
         {hoveredCell && (
-          <div className="absolute top-0 right-0 bg-[#051513] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 rounded-[2px] text-[10px] font-mono text-[#E8E9D8] shadow-lg pointer-events-none z-30">
+          <div className="absolute top-0 right-0 bg-[#051513] border border-[rgba(169,191,165,0.3)] px-3 py-1.5 rounded-[2px] text-[11px] font-mono text-[#E8E9D8] shadow-lg pointer-events-none z-30">
             <span className="text-[#A9BFA5]">June {hoveredCell.day} at {hoveredCell.hour}: </span>
             <span className="font-semibold text-white">
               {hoveredCell.intensity === 0 

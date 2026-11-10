@@ -145,7 +145,7 @@ function Options({
           <button type="button" className="nx-btn sm" onClick={() => { setAdding(false); setRaw(''); setErr(''); }}>Cancel</button>
         </div>
       )}
-      {err && <p className="text-[11px] text-danger mt-1.5 mb-0" role="alert">{err}</p>}
+      {err && <p className="text-[12px] text-danger mt-1.5 mb-0" role="alert">{err}</p>}
     </div>
   );
 }
@@ -273,7 +273,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
     return (
       <div className="py-24 max-w-xl mx-auto text-center animate-fadeIn">
         <div className="eyebrow">Nexora campaign strategist</div>
-        <h2 className="font-display text-[26px] font-bold text-ink mt-3 mb-5">{LOADING_STEPS[loadingStepIndex]}</h2>
+        <h2 className="font-display text-[26px] font-semibold text-ink mt-3 mb-5">{LOADING_STEPS[loadingStepIndex]}</h2>
         <div className="nx-progress max-w-[220px] mx-auto">
           <div style={{ width: `${((loadingStepIndex + 1) / LOADING_STEPS.length) * 100}%` }} />
         </div>
@@ -307,13 +307,13 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
                 className="flex items-center gap-2.5 bg-transparent border-0 cursor-pointer p-0 min-h-0!"
               >
                 <span
-                  className={`w-[26px] h-[26px] rounded-full grid place-items-center text-[11px] font-bold border ${
+                  className={`w-[26px] h-[26px] rounded-full grid place-items-center text-[12px] font-bold border ${
                     cur ? 'bg-brand text-white border-brand' : done ? 'bg-brand-soft text-brand border-brand-soft' : 'bg-surface text-ink-3 border-line'
                   }`}
                 >
                   {done ? '✓' : n}
                 </span>
-                <span className={`text-[12px] font-semibold ${cur ? 'text-ink' : 'text-ink-3'}`}>{t}</span>
+                <span className={`text-[13px] font-semibold ${cur ? 'text-ink' : 'text-ink-3'}`}>{t}</span>
               </button>
               {n < STEP_TITLES.length && <span className="w-8 h-px bg-line mx-3" />}
             </li>
@@ -321,7 +321,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
         })}
       </ol>
 
-      <div className="grid gap-[15px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
+      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
       <section className="nx-panel nx-pad">
         {step === 1 && (
           <>
@@ -500,7 +500,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
           </>
         )}
 
-        {error && <p className="text-[12px] text-danger m-0 mb-3">{error}</p>}
+        {error && <p className="text-[13px] text-danger m-0 mb-3">{error}</p>}
 
         <div className="flex justify-between gap-2 pt-2">
           <button type="button" className="nx-btn" disabled={step === 1} onClick={() => setStep(step - 1)}>
@@ -514,7 +514,7 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
 
         <aside className="nx-panel nx-pad lg:sticky lg:top-[88px]">
           <div className="eyebrow mb-1">Your campaign</div>
-          <h3 className="font-display text-[18px] font-bold text-ink m-0 mb-3 tracking-[-0.4px]">
+          <h3 className="font-display text-[18px] font-semibold text-ink m-0 mb-3 tracking-[-0.4px]">
             {form.name.trim() || 'Untitled campaign'}
           </h3>
           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -522,13 +522,13 @@ export default function CampaignCreationFlow({ onBack, onBlueprintGenerated }: C
             <span className="nx-tag">{form.primaryGoal}</span>
           </div>
           <div className="nx-split" />
-          <div className="nx-kv"><span>Offer</span><strong className="text-ink text-[12px] text-right">{form.offer}</strong></div>
-          <div className="nx-kv"><span>Audience</span><strong className="text-ink text-[12px] text-right">{form.audienceType}</strong></div>
-          <div className="nx-kv"><span>Reach</span><strong className="text-ink text-[12px] text-right">{form.location}, {form.ageRange}</strong></div>
-          <div className="nx-kv"><span>Budget</span><strong className="text-ink text-[12px]">{budgetLabel}</strong></div>
-          <div className="nx-kv"><span>Runs</span><strong className="text-ink text-[12px]">{durLabel}</strong></div>
-          <div className="nx-kv"><span>Channels</span><strong className="text-ink text-[12px] text-right">{form.channels.join(', ') || '—'}</strong></div>
-          <div className="nx-kv"><span>Tone</span><strong className="text-ink text-[12px]">{form.brandVoice} · {form.visualStyle}</strong></div>
+          <div className="nx-kv"><span>Offer</span><strong className="text-ink text-[13px] text-right">{form.offer}</strong></div>
+          <div className="nx-kv"><span>Audience</span><strong className="text-ink text-[13px] text-right">{form.audienceType}</strong></div>
+          <div className="nx-kv"><span>Reach</span><strong className="text-ink text-[13px] text-right">{form.location}, {form.ageRange}</strong></div>
+          <div className="nx-kv"><span>Budget</span><strong className="text-ink text-[13px]">{budgetLabel}</strong></div>
+          <div className="nx-kv"><span>Runs</span><strong className="text-ink text-[13px]">{durLabel}</strong></div>
+          <div className="nx-kv"><span>Channels</span><strong className="text-ink text-[13px] text-right">{form.channels.join(', ') || '—'}</strong></div>
+          <div className="nx-kv"><span>Tone</span><strong className="text-ink text-[13px]">{form.brandVoice} · {form.visualStyle}</strong></div>
         </aside>
       </div>
     </div>

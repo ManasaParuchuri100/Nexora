@@ -483,7 +483,7 @@ export default function EngageView({
     specialFilter === 'ready-to-book' ? 'Ready to book a call' : '';
 
   return (
-    <div className="flex-1 min-h-[560px] flex flex-row gap-[15px] text-ink select-text">
+    <div className="flex-1 min-h-[560px] flex flex-row gap-[16px] text-ink select-text">
       
       {/* =========================================================================
           PANEL 1: CONVERSATION LIST (LEFT)
@@ -508,14 +508,14 @@ export default function EngageView({
                   setActiveTab(tab.id as InboxFilterTab);
                   setSpecialFilter('all');
                 }}
-                className={`min-h-0! rounded-[7px]! py-2 px-3 flex items-center gap-1.5 transition-colors cursor-pointer text-[13px] font-bold focus-visible:outline-none ${
+                className={`min-h-0! rounded-[6px]! py-2 px-3 flex items-center gap-1.5 transition-colors cursor-pointer text-[14px] font-bold focus-visible:outline-none ${
                   activeTab === tab.id && specialFilter === 'all'
                     ? 'bg-brand-soft text-brand'
                     : 'bg-transparent text-ink-3 hover:text-ink'
                 }`}
               >
                 <span className="truncate">{tab.label}</span>
-                <span className="text-[10px] tabular-nums font-bold opacity-80">
+                <span className="text-[11px] tabular-nums font-bold opacity-80">
                   {tab.count}
                 </span>
               </button>
@@ -672,7 +672,7 @@ export default function EngageView({
                   onClick={() => handleSelectConversation(convo.id)}
                   className={`w-full min-h-0! rounded-none! py-[18px] pr-[18px] text-left transition-colors cursor-pointer border-b border-line flex flex-col gap-[9px] focus-visible:outline-none ${
                     isSelected
-                      ? 'bg-[#EFF8F7] dark-selected border-l-[3px] border-l-brand pl-[15px]'
+                      ? 'bg-brand-soft border-l-[3px] border-l-brand pl-[16px]'
                       : 'bg-surface hover:bg-surface-hover pl-[18px] border-l-0'
                   }`}
                 >
@@ -692,21 +692,21 @@ export default function EngageView({
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[13px] truncate font-bold text-ink`}>
+                          <span className={`text-[14px] truncate font-bold text-ink`}>
                             {convo.name}
                           </span>
                           {convo.unread && (
                             <span className="w-2 h-2 rounded-full bg-brand shrink-0" title="Unread" />
                           )}
                         </div>
-                        <span className="text-[10px] text-ink-3 truncate block">
+                        <span className="text-[11px] text-ink-3 truncate block">
                           {convo.company}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[10px] text-ink-3 tabular-nums">
+                      <span className="text-[11px] text-ink-3 tabular-nums">
                         {convo.time}
                       </span>
                       <span 
@@ -725,7 +725,7 @@ export default function EngageView({
                   </div>
 
                   {/* One-line snippet at text-sm */}
-                  <p className="text-[11px] text-ink-3 truncate leading-snug m-0">
+                  <p className="text-[12px] text-ink-3 truncate leading-snug m-0">
                     {convo.snippet}
                   </p>
 
@@ -801,7 +801,7 @@ export default function EngageView({
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[13px] font-bold text-ink truncate min-w-[96px]">
+                    <span className="text-[14px] font-bold text-ink truncate min-w-[96px]">
                       {currentConvo.name}
                     </span>
                     <span className="nx-tag teal hidden 2xl:inline-flex">{currentConvo.stage}</span>
@@ -809,7 +809,7 @@ export default function EngageView({
                       Score {currentConvo.score}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-ink-3 mt-[5px] whitespace-nowrap">
+                  <div className="flex items-center gap-1.5 text-[11px] text-ink-3 mt-[5px] whitespace-nowrap">
                     <span className="truncate">{currentConvo.company}</span>
                     <span>·</span>
                     {(() => {
@@ -932,7 +932,7 @@ export default function EngageView({
 
             {/* AI Paused Banner: Calm info style with Sparkles */}
             {currentConvo.aiAlert?.isPaused && currentConvo.status === 'needs_you' && (
-              <div className="nx-handoff px-[19px] py-3 text-[11px] animate-fadeIn shrink-0">
+              <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0">
                 <b>Human requested · AI paused</b>
                 <div className="mt-1">
                   {currentConvo.aiAlert.reason || 'The customer needs a person before this thread can continue.'}
@@ -966,7 +966,7 @@ export default function EngageView({
                   <React.Fragment key={m.id}>
                     {showSeparator && (
                       <div className="flex items-center justify-center my-3">
-                        <span className="text-[10px] text-ink-3">
+                        <span className="text-[11px] text-ink-3">
                           {currentDay}
                         </span>
                       </div>
@@ -1018,7 +1018,7 @@ export default function EngageView({
               
               {/* Context-Aware Suggestion Chips Toolbar */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
-                <span className="text-[11px] text-ink-3 shrink-0 font-bold">
+                <span className="text-[12px] text-ink-3 shrink-0 font-bold">
                   Insert
                 </span>
                 
@@ -1170,7 +1170,7 @@ export default function EngageView({
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <h3 className="font-display font-bold text-[15px] tracking-[-0.3px] text-ink">Lead intelligence</h3>
+              <h3 className="font-display font-semibold text-[16px] tracking-[-0.3px] text-ink">Lead intelligence</h3>
             </div>
             <button
               type="button"
@@ -1327,12 +1327,12 @@ export default function EngageView({
                 <div className="pt-3 space-y-2.5">
                   {linkedCall && (
                     <div className="space-y-1.5">
-                      <span className="text-[11px] text-ink-3 block">Upcoming call{customCallTitle(linkedCall) ? ` · ${customCallTitle(linkedCall)}` : ''} · {formatDue(linkedCall)} · Host: {linkedCall.owner}</span>
+                      <span className="text-[12px] text-ink-3 block">Upcoming call{customCallTitle(linkedCall) ? ` · ${customCallTitle(linkedCall)}` : ''} · {formatDue(linkedCall)} · Host: {linkedCall.owner}</span>
                       <CallChip task={linkedCall} onNotify={onNotify} />
                     </div>
                   )}
                   {linkedNext && (
-                    <span className="text-[11px] text-ink-3 block">
+                    <span className="text-[12px] text-ink-3 block">
                       Next follow-up: <b className="text-ink">{linkedNext.title}</b> · {formatDue(linkedNext)}
                     </span>
                   )}

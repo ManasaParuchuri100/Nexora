@@ -43,7 +43,7 @@ export default function BrandContextBanner({
 
   return (
     <div
-      className={`border rounded-[9px] transition-all text-xs ${
+      className={`border rounded-[8px] transition-all text-xs ${
         'bg-surface border-line text-ink'
       }`}
     >
@@ -56,18 +56,18 @@ export default function BrandContextBanner({
             }`}
           />
           <span
-            className={`text-[11px] font-bold shrink-0 font-medium ${
+            className={`text-[12px] font-bold shrink-0 font-medium ${
  'text-ink-2'
  }`}
           >
             Brand Context:
           </span>
-          <span className="font-medium truncate font-mono text-[11px]">
+          <span className="font-medium truncate font-mono text-[12px]">
             {context.productName}
           </span>
           <span className="hidden sm:inline opacity-40">·</span>
           <span
-            className={`hidden sm:inline truncate text-[11px] font-light ${
+            className={`hidden sm:inline truncate text-[12px] font-light ${
               'text-ink-3'
             }`}
           >
@@ -82,7 +82,7 @@ export default function BrandContextBanner({
               if (!isOpen) setDraft(context);
               setIsOpen(!isOpen);
             }}
-            className={`inline-flex items-center space-x-1 px-2 py-1 rounded-[9px] border text-[11px] font-mono transition-colors cursor-pointer ${
+            className={`inline-flex items-center space-x-1 px-2 py-1 rounded-[8px] border text-[12px] font-mono transition-colors cursor-pointer ${
               isOpen
                 ? 'border-brand bg-brand text-on-brand'
                 : 'border-line text-ink-2 hover:bg-surface-hover'
@@ -105,7 +105,7 @@ export default function BrandContextBanner({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1 ${
+                className={`block text-[12px] font-bold mb-1 ${
  'text-ink-2'
  }`}
               >
@@ -117,7 +117,7 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, productName: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                   'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -125,7 +125,7 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1 ${
+                className={`block text-[12px] font-bold mb-1 ${
  'text-ink-2'
  }`}
               >
@@ -137,7 +137,7 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, brandVoice: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                   'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -145,7 +145,7 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1 ${
+                className={`block text-[12px] font-bold mb-1 ${
  'text-ink-2'
  }`}
               >
@@ -155,7 +155,7 @@ export default function BrandContextBanner({
                 type="text"
                 value={draft.audience}
                 onChange={(e) => setDraft({ ...draft, audience: e.target.value })}
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                   'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -163,7 +163,7 @@ export default function BrandContextBanner({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1 ${
+                className={`block text-[12px] font-bold mb-1 ${
  'text-ink-2'
  }`}
               >
@@ -175,7 +175,7 @@ export default function BrandContextBanner({
                 onChange={(e) =>
                   setDraft({ ...draft, brandConstraints: e.target.value })
                 }
-                className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                   'bg-surface border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -186,7 +186,7 @@ export default function BrandContextBanner({
             <button
               type="button"
               onClick={handleReset}
-              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-[9px] border text-[11px] font-mono transition-colors cursor-pointer ${
+              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-[8px] border text-[12px] font-mono transition-colors cursor-pointer ${
                 'border-line text-ink-3 hover:text-ink'
               }`}
               title="Reset to Atelier default"
@@ -198,7 +198,7 @@ export default function BrandContextBanner({
             <button
               type="button"
               onClick={handleSave}
-              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-[9px] text-[11px] font-mono font-medium transition-colors cursor-pointer ${
+              className={`inline-flex items-center space-x-1 px-3 py-1 rounded-[8px] text-[12px] font-mono font-medium transition-colors cursor-pointer ${
                 'bg-brand text-on-brand hover:bg-brand-hover'
               }`}
             >

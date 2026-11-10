@@ -47,7 +47,7 @@ function KV({ k, children }: { k: string; children: React.ReactNode }) {
   return (
     <div className="nx-kv">
       <span>{k}</span>
-      <strong className="text-ink text-[12px] font-semibold text-right max-w-[62%]">{children}</strong>
+      <strong className="text-ink text-[13px] font-semibold text-right max-w-[62%]">{children}</strong>
     </div>
   );
 }
@@ -70,7 +70,7 @@ function Bullets({ items }: { items: string[] }) {
   return (
     <ul className="m-0 p-0 list-none">
       {items.map(i => (
-        <li key={i} className="flex gap-2.5 py-[9px] border-t border-line first:border-t-0 text-[12px] text-ink-2 leading-[1.55]">
+        <li key={i} className="flex gap-2.5 py-[9px] border-t border-line first:border-t-0 text-[13px] text-ink-2 leading-[1.55]">
           <span className="mt-[7px] w-[5px] h-[5px] rounded-full bg-brand shrink-0" />
           {i}
         </li>
@@ -142,7 +142,7 @@ export default function CampaignBlueprintView({
 
       {notice && <div className="nx-toast" role="status">{notice}</div>}
 
-      <div className="nx-grid nx-thirds mb-[15px]">
+      <div className="nx-grid nx-thirds mb-[16px]">
         {[
           { l: '1. Plan', v: 'Created by Nexora', d: 'Objective, audience, offer and roadmap are set.' },
           { l: '2. Content', v: `${linkedAssets.length} linked`, d: `${linkedAssets.filter(a => a.status === 'Scheduled' || a.status === 'Published').length} scheduled or published through Nexora.` },
@@ -156,7 +156,7 @@ export default function CampaignBlueprintView({
         ))}
       </div>
 
-      <div className="nx-grid nx-metrics mb-[15px]">
+      <div className="nx-grid nx-metrics mb-[16px]">
         {[
           { l: 'Objective', v: o.objective, d: 'Main goal' },
           { l: 'Budget', v: o.budget.replace('Total: ', '').replace('Daily: ', ''), d: o.budget.startsWith('Daily') ? 'per day' : 'total' },
@@ -171,10 +171,10 @@ export default function CampaignBlueprintView({
         ))}
       </div>
 
-      <Tabs<Tab> idPrefix="campaign" label="Campaign sections" tabs={TABS.map(t => t.id === 'content' && linkedAssets.length ? { ...t, count: linkedAssets.length } : t)} value={tab} onChange={setTab} className="mb-[15px]" />
+      <Tabs<Tab> idPrefix="campaign" label="Campaign sections" tabs={TABS.map(t => t.id === 'content' && linkedAssets.length ? { ...t, count: linkedAssets.length } : t)} value={tab} onChange={setTab} className="mb-[16px]" />
 
       <TabPanel idPrefix="campaign" id={tab}>
-      <div className="grid gap-[15px]">
+      <div className="grid gap-[16px]">
       {tab === 'plan' && (
         <div className="nx-grid nx-two">
           <Panel title="Campaign overview" sub="The essentials at a glance.">
@@ -194,7 +194,7 @@ export default function CampaignBlueprintView({
               </span>
             </div>
             <div className="nx-split" />
-            <h3 className="font-display text-[13px] font-bold text-ink m-0 mb-2">Success looks like</h3>
+            <h3 className="font-display text-[14px] font-semibold text-ink m-0 mb-2">Success looks like</h3>
             <Bullets items={o.successMetrics} />
           </Panel>
 
@@ -203,7 +203,7 @@ export default function CampaignBlueprintView({
             <KV k="Key message">{s.keyMessage}</KV>
             <KV k="Campaign angle">{s.campaignAngle}</KV>
             <div className="nx-split" />
-            <p className="text-[12px] text-ink-2 leading-[1.65] m-0">{s.recommendedApproach}</p>
+            <p className="text-[13px] text-ink-2 leading-[1.65] m-0">{s.recommendedApproach}</p>
           </Panel>
 
         </div>
@@ -222,14 +222,14 @@ export default function CampaignBlueprintView({
                     className="w-full flex items-center gap-3 py-[14px] bg-transparent border-0 cursor-pointer text-left min-h-0!">
                     <span className="nx-alerticon muted">{i + 1}</span>
                     <span className="flex-1 min-w-0">
-                      <strong className="block text-[13px] text-ink capitalize">{p.name.toLowerCase()}</strong>
-                      <span className="block text-[11px] text-ink-3">{p.suggestedTimeline} · {p.responsible}</span>
+                      <strong className="block text-[14px] text-ink capitalize">{p.name.toLowerCase()}</strong>
+                      <span className="block text-[12px] text-ink-3">{p.suggestedTimeline} · {p.responsible}</span>
                     </span>
-                    <span className="text-ink-3 text-[12px]">{open ? '−' : '+'}</span>
+                    <span className="text-ink-3 text-[13px]">{open ? '−' : '+'}</span>
                   </button>
                   {open && (
                     <div className="pb-4 pl-[42px] grid gap-4 md:grid-cols-2 animate-fadeIn">
-                      <div className="md:col-span-2 text-[12px] text-ink-2">{p.objective}</div>
+                      <div className="md:col-span-2 text-[13px] text-ink-2">{p.objective}</div>
                       <div><div className="eyebrow mb-1.5">Tasks</div><Bullets items={p.tasks} /></div>
                       <div><div className="eyebrow mb-1.5">Deliverables</div><Bullets items={p.deliverables} /></div>
                     </div>
@@ -242,14 +242,14 @@ export default function CampaignBlueprintView({
       )}
 
       {tab === 'content' && (
-        <div className="grid gap-[15px]">
+        <div className="grid gap-[16px]">
           <section className="nx-panel nx-pad">
             <div className="nx-sectionhead">
               <div><h2>Content in your library</h2><p>Drafts linked to this campaign.</p></div>
               <button type="button" className="nx-btn sm" onClick={() => onNavigateToModule?.('content', 'create')}>Create content →</button>
             </div>
             {linkedAssets.length === 0 ? (
-              <p className="text-[12px] text-ink-3 m-0">Nothing linked yet. Choose this campaign when you create content and it will appear here.</p>
+              <p className="text-[13px] text-ink-3 m-0">Nothing linked yet. Choose this campaign when you create content and it will appear here.</p>
             ) : (
               <div className="border-t border-line">
                 {linkedAssets.map(a => (
@@ -288,7 +288,7 @@ export default function CampaignBlueprintView({
               <div className="flex flex-wrap gap-1.5 mb-4">{blueprint.socialPlan.contentThemes.map(t => <span key={t} className="nx-chip">{t}</span>)}</div>
               <div className="eyebrow mb-1.5">Best formats</div>
               <div className="flex flex-wrap gap-1.5 mb-4">{blueprint.socialPlan.bestFormats.map(t => <span key={t} className="nx-chip">{t}</span>)}</div>
-              <p className="text-[12px] text-ink-2 leading-[1.6] m-0">{blueprint.socialPlan.engagementStrategy}</p>
+              <p className="text-[13px] text-ink-2 leading-[1.6] m-0">{blueprint.socialPlan.engagementStrategy}</p>
             </Panel>
             <Panel title="Post ideas" sub="Ready to turn into drafts.">
               <Bullets items={blueprint.socialPlan.postIdeas} />
@@ -310,7 +310,7 @@ export default function CampaignBlueprintView({
                 {blueprint.execution[g.key].map((item, i) => {
                   const k = `${g.key}-${i}`;
                   return (
-                    <label key={k} className="flex gap-2.5 py-2 border-t border-line text-[12px] text-ink-2 cursor-pointer">
+                    <label key={k} className="flex gap-2.5 py-2 border-t border-line text-[13px] text-ink-2 cursor-pointer">
                       <input type="checkbox" className="mt-[3px]" checked={!!done[k]}
                         onChange={() => setDone(d => ({ ...d, [k]: !d[k] }))} />
                       <span className={done[k] ? 'line-through text-ink-3' : ''}>{item}</span>
@@ -396,9 +396,9 @@ export default function CampaignBlueprintView({
               <div key={r.id} className="py-3 border-t border-line first:border-t-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`nx-tag ${r.severity === 'High' ? 'red' : r.severity === 'Medium' ? 'amber' : 'green'}`}>{r.severity}</span>
-                  <strong className="text-[12px] text-ink">{r.risk}</strong>
+                  <strong className="text-[13px] text-ink">{r.risk}</strong>
                 </div>
-                <p className="text-[12px] text-ink-2 leading-[1.6] m-0">{r.recommendation}</p>
+                <p className="text-[13px] text-ink-2 leading-[1.6] m-0">{r.recommendation}</p>
               </div>
             ))}
           </Panel>

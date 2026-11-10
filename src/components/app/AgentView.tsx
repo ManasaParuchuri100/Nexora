@@ -73,7 +73,7 @@ export default function AgentView({ onNavigate }: AgentViewProps) {
             key={m.label}
             type="button"
             onClick={m.onClick}
-            className="nx-panel nx-metric min-h-[121px]! rounded-[15px]!"
+            className="nx-panel nx-metric min-h-[121px]! rounded-[10px]!"
           >
             <div className="nx-label">{m.label}</div>
             <div className="nx-number">{m.value}</div>
@@ -82,7 +82,7 @@ export default function AgentView({ onNavigate }: AgentViewProps) {
         ))}
       </div>
 
-      <div className="nx-grid nx-two mt-[15px]">
+      <div className="nx-grid nx-two mt-[16px]">
         <section className="nx-panel nx-pad">
           <div className="nx-sectionhead">
             <div>
@@ -93,7 +93,7 @@ export default function AgentView({ onNavigate }: AgentViewProps) {
           <div className="border-t border-line">
             {RESPONSIBILITIES.map((r, i) => (
               <div key={r.title} className="nx-row">
-                <div className="nx-alerticon text-[15px]">{i + 1}</div>
+                <div className="nx-alerticon text-[16px]">{i + 1}</div>
                 <div className="flex-1 min-w-0">
                   <strong>{r.title}</strong>
                   <p>{r.detail}</p>
@@ -125,8 +125,8 @@ export default function AgentView({ onNavigate }: AgentViewProps) {
             </div>
           ))}
           <div className="nx-split" />
-          <h3 className="font-display text-[13px] font-bold text-ink m-0">Escalation conditions</h3>
-          <p className="text-[11px] text-ink-3 my-3">
+          <h3 className="font-display text-[14px] font-semibold text-ink m-0">Escalation conditions</h3>
+          <p className="text-[12px] text-ink-3 my-3">
             Customer asks for a human · AI is uncertain · pricing exception · sensitive request
           </p>
           <button type="button" className="nx-btn sm" onClick={() => onNavigate('settings', 'ai-automation')}>

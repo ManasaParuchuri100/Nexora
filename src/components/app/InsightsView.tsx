@@ -102,10 +102,10 @@ export default function InsightsView({
         {/* Header */}
         <section className="border-b border-line pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
+            <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
               INSIGHTS // REAL-TIME INBOUND
             </span>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl font-light text-ink tracking-tight">
+            <h1 className="font-display font-semibold text-4xl sm:text-5xl font-light text-ink tracking-tight">
               Live Leads
             </h1>
             <p className="mt-3 text-xs sm:text-sm text-ink-2 font-light leading-relaxed max-w-xl">
@@ -117,7 +117,7 @@ export default function InsightsView({
             <button
               type="button"
               onClick={() => onTriggerQuickAction('lead')}
-              className="bg-brand text-on-brand px-5 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5"
+              className="bg-brand text-on-brand px-5 py-2.5 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Lead</span>
@@ -135,7 +135,7 @@ export default function InsightsView({
                 placeholder="Filter by lead name, studio, channel..."
                 value={leadSearch}
                 onChange={(e) => setLeadSearch(e.target.value)}
-                className="bg-surface border border-line text-ink text-xs px-3 py-1.5 pl-8 rounded-[9px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 font-light w-64 sm:w-80"
+                className="bg-surface border border-line text-ink text-xs px-3 py-1.5 pl-8 rounded-[8px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 font-light w-64 sm:w-80"
               />
               <Search className="w-3.5 h-3.5 text-ink-3 absolute left-2.5 top-2.5 pointer-events-none" />
             </div>
@@ -146,7 +146,7 @@ export default function InsightsView({
               <select
                 value={selectedStatusFilter}
                 onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                className="bg-surface border border-line text-ink-2 text-xs px-2.5 py-1.5 rounded-[9px] focus:outline-none focus:border-line-strong cursor-pointer"
+                className="bg-surface border border-line text-ink-2 text-xs px-2.5 py-1.5 rounded-[8px] focus:outline-none focus:border-line-strong cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="New">NEW</option>
@@ -158,7 +158,7 @@ export default function InsightsView({
             </div>
           </div>
 
-          <div className="text-[11px]  text-ink-2">
+          <div className="text-[12px]  text-ink-2">
             Showing {filteredLeads.length} of {leads.length} incoming leads
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function InsightsView({
         <div className="border border-line bg-surface overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-line bg-surface-raised text-[10px] uppercase tracking-widest text-ink-3 font-medium">
+              <tr className="border-b border-line bg-surface-raised text-[11px] uppercase tracking-widest text-ink-3 font-medium">
                 <th className="py-3.5 px-6 font-medium">Lead</th>
                 <th className="py-3.5 px-6 font-medium">Source</th>
                 <th className="py-3.5 px-6 font-medium">Status</th>
@@ -193,7 +193,7 @@ export default function InsightsView({
                       <div className="font-medium text-ink group-hover:text-ink transition-colors">
                         {lead.name}
                       </div>
-                      <div className="text-[11px] text-ink-2 font-light mt-0.5">
+                      <div className="text-[12px] text-ink-2 font-light mt-0.5">
                         {lead.company}
                       </div>
                     </td>
@@ -205,13 +205,13 @@ export default function InsightsView({
 
                     {/* Status */}
                     <td className="py-4 px-6">
-                      <span className={`inline-block text-[9px] uppercase tracking-wider px-2 py-0.5 border rounded-[7px]  font-medium ${getStatusBadgeStyle(lead.status)}`}>
+                      <span className={`inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 border rounded-[6px]  font-medium ${getStatusBadgeStyle(lead.status)}`}>
                         {lead.status.toUpperCase()}
                       </span>
                     </td>
 
                     {/* Activity */}
-                    <td className="py-4 px-6 text-ink-2  text-[11px]">
+                    <td className="py-4 px-6 text-ink-2  text-[12px]">
                       {lead.lastActivity}
                     </td>
 
@@ -263,10 +263,10 @@ export default function InsightsView({
         {/* Header */}
         <section className="border-b border-line pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
+            <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
               INSIGHTS // MARKET RADAR
             </span>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl font-light text-ink tracking-tight">
+            <h1 className="font-display font-semibold text-4xl sm:text-5xl font-light text-ink tracking-tight">
               Trending Topics
             </h1>
             <p className="mt-3 text-xs sm:text-sm text-ink-2 font-light leading-relaxed max-w-xl">
@@ -274,7 +274,7 @@ export default function InsightsView({
             </p>
           </div>
 
-          <div className="text-[11px]  text-ink-2">
+          <div className="text-[12px]  text-ink-2">
             Radar synchronized · 15m cadence
           </div>
         </section>
@@ -291,18 +291,18 @@ export default function InsightsView({
                 >
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center space-x-3">
-                      <span className=" text-[10px] text-ink-3">
+                      <span className=" text-[11px] text-ink-3">
                         0{actualIdx + 1}
                       </span>
-                      <span className="text-[10px] uppercase tracking-widest  px-2 py-0.5 border border-line text-ink-2">
+                      <span className="text-[11px] uppercase tracking-widest  px-2 py-0.5 border border-line text-ink-2">
                         {topic.category}
                       </span>
-                      <span className="text-[10px] text-ink-3 ">
+                      <span className="text-[11px] text-ink-3 ">
                         {topic.volume}
                       </span>
                     </div>
 
-                    <h3 className="font-display font-bold text-xl font-light text-ink">
+                    <h3 className="font-display font-semibold text-xl font-light text-ink">
                       {topic.name}
                     </h3>
 
@@ -313,7 +313,7 @@ export default function InsightsView({
 
                   <div className="flex items-center space-x-6 shrink-0 pt-2 md:pt-0">
                     <div className="text-right">
-                      <span className="text-[10px] uppercase tracking-widest text-ink-3 block">Growth Signal</span>
+                      <span className="text-[11px] uppercase tracking-widest text-ink-3 block">Growth Signal</span>
                       <span className=" text-sm text-ok font-medium">
                         {topic.growth}
                       </span>

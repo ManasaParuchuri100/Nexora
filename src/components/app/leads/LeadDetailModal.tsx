@@ -83,7 +83,7 @@ export default function LeadDetailModal({
         }`}>
           <div>
             <div className="flex items-center space-x-2.5 mb-1.5">
-              <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+              <span className={`text-[12px] font-semibold px-2.5 py-0.5 rounded-full border ${
                 lead.tag === 'Priority' || lead.isPriority
                   ? 'text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-danger dark:border-rose-800/40'
                   : lead.tag === 'Returning'
@@ -123,7 +123,7 @@ export default function LeadDetailModal({
         <div className={`px-6 py-4 border-b ${
           isLight ? 'bg-white border-slate-200' : 'bg-surface border-line-subtle'
         }`}>
-          <span className={`text-[11px] font-semibold uppercase tracking-wider block mb-2 ${
+          <span className={`text-[12px] font-semibold uppercase tracking-wider block mb-2 ${
             isLight ? 'text-slate-500' : 'text-ink-3'
           }`}>
             Pipeline Stage Progression
@@ -151,7 +151,7 @@ export default function LeadDetailModal({
                         : 'border-line-subtle bg-surface-raised text-ink-3 hover:text-ink-2'
                   }`}
                 >
-                  <div className={`text-[10px] uppercase font-bold mb-0.5 ${
+                  <div className={`text-[11px] uppercase font-bold mb-0.5 ${
                     isCurrent ? 'text-teal-100' : 'opacity-60'
                   }`}>
                     0{i + 1}
@@ -170,7 +170,7 @@ export default function LeadDetailModal({
             isLight ? 'bg-slate-50 border-slate-200/90' : 'bg-surface-raised border-line-subtle'
           }`}>
             <div>
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Estimated Value
@@ -182,7 +182,7 @@ export default function LeadDetailModal({
               </span>
             </div>
             <div>
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Intent Score
@@ -192,7 +192,7 @@ export default function LeadDetailModal({
               </span>
             </div>
             <div>
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Source
@@ -204,7 +204,7 @@ export default function LeadDetailModal({
               </span>
             </div>
             <div>
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Last Activity
@@ -220,7 +220,7 @@ export default function LeadDetailModal({
           {/* Assignee & Contact Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Assigned Team Lead
@@ -235,7 +235,7 @@ export default function LeadDetailModal({
                   <h4 className={`text-xs font-semibold ${isLight ? 'text-slate-900' : 'text-ink'}`}>
                     {lead.assignee?.name || 'Rahul — Sales'}
                   </h4>
-                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
+                  <p className={`text-[12px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
                     {lead.assignee?.role || 'Lead Manager'}
                   </p>
                 </div>
@@ -243,7 +243,7 @@ export default function LeadDetailModal({
             </div>
 
             <div className="space-y-2">
-              <span className={`text-[11px] uppercase tracking-wider block font-semibold ${
+              <span className={`text-[12px] uppercase tracking-wider block font-semibold ${
                 isLight ? 'text-slate-500' : 'text-ink-3'
               }`}>
                 Primary Contact
@@ -255,7 +255,7 @@ export default function LeadDetailModal({
                   <Mail className="w-3.5 h-3.5 text-teal-600" />
                   <span>{lead.email}</span>
                 </div>
-                <div className={`flex items-center space-x-2 text-[11px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
+                <div className={`flex items-center space-x-2 text-[12px] ${isLight ? 'text-slate-500' : 'text-ink-2'}`}>
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Scheduled date: {lead.date || 'Today'}</span>
                 </div>

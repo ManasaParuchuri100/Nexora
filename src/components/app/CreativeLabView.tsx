@@ -81,7 +81,7 @@ function ScheduleDialog({
           <input type="time" value={time} onChange={e => { setTime(e.target.value); setError(''); }} aria-label="Time" />
         </div>
       </Field>
-      {error && <p className="text-[12px] text-danger m-0 mb-2" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-danger m-0 mb-2" role="alert">{error}</p>}
     </NxModal>
   );
 }
@@ -1316,7 +1316,7 @@ Audio: Solo cello harmonics and tactile room tone
   };
 
   return (
-    <div className="w-full animate-fadeIn space-y-[15px]">
+    <div className="w-full animate-fadeIn space-y-[16px]">
       <PageHeader
         eyebrow="Marketing / Content"
         title="Content"
@@ -1372,7 +1372,7 @@ Audio: Solo cello harmonics and tactile room tone
             </div>
 
             {campaigns.length > 0 && (
-              <label className="flex items-center gap-2 text-[11px] font-bold text-ink-3 shrink-0">
+              <label className="flex items-center gap-2 text-[12px] font-bold text-ink-3 shrink-0">
                 Campaign
                 <select
                   value={campaignId}
@@ -1458,7 +1458,7 @@ Audio: Solo cello harmonics and tactile room tone
           <div
             className={`border ${
               'border-line bg-surface'
-            } p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[9px] transition-colors shadow-sm`}
+            } p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[8px] transition-colors shadow-sm`}
           >
             <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
               {[{ id: 'All', label: 'All', count: assets.length }, ...MAIN_CATEGORIES.map(m => ({
@@ -1492,7 +1492,7 @@ Audio: Solo cello harmonics and tactile room tone
               className="nx-input w-full sm:w-[220px]"
             />
             <div
-              className={`text-[11px] font-mono shrink-0 ${
+              className={`text-[12px] font-mono shrink-0 ${
                 'text-ink-2'
               }`}
             >
@@ -1511,10 +1511,10 @@ Audio: Solo cello harmonics and tactile room tone
             <div
               className={`p-12 border ${
                 'border-line bg-surface'
-              } text-center text-xs rounded-[9px] space-y-2`}
+              } text-center text-xs rounded-[8px] space-y-2`}
             >
               <div
-                className={`font-display font-bold text-base ${
+                className={`font-display font-semibold text-base ${
                   'text-ink'
                 }`}
               >
@@ -1535,19 +1535,19 @@ Audio: Solo cello harmonics and tactile room tone
                   key={asset.id}
                   className={`border ${
                     'border-line bg-surface hover:border-line'
-                  } p-6 rounded-[9px] transition-colors flex flex-col justify-between shadow-sm`}
+                  } p-6 rounded-[8px] transition-colors flex flex-col justify-between shadow-sm`}
                 >
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
                       <span
-                        className={`text-[11px] font-bold font-medium ${
+                        className={`text-[12px] font-bold font-medium ${
  'text-brand'
  }`}
                       >
                         {asset.type} · {asset.platform}
                       </span>
                       <span
-                        className={`text-[10px] font-mono ${
+                        className={`text-[11px] font-mono ${
                           'text-ink-3'
                         }`}
                       >
@@ -1563,7 +1563,7 @@ Audio: Solo cello harmonics and tactile room tone
                     )}
 
                     <h4
-                      className={`font-display font-bold tracking-[-0.3px] mb-3 ${
+                      className={`font-display font-semibold tracking-[-0.3px] mb-3 ${
                         'text-ink'
                       }`}
                     >
@@ -1571,7 +1571,7 @@ Audio: Solo cello harmonics and tactile room tone
                     </h4>
 
                     {asset.imageUrl && (
-                      <div className="mb-3.5 aspect-video w-full rounded-[9px] overflow-hidden border border-inherit bg-black shadow-sm">
+                      <div className="mb-3.5 aspect-video w-full rounded-[8px] overflow-hidden border border-inherit bg-black shadow-sm">
                         <img
                           src={asset.imageUrl}
                           alt={asset.title}
@@ -1616,9 +1616,9 @@ Audio: Solo cello harmonics and tactile room tone
                       </div>
                       {historyOpen === asset.id && (
                         <div className="mt-2 border border-line rounded-[10px] divide-y divide-line">
-                          <div className="px-3 py-2 text-[11px]"><strong className="text-ink">Version {asset.version ?? 1} (current)</strong></div>
+                          <div className="px-3 py-2 text-[12px]"><strong className="text-ink">Version {asset.version ?? 1} (current)</strong></div>
                           {[...(asset.versions ?? [])].reverse().map(v => (
-                            <div key={v.version} className="px-3 py-2 text-[11px] flex items-start gap-2">
+                            <div key={v.version} className="px-3 py-2 text-[12px] flex items-start gap-2">
                               <div className="flex-1 min-w-0">
                                 <strong className="text-ink">Version {v.version}</strong> <span className="text-ink-3">· {v.at}</span>
                                 <p className="m-0 mt-0.5 text-ink-3 line-clamp-2">{v.text.replace(/[━─═]{3,}/g, ' ').replace(/\s+/g, ' ')}</p>
@@ -1640,7 +1640,7 @@ Audio: Solo cello harmonics and tactile room tone
                               </button>
                             </div>
                           ))}
-                          {(asset.versions?.length ?? 0) === 0 && <div className="px-3 py-2 text-[11px] text-ink-3">No earlier versions. Edit this draft in the Studio to create one.</div>}
+                          {(asset.versions?.length ?? 0) === 0 && <div className="px-3 py-2 text-[12px] text-ink-3">No earlier versions. Edit this draft in the Studio to create one.</div>}
                         </div>
                       )}
                     </div>
@@ -1655,7 +1655,7 @@ Audio: Solo cello harmonics and tactile room tone
                       {asset.tags.map((t) => (
                         <span
                           key={t}
-                          className={`text-[9px] px-1.5 py-0.5 border rounded-[7px] ${
+                          className={`text-[10px] px-1.5 py-0.5 border rounded-[6px] ${
  'border-line bg-surface-hover text-ink-2'
  }`}
                         >
@@ -1700,7 +1700,7 @@ Audio: Solo cello harmonics and tactile room tone
             <div
               className={`border ${
                 'border-line bg-surface'
-              } rounded-[9px] transition-colors shadow-sm`}
+              } rounded-[8px] transition-colors shadow-sm`}
             >
               <Pagination
                 currentPage={assetPage}

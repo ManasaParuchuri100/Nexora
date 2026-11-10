@@ -64,20 +64,20 @@ export default function SettingsModal({
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-2xl bg-surface-raised border border-line shadow-2xl rounded-[9px] overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp text-ink"
+        className="w-full max-w-2xl bg-surface-raised border border-line shadow-2xl rounded-[8px] overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp text-ink"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-line bg-surface">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-[9px] bg-surface-hover border border-line flex items-center justify-center text-ink-2">
+            <div className="w-8 h-8 rounded-[8px] bg-surface-hover border border-line flex items-center justify-center text-ink-2">
               <Sliders className="w-4 h-4" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="font-display font-bold text-xl sm:text-2xl font-light tracking-tight text-ink">
+              <h2 className="font-display font-semibold text-xl sm:text-2xl font-light tracking-tight text-ink">
                 Application Settings
               </h2>
-              <p className="text-[11px] text-ink-2 font-light">
+              <p className="text-[12px] text-ink-2 font-light">
                 Configure theme appearance, display density, and workspace defaults.
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function SettingsModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-ink-3 hover:text-ink hover:bg-[rgba(169,191,165,0.1)] rounded transition-colors cursor-pointer"
+            className="p-1.5 text-ink-3 hover:text-ink hover:bg-surface-hover rounded transition-colors cursor-pointer"
             aria-label="Close settings"
           >
             <X className="w-5 h-5" strokeWidth={1.5} />
@@ -155,7 +155,7 @@ export default function SettingsModal({
                   <button
                     type="button"
                     onClick={toggleTheme}
-                    className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-[9px] border border-line bg-surface text-xs  text-ink-2 hover:text-ink hover:border-line-strong transition-all cursor-pointer"
+                    className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-[8px] border border-line bg-surface text-xs  text-ink-2 hover:text-ink hover:border-line-strong transition-all cursor-pointer"
                   >
                     {theme === 'light' ? (
                       <>
@@ -176,32 +176,32 @@ export default function SettingsModal({
                   {/* 1. Light Mode Card */}
                   <div
                     onClick={() => handleSelectTheme('light')}
-                    className={`border p-4 rounded-[9px] cursor-pointer transition-all duration-200 relative group flex flex-col justify-between ${
+                    className={`border p-4 rounded-[8px] cursor-pointer transition-all duration-200 relative group flex flex-col justify-between ${
                       theme === 'light'
-                        ? 'bg-surface-hover border-line-strong ring-2 ring-[#A9BFA5]/40 shadow-lg'
-                        : 'bg-surface border-line hover:border-line hover:bg-[#09221F]'
+                        ? 'bg-surface-hover border-line-strong ring-2 ring-brand/40 shadow-lg'
+                        : 'bg-surface border-line hover:border-line hover:bg-surface-hover'
                     }`}
                   >
                     <div>
                       {/* Mini Mockup Thumbnail */}
-                      <div className="w-full h-24 rounded-[9px] bg-surface-raised border border-stone-200 p-2.5 flex flex-col justify-between mb-3 shadow-inner overflow-hidden select-none">
+                      <div className="w-full h-24 rounded-[8px] bg-surface-raised border border-stone-200 p-2.5 flex flex-col justify-between mb-3 shadow-inner overflow-hidden select-none">
                         {/* Mock topbar */}
                         <div className="flex items-center justify-between border-b border-stone-200 pb-1.5">
-                          <span className="font-display font-bold text-[11px] font-bold text-[#142824] lowercase">nexora</span>
+                          <span className="font-display font-semibold text-[12px] font-semibold text-ink lowercase">nexora</span>
                           <div className="flex space-x-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#3D5A50]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-ink-3" />
                             <span className="w-1.5 h-1.5 rounded-full bg-stone-300" />
                           </div>
                         </div>
                         {/* Mock cards */}
                         <div className="grid grid-cols-2 gap-1.5">
-                          <div className="bg-surface border border-stone-200 p-1.5 rounded-[7px]">
-                            <span className="text-[8px] text-[#416055]  block">Contacted</span>
-                            <span className="font-display font-bold text-[11px] font-bold text-[#142824]">16 leads</span>
+                          <div className="bg-surface border border-stone-200 p-1.5 rounded-[6px]">
+                            <span className="text-[10px] text-ink-3  block">Contacted</span>
+                            <span className="font-display font-semibold text-[12px] font-semibold text-ink">16 leads</span>
                           </div>
-                          <div className="bg-surface border border-stone-200 p-1.5 rounded-[7px]">
-                            <span className="text-[8px] text-[#416055]  block">Conversion</span>
-                            <span className="font-display font-bold text-[11px] font-bold text-[#142824]">64%</span>
+                          <div className="bg-surface border border-stone-200 p-1.5 rounded-[6px]">
+                            <span className="text-[10px] text-ink-3  block">Conversion</span>
+                            <span className="font-display font-semibold text-[12px] font-semibold text-ink">64%</span>
                           </div>
                         </div>
                       </div>
@@ -210,7 +210,7 @@ export default function SettingsModal({
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center space-x-2">
                           <Sun className="w-4 h-4 text-warn" />
-                          <h4 className="font-display font-bold text-base font-light text-ink">
+                          <h4 className="font-display font-semibold text-base font-light text-ink">
                             Light Mode
                           </h4>
                         </div>
@@ -222,11 +222,11 @@ export default function SettingsModal({
                       </div>
 
                       <p className="text-xs text-ink-3 font-light leading-relaxed">
-                        Crisp porcelain palette (<span className=" text-[10px]">#F8F9F5</span>) with clean white cards, deep forest text, and clear contrast.
+                        Crisp porcelain palette (<span className=" text-[11px]">#F8F9F5</span>) with clean white cards, deep forest text, and clear contrast.
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-line-subtle flex items-center justify-between text-[11px] ">
+                    <div className="mt-4 pt-3 border-t border-line-subtle flex items-center justify-between text-[12px] ">
                       <span className="text-ink-3">Botanical Ivory</span>
                       <span className={theme === 'light' ? 'text-ink font-bold' : 'text-ink-3'}>
                         {theme === 'light' ? 'Active' : 'Click to select'}
@@ -237,18 +237,18 @@ export default function SettingsModal({
                   {/* 2. Dark Mode Card */}
                   <div
                     onClick={() => handleSelectTheme('dark')}
-                    className={`border p-4 rounded-[9px] cursor-pointer transition-all duration-200 relative group flex flex-col justify-between ${
+                    className={`border p-4 rounded-[8px] cursor-pointer transition-all duration-200 relative group flex flex-col justify-between ${
                       theme === 'dark'
-                        ? 'bg-surface-hover border-line-strong ring-2 ring-[#A9BFA5]/40 shadow-lg'
-                        : 'bg-surface border-line hover:border-line hover:bg-[#09221F]'
+                        ? 'bg-surface-hover border-line-strong ring-2 ring-brand/40 shadow-lg'
+                        : 'bg-surface border-line hover:border-line hover:bg-surface-hover'
                     }`}
                   >
                     <div>
                       {/* Mini Mockup Thumbnail */}
-                      <div className="w-full h-24 rounded-[9px] bg-surface border border-line p-2.5 flex flex-col justify-between mb-3 shadow-inner overflow-hidden select-none">
+                      <div className="w-full h-24 rounded-[8px] bg-surface border border-line p-2.5 flex flex-col justify-between mb-3 shadow-inner overflow-hidden select-none">
                         {/* Mock topbar */}
                         <div className="flex items-center justify-between border-b border-line pb-1.5">
-                          <span className="font-display font-bold text-[11px] font-bold text-ink lowercase">nexora</span>
+                          <span className="font-display font-semibold text-[12px] font-semibold text-ink lowercase">nexora</span>
                           <div className="flex space-x-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                             <span className="w-1.5 h-1.5 rounded-full bg-surface-hover" />
@@ -256,13 +256,13 @@ export default function SettingsModal({
                         </div>
                         {/* Mock cards */}
                         <div className="grid grid-cols-2 gap-1.5">
-                          <div className="bg-surface-raised border border-line p-1.5 rounded-[7px]">
-                            <span className="text-[8px] text-ink-2  block">Contacted</span>
-                            <span className="font-display font-bold text-[11px] font-bold text-ink">16 leads</span>
+                          <div className="bg-surface-raised border border-line p-1.5 rounded-[6px]">
+                            <span className="text-[10px] text-ink-2  block">Contacted</span>
+                            <span className="font-display font-semibold text-[12px] font-semibold text-ink">16 leads</span>
                           </div>
-                          <div className="bg-surface-raised border border-line p-1.5 rounded-[7px]">
-                            <span className="text-[8px] text-ink-2  block">Conversion</span>
-                            <span className="font-display font-bold text-[11px] font-bold text-ink">64%</span>
+                          <div className="bg-surface-raised border border-line p-1.5 rounded-[6px]">
+                            <span className="text-[10px] text-ink-2  block">Conversion</span>
+                            <span className="font-display font-semibold text-[12px] font-semibold text-ink">64%</span>
                           </div>
                         </div>
                       </div>
@@ -271,7 +271,7 @@ export default function SettingsModal({
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center space-x-2">
                           <Moon className="w-4 h-4 text-sky-300" />
-                          <h4 className="font-display font-bold text-base font-light text-ink">
+                          <h4 className="font-display font-semibold text-base font-light text-ink">
                             Dark Mode
                           </h4>
                         </div>
@@ -283,11 +283,11 @@ export default function SettingsModal({
                       </div>
 
                       <p className="text-xs text-ink-3 font-light leading-relaxed">
-                        Classic deep botanical teal palette (<span className=" text-[10px]">#071C1A</span>) with warm cream typography and luminous sage telemetry.
+                        Classic deep botanical teal palette (<span className=" text-[11px]">#071C1A</span>) with warm cream typography and luminous sage telemetry.
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-line-subtle flex items-center justify-between text-[11px] ">
+                    <div className="mt-4 pt-3 border-t border-line-subtle flex items-center justify-between text-[12px] ">
                       <span className="text-ink-3">Botanical Noir</span>
                       <span className={theme === 'dark' ? 'text-ink font-bold' : 'text-ink-3'}>
                         {theme === 'dark' ? 'Active' : 'Click to select'}
@@ -304,29 +304,29 @@ export default function SettingsModal({
                 </h4>
 
                 <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 border border-line bg-surface rounded-[9px] cursor-pointer hover:border-line transition-colors">
+                  <label className="flex items-center justify-between p-3 border border-line bg-surface rounded-[8px] cursor-pointer hover:border-line transition-colors">
                     <div>
                       <span className="text-xs font-medium text-ink block">High Contrast Accents</span>
-                      <span className="text-[11px] text-ink-3 font-light">Enforce AAA ratio on telemetry badges and grid outlines</span>
+                      <span className="text-[12px] text-ink-3 font-light">Enforce AAA ratio on telemetry badges and grid outlines</span>
                     </div>
                     <input 
                       type="checkbox"
                       checked={highContrast}
                       onChange={(e) => setHighContrast(e.target.checked)}
-                      className="w-4 h-4 accent-[#A9BFA5] cursor-pointer"
+                      className="w-4 h-4 accent-brand cursor-pointer"
                     />
                   </label>
 
-                  <label className="flex items-center justify-between p-3 border border-line bg-surface rounded-[9px] cursor-pointer hover:border-line transition-colors">
+                  <label className="flex items-center justify-between p-3 border border-line bg-surface rounded-[8px] cursor-pointer hover:border-line transition-colors">
                     <div>
                       <span className="text-xs font-medium text-ink block">Compact Table Density</span>
-                      <span className="text-[11px] text-ink-3 font-light">Decrease vertical padding in live leads and stats grids</span>
+                      <span className="text-[12px] text-ink-3 font-light">Decrease vertical padding in live leads and stats grids</span>
                     </div>
                     <input 
                       type="checkbox"
                       checked={compactDensity}
                       onChange={(e) => setCompactDensity(e.target.checked)}
-                      className="w-4 h-4 accent-[#A9BFA5] cursor-pointer"
+                      className="w-4 h-4 accent-brand cursor-pointer"
                     />
                   </label>
                 </div>
@@ -338,14 +338,14 @@ export default function SettingsModal({
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-ink">Workspace Identity</h3>
               <div className="space-y-3">
-                <div className="p-3.5 border border-line bg-surface rounded-[9px] space-y-1">
-                  <span className="text-[10px]  text-ink-3 uppercase tracking-wider block">Organization</span>
+                <div className="p-3.5 border border-line bg-surface rounded-[8px] space-y-1">
+                  <span className="text-[11px]  text-ink-3 uppercase tracking-wider block">Organization</span>
                   <p className="text-sm text-ink font-medium">Nexora Studios Ltd.</p>
                   <p className="text-xs text-ink-2">Tokyo &bull; London &bull; Zurich</p>
                 </div>
 
-                <div className="p-3.5 border border-line bg-surface rounded-[9px] space-y-1">
-                  <span className="text-[10px]  text-ink-3 uppercase tracking-wider block">Account Tier</span>
+                <div className="p-3.5 border border-line bg-surface rounded-[8px] space-y-1">
+                  <span className="text-[11px]  text-ink-3 uppercase tracking-wider block">Account Tier</span>
                   <div className="flex items-center space-x-2">
                     <ShieldCheck className="w-4 h-4 text-ok" />
                     <span className="text-sm text-ink font-medium">Pro Enterprise Workspace</span>
@@ -360,16 +360,16 @@ export default function SettingsModal({
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-ink">Notification Routing</h3>
               <div className="space-y-3">
-                <label className="flex items-center justify-between p-3.5 border border-line bg-surface rounded-[9px] cursor-pointer">
+                <label className="flex items-center justify-between p-3.5 border border-line bg-surface rounded-[8px] cursor-pointer">
                   <div>
                     <span className="text-xs font-medium text-ink block">Audible Feedback</span>
-                    <span className="text-[11px] text-ink-2 font-light">Play quiet chime upon campaign generation or lead qualification</span>
+                    <span className="text-[12px] text-ink-2 font-light">Play quiet chime upon campaign generation or lead qualification</span>
                   </div>
                   <input 
                     type="checkbox"
                     checked={soundEnabled}
                     onChange={(e) => setSoundEnabled(e.target.checked)}
-                    className="w-4 h-4 accent-[#A9BFA5] cursor-pointer"
+                    className="w-4 h-4 accent-brand cursor-pointer"
                   />
                 </label>
               </div>
@@ -379,7 +379,7 @@ export default function SettingsModal({
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-line bg-surface flex items-center justify-between">
-          <span className="text-[11px] text-ink-3 ">
+          <span className="text-[12px] text-ink-3 ">
             {theme === 'light' ? 'Mode: Light (Botanical Ivory)' : 'Mode: Dark (Botanical Noir)'}
           </span>
 
@@ -387,7 +387,7 @@ export default function SettingsModal({
             <button
               type="button"
               onClick={onClose}
-              className="bg-brand text-on-brand px-5 py-2 rounded-[9px] font-semibold text-xs uppercase tracking-wider hover:bg-brand-hover transition-colors cursor-pointer"
+              className="bg-brand text-on-brand px-5 py-2 rounded-[8px] font-semibold text-xs uppercase tracking-wider hover:bg-brand-hover transition-colors cursor-pointer"
             >
               Done
             </button>

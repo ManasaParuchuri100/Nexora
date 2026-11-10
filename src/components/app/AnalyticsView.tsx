@@ -83,7 +83,7 @@ function LineChart({ current, previous }: { current: Point[]; previous: Point[] 
         )}
       </svg>
       {hp && hover !== null && (
-        <div className="absolute top-1 right-2 text-[11px] bg-surface border border-line rounded-[8px] px-2.5 py-1.5 shadow-pop pointer-events-none">
+        <div className="absolute top-1 right-2 text-[12px] bg-surface border border-line rounded-[8px] px-2.5 py-1.5 shadow-pop pointer-events-none">
           <div className="font-bold text-ink">{hp.label}</div>
           <div className="text-brand">This period: {hp.value}</div>
           <div className="text-ink-3">Previous: {previous[hover]?.value ?? '—'}</div>
@@ -96,7 +96,7 @@ function LineChart({ current, previous }: { current: Point[]; previous: Point[] 
 function BarRow({ label, value, max, suffix = '', tone = 'brand' }: { key?: React.Key; label: string; value: number; max: number; suffix?: string; tone?: 'brand' | 'warn' | 'danger' }) {
   const color = tone === 'warn' ? 'bg-warn' : tone === 'danger' ? 'bg-danger' : 'bg-brand';
   return (
-    <div className="flex items-center gap-3 py-[7px] text-[12px]">
+    <div className="flex items-center gap-3 py-[7px] text-[13px]">
       <span className="w-[130px] shrink-0 text-ink-2 truncate">{label}</span>
       <div className="flex-1 h-[7px] rounded-full bg-surface-raised overflow-hidden" aria-hidden="true">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${max ? (value / max) * 100 : 0}%` }} />
@@ -132,7 +132,7 @@ function Overview({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?
   };
 
   return (
-    <div className="grid gap-[15px]">
+    <div className="grid gap-[16px]">
       <div className="nx-grid nx-metrics" style={{ gridTemplateColumns: 'repeat(5, minmax(0,1fr))' }}>
         {d.kpis.map(k => {
           const action = click[k.id];
@@ -158,7 +158,7 @@ function Overview({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?
       />
 
       <Panel title="Leads over time" sub={`${total} leads · previous period ${prevTotal}`}>
-        <div className="flex items-center gap-4 text-[11px] text-ink-3 mb-2">
+        <div className="flex items-center gap-4 text-[12px] text-ink-3 mb-2">
           <span className="inline-flex items-center gap-1.5"><span className="w-3 h-[3px] bg-brand rounded" />This period</span>
           <span className="inline-flex items-center gap-1.5"><span className="w-3 border-t-2 border-dashed border-ink-3" />Previous period</span>
         </div>
@@ -192,7 +192,7 @@ function LeadsTab({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?
   const biggestLoss = [...d.lost].sort((a, b) => b.count - a.count)[0];
   const lostTotal = d.lost.reduce((a, l) => a + l.count, 0);
   return (
-    <div className="grid gap-[15px]">
+    <div className="grid gap-[16px]">
       <AIInsight
         observation={`${biggestLoss.reason} is the top reason for lost leads (${biggestLoss.count} of ${lostTotal}).`}
         recommendation={biggestLoss.reason === 'Price' ? 'Share a clear price range earlier in the conversation and review the pricing answers in AI knowledge.' : 'Review the follow-up cadence for these leads.'}
@@ -222,7 +222,7 @@ function ChannelsTab({ d }: { d: AnalyticsData }) {
   const best = [...d.sources].sort((a, b) => b.conv - a.conv)[0];
   const most = [...d.sources].sort((a, b) => b.leads - a.leads)[0];
   return (
-    <div className="grid gap-[15px]">
+    <div className="grid gap-[16px]">
       <AIInsight
         observation={`${most.name} brings the most qualified leads (${[...d.sources].sort((a, b) => b.qualified - a.qualified)[0].qualified}); ${best.name} converts best at ${best.conv}%.`}
         recommendation={`Keep investing in ${most.name} and test what ${best.name} does differently.`}
@@ -270,13 +270,13 @@ function ActivityTab({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, s
       <div className="border-t border-line">
         {rows.map(a => (
           <div key={a.id} className="nx-row">
-            <span className="text-[11px] text-ink-3 w-[70px] shrink-0 tabular-nums">{a.when}</span>
+            <span className="text-[12px] text-ink-3 w-[70px] shrink-0 tabular-nums">{a.when}</span>
             <span className="nx-tag shrink-0">{ACTIVITY_LABEL[a.type] || a.type}</span>
-            <div className="flex-1 min-w-0 text-[12px] text-ink">{a.text}</div>
+            <div className="flex-1 min-w-0 text-[13px] text-ink">{a.text}</div>
             <button type="button" className="nx-inline-link shrink-0" onClick={() => onGo(a.go.category as NavCategory, a.go.sub as SubCategory)}>Open →</button>
           </div>
         ))}
-        {rows.length === 0 && <p className="text-[12px] text-ink-3 py-6 text-center m-0">No activity of this type.</p>}
+        {rows.length === 0 && <p className="text-[13px] text-ink-3 py-6 text-center m-0">No activity of this type.</p>}
       </div>
     </section>
   );
@@ -315,14 +315,14 @@ export default function AnalyticsView({
   };
 
   return (
-    <div className="space-y-[15px] pb-12 animate-fadeIn text-ink select-text">
+    <div className="space-y-[16px] pb-12 animate-fadeIn text-ink select-text">
       <PageHeader
         eyebrow="Intelligence / Analytics"
         title="Analytics"
         subtitle="See what is producing leads and where they are in the funnel."
         actions={
           <>
-            <select value={rangeId} onChange={e => setRangeId(e.target.value as RangeId)} aria-label="Date range" className="bg-surface border border-line text-ink px-3 py-1.5 rounded-[9px] cursor-pointer">
+            <select value={rangeId} onChange={e => setRangeId(e.target.value as RangeId)} aria-label="Date range" className="bg-surface border border-line text-ink px-3 py-1.5 rounded-[8px] cursor-pointer">
               {RANGES.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
             </select>
             <button type="button" onClick={exportCsv} disabled={isFirstRun} className="nx-btn inline-flex items-center gap-1.5">

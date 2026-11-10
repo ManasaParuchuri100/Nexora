@@ -162,7 +162,7 @@ export default function OutputWorkspace({
   if (!currentVariation && variations.length === 0) {
     return (
       <div
-        className={`border rounded-[15px] p-8 sm:p-12 transition-colors flex flex-col items-center justify-center text-center min-h-[440px] shadow-sm ${
+        className={`border rounded-[10px] p-8 sm:p-12 transition-colors flex flex-col items-center justify-center text-center min-h-[440px] shadow-sm ${
           'bg-surface border-line'
         }`}
       >
@@ -175,7 +175,7 @@ export default function OutputWorkspace({
         </div>
 
         <span
-          className={`text-[11px] font-medium block mb-2 ${
+          className={`text-[12px] font-medium block mb-2 ${
  'text-ink-2'
  }`}
         >
@@ -183,7 +183,7 @@ export default function OutputWorkspace({
         </span>
 
         <h3
-          className={`font-display font-bold tracking-[-0.3px] mb-2.5 ${
+          className={`font-display font-semibold tracking-[-0.3px] mb-2.5 ${
             'text-ink'
           }`}
         >
@@ -203,7 +203,7 @@ export default function OutputWorkspace({
 
   return (
     <div
-      className={`border rounded-[15px] p-6 transition-colors shadow-card space-y-6 ${
+      className={`border rounded-[10px] p-6 transition-colors shadow-card space-y-6 ${
         'bg-surface border-line'
       }`}
     >
@@ -222,7 +222,7 @@ export default function OutputWorkspace({
                 key={v.id}
                 type="button"
                 onClick={() => onSelectVariation(idx)}
-                className={`px-3 py-1.5 text-xs font-mono rounded-[9px] border transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 text-xs font-mono rounded-[8px] border transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
                     ? 'bg-brand border-brand text-on-brand font-medium shadow-sm'
                     : 'border-line bg-surface-raised text-ink-3 hover:text-ink hover:border-line'
@@ -239,7 +239,7 @@ export default function OutputWorkspace({
           <button
             type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className={`p-1.5 rounded-[9px] border transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-[8px] border transition-colors cursor-pointer ${
               isEditing
                 ? 'bg-brand border-brand text-on-brand'
                 : 'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
@@ -252,7 +252,7 @@ export default function OutputWorkspace({
           <button
             type="button"
             onClick={() => handleCopy(currentVariation.content)}
-            className={`px-2.5 py-1 text-xs font-mono rounded-[9px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-2.5 py-1 text-xs font-mono rounded-[8px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
               'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
             }`}
             title="Copy content"
@@ -274,7 +274,7 @@ export default function OutputWorkspace({
             type="button"
             onClick={onRegenerate}
             disabled={isGenerating}
-            className={`p-1.5 rounded-[9px] border transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-[8px] border transition-colors cursor-pointer ${
               'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
             }`}
             title="Regenerate all variations"
@@ -285,7 +285,7 @@ export default function OutputWorkspace({
           <button
             type="button"
             onClick={handleExport}
-            className={`p-1.5 rounded-[9px] border transition-colors cursor-pointer ${
+            className={`p-1.5 rounded-[8px] border transition-colors cursor-pointer ${
               'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
             }`}
             title="Export markdown file"
@@ -307,7 +307,7 @@ export default function OutputWorkspace({
       {/* ------------------------------------------------------------- */}
       {(isImageCategory || activeImageUrl) && (
         <div
-          className={`border rounded-[11px] p-3.5 transition-colors space-y-3 ${
+          className={`border rounded-[10px] p-3.5 transition-colors space-y-3 ${
             'border-line bg-surface-raised'
           }`}
         >
@@ -315,7 +315,7 @@ export default function OutputWorkspace({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
               <span
-                className={`text-[11px] font-bold font-semibold ${
+                className={`text-[12px] font-bold font-semibold ${
  'text-brand'
  }`}
               >
@@ -323,13 +323,13 @@ export default function OutputWorkspace({
               </span>
             </div>
 
-            <div className="flex items-center space-x-2 text-[11px] font-mono">
+            <div className="flex items-center space-x-2 text-[12px] font-mono">
               {activeImageUrl && (
                 <>
                   <button
                     type="button"
                     onClick={() => setLightboxOpen(true)}
-                    className={`px-2 py-0.5 rounded-[9px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-[8px] border flex items-center space-x-1 transition-colors cursor-pointer ${
                       'border-line bg-surface text-brand hover:bg-surface-hover'
                     }`}
                     title="Inspect Full Resolution"
@@ -341,7 +341,7 @@ export default function OutputWorkspace({
                   <button
                     type="button"
                     onClick={() => handleDownloadImage(activeImageUrl)}
-                    className={`px-2 py-0.5 rounded-[9px] border flex items-center space-x-1 transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 rounded-[8px] border flex items-center space-x-1 transition-colors cursor-pointer ${
                       'border-line bg-surface text-brand hover:bg-surface-hover'
                     }`}
                     title="Download high-resolution image"
@@ -356,7 +356,7 @@ export default function OutputWorkspace({
                 type="button"
                 onClick={handleTriggerImageGeneration}
                 disabled={isGeneratingImage}
-                className={`px-2.5 py-0.5 rounded-[9px] flex items-center space-x-1 transition-colors cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded-[8px] flex items-center space-x-1 transition-colors cursor-pointer ${
                   'bg-brand text-on-brand hover:bg-brand-hover'
                 }`}
                 title="Regenerate Image"
@@ -368,7 +368,7 @@ export default function OutputWorkspace({
           </div>
 
           {/* Actual Rendered Image Display Container */}
-          <div className="relative group rounded-[9px] overflow-hidden border border-inherit bg-black shadow-md">
+          <div className="relative group rounded-[8px] overflow-hidden border border-inherit bg-black shadow-md">
             {activeImageUrl ? (
               <div className="relative">
                 <img
@@ -381,11 +381,11 @@ export default function OutputWorkspace({
 
                 {/* Subtle hairline vignette overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3 pointer-events-none">
-                  <div className="text-on-brand text-[11px] font-mono">
+                  <div className="text-on-brand text-[12px] font-mono">
                     <span className="font-semibold block">{currentVariation.versionLabel}</span>
                   </div>
 
-                  <span className="bg-surface/20 backdrop-blur-sm px-2 py-0.5 rounded-[7px] text-[10px] text-on-brand font-mono flex items-center space-x-1">
+                  <span className="bg-surface/20 backdrop-blur-sm px-2 py-0.5 rounded-[6px] text-[11px] text-on-brand font-mono flex items-center space-x-1">
                     <Maximize2 className="w-3 h-3" />
                     <span>View 4K</span>
                   </span>
@@ -399,7 +399,7 @@ export default function OutputWorkspace({
                   type="button"
                   onClick={handleTriggerImageGeneration}
                   disabled={isGeneratingImage}
-                  className="px-4 py-2 rounded-[9px] bg-brand text-on-brand text-xs font-medium hover:bg-brand-hover cursor-pointer"
+                  className="px-4 py-2 rounded-[8px] bg-brand text-on-brand text-xs font-medium hover:bg-brand-hover cursor-pointer"
                 >
                   Render image
                 </button>
@@ -413,7 +413,7 @@ export default function OutputWorkspace({
                 <span className="text-xs text-ink font-semibold">
                   Synthesizing Visual
                 </span>
-                <span className="text-[11px] text-ink-3 mt-1">
+                <span className="text-[12px] text-ink-3 mt-1">
                   {generationStep || 'Executing render pipeline...'}
                 </span>
               </div>
@@ -425,7 +425,7 @@ export default function OutputWorkspace({
       {/* Generated Content Body (Art Direction Brief or Copy Script) */}
       <div className="space-y-2">
         {isImageCategory && (
-          <div className="flex items-center justify-between text-[11px] font-bold font-medium">
+          <div className="flex items-center justify-between text-[12px] font-bold font-medium">
             <span className={'text-ink-2'}>
               Technical Art Direction Brief
             </span>
@@ -443,13 +443,13 @@ export default function OutputWorkspace({
               onChange={(e) =>
                 onUpdateVariationContent(activeVariationIndex, e.target.value)
               }
-              className={`w-full text-xs font-mono p-3.5 rounded-[9px] border focus:outline-none resize-y leading-relaxed transition-colors ${
+              className={`w-full text-xs font-mono p-3.5 rounded-[8px] border focus:outline-none resize-y leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
           ) : (
             <div
-              className={`p-4 rounded-[9px] border text-xs leading-relaxed font-mono whitespace-pre-wrap select-text overflow-x-auto max-h-[340px] overflow-y-auto ${
+              className={`p-4 rounded-[8px] border text-xs leading-relaxed font-mono whitespace-pre-wrap select-text overflow-x-auto max-h-[340px] overflow-y-auto ${
                 'bg-surface-raised border-line text-ink'
               }`}
             >
@@ -467,13 +467,13 @@ export default function OutputWorkspace({
       >
         <div className="flex items-center justify-between">
           <span
-            className={`text-[11px] font-bold font-medium ${
+            className={`text-[12px] font-bold font-medium ${
  'text-ink-2'
  }`}
           >
             Refine Output
           </span>
-          <div className="flex items-center space-x-1.5 text-[10px] font-mono">
+          <div className="flex items-center space-x-1.5 text-[11px] font-mono">
             {['Shorter', 'More premium', 'Provocative'].map((action) => (
               <button
                 key={action}
@@ -503,14 +503,14 @@ export default function OutputWorkspace({
             value={customRefinement}
             onChange={(e) => setCustomRefinement(e.target.value)}
             placeholder="e.g. Make it more concise and executive..."
-            className={`flex-1 text-xs px-3 py-1.5 rounded-[9px] border focus:outline-none transition-colors ${
+            className={`flex-1 text-xs px-3 py-1.5 rounded-[8px] border focus:outline-none transition-colors ${
               'bg-surface-raised border-line text-ink focus:border-line-strong'
             }`}
           />
           <button
             type="submit"
             disabled={!customRefinement.trim() || isGenerating}
-            className={`px-3 py-1.5 text-xs rounded-[9px] transition-colors cursor-pointer shrink-0 ${
+            className={`px-3 py-1.5 text-xs rounded-[8px] transition-colors cursor-pointer shrink-0 ${
  !customRefinement.trim() || isGenerating
  ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
  : 'bg-brand text-on-brand hover:bg-brand-hover'
@@ -538,14 +538,14 @@ export default function OutputWorkspace({
               <span className="text-xs text-ink-3">
                 {category} · {currentVariation.versionLabel}
               </span>
-              <span className="text-[11px] font-mono text-on-brand/60">3840×2160 UHD</span>
+              <span className="text-[12px] font-mono text-on-brand/60">3840×2160 UHD</span>
             </div>
 
             <div className="flex items-center space-x-3">
               <button
                 type="button"
                 onClick={() => handleDownloadImage(activeImageUrl)}
-                className="px-3 py-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-on-brand text-xs font-mono flex items-center space-x-1.5 transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-[8px] bg-surface/10 hover:bg-surface/20 text-on-brand text-xs font-mono flex items-center space-x-1.5 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download .jpg</span>
@@ -554,7 +554,7 @@ export default function OutputWorkspace({
               <button
                 type="button"
                 onClick={() => setLightboxOpen(false)}
-                className="p-1.5 rounded-[9px] bg-surface/10 hover:bg-surface/20 text-on-brand transition-colors cursor-pointer"
+                className="p-1.5 rounded-[8px] bg-surface/10 hover:bg-surface/20 text-on-brand transition-colors cursor-pointer"
                 title="Close Lightbox"
               >
                 <X className="w-5 h-5" />
@@ -571,7 +571,7 @@ export default function OutputWorkspace({
               src={activeImageUrl}
               alt={currentVariation.versionLabel}
               referrerPolicy="no-referrer"
-              className="max-h-[82vh] max-w-full object-contain rounded-[9px] shadow-2xl border border-white/10"
+              className="max-h-[82vh] max-w-full object-contain rounded-[8px] shadow-2xl border border-white/10"
             />
           </div>
 

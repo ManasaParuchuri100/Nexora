@@ -410,7 +410,7 @@ export default function StatsView() {
       <header className="border-b border-line pb-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl font-light text-ink tracking-tight">
+            <h1 className="font-display font-semibold text-4xl sm:text-5xl lg:text-6xl font-light text-ink tracking-tight">
               Stats
             </h1>
             <p className="mt-3 text-xs sm:text-sm text-ink-2 font-light leading-relaxed">
@@ -448,10 +448,10 @@ export default function StatsView() {
         {/* Section Heading & Stat */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
+            <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               01 // LEAD GROWTH
             </span>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+            <h2 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
               Lead Growth
             </h2>
             <p className="mt-1 text-xs text-ink-2 font-light">
@@ -461,10 +461,10 @@ export default function StatsView() {
 
           {/* Metric Callout */}
           <div className="text-left md:text-right">
-            <span className="font-display font-bold text-3xl sm:text-4xl font-light text-ink block">
+            <span className="font-display font-semibold text-3xl sm:text-4xl font-light text-ink block">
               {leadGrowthData.stat}
             </span>
-            <span className="text-[11px]  text-ink-2 block mt-0.5">
+            <span className="text-[12px]  text-ink-2 block mt-0.5">
               {leadGrowthData.comparison}
             </span>
           </div>
@@ -474,7 +474,7 @@ export default function StatsView() {
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-1 text-xs  border-t border-line-subtle">
           {/* Preset Buttons & Custom Button */}
           <div className="flex items-center flex-wrap gap-2">
-            <span className="text-ink-3 uppercase tracking-wider text-[10px] mr-1 hidden sm:inline">
+            <span className="text-ink-3 uppercase tracking-wider text-[11px] mr-1 hidden sm:inline">
               Range:
             </span>
             {(['7D', '30D', '90D', '1Y'] as TimeRange[]).map((period) => {
@@ -513,7 +513,7 @@ export default function StatsView() {
               <Calendar className="w-3.5 h-3.5 text-ink-2" />
               <span>Custom Dates 📅</span>
               {leadRangeMode === 'CUSTOM' && (
-                <span className="ml-1 text-[10px] bg-surface text-ink-2 px-1.5 py-0.2 border border-line">
+                <span className="ml-1 text-[11px] bg-surface text-ink-2 px-1.5 py-0.2 border border-line">
                   {customStartDate.slice(5)} → {customEndDate.slice(5)}
                 </span>
               )}
@@ -521,7 +521,7 @@ export default function StatsView() {
           </div>
 
           {/* Quick Metrics & Current Span Badge */}
-          <div className="flex items-center gap-3 text-[11px] text-ink-2">
+          <div className="flex items-center gap-3 text-[12px] text-ink-2">
             <span className="hidden lg:inline text-ink-3">
               {leadGrowthData.formattedRange}
             </span>
@@ -538,7 +538,7 @@ export default function StatsView() {
                   setLeadRangeMode('30D');
                   setIsCustomPickerOpen(false);
                 }}
-                className="text-[10px] text-ink-3 hover:text-ink underline cursor-pointer ml-1"
+                className="text-[11px] text-ink-3 hover:text-ink underline cursor-pointer ml-1"
                 title="Reset to standard 30-day view"
               >
                 Reset
@@ -549,7 +549,7 @@ export default function StatsView() {
 
         {/* Expandable Custom Date Picker Panel */}
         {isCustomPickerOpen && (
-          <div className="p-4 sm:p-5 bg-surface-raised border border-line rounded-[9px] space-y-4 animate-fadeIn">
+          <div className="p-4 sm:p-5 bg-surface-raised border border-line rounded-[8px] space-y-4 animate-fadeIn">
             <div className="flex items-center justify-between pb-3 border-b border-line-subtle">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-3.5 h-3.5 text-ink-2" />
@@ -571,7 +571,7 @@ export default function StatsView() {
               {/* Native Date Pickers */}
               <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
+                  <label className="block text-[11px]  uppercase tracking-wider text-ink-2 mb-1.5">
                     Start Date (From)
                   </label>
                   <input
@@ -584,7 +584,7 @@ export default function StatsView() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
+                  <label className="block text-[11px]  uppercase tracking-wider text-ink-2 mb-1.5">
                     End Date (To)
                   </label>
                   <input
@@ -599,7 +599,7 @@ export default function StatsView() {
 
               {/* Quick Preset Chips */}
               <div className="md:col-span-5">
-                <label className="block text-[10px]  uppercase tracking-wider text-ink-2 mb-1.5">
+                <label className="block text-[11px]  uppercase tracking-wider text-ink-2 mb-1.5">
                   Quick Ranges
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -618,7 +618,7 @@ export default function StatsView() {
                         setPendingStartDate(preset.start);
                         setPendingEndDate(preset.end);
                       }}
-                      className={`text-[10px]  px-2 py-1 border transition-colors cursor-pointer ${
+                      className={`text-[11px]  px-2 py-1 border transition-colors cursor-pointer ${
                         pendingStartDate === preset.start && pendingEndDate === preset.end
                           ? 'bg-brand text-ink border-line-strong'
                           : 'bg-surface text-ink-2 border-line hover:text-ink'
@@ -633,7 +633,7 @@ export default function StatsView() {
 
             {/* Bottom Actions */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-line-subtle">
-              <div className="text-[11px]  text-ink-2">
+              <div className="text-[12px]  text-ink-2">
                 Range preview: <span className="text-ink">{pendingStartDate}</span> &rarr; <span className="text-ink">{pendingEndDate}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -683,7 +683,7 @@ export default function StatsView() {
                 </strong>
               </span>
             ) : (
-              <span className="text-ink-3 text-[11px]">
+              <span className="text-ink-3 text-[12px]">
                 Hover over data points to inspect cadence
               </span>
             )}
@@ -708,10 +708,10 @@ export default function StatsView() {
           ===================================================================== */}
       <section className="space-y-8">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
+          <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
             02 // LEAD SOURCES
           </span>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+          <h2 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
             Lead Sources
           </h2>
           <p className="mt-1 text-xs text-ink-2 font-light">
@@ -739,7 +739,7 @@ export default function StatsView() {
                   <span className="text-xs font-medium text-ink tracking-wide block">
                     {item.name}
                   </span>
-                  <span className="text-[10px]  text-ink-3 block mt-0.5">
+                  <span className="text-[11px]  text-ink-3 block mt-0.5">
                     {item.share} of total
                   </span>
                 </div>
@@ -760,7 +760,7 @@ export default function StatsView() {
                     <span className="text-ink font-medium block">
                       {item.count.toLocaleString()} leads
                     </span>
-                    <span className="text-[10px] text-ok">
+                    <span className="text-[11px] text-ok">
                       {item.change}
                     </span>
                   </div>
@@ -780,10 +780,10 @@ export default function StatsView() {
       <section className="space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
+            <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               03 // CAMPAIGN PERFORMANCE
             </span>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+            <h2 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
               Campaign Performance
             </h2>
             <p className="mt-1 text-xs text-ink-2 font-light">
@@ -818,7 +818,7 @@ export default function StatsView() {
           <div className="flex items-center flex-wrap gap-4">
             {/* Timeline Filter */}
             <div className="flex items-center space-x-2">
-              <span className="text-[10px]  uppercase tracking-wider text-ink-2">Timeline:</span>
+              <span className="text-[11px]  uppercase tracking-wider text-ink-2">Timeline:</span>
               {(['All', 'Active', 'Upcoming', 'Concluded'] as const).map((t) => {
                 const isSelected = campaignTimelineFilter === t;
                 return (
@@ -826,7 +826,7 @@ export default function StatsView() {
                     key={t}
                     type="button"
                     onClick={() => setCampaignTimelineFilter(t)}
-                    className={`px-2 py-0.5 text-[10px]  rounded-[9px] border transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 text-[11px]  rounded-[8px] border transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-surface-hover text-ink border-line-strong font-semibold'
                         : 'bg-surface text-ink-3 border-line-subtle hover:text-ink'
@@ -840,7 +840,7 @@ export default function StatsView() {
 
             {/* Progress Filter */}
             <div className="flex items-center space-x-2">
-              <span className="text-[10px]  uppercase tracking-wider text-ink-2">Progress:</span>
+              <span className="text-[11px]  uppercase tracking-wider text-ink-2">Progress:</span>
               {(
                 [
                   { id: 'All', label: 'All' },
@@ -855,7 +855,7 @@ export default function StatsView() {
                     key={p.id}
                     type="button"
                     onClick={() => setCampaignProgressFilter(p.id)}
-                    className={`px-2 py-0.5 text-[10px]  rounded-[9px] border transition-colors cursor-pointer ${
+                    className={`px-2 py-0.5 text-[11px]  rounded-[8px] border transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-surface-hover text-ink border-line-strong font-semibold'
                         : 'bg-surface text-ink-3 border-line-subtle hover:text-ink'
@@ -876,7 +876,7 @@ export default function StatsView() {
                 setCampaignTimelineFilter('All');
                 setCampaignProgressFilter('All');
               }}
-              className="text-[10px]  text-ink-2 hover:text-ink underline cursor-pointer shrink-0"
+              className="text-[11px]  text-ink-2 hover:text-ink underline cursor-pointer shrink-0"
             >
               Reset Filters
             </button>
@@ -909,7 +909,7 @@ export default function StatsView() {
                       <span className="text-xs font-medium text-ink tracking-wide block">
                         {campaign.name}
                       </span>
-                      <span className={`text-[9px]  px-1.5 py-0.2 rounded border ${
+                      <span className={`text-[10px]  px-1.5 py-0.2 rounded border ${
                         campaign.timeline === 'Active'
                           ? 'border-emerald-500/30 text-ok bg-emerald-950/30'
                           : campaign.timeline === 'Upcoming'
@@ -920,7 +920,7 @@ export default function StatsView() {
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2 text-[10px]  text-ink-3 mt-0.5">
+                    <div className="flex items-center space-x-2 text-[11px]  text-ink-3 mt-0.5">
                       <span>{campaign.dates}</span>
                       <span>•</span>
                       <span>{campaign.progress}% prog</span>
@@ -943,7 +943,7 @@ export default function StatsView() {
                       <span className="text-ink font-medium block">
                         {campaign.display}
                       </span>
-                      <span className="text-[10px] text-ink-3 uppercase tracking-wider">
+                      <span className="text-[11px] text-ink-3 uppercase tracking-wider">
                         {campaignMetric}
                       </span>
                     </div>
@@ -977,10 +977,10 @@ export default function StatsView() {
         {/* Section Heading & Dual Controls */}
         <div className="space-y-4">
           <div>
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
+            <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2  block mb-1">
               04 // SOCIAL ENGAGEMENT
             </span>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink">
+            <h2 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink">
               Social Engagement
             </h2>
             <p className="mt-1 text-xs text-ink-2 font-light">
@@ -992,7 +992,7 @@ export default function StatsView() {
           <div className="pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line-subtle pb-3">
             {/* Metric Switcher: Engagement | Reach | Clicks */}
             <div className="flex items-center space-x-6 text-xs uppercase tracking-widest ">
-              <span className="text-[10px] text-ink-3 uppercase tracking-widest mr-2">
+              <span className="text-[11px] text-ink-3 uppercase tracking-widest mr-2">
                 Metric:
               </span>
               {(['Engagement', 'Reach', 'Clicks'] as SocialMetric[]).map((m) => {
@@ -1016,7 +1016,7 @@ export default function StatsView() {
 
             {/* Platform Filters: All | Instagram | LinkedIn | X | Facebook */}
             <div className="flex items-center space-x-5 text-xs uppercase tracking-widest ">
-              <span className="text-[10px] text-ink-3 uppercase tracking-widest mr-1">
+              <span className="text-[11px] text-ink-3 uppercase tracking-widest mr-1">
                 Platform:
               </span>
               {(['All', 'Instagram', 'LinkedIn', 'X', 'Facebook'] as SocialPlatform[]).map((plat) => {
@@ -1043,7 +1043,7 @@ export default function StatsView() {
         {/* Aggregate Stat & Indicator */}
         <div className="flex items-baseline justify-between pt-1">
           <div className="flex items-baseline space-x-3">
-            <span className="font-display font-bold text-3xl sm:text-4xl font-light text-ink">
+            <span className="font-display font-semibold text-3xl sm:text-4xl font-light text-ink">
               {socialData.total}
             </span>
             <span className="text-xs  text-ink-2">
@@ -1069,7 +1069,7 @@ export default function StatsView() {
                 </strong>
               </span>
             ) : (
-              <span className="text-ink-3 text-[11px]">
+              <span className="text-ink-3 text-[12px]">
                 Hover over data points to inspect
               </span>
             )}
@@ -1198,7 +1198,7 @@ function LeadLineChart({
               y1={y}
               x2={width - paddingRight}
               y2={y}
-              stroke="rgba(169, 191, 165, 0.1)"
+              stroke="var(--border)"
               strokeDasharray="3 3"
               strokeWidth="1"
             />
@@ -1206,7 +1206,7 @@ function LeadLineChart({
               x={paddingLeft - 10}
               y={y + 4}
               textAnchor="end"
-              fill="rgba(169, 191, 165, 0.5)"
+              fill="var(--text-muted)"
               fontSize="10"
               fontFamily="monospace"
             >
@@ -1254,7 +1254,7 @@ function LeadLineChart({
               cy={c.y}
               r={isHovered ? 5 : 3}
               fill={isHovered ? '#FFFFFF' : '#071C1A'}
-              stroke={isHovered ? '#E8E9D8' : '#A9BFA5'}
+              stroke={isHovered ? 'var(--primary)' : '#A9BFA5'}
               strokeWidth={isHovered ? 2 : 1.5}
               className="transition-all duration-150 pointer-events-none"
             />
@@ -1268,7 +1268,7 @@ function LeadLineChart({
                   x={c.x}
                   y={height - 12}
                   textAnchor="middle"
-                  fill={isHovered ? '#E8E9D8' : 'rgba(169, 191, 165, 0.6)'}
+                  fill={isHovered ? 'var(--primary)' : 'var(--text-secondary)'}
                   fontSize="10"
                   fontFamily="monospace"
                   className="transition-colors pointer-events-none"
@@ -1361,7 +1361,7 @@ function SocialLineChart({
               y1={y}
               x2={width - paddingRight}
               y2={y}
-              stroke="rgba(169, 191, 165, 0.1)"
+              stroke="var(--border)"
               strokeDasharray="3 3"
               strokeWidth="1"
             />
@@ -1369,7 +1369,7 @@ function SocialLineChart({
               x={paddingLeft - 10}
               y={y + 4}
               textAnchor="end"
-              fill="rgba(169, 191, 165, 0.5)"
+              fill="var(--text-muted)"
               fontSize="10"
               fontFamily="monospace"
             >
@@ -1416,7 +1416,7 @@ function SocialLineChart({
               cy={c.y}
               r={isHovered ? 5 : 3}
               fill={isHovered ? '#FFFFFF' : '#071C1A'}
-              stroke={isHovered ? '#E8E9D8' : '#A9BFA5'}
+              stroke={isHovered ? 'var(--primary)' : '#A9BFA5'}
               strokeWidth={isHovered ? 2 : 1.5}
               className="transition-all duration-150 pointer-events-none"
             />
@@ -1425,7 +1425,7 @@ function SocialLineChart({
               x={c.x}
               y={height - 12}
               textAnchor="middle"
-              fill={isHovered ? '#E8E9D8' : 'rgba(169, 191, 165, 0.6)'}
+              fill={isHovered ? 'var(--primary)' : 'var(--text-secondary)'}
               fontSize="10"
               fontFamily="monospace"
               className="transition-colors pointer-events-none"

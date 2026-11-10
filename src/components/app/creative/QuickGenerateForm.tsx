@@ -56,7 +56,7 @@ export default function QuickGenerateForm({
 
   return (
     <div
-      className={`border rounded-[9px] p-5 transition-colors shadow-sm ${
+      className={`border rounded-[8px] p-5 transition-colors shadow-sm ${
         'bg-surface border-line'
       }`}
     >
@@ -71,7 +71,7 @@ export default function QuickGenerateForm({
             Prompt / brief
           </label>
           <span
-            className={`text-[10px] font-mono ${
+            className={`text-[11px] font-mono ${
               'text-ink-3'
             }`}
           >
@@ -91,7 +91,7 @@ export default function QuickGenerateForm({
               }
             }}
             placeholder="e.g. Create a launch email for Nexora Atelier OS aimed at creative directors..."
-            className={`w-full text-xs font-mono p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+            className={`w-full text-xs font-mono p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
               'bg-surface-raised border-line text-ink focus:border-line-strong placeholder:text-ink-3'
             }`}
           />
@@ -100,7 +100,7 @@ export default function QuickGenerateForm({
         {/* Quick Inspiration Tags */}
         <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
           <span
-            className={`text-[11px] font-bold shrink-0 mr-1 ${
+            className={`text-[12px] font-bold shrink-0 mr-1 ${
  'text-ink-3'
  }`}
           >
@@ -111,7 +111,7 @@ export default function QuickGenerateForm({
               key={item.label}
               type="button"
               onClick={() => setPrompt(item.text)}
-              className={`text-[10px] px-2 py-0.5 rounded-[9px] border font-mono transition-colors cursor-pointer shrink-0 ${
+              className={`text-[11px] px-2 py-0.5 rounded-[8px] border font-mono transition-colors cursor-pointer shrink-0 ${
                 'border-line bg-surface-raised text-ink-2 hover:border-brand'
               }`}
             >
@@ -128,7 +128,7 @@ export default function QuickGenerateForm({
         >
           <div className="flex items-center space-x-2">
             <span
-              className={`text-[11px] font-bold ${
+              className={`text-[12px] font-bold ${
  'text-ink-3'
  }`}
             >
@@ -151,7 +151,7 @@ export default function QuickGenerateForm({
           <button
             type="submit"
             disabled={!prompt.trim() || isGenerating}
-            className={`px-4 py-2 rounded-[9px] text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-[8px] text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
  !prompt.trim() || isGenerating
  ? 'opacity-40 cursor-not-allowed bg-surface-raised text-ink-3'
  : 'bg-brand text-on-brand hover:bg-brand-hover shadow-sm'

@@ -129,13 +129,13 @@ export default function ContentCalendar({
         onClick={() => setOpenPost(e.post)}
         title={`${timeLabel(e.at)} · ${e.post.title}${movable ? ' (drag to reschedule)' : ''}`}
         aria-label={`${e.post.title}, ${formatPostTime(e.at)}, ${e.post.status}`}
-        className={`w-full text-left rounded-[6px]! border px-1.5 py-1 min-h-0! text-[11px] leading-tight ${tone} ${
+        className={`w-full text-left rounded-[6px]! border px-1.5 py-1 min-h-0! text-[12px] leading-tight ${tone} ${
           movable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer opacity-80'
         } ${dragId === e.post.id ? 'opacity-40' : ''}`}
       >
         <span className="font-bold tabular-nums">{timeLabel(e.at)}</span>
         <span className={`block ${roomy ? 'whitespace-normal' : 'truncate'}`}>{e.post.title}</span>
-        {roomy && <span className="block text-[10px] opacity-80 truncate">{e.post.platforms.join(' · ')}</span>}
+        {roomy && <span className="block text-[11px] opacity-80 truncate">{e.post.platforms.join(' · ')}</span>}
       </button>
     );
   };
@@ -148,7 +148,7 @@ export default function ContentCalendar({
           <button type="button" className="nx-btn sm" onClick={() => step(-1)} aria-label={view === 'month' ? 'Previous month' : 'Previous week'}>‹</button>
           <button type="button" className="nx-btn sm" onClick={() => setCursor(today)}>Today</button>
           <button type="button" className="nx-btn sm" onClick={() => step(1)} aria-label={view === 'month' ? 'Next month' : 'Next week'}>›</button>
-          <h2 className="font-display text-[16px] font-bold text-ink m-0 ml-2 tracking-[-0.3px]" aria-live="polite">{title}</h2>
+          <h2 className="font-display text-[16px] font-semibold text-ink m-0 ml-2 tracking-[-0.3px]" aria-live="polite">{title}</h2>
         </div>
         <Tabs<View>
           idPrefix="cal-view"
@@ -165,17 +165,17 @@ export default function ContentCalendar({
             {p}
           </button>
         ))}
-        <span className="text-[11px] text-ink-3 ml-auto hidden sm:inline">Drag a post to another day to reschedule it. Click a post for details.</span>
+        <span className="text-[12px] text-ink-3 ml-auto hidden sm:inline">Drag a post to another day to reschedule it. Click a post for details.</span>
       </div>
 
-      <div className="min-h-[20px] text-[12px] text-ok mb-2" role="status">{message}</div>
+      <div className="min-h-[20px] text-[13px] text-ok mb-2" role="status">{message}</div>
 
       {/* Grid (scrolls inside its own container on small screens) */}
       <div className="overflow-x-auto">
         <div className="min-w-[720px]">
           <div className="grid grid-cols-7 border-t border-l border-line rounded-t-[10px] overflow-hidden bg-surface-raised">
             {WEEKDAY_LABELS.map(d => (
-              <div key={d} className="px-2 py-2 text-[10px] font-extrabold uppercase tracking-[1px] text-ink-3 border-r border-b border-line">
+              <div key={d} className="px-2 py-2 text-[11px] font-extrabold uppercase tracking-[1px] text-ink-3 border-r border-b border-line">
                 {d}
               </div>
             ))}
@@ -209,7 +209,7 @@ export default function ContentCalendar({
                     <button
                       type="button"
                       onClick={() => setDayList(day)}
-                      className={`min-h-0! w-[22px] h-[22px] rounded-full! grid place-items-center text-[11px] font-bold tabular-nums ${
+                      className={`min-h-0! w-[22px] h-[22px] rounded-full! grid place-items-center text-[12px] font-bold tabular-nums ${
                         isToday ? 'bg-brand text-on-brand' : inMonth ? 'text-ink-2 hover:bg-surface-hover' : 'text-ink-3'
                       }`}
                       aria-label={`Open ${day.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`}
@@ -229,7 +229,7 @@ export default function ContentCalendar({
                   </div>
                   {list.slice(0, limit).map(e => renderChip(e, view === 'week'))}
                   {list.length > limit && (
-                    <button type="button" onClick={() => setDayList(day)} className="min-h-0! text-left text-[11px] font-bold text-ink-3 hover:text-brand px-1">
+                    <button type="button" onClick={() => setDayList(day)} className="min-h-0! text-left text-[12px] font-bold text-ink-3 hover:text-brand px-1">
                       +{list.length - limit} more
                     </button>
                   )}
@@ -241,10 +241,10 @@ export default function ContentCalendar({
       </div>
 
       {entries.length === 0 && (
-        <p className="text-[12px] text-ink-3 mt-3 mb-0">No posts match. Click “+” on any upcoming day to schedule one.</p>
+        <p className="text-[13px] text-ink-3 mt-3 mb-0">No posts match. Click “+” on any upcoming day to schedule one.</p>
       )}
       {unplaced > 0 && (
-        <p className="text-[11px] text-ink-3 mt-2 mb-0">{unplaced} post{unplaced > 1 ? 's have' : ' has'} no exact date and only appear in the Queue.</p>
+        <p className="text-[12px] text-ink-3 mt-2 mb-0">{unplaced} post{unplaced > 1 ? 's have' : ' has'} no exact date and only appear in the Queue.</p>
       )}
 
       {/* Day list */}
@@ -263,7 +263,7 @@ export default function ContentCalendar({
           }
         >
           {(byDay.get(dayKey(dayList)) || []).length === 0 ? (
-            <p className="text-[12px] text-ink-3 m-0 pb-3">Nothing scheduled.</p>
+            <p className="text-[13px] text-ink-3 m-0 pb-3">Nothing scheduled.</p>
           ) : (
             <div className="grid gap-1.5 pb-3">
               {(byDay.get(dayKey(dayList)) || []).map(e => (
@@ -333,16 +333,16 @@ function PostDialog({
         </>
       }
     >
-      <p className="text-[12px] text-ink-2 leading-[1.65] whitespace-pre-wrap m-0 mb-4 max-h-[180px] overflow-y-auto">{post.content}</p>
+      <p className="text-[13px] text-ink-2 leading-[1.65] whitespace-pre-wrap m-0 mb-4 max-h-[180px] overflow-y-auto">{post.content}</p>
       {locked ? (
-        <p className="text-[12px] text-ink-3 pb-3">Published {formatPostTime(at)}. Published posts cannot be moved.</p>
+        <p className="text-[13px] text-ink-3 pb-3">Published {formatPostTime(at)}. Published posts cannot be moved.</p>
       ) : (
         <Field label="Date & time">
           <div className="grid grid-cols-2 gap-[10px]">
             <input type="date" value={date} min={isoDay(new Date())} onChange={e => { setDate(e.target.value); setError(''); }} aria-label="Date" />
             <input type="time" value={time} onChange={e => { setTime(e.target.value); setError(''); }} aria-label="Time" />
           </div>
-          {error && <div className="text-[12px] text-danger mt-1.5" role="alert">{error}</div>}
+          {error && <div className="text-[13px] text-danger mt-1.5" role="alert">{error}</div>}
         </Field>
       )}
     </NxModal>
@@ -411,7 +411,7 @@ function AddDialog({ day, onClose, onCreate }: { day: Date; onClose: () => void;
       <Field label="Time">
         <input type="time" value={time} onChange={e => { setTime(e.target.value); setError(''); }} aria-label="Time" />
       </Field>
-      {error && <p className="text-[12px] text-danger m-0 mb-2" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-danger m-0 mb-2" role="alert">{error}</p>}
     </NxModal>
   );
 }

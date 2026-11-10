@@ -113,14 +113,14 @@ export default function CategoryNav({
 
   return (
     <div
-      className={`border rounded-[15px] p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
+      className={`border rounded-[10px] p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
         'bg-surface border-line'
       }`}
     >
       {/* 3 Core Category Tabs: Text, Images, Videos */}
       <div className="flex items-center space-x-1">
         <span
-          className={`text-[11px] font-bold px-2 hidden md:inline-block ${
+          className={`text-[12px] font-bold px-2 hidden md:inline-block ${
  'text-ink-3'
  }`}
         >
@@ -128,7 +128,7 @@ export default function CategoryNav({
         </span>
 
         <div
-          className={`inline-flex rounded-[9px] p-0.5 border ${
+          className={`inline-flex rounded-[8px] p-0.5 border ${
             'bg-surface-raised border-line'
           }`}
         >
@@ -139,7 +139,7 @@ export default function CategoryNav({
                 key={main.id}
                 type="button"
                 onClick={() => handleSelectMain(main.id)}
-                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 rounded-[7px] ${
+                className={`px-3 py-1.5 text-xs font-mono tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 rounded-[6px] ${
                   isSelected
                     ? 'bg-brand text-on-brand font-medium shadow-sm'
                     : 'text-ink-3 hover:text-ink'
@@ -156,7 +156,7 @@ export default function CategoryNav({
       {/* Sub-Category Dropdown */}
       <div ref={dropdownRef} className="relative flex items-center space-x-2">
         <span
-          className={`text-[11px] font-bold shrink-0 ${
+          className={`text-[12px] font-bold shrink-0 ${
  'text-ink-3'
  }`}
         >
@@ -166,7 +166,7 @@ export default function CategoryNav({
         <button
           type="button"
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className={`px-3 py-1.5 rounded-[9px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[210px] transition-colors cursor-pointer ${
+          className={`px-3 py-1.5 rounded-[8px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[210px] transition-colors cursor-pointer ${
             'bg-surface-raised border-line text-ink hover:border-brand'
           }`}
         >
@@ -181,12 +181,12 @@ export default function CategoryNav({
         {/* Dropdown Menu Popup */}
         {dropdownOpen && (
           <div
-            className={`absolute right-0 top-full mt-1.5 w-64 rounded-[9px] border shadow-lg py-1 z-30 animate-fadeIn ${
+            className={`absolute right-0 top-full mt-1.5 w-64 rounded-[8px] border shadow-lg py-1 z-30 animate-fadeIn ${
               'bg-surface border-line text-ink'
             }`}
           >
             <div
-              className={`px-3 py-1 text-[9px] border-b ${
+              className={`px-3 py-1 text-[10px] border-b ${
  'text-ink-3 border-line'
  }`}
             >

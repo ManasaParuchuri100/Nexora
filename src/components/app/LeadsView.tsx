@@ -1664,11 +1664,11 @@ export default function LeadsView({
                               <div className="flex items-center gap-3">
                                 <Avatar name={lead.company || lead.name} size="md" />
                                 <div className="min-w-0">
-                                  <p className="font-bold text-ink truncate text-[13px] leading-tight m-0">
+                                  <p className="font-bold text-ink truncate text-[14px] leading-tight m-0">
                                     {lead.company || lead.name}
                                   </p>
                                   {hasSeparateContactName ? (
-                                    <p className="text-[10px] text-ink-3 truncate leading-tight mt-0.5 mb-0">
+                                    <p className="text-[11px] text-ink-3 truncate leading-tight mt-0.5 mb-0">
                                       {lead.name}
                                     </p>
                                   ) : (
@@ -1779,7 +1779,7 @@ export default function LeadsView({
                                   </span>
                                 )}
                                 {lead.handlingMode === 'AI' && (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-surface-raised border border-line-subtle text-ink-3 text-[10px] font-semibold" title="AI handling active">
+                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-surface-raised border border-line-subtle text-ink-3 text-[11px] font-semibold" title="AI handling active">
                                     <Bot className="w-3 h-3 text-brand" />
                                     <span>AI</span>
                                   </span>

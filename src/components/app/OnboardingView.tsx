@@ -37,7 +37,7 @@ export default function OnboardingView({ isFirstRun = false, onNavigateTo, onSta
   };
 
   return (
-    <div className="w-full animate-fadeIn space-y-[15px] pb-12">
+    <div className="w-full animate-fadeIn space-y-[16px] pb-12">
       <PageHeader
         eyebrow="General / Onboarding"
         title="Onboarding"
@@ -49,7 +49,7 @@ export default function OnboardingView({ isFirstRun = false, onNavigateTo, onSta
         }
       />
 
-      <div className="grid gap-[15px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
+      <div className="grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
         <section className="nx-panel nx-pad">
           <div className="nx-sectionhead">
             <div>
@@ -94,15 +94,15 @@ export default function OnboardingView({ isFirstRun = false, onNavigateTo, onSta
 
         <aside className="nx-panel nx-pad" aria-label="How setup works">
           <div className="eyebrow mb-1">How it works</div>
-          <h2 className="font-display text-[15px] font-bold m-0 mb-3">Four steps, then you decide</h2>
-          <ol className="m-0 pl-5 list-decimal text-[12px] text-ink-2 leading-[1.8]">
+          <h2 className="font-display text-[16px] font-semibold m-0 mb-3">Four steps, then you decide</h2>
+          <ol className="m-0 pl-5 list-decimal text-[13px] text-ink-2 leading-[1.8]">
             <li>Tell Nexora about your business.</li>
             <li>Approve the answers the AI may give.</li>
             <li>Connect where customers reach you.</li>
             <li>Test the AI, then activate it.</li>
           </ol>
           <div className="nx-split" />
-          <p className="text-[11px] text-ink-3 m-0 leading-[1.6]">
+          <p className="text-[12px] text-ink-3 m-0 leading-[1.6]">
             Nothing is sent to customers until you activate. You can pause the AI at any time, and you can change any answer later in Settings.
           </p>
         </aside>

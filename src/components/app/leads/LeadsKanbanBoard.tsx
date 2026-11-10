@@ -126,14 +126,14 @@ export default function LeadsKanbanBoard({
                 setSelectedStage(col.stage);
                 setActiveMenuId(null);
               }}
-              className={`p-3.5 sm:p-4 text-left transition-all duration-150 border rounded-[9px] cursor-pointer flex flex-col justify-between ${
+              className={`p-3.5 sm:p-4 text-left transition-all duration-150 border rounded-[8px] cursor-pointer flex flex-col justify-between ${
                 isSelected
-                  ? 'bg-surface-hover border-line-strong text-ink shadow-[0_4px_20px_rgba(169,191,165,0.12)] ring-1 ring-[#A9BFA5]/30'
-                  : 'bg-surface border-line text-ink-3 hover:border-line hover:bg-[#09221F] hover:text-ink'
+                  ? 'bg-surface-hover border-line-strong text-ink shadow-card ring-1 ring-brand/30'
+                  : 'bg-surface border-line text-ink-3 hover:border-line hover:bg-surface-hover hover:text-ink'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px]  tracking-widest uppercase text-ink-3">
+                <span className="text-[11px]  tracking-widest uppercase text-ink-3">
                   Stage 0{index + 1}
                 </span>
                 {isSelected && (
@@ -142,12 +142,12 @@ export default function LeadsKanbanBoard({
               </div>
 
               <div className="flex items-center justify-between">
-                <h3 className={`font-display font-bold text-base sm:text-lg font-light tracking-tight transition-colors ${
+                <h3 className={`font-display font-semibold text-base sm:text-lg font-light tracking-tight transition-colors ${
                   isSelected ? 'text-ink' : 'text-ink-3'
                 }`}>
                   {col.label}
                 </h3>
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px]  border transition-colors ${
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px]  border transition-colors ${
                   isSelected 
                     ? 'bg-brand text-on-brand border-brand font-bold'
                     : 'bg-surface-raised text-ink-2 border-line'
@@ -163,7 +163,7 @@ export default function LeadsKanbanBoard({
       {/* Active Stage Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line-subtle">
         <div className="flex items-center space-x-3">
-          <h2 className="font-display font-bold text-2xl sm:text-3xl font-light text-ink tracking-tight">
+          <h2 className="font-display font-semibold text-2xl sm:text-3xl font-light text-ink tracking-tight">
             {activeCol.label}
           </h2>
           <span className="w-7 h-7 rounded-full bg-surface-raised border border-line flex items-center justify-center text-xs  text-ink-2">
@@ -185,7 +185,7 @@ export default function LeadsKanbanBoard({
                 setActiveMenuId(null);
               }
             }}
-            className={`px-3 py-1.5 rounded-[9px] border text-xs  transition-colors flex items-center space-x-1 ${
+            className={`px-3 py-1.5 rounded-[8px] border text-xs  transition-colors flex items-center space-x-1 ${
               currentStageIndex === 0
                 ? 'opacity-30 cursor-not-allowed border-line-subtle text-ink-3'
                 : 'border-line text-ink-2 hover:text-ink hover:border-line-strong cursor-pointer'
@@ -204,7 +204,7 @@ export default function LeadsKanbanBoard({
                 setActiveMenuId(null);
               }
             }}
-            className={`px-3 py-1.5 rounded-[9px] border text-xs  transition-colors flex items-center space-x-1 ${
+            className={`px-3 py-1.5 rounded-[8px] border text-xs  transition-colors flex items-center space-x-1 ${
               currentStageIndex === COLUMNS.length - 1
                 ? 'opacity-30 cursor-not-allowed border-line-subtle text-ink-3'
                 : 'border-line text-ink-2 hover:text-ink hover:border-line-strong cursor-pointer'
@@ -218,7 +218,7 @@ export default function LeadsKanbanBoard({
             <button
               type="button"
               onClick={onAddLeadModal}
-              className="bg-brand text-on-brand px-3.5 py-1.5 rounded-[9px] font-semibold text-xs uppercase tracking-wider hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5 ml-2"
+              className="bg-brand text-on-brand px-3.5 py-1.5 rounded-[8px] font-semibold text-xs uppercase tracking-wider hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5 ml-2"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Prospect</span>
@@ -238,16 +238,16 @@ export default function LeadsKanbanBoard({
               <div
                 key={lead.id}
                 onClick={() => onSelectLead(lead)}
-                className={`relative border p-5 rounded-[9px] transition-all cursor-pointer group select-none flex flex-col justify-between ${
+                className={`relative border p-5 rounded-[8px] transition-all cursor-pointer group select-none flex flex-col justify-between ${
                   isHighlighted
-                    ? 'bg-surface-hover border-line-strong shadow-[0_4px_24px_rgba(169,191,165,0.08)] ring-1 ring-[#A9BFA5]/20'
-                    : 'bg-surface border-line hover:border-line hover:bg-[#09221F]'
+                    ? 'bg-surface-hover border-line-strong shadow-card ring-1 ring-brand/20'
+                    : 'bg-surface border-line hover:border-line hover:bg-surface-hover'
                 }`}
               >
                 <div>
                   {/* Card Top: Tag badge & More Options */}
                   <div className="flex items-center justify-between mb-3">
-                    <span className={`text-[10px] uppercase tracking-wider  px-2.5 py-0.5 rounded-[9px] ${getTagBadgeStyle(
+                    <span className={`text-[11px] uppercase tracking-wider  px-2.5 py-0.5 rounded-[8px] ${getTagBadgeStyle(
                       lead.tag,
                       lead.isPriority
                     )}`}>
@@ -265,7 +265,7 @@ export default function LeadsKanbanBoard({
 
                       {/* Options Dropdown Menu */}
                       {isMenuOpen && (
-                        <div className="absolute right-0 top-6 w-44 bg-surface-raised border border-line shadow-2xl rounded-[9px] py-1 text-xs  z-30">
+                        <div className="absolute right-0 top-6 w-44 bg-surface-raised border border-line shadow-2xl rounded-[8px] py-1 text-xs  z-30">
                           <button
                             type="button"
                             onClick={() => {
@@ -278,7 +278,7 @@ export default function LeadsKanbanBoard({
                           </button>
 
                           <div className="border-t border-line-subtle my-1" />
-                          <div className="px-3 py-1 text-[9px] uppercase tracking-wider text-ink-3">
+                          <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-ink-3">
                             Move Stage:
                           </div>
 
@@ -288,7 +288,7 @@ export default function LeadsKanbanBoard({
                               type="button"
                               disabled={lead.stage === c.stage}
                               onClick={() => handleAdvanceStage(lead, c.stage)}
-                              className={`w-full text-left px-3 py-1 text-[11px] transition-colors flex items-center justify-between ${
+                              className={`w-full text-left px-3 py-1 text-[12px] transition-colors flex items-center justify-between ${
                                 lead.stage === c.stage
                                   ? 'text-ink-3 cursor-not-allowed'
                                   : 'text-ink-2 hover:bg-surface-hover hover:text-ink'
@@ -304,12 +304,12 @@ export default function LeadsKanbanBoard({
                   </div>
 
                   {/* Card Title (Company Name) */}
-                  <h4 className="font-display font-bold text-base sm:text-lg font-light text-ink group-hover:text-ink transition-colors leading-snug mb-1">
+                  <h4 className="font-display font-semibold text-base sm:text-lg font-light text-ink group-hover:text-ink transition-colors leading-snug mb-1">
                     {lead.company || lead.name}
                   </h4>
 
                   {/* Description */}
-                  <p className="text-[11px] sm:text-xs text-ink-3 font-light leading-relaxed mb-4 line-clamp-2">
+                  <p className="text-[12px] sm:text-xs text-ink-3 font-light leading-relaxed mb-4 line-clamp-2">
                     {lead.description || 'Enterprise prospect requiring client intake automation and reporting.'}
                   </p>
                 </div>
@@ -324,7 +324,7 @@ export default function LeadsKanbanBoard({
                         className="w-8 h-8 rounded-full object-cover border border-line-strong"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-surface-hover border border-line-strong flex items-center justify-center text-[10px]  text-ink">
+                      <div className="w-8 h-8 rounded-full bg-surface-hover border border-line-strong flex items-center justify-center text-[11px]  text-ink">
                         {lead.assignee?.name ? lead.assignee.name.charAt(0) : 'N'}
                       </div>
                     )}
@@ -332,14 +332,14 @@ export default function LeadsKanbanBoard({
                       <p className="text-xs font-medium text-ink leading-tight">
                         {lead.assignee?.name || 'Mateo Petty'}
                       </p>
-                      <p className="text-[10px] text-ink-3 ">
+                      <p className="text-[11px] text-ink-3 ">
                         {lead.assignee?.role || 'Lead Manager'}
                       </p>
                     </div>
                   </div>
 
                   {/* Card Footer: Date, Attachments, Messages & View Action */}
-                  <div className="flex items-center justify-between text-[11px]  text-ink-2 pt-1">
+                  <div className="flex items-center justify-between text-[12px]  text-ink-2 pt-1">
                     <div className="flex items-center space-x-1.5">
                       <Calendar className="w-3.5 h-3.5 text-ink-2" />
                       <span>{lead.date || '13 May'}</span>
@@ -356,7 +356,7 @@ export default function LeadsKanbanBoard({
                           e.stopPropagation();
                           onSelectLead(lead);
                         }}
-                        className="px-2 py-0.5 text-[10px]  rounded-[9px] bg-surface-hover hover:bg-brand text-ink-2 hover:text-on-brand border border-line transition-colors cursor-pointer"
+                        className="px-2 py-0.5 text-[11px]  rounded-[8px] bg-surface-hover hover:bg-brand text-ink-2 hover:text-on-brand border border-line transition-colors cursor-pointer"
                       >
                         View
                       </button>
@@ -368,8 +368,8 @@ export default function LeadsKanbanBoard({
           })}
         </div>
       ) : (
-        <div className="border border-dashed border-line bg-surface p-12 text-center rounded-[9px] space-y-3">
-          <p className="font-display font-bold text-xl text-ink font-light">
+        <div className="border border-dashed border-line bg-surface p-12 text-center rounded-[8px] space-y-3">
+          <p className="font-display font-semibold text-xl text-ink font-light">
             No prospects found in {activeCol.label}
           </p>
           <p className="text-xs text-ink-3 ">
@@ -379,7 +379,7 @@ export default function LeadsKanbanBoard({
             <button
               type="button"
               onClick={onAddLeadModal}
-              className="inline-flex items-center space-x-1.5 text-xs text-ink bg-surface-hover border border-line px-3.5 py-2 rounded-[9px] hover:border-line-strong transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1.5 text-xs text-ink bg-surface-hover border border-line px-3.5 py-2 rounded-[8px] hover:border-line-strong transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add prospect to {activeCol.label}</span>

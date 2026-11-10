@@ -29,32 +29,32 @@ export default function InfoModal({ type, onClose }: InfoModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-[#071C1A] border border-[rgba(169,191,165,0.2)] p-8 sm:p-10 shadow-2xl">
+      <div className="relative w-full max-w-lg bg-surface border border-line p-8 sm:p-10 shadow-2xl">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <span className="text-[10px] uppercase tracking-widest-plus text-[#A9BFA5] font-normal block mb-1">
+            <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 font-normal block mb-1">
               nexora documentation
             </span>
-            <h3 className="serif text-3xl font-light text-[#E8E9D8]">
+            <h3 className="font-display font-bold text-3xl font-light text-ink">
               {content.title}
             </h3>
-            <p className="text-xs text-[#A9BFA5] font-light mt-1">
+            <p className="text-xs text-ink-2 font-light mt-1">
               {content.subtitle}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-[#A9BFA5]/60 hover:text-[#E8E9D8] transition-colors p-1 cursor-pointer"
+            className="text-ink-3 hover:text-ink transition-colors p-1 cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" strokeWidth={1.5} />
           </button>
         </div>
 
-        <div className="w-full h-px bg-[rgba(169,191,165,0.2)] my-6" />
+        <div className="w-full h-px bg-line my-6" />
 
-        <p className="text-xs sm:text-sm text-[#A9BFA5] font-light leading-relaxed mb-8">
+        <p className="text-xs sm:text-sm text-ink-2 font-light leading-relaxed mb-8">
           {content.body}
         </p>
 
@@ -62,7 +62,7 @@ export default function InfoModal({ type, onClose }: InfoModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="bg-[#E8E9D8] text-[#071C1A] px-6 py-2.5 rounded-[2px] font-semibold uppercase tracking-widest text-xs hover:bg-white transition-colors cursor-pointer"
+            className="bg-brand text-on-brand px-6 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer"
           >
             Acknowledge
           </button>

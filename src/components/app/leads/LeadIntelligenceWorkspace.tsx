@@ -465,14 +465,14 @@ export default function LeadIntelligenceWorkspace({
         className={`nx-acc-head group ${open ? 'open' : ''}`}
       >
         <span className="nx-acc-icon">
-          <Icon className="w-[15px] h-[15px]" strokeWidth={1.8} />
+          <Icon className="w-[16px] h-[16px]" strokeWidth={1.8} />
         </span>
         <span className="flex-1 min-w-0 text-left">
-          <span className="block font-display text-[15px] font-bold tracking-[-0.3px] text-ink">{item.label}</span>
-          <span className="block text-[11px] text-ink-3 truncate mt-[3px]">{hint}</span>
+          <span className="block font-display text-[16px] font-semibold tracking-[-0.3px] text-ink">{item.label}</span>
+          <span className="block text-[12px] text-ink-3 truncate mt-[3px]">{hint}</span>
         </span>
         {typeof item.count === 'number' && item.count > 0 && (
-          <span className="text-[11px] font-bold text-ink-3 tabular-nums">{item.count}</span>
+          <span className="text-[12px] font-bold text-ink-3 tabular-nums">{item.count}</span>
         )}
         <span className="nx-acc-chevron">
           <ChevronDown className="w-4 h-4" strokeWidth={1.8} />
@@ -497,13 +497,13 @@ export default function LeadIntelligenceWorkspace({
         <div className="px-[27px] pt-[24px] pb-5 border-b border-line shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 min-w-0">
-              <div className="w-[46px] h-[46px] rounded-[12px] grid place-items-center bg-avatar text-avatar-ink font-extrabold text-[15px] shrink-0 mt-1">
+              <div className="w-[46px] h-[46px] rounded-[10px] grid place-items-center bg-avatar text-avatar-ink font-extrabold text-[16px] shrink-0 mt-1">
                 {initials}
               </div>
               <div className="min-w-0">
                 <span className="eyebrow">Lead details</span>
                 <h1 className="text-[26px] leading-[1.2] font-bold tracking-[-1px] text-ink mt-1 mb-1 truncate">{lead.name}</h1>
-                <p className="text-[13px] text-ink-3 m-0 truncate">
+                <p className="text-[14px] text-ink-3 m-0 truncate">
                   {lead.company}
                   {lead.title ? ` · ${lead.title}` : ''}
                   {lead.location ? ` · ${lead.location}` : ''}
@@ -518,7 +518,7 @@ export default function LeadIntelligenceWorkspace({
                 aria-label="Update lead stage"
                 value={lead.stage || 'New'}
                 onChange={(e) => handleStageChange(e.target.value as LeadStage)}
-                className="hidden md:block text-[12px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
+                className="hidden md:block text-[13px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
               >
                 {STAGE_OPTIONS.map((stg) => (
                   <option key={stg} value={stg}>Stage: {stg}</option>
@@ -529,7 +529,7 @@ export default function LeadIntelligenceWorkspace({
                 aria-label="Override lead temperature"
                 value={temperature}
                 onChange={(e) => handleTemperatureChange(e.target.value as LeadTemperature)}
-                className="hidden md:block text-[12px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
+                className="hidden md:block text-[13px] font-bold h-[35px] min-h-[35px]! px-3 pr-8 cursor-pointer"
               >
                 <option value="HOT">Hot</option>
                 <option value="WARM">Warm</option>
@@ -539,7 +539,7 @@ export default function LeadIntelligenceWorkspace({
                 type="button"
                 onClick={onClose}
                 aria-label="Close lead profile"
-                className="w-[35px] h-[35px] min-h-[35px]! rounded-[9px]! border border-line bg-surface text-ink-2 grid place-items-center hover:bg-surface-hover cursor-pointer"
+                className="w-[35px] h-[35px] min-h-[35px]! rounded-[8px]! border border-line bg-surface text-ink-2 grid place-items-center hover:bg-surface-hover cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -558,10 +558,10 @@ export default function LeadIntelligenceWorkspace({
 
           {nextCall && (
             <div className="nx-callbar mt-3">
-              <span className="text-[11px] font-bold text-ink">{customCallTitle(nextCall) || 'Upcoming call'}</span>
-              <span className="text-[11px] text-ink-2">{formatDue(nextCall, followUpNow)} · Host: {nextCall.owner}</span>
+              <span className="text-[12px] font-bold text-ink">{customCallTitle(nextCall) || 'Upcoming call'}</span>
+              <span className="text-[12px] text-ink-2">{formatDue(nextCall, followUpNow)} · Host: {nextCall.owner}</span>
               <CallChip task={nextCall} onNotify={onNotify} />
-              <button type="button" className="nx-link text-[11px] ml-auto" onClick={() => setFuModal({ type: 'call', editing: nextCall })}>
+              <button type="button" className="nx-link text-[12px] ml-auto" onClick={() => setFuModal({ type: 'call', editing: nextCall })}>
                 Reschedule
               </button>
             </div>
@@ -579,8 +579,8 @@ export default function LeadIntelligenceWorkspace({
               ['Owner', lead.assignee?.name || null, ''],
             ].map(([label, value, tone]) => (
               <div key={label as string} className="min-w-0">
-                <div className="text-[11px] text-ink-3">{label as string}</div>
-                <div className={`text-[13px] font-bold mt-1 truncate ${value ? (tone as string) || 'text-ink' : 'text-ink-3 font-normal'}`}>
+                <div className="text-[12px] text-ink-3">{label as string}</div>
+                <div className={`text-[14px] font-bold mt-1 truncate ${value ? (tone as string) || 'text-ink' : 'text-ink-3 font-normal'}`}>
                   {(value as string) || 'Not provided'}
                 </div>
               </div>
@@ -592,10 +592,10 @@ export default function LeadIntelligenceWorkspace({
         <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex-1 min-w-0 overflow-y-auto bg-surface px-[27px] pt-[18px] pb-10 nx-acc">
           <div className="flex items-center justify-between gap-3 pb-3">
-            <span className="text-[9px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-[1.8px] text-muted-decor">Sections</span>
             <button
               type="button"
-              className="nx-link text-[11px]"
+              className="nx-link text-[12px]"
               onClick={() =>
                 setOpenSections(
                   openSections.size === navItems.length
@@ -614,13 +614,13 @@ export default function LeadIntelligenceWorkspace({
           {renderSectionHeader('qualification', `${lead.score}/100 · ${verifiedCount} of ${qualificationChecks.length} criteria verified`)}
           {openSections.has('qualification') && (
             <div className="nx-section-body">
-            <div className="space-y-[15px]">
+            <div className="space-y-[16px]">
 
               {/* Score & summary */}
               <section className="nx-panel nx-pad">
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <div className="text-[11px] text-ink-3">Qualification score</div>
+                    <div className="text-[12px] text-ink-3">Qualification score</div>
                     <div className="flex items-baseline gap-1.5 mt-1">
                       <span className="font-display text-[34px] leading-none font-extrabold tracking-[-1.3px] text-ink tabular-nums">{lead.score}</span>
                       <span className="text-[14px] text-ink-3">/ 100</span>
@@ -643,18 +643,18 @@ export default function LeadIntelligenceWorkspace({
 
                 <div className="nx-split" />
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-display text-[13px] font-bold text-ink m-0">Conversation summary</h3>
+                  <h3 className="font-display text-[14px] font-semibold text-ink m-0">Conversation summary</h3>
                   <button
                     type="button"
                     onClick={handleRegenerateSummary}
                     disabled={isRegeneratingSummary}
-                    className="nx-link text-[11px] inline-flex items-center gap-1.5 disabled:opacity-50"
+                    className="nx-link text-[12px] inline-flex items-center gap-1.5 disabled:opacity-50"
                   >
                     <RotateCw className={`w-3.5 h-3.5 ${isRegeneratingSummary ? 'animate-spin' : ''}`} />
                     {isRegeneratingSummary ? 'Regenerating…' : 'Regenerate'}
                   </button>
                 </div>
-                <p className="text-[12px] text-ink-2 mt-2 mb-0">
+                <p className="text-[13px] text-ink-2 mt-2 mb-0">
                   {aiSummary || lead.description || (
                     <span className="text-ink-3">No summary yet. Regenerate to create one from lead signals.</span>
                   )}
@@ -751,7 +751,7 @@ export default function LeadIntelligenceWorkspace({
             <div className="space-y-4">
               
               {/* Channel & Mode banner */}
-              <div className={`flex items-center justify-between p-3.5 rounded-[13px] border text-xs transition-colors ${
+              <div className={`flex items-center justify-between p-3.5 rounded-[10px] border text-xs transition-colors ${
                 'bg-surface border-line text-ink-2 '
               }`}>
                 <div className="flex items-center space-x-2">
@@ -774,7 +774,7 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Chat Thread Container */}
-              <div className={`nx-keep border rounded-[13px] flex flex-col max-h-[460px] overflow-hidden transition-colors nx-messages ${
+              <div className={`nx-keep border rounded-[10px] flex flex-col max-h-[460px] overflow-hidden transition-colors nx-messages ${
                 'bg-surface border-line'
               }`}>
                 <div className="flex-1 overflow-y-auto p-5 space-y-3">
@@ -795,7 +795,7 @@ export default function LeadIntelligenceWorkspace({
                           key={msg.id}
                           className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
                         >
-                          <div className={`flex items-center space-x-1.5 mb-1 text-[11px] px-1 ${
+                          <div className={`flex items-center space-x-1.5 mb-1 text-[12px] px-1 ${
                             'text-ink-3'
                           }`}>
                             {isCustomer ? (
@@ -817,7 +817,7 @@ export default function LeadIntelligenceWorkspace({
                               </>
                             )}
                             <span>·</span>
-                            <span className="text-[10px] font-mono tabular-nums">{msg.time}</span>
+                            <span className="text-[11px] font-mono tabular-nums">{msg.time}</span>
                           </div>
 
                           <div className={`max-w-[82%] sm:max-w-[75%] leading-[1.6] ${
@@ -898,10 +898,10 @@ export default function LeadIntelligenceWorkspace({
             <div className="space-y-6">
               
               {/* Card 1: Contact Information */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
               }`}>
-                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case block ${
                   'text-ink-2'
                 }`}>
                   Contact Information
@@ -909,13 +909,13 @@ export default function LeadIntelligenceWorkspace({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Full Name</span>
                     <span className={`font-semibold ${'text-ink'}`}>{lead.name}</span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Job Title</span>
                     <span className={'text-ink font-medium'}>
@@ -923,7 +923,7 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Email Address</span>
                     {lead.email ? (
@@ -936,7 +936,7 @@ export default function LeadIntelligenceWorkspace({
                     )}
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Phone Number</span>
                     {lead.phone ? (
@@ -949,13 +949,13 @@ export default function LeadIntelligenceWorkspace({
                     )}
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Company</span>
                     <span className={`font-semibold ${'text-ink'}`}>{lead.company}</span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Company Size</span>
                     <span className={'text-ink font-medium'}>
@@ -963,7 +963,7 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Location</span>
                     <span className={'text-ink font-medium'}>
@@ -971,7 +971,7 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Preferred Channel</span>
                     <span className="text-brand font-semibold">{channelBadge.name}</span>
@@ -980,10 +980,10 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 2: Business & Requirement */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
               }`}>
-                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case block ${
                   'text-ink-2'
                 }`}>
                   Business & Requirement Scope
@@ -991,7 +991,7 @@ export default function LeadIntelligenceWorkspace({
 
                 <div className="space-y-3.5 text-xs">
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-1.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-1.5 ${
                       'text-ink-3'
                     }`}>Requirement Statement</span>
                     <p className={`p-3.5 rounded-lg border leading-relaxed font-normal ${
@@ -1005,7 +1005,7 @@ export default function LeadIntelligenceWorkspace({
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                     <div>
-                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                         'text-ink-3'
                       }`}>Budget Allocated</span>
                       <span className="text-ok font-semibold tabular-nums">
@@ -1013,7 +1013,7 @@ export default function LeadIntelligenceWorkspace({
                       </span>
                     </div>
                     <div>
-                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                         'text-ink-3'
                       }`}>Expected Timeline</span>
                       <span className={`font-semibold ${'text-ink'}`}>
@@ -1021,7 +1021,7 @@ export default function LeadIntelligenceWorkspace({
                       </span>
                     </div>
                     <div>
-                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                         'text-ink-3'
                       }`}>Decision Maker</span>
                       {lead.decisionMaker === true ? (
@@ -1037,10 +1037,10 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 3: Attribution & Campaign Source */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
               }`}>
-                <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case block ${
+                <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case block ${
                   'text-ink-2'
                 }`}>
                   Lead Source & Attribution
@@ -1048,13 +1048,13 @@ export default function LeadIntelligenceWorkspace({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Origin Channel</span>
                     <span className={`font-semibold ${'text-ink'}`}>{lead.source}</span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Campaign Name</span>
                     <span className={'text-ink font-medium'}>
@@ -1062,7 +1062,7 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>First Touch</span>
                     <span className={'text-ink-2'}>
@@ -1070,7 +1070,7 @@ export default function LeadIntelligenceWorkspace({
                     </span>
                   </div>
                   <div>
-                    <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                    <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                       'text-ink-3'
                     }`}>Last Touch</span>
                     <span className={'text-ink-2'}>
@@ -1079,7 +1079,7 @@ export default function LeadIntelligenceWorkspace({
                   </div>
                   {lead.campaignAttribution?.adName && (
                     <div className="sm:col-span-2">
-                      <span className={`block text-[11px] font-normal text-ink-3 mb-0.5 ${
+                      <span className={`block text-[12px] font-normal text-ink-3 mb-0.5 ${
                         'text-ink-3'
                       }`}>Creative / Ad Name</span>
                       <span className={`font-medium ${'text-ink'}`}>
@@ -1101,11 +1101,11 @@ export default function LeadIntelligenceWorkspace({
           {openSections.has('timeline') && (
             <div className="nx-section-body">
             <div className="space-y-4">
-              <div className={`p-[22px] rounded-[15px] border space-y-6  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-6  transition-colors ${
                 'bg-surface border-line'
               }`}>
                 <div className="flex items-center justify-between pb-3 border-b border-line-subtle">
-                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                  <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case ${
                     'text-ink-2'
                   }`}>
                     Chronological Activity Timeline
@@ -1126,7 +1126,7 @@ export default function LeadIntelligenceWorkspace({
                   <div className="space-y-4 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
                     {timelineEvents.map((evt) => (
                       <div key={evt.id} className="flex items-start space-x-3.5 relative pl-1">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[10px]  ${
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 text-[11px]  ${
                           evt.type === 'message'
                             ? 'bg-info-soft text-info border border-sky-200'
                             : evt.type === 'ai_action'
@@ -1149,7 +1149,7 @@ export default function LeadIntelligenceWorkspace({
                             <span className={`text-xs font-semibold ${'text-ink'}`}>
                               {evt.title}
                             </span>
-                            <span className="text-[11px] font-mono tabular-nums text-ink-3 shrink-0">
+                            <span className="text-[12px] font-mono tabular-nums text-ink-3 shrink-0">
                               {evt.at ? formatRelative(evt.at) : evt.time}
                             </span>
                           </div>
@@ -1226,7 +1226,7 @@ export default function LeadIntelligenceWorkspace({
 
                 {leadFollowUps.length > openLeadFollowUps.length && (
                   <div className="mt-3">
-                    <button type="button" className="nx-link text-[11px]" onClick={() => setShowDoneFollowUps(v => !v)}>
+                    <button type="button" className="nx-link text-[12px]" onClick={() => setShowDoneFollowUps(v => !v)}>
                       {showDoneFollowUps ? 'Hide' : 'Show'} {leadFollowUps.length - openLeadFollowUps.length} completed
                     </button>
                     {showDoneFollowUps && (
@@ -1241,19 +1241,19 @@ export default function LeadIntelligenceWorkspace({
               </section>
 
               {/* Card 2: Internal Notes */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
               }`}>
                 <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
                   <div className="flex items-center space-x-2">
                     <Lock className="w-4 h-4 text-amber-500" />
-                    <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                    <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case ${
                       'text-ink-2'
                     }`}>
                       Internal Notes
                     </span>
                   </div>
-                  <span className="text-[11px] font-medium text-warn bg-warn-soft border border-transparent px-2.5 py-0.5 rounded-md">
+                  <span className="text-[12px] font-medium text-warn bg-warn-soft border border-transparent px-2.5 py-0.5 rounded-md">
                     Internal Team Only
                   </span>
                 </div>
@@ -1290,7 +1290,7 @@ export default function LeadIntelligenceWorkspace({
                             'bg-surface-raised border-line text-ink-2'
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-1 text-[11px] text-ink-3">
+                          <div className="flex items-center justify-between mb-1 text-[12px] text-ink-3">
                             <span className="font-semibold text-brand">Team Note</span>
                           </div>
                           <p>{note}</p>
@@ -1302,11 +1302,11 @@ export default function LeadIntelligenceWorkspace({
               </div>
 
               {/* Card 3: Lead Tags */}
-              <div className={`p-[22px] rounded-[15px] border space-y-4  transition-colors ${
+              <div className={`p-[22px] rounded-[10px] border space-y-4  transition-colors ${
                 'bg-surface border-line'
               }`}>
                 <div className="flex items-center justify-between pb-2 border-b border-line-subtle">
-                  <span className={`font-display text-[15px] font-bold tracking-[-0.3px] text-ink normal-case ${
+                  <span className={`font-display text-[16px] font-semibold tracking-[-0.3px] text-ink normal-case ${
                     'text-ink-2'
                   }`}>
                     Lead Tags
@@ -1383,7 +1383,7 @@ export default function LeadIntelligenceWorkspace({
 
         {/* Footer actions */}
         <div className="border-t border-line px-[27px] py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 bg-surface">
-          <div className="flex items-center gap-2 text-[11px] text-ink-3">
+          <div className="flex items-center gap-2 text-[12px] text-ink-3">
             <span>Assigned: <b className="text-ink">{lead.assignee?.name || 'Unassigned'}</b></span>
             <span>·</span>
             <span className={`nx-tag ${handlingMode === 'HUMAN' ? 'amber' : 'green'}`}>

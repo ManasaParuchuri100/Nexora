@@ -266,9 +266,9 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
       <div ref={topRef} />
       <header className="max-w-[1080px] mx-auto px-5 pt-6 pb-4 flex items-center justify-between">
         <div className="flex flex-col leading-none">
-          <span className="text-[9px] font-extrabold tracking-[3px] text-brand uppercase">{BRAND_COMPANY}</span>
+          <span className="text-[10px] font-extrabold tracking-[3px] text-brand uppercase">{BRAND_COMPANY}</span>
           <span className="font-display text-[22px] font-extrabold tracking-[-1px] uppercase mt-1">{BRAND_NAME}<span className="text-brand">.</span></span>
-          <span className="text-[9px] tracking-[2px] text-ink-3 uppercase mt-0.5">{BRAND_TAGLINE}</span>
+          <span className="text-[10px] tracking-[2px] text-ink-3 uppercase mt-0.5">{BRAND_TAGLINE}</span>
         </div>
         <div className="flex items-center gap-3">
           {!setup && <button type="button" className="nx-inline-link" onClick={onOpenLogin}>Already have an account? Log in</button>}
@@ -276,13 +276,13 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
         </div>
       </header>
 
-      <div className="max-w-[1080px] mx-auto px-5 pb-16 grid gap-[15px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
+      <div className="max-w-[1080px] mx-auto px-5 pb-16 grid gap-[16px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
         <main>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 mb-[18px] p-0 list-none" aria-label="Setup steps">
             {steps.map((s, i) => (
               <li key={s.id} className="flex items-center">
-                <span className={`w-[24px] h-[24px] rounded-full grid place-items-center text-[11px] font-bold border mr-2 ${i === stepIdx ? 'bg-brand text-on-brand border-brand' : i < stepIdx ? 'bg-brand-soft text-brand border-brand-soft' : 'bg-surface text-ink-3 border-line'}`}>{i < stepIdx ? '✓' : i + 1}</span>
-                <span className={`text-[12px] font-semibold ${i === stepIdx ? 'text-ink' : 'text-ink-3'}`}>{s.label}</span>
+                <span className={`w-[24px] h-[24px] rounded-full grid place-items-center text-[12px] font-bold border mr-2 ${i === stepIdx ? 'bg-brand text-on-brand border-brand' : i < stepIdx ? 'bg-brand-soft text-brand border-brand-soft' : 'bg-surface text-ink-3 border-line'}`}>{i < stepIdx ? '✓' : i + 1}</span>
+                <span className={`text-[13px] font-semibold ${i === stepIdx ? 'text-ink' : 'text-ink-3'}`}>{s.label}</span>
                 {i < steps.length - 1 && <span className="w-5 h-px bg-line mx-2" />}
               </li>
             ))}
@@ -292,7 +292,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
             {/* ---------- Account ---------- */}
             {step === 'account' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[22px] font-bold m-0">Create your private workspace</h1><p>This is a workspace for your business, not just a chatbot. Only your team can see it.</p></div></div>
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[22px] font-semibold m-0">Create your private workspace</h1><p>This is a workspace for your business, not just a chatbot. Only your team can see it.</p></div></div>
                 <Input label="Your name" value={name} onChange={e => { setName(e.target.value); setAccountErr(a => ({ ...a, name: undefined })); }} error={accountErr.name} autoComplete="name" />
                 <Input label="Work email" type="email" value={email} onChange={e => { setEmail(e.target.value); setAccountErr(a => ({ ...a, email: undefined })); }} error={accountErr.email} autoComplete="email" />
                 <div className="nx-field">
@@ -301,19 +301,19 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                     <input id="ob-pw" type={showPw ? 'text' : 'password'} value={password} onChange={e => { setPassword(e.target.value); setAccountErr(a => ({ ...a, password: undefined })); }} autoComplete="new-password" aria-invalid={accountErr.password ? true : undefined} onKeyDown={e => e.key === 'Enter' && createAccount()} />
                     <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 min-h-0! text-ink-3 hover:text-ink" onClick={() => setShowPw(v => !v)} aria-label={showPw ? 'Hide password' : 'Show password'}>{showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
                   </div>
-                  {accountErr.password ? <div role="alert" className="text-[11px] text-danger mt-1.5">{accountErr.password}</div> : <div className="text-[11px] text-ink-3 mt-1.5">At least 8 characters.</div>}
+                  {accountErr.password ? <div role="alert" className="text-[12px] text-danger mt-1.5">{accountErr.password}</div> : <div className="text-[12px] text-ink-3 mt-1.5">At least 8 characters.</div>}
                 </div>
                 <button type="button" className="nx-btn primary w-full justify-center" onClick={createAccount} disabled={creating}>
                   {creating ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Creating workspace…</> : 'Create account'}
                 </button>
-                <p className="text-[11px] text-ink-3 mt-3 mb-0">Demo: no account is created on a server. We confirm your email in a real product.</p>
+                <p className="text-[12px] text-ink-3 mt-3 mb-0">Demo: no account is created on a server. We confirm your email in a real product.</p>
               </>
             )}
 
             {/* ---------- Business ---------- */}
             {step === 'business' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-bold m-0">Tell us about your business</h1><p>Nexora uses this to answer customers correctly.</p></div></div>
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-semibold m-0">Tell us about your business</h1><p>Nexora uses this to answer customers correctly.</p></div></div>
                 <div className="grid gap-x-4 sm:grid-cols-2">
                   <Input label="Business name" value={businessName} onChange={e => setBusinessName(e.target.value)} error={bizTried && !businessName.trim() ? 'Enter your business name.' : undefined} />
                   <Input label="Website" hint="Optional" value={website} onChange={e => setWebsite(e.target.value)} placeholder="yourbusiness.com" />
@@ -324,7 +324,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                     {[...INDUSTRIES, 'Other'].map(i => <button key={i} type="button" aria-pressed={industry === i} className={`nx-chip ${industry === i ? 'active' : ''}`} onClick={() => setIndustry(i)}>{i}</button>)}
                   </div>
                   {industry === 'Other' && <input className="mt-2 max-w-[280px]" value={customIndustry} onChange={e => setCustomIndustry(e.target.value)} placeholder="Your industry" aria-label="Your industry" />}
-                  {bizTried && !industryValue && <div role="alert" className="text-[11px] text-danger mt-1.5">Choose an industry.</div>}
+                  {bizTried && !industryValue && <div role="alert" className="text-[12px] text-danger mt-1.5">Choose an industry.</div>}
                 </div>
                 <div className="grid gap-x-4 sm:grid-cols-2">
                   <Input label="City" value={location} onChange={e => setLocation(e.target.value)} error={bizTried && !location.trim() ? 'Enter your city.' : undefined} />
@@ -333,7 +333,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                 <div className="nx-field">
                   <label htmlFor="ob-sell">What do you sell?</label>
                   <textarea id="ob-sell" rows={3} value={whatYouSell} onChange={e => setWhatYouSell(e.target.value)} placeholder="e.g. residential and office interiors" />
-                  {bizTried && !whatYouSell.trim() && <div role="alert" className="text-[11px] text-danger mt-1.5">Describe what you sell.</div>}
+                  {bizTried && !whatYouSell.trim() && <div role="alert" className="text-[12px] text-danger mt-1.5">Describe what you sell.</div>}
                 </div>
                 <Nav canNext onNext={() => { setBizTried(true); if (businessDone) next(); }} />
               </>
@@ -342,13 +342,13 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
             {/* ---------- Knowledge ---------- */}
             {step === 'knowledge' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-bold m-0">Teach the AI what it may say</h1><p>The AI only answers from knowledge you approve. Drafts are never used until you approve them.</p></div></div>
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-semibold m-0">Teach the AI what it may say</h1><p>The AI only answers from knowledge you approve. Drafts are never used until you approve them.</p></div></div>
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   <button type="button" className="nx-btn" onClick={draftFaqs} disabled={drafting}>{drafting ? 'Drafting…' : 'Draft answers from my business details'}</button>
-                  <span className="text-[11px] text-ink-3">Check every draft. Prices and policies are never filled in for you.</span>
+                  <span className="text-[12px] text-ink-3">Check every draft. Prices and policies are never filled in for you.</span>
                 </div>
                 <div className="border-t border-line">
-                  {faqs.length === 0 && <p className="text-[12px] text-ink-3 py-5 m-0">No knowledge yet. Draft answers above or add your own below.</p>}
+                  {faqs.length === 0 && <p className="text-[13px] text-ink-3 py-5 m-0">No knowledge yet. Draft answers above or add your own below.</p>}
                   {faqs.map(f => (
                     <div key={f.id} className="py-3 border-b border-line">
                       {editing === f.id ? (
@@ -360,8 +360,8 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                       ) : (
                         <div className="flex items-start gap-3">
                           <div className="flex-1 min-w-0">
-                            <strong className="text-[13px] text-ink block">{f.question}</strong>
-                            <p className="text-[12px] text-ink-2 m-0 mt-0.5 leading-[1.55]">{f.answer}</p>
+                            <strong className="text-[14px] text-ink block">{f.question}</strong>
+                            <p className="text-[13px] text-ink-2 m-0 mt-0.5 leading-[1.55]">{f.answer}</p>
                           </div>
                           <span className={`nx-tag ${f.status === 'approved' ? 'green' : 'amber'}`}>{f.status === 'approved' ? 'Approved' : 'Needs review'}</span>
                           <div className="flex gap-1.5 shrink-0">
@@ -375,7 +375,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                   ))}
                 </div>
                 <div className="nx-callout block! mt-4">
-                  <div className="text-[12px] font-bold text-ink mb-2">Add your own answer</div>
+                  <div className="text-[13px] font-bold text-ink mb-2">Add your own answer</div>
                   <input value={newQ} onChange={e => setNewQ(e.target.value)} placeholder="Question customers ask" aria-label="New question" className="mb-2 w-full" />
                   <textarea rows={2} value={newA} onChange={e => setNewA(e.target.value)} placeholder="The answer you approve" aria-label="New answer" className="mb-2 w-full" />
                   <button type="button" className="nx-btn sm" onClick={addFaq} disabled={!newQ.trim() || !newA.trim()}>Add as approved</button>
@@ -386,11 +386,11 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                 </div>
                 <div className="nx-field">
                   <label>Hand a conversation to a person when</label>
-                  <label className="flex items-center gap-2 text-[12px] py-1"><input type="checkbox" checked={handoff.customerAsksPerson} onChange={e => setHandoff({ ...handoff, customerAsksPerson: e.target.checked })} /> the customer asks for a person</label>
-                  <label className="flex items-center gap-2 text-[12px] py-1"><input type="checkbox" checked={handoff.aiNotSure} onChange={e => setHandoff({ ...handoff, aiNotSure: e.target.checked })} /> the AI is not sure of the answer</label>
-                  <label className="flex items-center gap-2 text-[12px] py-1 flex-wrap"><input type="checkbox" checked={handoff.dealValueAbove} onChange={e => setHandoff({ ...handoff, dealValueAbove: e.target.checked })} /> the deal is worth more than ₹ <input type="number" min={0} value={handoff.dealValueThreshold} disabled={!handoff.dealValueAbove} onChange={e => setHandoff({ ...handoff, dealValueThreshold: e.target.value })} aria-label="Deal value" className="w-[120px]!" /></label>
+                  <label className="flex items-center gap-2 text-[13px] py-1"><input type="checkbox" checked={handoff.customerAsksPerson} onChange={e => setHandoff({ ...handoff, customerAsksPerson: e.target.checked })} /> the customer asks for a person</label>
+                  <label className="flex items-center gap-2 text-[13px] py-1"><input type="checkbox" checked={handoff.aiNotSure} onChange={e => setHandoff({ ...handoff, aiNotSure: e.target.checked })} /> the AI is not sure of the answer</label>
+                  <label className="flex items-center gap-2 text-[13px] py-1 flex-wrap"><input type="checkbox" checked={handoff.dealValueAbove} onChange={e => setHandoff({ ...handoff, dealValueAbove: e.target.checked })} /> the deal is worth more than ₹ <input type="number" min={0} value={handoff.dealValueThreshold} disabled={!handoff.dealValueAbove} onChange={e => setHandoff({ ...handoff, dealValueThreshold: e.target.value })} aria-label="Deal value" className="w-[120px]!" /></label>
                 </div>
-                {pending.length > 0 && <p className="text-[12px] text-warn m-0" role="status">{pending.length} draft{pending.length > 1 ? 's' : ''} still need review before the knowledge counts as verified.</p>}
+                {pending.length > 0 && <p className="text-[13px] text-warn m-0" role="status">{pending.length} draft{pending.length > 1 ? 's' : ''} still need review before the knowledge counts as verified.</p>}
                 <Nav canNext />
               </>
             )}
@@ -398,7 +398,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
             {/* ---------- Channels ---------- */}
             {step === 'channels' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-bold m-0">Connect where customers reach you</h1><p>Start with one channel. WhatsApp is the most common first choice.</p></div></div>
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-semibold m-0">Connect where customers reach you</h1><p>Start with one channel. WhatsApp is the most common first choice.</p></div></div>
                 <div className="border-t border-line">
                   {CHANNELS.map(c => {
                     const handle = channels[c.id];
@@ -423,7 +423,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                     );
                   })}
                 </div>
-                <p className="text-[11px] text-ink-3 mt-3 mb-0">Connections are simulated in this demo. A live channel needs authorization from the provider.</p>
+                <p className="text-[12px] text-ink-3 mt-3 mb-0">Connections are simulated in this demo. A live channel needs authorization from the provider.</p>
                 <Nav canNext />
               </>
             )}
@@ -431,8 +431,8 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
             {/* ---------- Test ---------- */}
             {step === 'test' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-bold m-0">Test the AI before customers do</h1><p>Ask a question. The answer comes only from the knowledge you approved.</p></div></div>
-                {approved.length === 0 && <p className="text-[12px] text-warn mt-0" role="status">You have not approved any knowledge yet, so the AI will hand every question to a person.</p>}
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-semibold m-0">Test the AI before customers do</h1><p>Ask a question. The answer comes only from the knowledge you approved.</p></div></div>
+                {approved.length === 0 && <p className="text-[13px] text-warn mt-0" role="status">You have not approved any knowledge yet, so the AI will hand every question to a person.</p>}
                 <div className="flex gap-2 mb-2">
                   <input value={question} onChange={e => setQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && ask(question)} placeholder="Ask like a customer would" aria-label="Test question" className="flex-1" />
                   <button type="button" className="nx-btn primary" onClick={() => ask(question)} disabled={!question.trim()}>Ask</button>
@@ -441,12 +441,12 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                   {suggestions.map(s => <button key={s} type="button" className="nx-chip" onClick={() => ask(s)}>{s}</button>)}
                 </div>
                 <div className="border-t border-line">
-                  {tests.length === 0 && <p className="text-[12px] text-ink-3 py-5 m-0">Your test conversation appears here.</p>}
+                  {tests.length === 0 && <p className="text-[13px] text-ink-3 py-5 m-0">Your test conversation appears here.</p>}
                   {tests.map((t, i) => (
                     <div key={i} className="py-3 border-b border-line">
-                      <p className="text-[12px] font-bold text-ink m-0">Customer: {t.q}</p>
-                      <p className="text-[12px] text-ink-2 m-0 mt-1 leading-[1.6]">AI: {t.a}</p>
-                      <p className="text-[11px] text-ink-3 m-0 mt-1">{t.source ? `Answered from approved knowledge: “${t.source}”` : 'Not covered by approved knowledge. Handed to a person.'}</p>
+                      <p className="text-[13px] font-bold text-ink m-0">Customer: {t.q}</p>
+                      <p className="text-[13px] text-ink-2 m-0 mt-1 leading-[1.6]">AI: {t.a}</p>
+                      <p className="text-[12px] text-ink-3 m-0 mt-1">{t.source ? `Answered from approved knowledge: “${t.source}”` : 'Not covered by approved knowledge. Handed to a person.'}</p>
                     </div>
                   ))}
                 </div>
@@ -457,7 +457,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
             {/* ---------- Activate ---------- */}
             {step === 'activate' && (
               <>
-                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-bold m-0">Review and activate</h1><p>Everything below must be done before the AI starts replying.</p></div></div>
+                <div className="nx-sectionhead"><div><h1 className="font-display text-[20px] font-semibold m-0">Review and activate</h1><p>Everything below must be done before the AI starts replying.</p></div></div>
                 <div className="border-t border-line">
                   {readiness.slice(0, 4).map(r => (
                     <div key={r.id} className="nx-row">
@@ -467,7 +467,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                     </div>
                   ))}
                 </div>
-                <div className="nx-callout block! mt-4 text-[12px] text-ink-2">
+                <div className="nx-callout block! mt-4 text-[13px] text-ink-2">
                   <strong className="text-ink">{businessName || 'Your business'}</strong> · {industryValue || '—'} · {location || '—'}<br />
                   {approved.length} approved answer{approved.length === 1 ? '' : 's'} · tone {tone.toLowerCase()} · {Object.keys(channels).length} channel{Object.keys(channels).length === 1 ? '' : 's'} connected
                 </div>
@@ -475,7 +475,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
                   <button type="button" className="nx-btn" onClick={back}>Back</button>
                   <button type="button" className="nx-btn primary" onClick={activate} disabled={!readiness[4].done}>Activate Nexora →</button>
                 </div>
-                {!readiness[4].done && <p className="text-[12px] text-ink-3 mt-2 mb-0" role="status">Finish the open items to activate.</p>}
+                {!readiness[4].done && <p className="text-[13px] text-ink-3 mt-2 mb-0" role="status">Finish the open items to activate.</p>}
               </>
             )}
           </section>
@@ -483,17 +483,17 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
 
         <aside className="nx-panel nx-pad lg:sticky lg:top-6" aria-label="Setup progress">
           <div className="eyebrow mb-1">Setup progress</div>
-          <div className="font-display text-[24px] font-bold tracking-[-0.6px] mb-2">{doneCount} of {readiness.length}</div>
+          <div className="font-display text-[24px] font-semibold tracking-[-0.6px] mb-2">{doneCount} of {readiness.length}</div>
           <div className="nx-progress mb-4"><div style={{ width: `${(doneCount / readiness.length) * 100}%` }} /></div>
           <ul className="m-0 p-0 list-none">
             {readiness.map(r => (
-              <li key={r.id} className="flex items-center gap-2.5 py-2 border-t border-line first:border-t-0 text-[12px]">
+              <li key={r.id} className="flex items-center gap-2.5 py-2 border-t border-line first:border-t-0 text-[13px]">
                 <span className={`w-[18px] h-[18px] rounded-full grid place-items-center shrink-0 ${r.done ? 'bg-ok text-white' : 'bg-surface-raised text-ink-3 border border-line'}`}>{r.done ? <Check className="w-3 h-3" /> : null}</span>
                 <span className={r.done ? 'text-ink' : 'text-ink-3'}>{r.label}</span>
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-ink-3 mt-3 mb-0">The AI is not active until every step is done.</p>
+          <p className="text-[12px] text-ink-3 mt-3 mb-0">The AI is not active until every step is done.</p>
         </aside>
       </div>
     </div>

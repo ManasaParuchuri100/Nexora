@@ -97,14 +97,14 @@ export default function NewCustomersChart({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
         <div className="flex items-center space-x-3">
-          <h3 className="font-display font-bold text-xl sm:text-2xl font-light text-ink tracking-tight">
+          <h3 className="font-display font-semibold text-xl sm:text-2xl font-light text-ink tracking-tight">
             New customers
           </h3>
           {onToggleActivity && (
             <button
               type="button"
               onClick={onToggleActivity}
-              className={`text-[10px]  uppercase tracking-wider px-2.5 py-1 rounded-[9px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
+              className={`text-[11px]  uppercase tracking-wider px-2.5 py-1 rounded-[8px] border transition-colors cursor-pointer flex items-center space-x-1.5 ${
                 isActivityVisible
                   ? 'border-line-strong text-ink bg-[#072421]'
                   : 'border-line text-ink-2 hover:text-ink hover:border-line'
@@ -117,7 +117,7 @@ export default function NewCustomersChart({
         </div>
 
         {/* Legend with interactive channel filters */}
-        <div className="flex items-center space-x-3 text-[10px]  text-ink-2 select-none">
+        <div className="flex items-center space-x-3 text-[11px]  text-ink-2 select-none">
           <button
             type="button"
             onClick={() => setActiveChannel(activeChannel === 'website' ? 'all' : 'website')}
@@ -340,7 +340,7 @@ export default function NewCustomersChart({
             transform: activeDayIndex > 1 && activeDayIndex < 5 ? 'translateX(-50%)' : 'none'
           }}
         >
-          <div className="bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-2xl px-3 py-2 rounded-[9px] text-[11px]  space-y-1 min-w-[110px]">
+          <div className="bg-[var(--surface-elevated)] border border-[var(--border-strong)] shadow-2xl px-3 py-2 rounded-[8px] text-[12px]  space-y-1 min-w-[110px]">
             <div className="flex items-center space-x-2 text-[var(--text-primary)]">
               <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: websiteStroke }} />
               <span className="text-[var(--text-secondary)]">Website -</span>

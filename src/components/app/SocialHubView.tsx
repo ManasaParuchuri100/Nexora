@@ -345,7 +345,7 @@ export default function SocialHubView({
   };
 
   return (
-    <div className="w-full animate-fadeIn space-y-[15px]">
+    <div className="w-full animate-fadeIn space-y-[16px]">
       <PageHeader
         eyebrow="Marketing / Content"
         title="Content"
@@ -377,12 +377,12 @@ export default function SocialHubView({
 
       {/* First-Run Empty State (Image 6 spec) */}
       {isFirstRun && (
-        <div className="p-8 sm:p-12 rounded-[9px] bg-surface-raised border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
+        <div className="p-8 sm:p-12 rounded-[8px] bg-surface-raised border border-emerald-500/40 text-center space-y-4 max-w-xl mx-auto my-6 animate-fadeIn shadow-2xl">
           <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-ok">
             <CalendarIcon className="w-6 h-6" />
           </div>
           <div className="space-y-1.5">
-            <h3 className="font-display font-bold text-xl sm:text-2xl font-light text-ink">
+            <h3 className="font-display font-semibold text-xl sm:text-2xl font-light text-ink">
               Nothing scheduled.
             </h3>
             <p className="text-xs text-ink-2 font-light max-w-md mx-auto leading-relaxed">
@@ -394,7 +394,7 @@ export default function SocialHubView({
               type="button"
               id="schedule-create-post-btn"
               onClick={() => onNavigateSub('manual-scheduling')}
-              className="px-6 py-2.5 bg-brand text-on-brand hover:bg-brand-hover text-xs font-mono font-bold uppercase tracking-wider rounded-[9px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
+              className="px-6 py-2.5 bg-brand text-on-brand hover:bg-brand-hover text-xs font-mono font-bold uppercase tracking-wider rounded-[8px] transition-colors inline-flex items-center space-x-2 cursor-pointer shadow-md"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Create a post → composer drawer</span>
@@ -407,7 +407,7 @@ export default function SocialHubView({
       {currentTab === 'connect' && (
         <div className="space-y-6">
           <div className="border border-line divide-y divide-line-subtle bg-surface">
-            <div className="grid grid-cols-12 px-6 py-3 text-[10px] uppercase tracking-widest text-ink-3 font-medium bg-surface-raised">
+            <div className="grid grid-cols-12 px-6 py-3 text-[11px] uppercase tracking-widest text-ink-3 font-medium bg-surface-raised">
               <div className="col-span-4">Platform / Handle</div>
               <div className="col-span-3">Status</div>
               <div className="col-span-2 text-right">Followers</div>
@@ -418,11 +418,11 @@ export default function SocialHubView({
               <div key={acc.id} className="grid grid-cols-12 px-6 py-4 items-center hover:bg-surface-hover transition-colors">
                 <div className="col-span-4">
                   <p className="text-xs sm:text-sm font-medium text-ink">{acc.platform}</p>
-                  <p className="text-[11px] text-ink-2 font-mono">{acc.handle}</p>
+                  <p className="text-[12px] text-ink-2 font-mono">{acc.handle}</p>
                 </div>
 
                 <div className="col-span-3">
-                  <span className="inline-flex items-center space-x-1.5 text-[10px] uppercase tracking-wider px-2 py-0.5 border border-emerald-500/30 text-ok bg-emerald-950/20 rounded-[1px] font-mono">
+                  <span className="inline-flex items-center space-x-1.5 text-[11px] uppercase tracking-wider px-2 py-0.5 border border-emerald-500/30 text-ok bg-emerald-950/20 rounded-[1px] font-mono">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     <span>{acc.status}</span>
                   </span>
@@ -434,7 +434,7 @@ export default function SocialHubView({
 
                 <div className="col-span-3 text-right">
                   <p className="text-xs font-mono text-ink">{acc.engagement}</p>
-                  <p className="text-[10px] text-ink-3">{acc.lastSync}</p>
+                  <p className="text-[11px] text-ink-3">{acc.lastSync}</p>
                 </div>
               </div>
             ))}
@@ -468,7 +468,7 @@ export default function SocialHubView({
       {currentTab === 'ai-guided-creation' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-6 space-y-6 border border-line p-6 sm:p-8 bg-surface">
-            <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block">
+            <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 block">
               Step 1 // Composition Intent
             </span>
 
@@ -484,7 +484,7 @@ export default function SocialHubView({
                       key={platform}
                       type="button"
                       onClick={() => togglePlatform(platform)}
-                      className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[9px] transition-colors cursor-pointer ${
+                      className={`text-xs uppercase tracking-wider px-3 py-1.5 border rounded-[8px] transition-colors cursor-pointer ${
                         active 
                           ? 'text-ink border-line-strong bg-surface-hover' 
                           : 'text-ink-3 border-line'
@@ -506,7 +506,7 @@ export default function SocialHubView({
                 value={postPrompt}
                 onChange={(e) => setPostPrompt(e.target.value)}
                 placeholder="What insight, release, or thought should Nexora translate into an authoritative multi-channel announcement?"
-                className="w-full bg-surface-raised border border-line text-ink text-xs p-3 rounded-[9px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 leading-relaxed font-light resize-none"
+                className="w-full bg-surface-raised border border-line text-ink text-xs p-3 rounded-[8px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 leading-relaxed font-light resize-none"
               />
             </div>
 
@@ -514,7 +514,7 @@ export default function SocialHubView({
               type="button"
               onClick={handleGeneratePost}
               disabled={!postPrompt.trim()}
-              className="w-full bg-brand text-on-brand py-3 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
+              className="w-full bg-brand text-on-brand py-3 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Format Multi-Network Broadcast</span>
@@ -525,10 +525,10 @@ export default function SocialHubView({
           <div className="lg:col-span-6 border border-line p-6 sm:p-8 bg-surface flex flex-col justify-between">
             <div>
               <div className="flex items-baseline justify-between border-b border-line pb-3 mb-4">
-                <span className="text-[10px] uppercase tracking-widest text-ink-2">
+                <span className="text-[11px] uppercase tracking-widest text-ink-2">
                   Step 2 // Network Preview
                 </span>
-                <span className="text-[10px] text-ink-3 font-mono">
+                <span className="text-[11px] text-ink-3 font-mono">
                   {selectedPlatforms.join(' · ')}
                 </span>
               </div>
@@ -541,24 +541,24 @@ export default function SocialHubView({
 
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1">
+                      <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1">
                         Release Window
                       </label>
                       <input
                         type="text"
                         value={scheduledDate}
                         onChange={(e) => setScheduledDate(e.target.value)}
-                        className="w-full bg-surface-raised border border-line text-xs text-ink px-2.5 py-1.5 rounded-[9px]"
+                        className="w-full bg-surface-raised border border-line text-xs text-ink px-2.5 py-1.5 rounded-[8px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1">
+                      <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1">
                         Tracking Tag
                       </label>
                       <input
                         type="text"
                         defaultValue="#nexora #calmdesign"
-                        className="w-full bg-surface-raised border border-line text-xs text-ink px-2.5 py-1.5 rounded-[9px]"
+                        className="w-full bg-surface-raised border border-line text-xs text-ink px-2.5 py-1.5 rounded-[8px]"
                       />
                     </div>
                   </div>
@@ -585,7 +585,7 @@ export default function SocialHubView({
               <button
                 type="button"
                 onClick={handleConfirmSchedule}
-                className="w-full mt-6 bg-brand text-on-brand py-3 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2"
+                className="w-full mt-6 bg-brand text-on-brand py-3 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2"
               >
                 {isScheduled ? (
                   <>
@@ -610,7 +610,7 @@ export default function SocialHubView({
           {/* Top Bar with Mode Switcher */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line-subtle">
             <div>
-              <h2 className="font-display font-bold text-[18px] tracking-[-0.4px] text-ink m-0">
+              <h2 className="font-display font-semibold text-[18px] tracking-[-0.4px] text-ink m-0">
                 {schedulingView === 'queue' ? 'Broadcast Queue' : 'Compose Broadcast'}
               </h2>
               <p className="text-xs text-ink-2 font-light mt-1">
@@ -621,7 +621,7 @@ export default function SocialHubView({
             </div>
 
             {/* Segmented Mode Selector */}
-            <div className="inline-flex p-1 bg-surface-raised border border-line rounded-[9px] self-start sm:self-auto shrink-0">
+            <div className="inline-flex p-1 bg-surface-raised border border-line rounded-[8px] self-start sm:self-auto shrink-0">
               <button
                 type="button"
                 onClick={() => setSchedulingView('queue')}
@@ -652,7 +652,7 @@ export default function SocialHubView({
 
           {/* Form success banner */}
           {formSuccess && (
-            <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between rounded-[9px] animate-fadeIn font-mono">
+            <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center justify-between rounded-[8px] animate-fadeIn font-mono">
               <div className="flex items-center space-x-2.5">
                 <CheckCircle2 className="w-4 h-4 text-ok shrink-0" />
                 <span>Broadcast successfully scheduled and queued for multi-network dispatch!</span>
@@ -660,7 +660,7 @@ export default function SocialHubView({
               <button
                 type="button"
                 onClick={() => setFormSuccess(false)}
-                className="text-ok hover:text-ink text-[11px] underline cursor-pointer"
+                className="text-ok hover:text-ink text-[12px] underline cursor-pointer"
               >
                 Dismiss
               </button>
@@ -673,34 +673,34 @@ export default function SocialHubView({
               {/* Compact 4-Card Status Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 border border-line bg-surface">
-                  <span className="text-[10px] uppercase tracking-widest text-ink-3 block font-mono">
+                  <span className="text-[11px] uppercase tracking-widest text-ink-3 block font-mono">
                     Total Queue
                   </span>
-                  <p className="text-xl font-light text-ink mt-0.5 font-display font-bold">
+                  <p className="text-xl font-light text-ink mt-0.5 font-display font-semibold">
                     {queue.length} Releases
                   </p>
                 </div>
 
                 <div className="p-3.5 border border-line bg-surface">
-                  <span className="text-[10px] uppercase tracking-widest text-ink-3 block font-mono">
+                  <span className="text-[11px] uppercase tracking-widest text-ink-3 block font-mono">
                     Pending Dispatch
                   </span>
-                  <p className="text-xl font-light text-amber-300 mt-0.5 font-display font-bold">
+                  <p className="text-xl font-light text-amber-300 mt-0.5 font-display font-semibold">
                     {queue.filter(q => q.status === 'Queued' || q.status === 'Scheduled').length} Slots
                   </p>
                 </div>
 
                 <div className="p-3.5 border border-line bg-surface">
-                  <span className="text-[10px] uppercase tracking-widest text-ink-3 block font-mono">
+                  <span className="text-[11px] uppercase tracking-widest text-ink-3 block font-mono">
                     Active Networks
                   </span>
-                  <p className="text-xl font-light text-emerald-300 mt-0.5 font-display font-bold">
+                  <p className="text-xl font-light text-emerald-300 mt-0.5 font-display font-semibold">
                     {accounts.length} Platforms
                   </p>
                 </div>
 
                 <div className="p-3.5 border border-line bg-surface">
-                  <span className="text-[10px] uppercase tracking-widest text-ink-3 block font-mono">
+                  <span className="text-[11px] uppercase tracking-widest text-ink-3 block font-mono">
                     Next Release
                   </span>
                   <p className="text-xs font-medium text-ink mt-1.5 truncate">
@@ -716,7 +716,7 @@ export default function SocialHubView({
                     <h3 className="text-xs uppercase tracking-widest text-ink font-medium">
                       Scheduled Broadcasts
                     </h3>
-                    <span className="text-[10px] text-ink-2 font-mono px-2 py-0.5 border border-line rounded-[1px]">
+                    <span className="text-[11px] text-ink-2 font-mono px-2 py-0.5 border border-line rounded-[1px]">
                       {filteredQueue.length} of {queue.length}
                     </span>
                   </div>
@@ -731,7 +731,7 @@ export default function SocialHubView({
                       value={searchQuery}
                       onChange={(e) => { setSearchQuery(e.target.value); setQueuePage(1); }}
                       placeholder="Search title, copy, platform, or tags..."
-                      className="w-full bg-surface-raised border border-line text-ink pl-9 pr-8 py-2 rounded-[9px] focus:outline-none focus:border-line-strong text-xs placeholder:text-ink-3 font-light"
+                      className="w-full bg-surface-raised border border-line text-ink pl-9 pr-8 py-2 rounded-[8px] focus:outline-none focus:border-line-strong text-xs placeholder:text-ink-3 font-light"
                     />
                     {searchQuery && (
                       <button
@@ -745,11 +745,11 @@ export default function SocialHubView({
                   </div>
 
                   <div className="md:col-span-3 flex items-center space-x-2">
-                    <span className="text-[10px] uppercase tracking-widest text-ink-3 shrink-0 font-mono">Platform:</span>
+                    <span className="text-[11px] uppercase tracking-widest text-ink-3 shrink-0 font-mono">Platform:</span>
                     <select
                       value={platformFilter}
                       onChange={(e) => { setPlatformFilter(e.target.value); setQueuePage(1); }}
-                      className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[9px] focus:outline-none focus:border-line-strong text-xs"
+                      className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[8px] focus:outline-none focus:border-line-strong text-xs"
                     >
                       <option value="all">All Platforms</option>
                       <option value="LinkedIn">LinkedIn</option>
@@ -762,11 +762,11 @@ export default function SocialHubView({
                   </div>
 
                   <div className="md:col-span-3 flex items-center space-x-2">
-                    <span className="text-[10px] uppercase tracking-widest text-ink-3 shrink-0 font-mono">Status:</span>
+                    <span className="text-[11px] uppercase tracking-widest text-ink-3 shrink-0 font-mono">Status:</span>
                     <select
                       value={statusFilter}
                       onChange={(e) => { setStatusFilter(e.target.value); setQueuePage(1); }}
-                      className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[9px] focus:outline-none focus:border-line-strong text-xs"
+                      className="w-full bg-surface-raised border border-line text-ink px-2.5 py-2 rounded-[8px] focus:outline-none focus:border-line-strong text-xs"
                     >
                       <option value="all">All Statuses</option>
                       <option value="Queued">Queued</option>
@@ -786,7 +786,7 @@ export default function SocialHubView({
                       return (
                         <div 
                           key={item.id} 
-                          className="py-4 hover:bg-surface-hover transition-colors px-2 rounded-[9px] space-y-2.5"
+                          className="py-4 hover:bg-surface-hover transition-colors px-2 rounded-[8px] space-y-2.5"
                         >
                           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             {/* Time & Title info */}
@@ -806,7 +806,7 @@ export default function SocialHubView({
                                   {item.platforms.map((plat) => (
                                     <span 
                                       key={plat}
-                                      className="inline-flex items-center space-x-1 text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 bg-surface-raised border border-line text-ink rounded-[9px]"
+                                      className="inline-flex items-center space-x-1 text-[11px] uppercase tracking-wider font-mono px-2 py-0.5 bg-surface-raised border border-line text-ink rounded-[8px]"
                                     >
                                       <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                                       <span>{plat}</span>
@@ -814,7 +814,7 @@ export default function SocialHubView({
                                   ))}
 
                                   {item.mediaAttachments && item.mediaAttachments.length > 0 ? (
-                                    <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-surface-raised border border-line text-ink rounded-[9px]">
+                                    <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-surface-raised border border-line text-ink rounded-[8px]">
                                       <div className="flex items-center -space-x-1">
                                         {item.mediaAttachments.slice(0, 3).map((med, idx) => (
                                           <div 
@@ -832,12 +832,12 @@ export default function SocialHubView({
                                           </div>
                                         ))}
                                       </div>
-                                      <span className="text-[10px] text-ink-2 font-mono">
+                                      <span className="text-[11px] text-ink-2 font-mono">
                                         {item.mediaAttachments.length} asset{item.mediaAttachments.length > 1 ? 's' : ''}
                                       </span>
                                     </div>
                                   ) : item.mediaCount && item.mediaCount > 0 ? (
-                                    <span className="text-[10px] text-ink-3 font-mono px-1.5 py-0.5 border border-line-subtle rounded-[9px]">
+                                    <span className="text-[11px] text-ink-3 font-mono px-1.5 py-0.5 border border-line-subtle rounded-[8px]">
                                       {item.mediaCount} media
                                     </span>
                                   ) : null}
@@ -847,7 +847,7 @@ export default function SocialHubView({
 
                             {/* Status & Actions */}
                             <div className="flex items-center space-x-2.5 self-end lg:self-center shrink-0">
-                              <span className={`text-[10px] uppercase tracking-widest font-mono px-2.5 py-1 border rounded-[9px] ${
+                              <span className={`text-[11px] uppercase tracking-widest font-mono px-2.5 py-1 border rounded-[8px] ${
                                 item.status === 'Dispatched'
                                   ? 'border-cyan-500/40 text-cyan-300 bg-cyan-950/20'
                                   : item.status === 'Approved'
@@ -864,7 +864,7 @@ export default function SocialHubView({
                                   type="button"
                                   onClick={() => setInspectingPost(item)}
                                   title="Inspect full dispatch payload"
-                                  className="p-1.5 text-ink-2 hover:text-ink hover:bg-surface-raised rounded-[9px] transition-colors cursor-pointer"
+                                  className="p-1.5 text-ink-2 hover:text-ink hover:bg-surface-raised rounded-[8px] transition-colors cursor-pointer"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
                                 </button>
@@ -873,7 +873,7 @@ export default function SocialHubView({
                                   type="button"
                                   onClick={() => handleLoadPostIntoComposer(item)}
                                   title="Duplicate or Edit in Composer"
-                                  className="p-1.5 text-ink-2 hover:text-ink hover:bg-surface-raised rounded-[9px] transition-colors cursor-pointer"
+                                  className="p-1.5 text-ink-2 hover:text-ink hover:bg-surface-raised rounded-[8px] transition-colors cursor-pointer"
                                 >
                                   <Copy className="w-3.5 h-3.5" />
                                 </button>
@@ -883,7 +883,7 @@ export default function SocialHubView({
                                     type="button"
                                     onClick={() => handleDispatchNow(item)}
                                     title="Dispatch immediately"
-                                    className="p-1.5 text-ink-2 hover:text-emerald-300 hover:bg-surface-raised rounded-[9px] transition-colors cursor-pointer"
+                                    className="p-1.5 text-ink-2 hover:text-emerald-300 hover:bg-surface-raised rounded-[8px] transition-colors cursor-pointer"
                                   >
                                     <Send className="w-3.5 h-3.5" />
                                   </button>
@@ -893,7 +893,7 @@ export default function SocialHubView({
                                   type="button"
                                   onClick={() => handleDeletePost(item.id)}
                                   title="Cancel & remove from queue"
-                                  className="p-1.5 text-ink-3 hover:text-red-400 hover:bg-red-950/20 rounded-[9px] transition-colors cursor-pointer"
+                                  className="p-1.5 text-ink-3 hover:text-red-400 hover:bg-red-950/20 rounded-[8px] transition-colors cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -911,7 +911,7 @@ export default function SocialHubView({
                                 <button
                                   type="button"
                                   onClick={() => toggleExpandContent(item.id)}
-                                  className="text-[10px] text-ink-2 hover:text-ink font-mono mt-1 underline cursor-pointer"
+                                  className="text-[11px] text-ink-2 hover:text-ink font-mono mt-1 underline cursor-pointer"
                                 >
                                   {isExpanded ? 'Show less' : 'Read full draft...'}
                                 </button>
@@ -941,7 +941,7 @@ export default function SocialHubView({
                         <button
                           type="button"
                           onClick={() => setSchedulingView('composer')}
-                          className="text-xs uppercase font-mono tracking-wider px-3.5 py-1.5 bg-brand text-on-brand font-semibold rounded-[9px] cursor-pointer hover:bg-brand-hover"
+                          className="text-xs uppercase font-mono tracking-wider px-3.5 py-1.5 bg-brand text-on-brand font-semibold rounded-[8px] cursor-pointer hover:bg-brand-hover"
                         >
                           + Compose New Broadcast
                         </button>
@@ -983,14 +983,14 @@ export default function SocialHubView({
                   <span>Return to Broadcast Queue</span>
                 </button>
 
-                <span className="text-[11px] text-ink-3 font-mono">
+                <span className="text-[12px] text-ink-3 font-mono">
                   {manualPlatforms.length} platform{manualPlatforms.length > 1 ? 's' : ''} targeted
                 </span>
               </div>
 
               {/* Error Alert */}
               {formError && (
-                <div className="p-3 bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs flex items-center space-x-2 rounded-[9px] animate-fadeIn font-mono">
+                <div className="p-3 bg-amber-950/40 border border-amber-500/40 text-amber-300 text-xs flex items-center space-x-2 rounded-[8px] animate-fadeIn font-mono">
                   <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>{formError}</span>
                 </div>
@@ -1007,7 +1007,7 @@ export default function SocialHubView({
                         <label className="block text-xs uppercase tracking-wider text-ink font-medium">
                           1. Target Networks
                         </label>
-                        <p className="text-[11px] text-ink-2 font-light">
+                        <p className="text-[12px] text-ink-2 font-light">
                           Select the destination channels for this broadcast.
                         </p>
                       </div>
@@ -1016,7 +1016,7 @@ export default function SocialHubView({
                         <button
                           type="button"
                           onClick={selectAllManualPlatforms}
-                          className="text-ink-2 hover:text-ink underline cursor-pointer text-[11px]"
+                          className="text-ink-2 hover:text-ink underline cursor-pointer text-[12px]"
                         >
                           All
                         </button>
@@ -1024,7 +1024,7 @@ export default function SocialHubView({
                         <button
                           type="button"
                           onClick={clearAllManualPlatforms}
-                          className="text-ink-3 hover:text-ink underline cursor-pointer text-[11px]"
+                          className="text-ink-3 hover:text-ink underline cursor-pointer text-[12px]"
                         >
                           Clear
                         </button>
@@ -1040,7 +1040,7 @@ export default function SocialHubView({
                             key={plat.id}
                             type="button"
                             onClick={() => toggleManualPlatform(plat.id)}
-                            className={`p-2.5 border text-left rounded-[9px] transition-all cursor-pointer flex items-center justify-between ${
+                            className={`p-2.5 border text-left rounded-[8px] transition-all cursor-pointer flex items-center justify-between ${
                               isSelected
                                 ? 'bg-surface-hover border-line-strong text-ink'
                                 : 'bg-surface-raised border-line text-ink-3 hover:border-line hover:text-ink-2'
@@ -1048,7 +1048,7 @@ export default function SocialHubView({
                           >
                             <div className="min-w-0 pr-1.5">
                               <span className="text-xs font-medium block truncate">{plat.label}</span>
-                              <span className="text-[10px] font-mono text-ink-3 block truncate">{plat.handle}</span>
+                              <span className="text-[11px] font-mono text-ink-3 block truncate">{plat.handle}</span>
                             </div>
                             <div className={`w-3.5 h-3.5 rounded-[1px] border flex items-center justify-center shrink-0 ${
                               isSelected 
@@ -1074,7 +1074,7 @@ export default function SocialHubView({
                         value={manualTitle}
                         onChange={(e) => setManualTitle(e.target.value)}
                         placeholder="e.g. Why studio software requires architectural restraint..."
-                        className="w-full bg-surface-raised border border-line text-ink text-xs px-3 py-2.5 rounded-[9px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 font-light"
+                        className="w-full bg-surface-raised border border-line text-ink text-xs px-3 py-2.5 rounded-[8px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 font-light"
                       />
                     </div>
 
@@ -1083,7 +1083,7 @@ export default function SocialHubView({
                         <label className="block text-xs uppercase tracking-wider text-ink font-medium">
                           3. Message Copy
                         </label>
-                        <div className="flex items-center space-x-2 text-[10px] font-mono text-ink-2">
+                        <div className="flex items-center space-x-2 text-[11px] font-mono text-ink-2">
                           <span>{manualContent.length} chars</span>
                           <span>·</span>
                           <span>{manualContent.split(/\s+/).filter(Boolean).length} words</span>
@@ -1100,12 +1100,12 @@ export default function SocialHubView({
                         value={manualContent}
                         onChange={(e) => setManualContent(e.target.value)}
                         placeholder="Draft the message copy or insert a template..."
-                        className="w-full bg-surface-raised border border-line text-ink text-xs p-3 rounded-[9px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 leading-relaxed font-light resize-y"
+                        className="w-full bg-surface-raised border border-line text-ink text-xs p-3 rounded-[8px] focus:outline-none focus:border-line-strong placeholder:text-ink-3 leading-relaxed font-light resize-y"
                       />
 
                       {/* Quick copy template chips */}
                       <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                        <span className="text-[10px] uppercase tracking-widest text-ink-3 font-mono">
+                        <span className="text-[11px] uppercase tracking-widest text-ink-3 font-mono">
                           Templates:
                         </span>
                         {COPY_TEMPLATES.map((tpl, i) => (
@@ -1113,7 +1113,7 @@ export default function SocialHubView({
                             key={i}
                             type="button"
                             onClick={() => applyCopyTemplate(tpl)}
-                            className="text-[10px] font-mono px-2 py-0.5 border border-line hover:border-line-strong text-ink-2 hover:text-ink rounded-[1px] transition-colors cursor-pointer"
+                            className="text-[11px] font-mono px-2 py-0.5 border border-line hover:border-line-strong text-ink-2 hover:text-ink rounded-[1px] transition-colors cursor-pointer"
                           >
                             + {tpl.label}
                           </button>
@@ -1148,7 +1148,7 @@ export default function SocialHubView({
                             key={preset}
                             type="button"
                             onClick={() => setManualTimingPreset(preset)}
-                            className={`text-[11px] px-2.5 py-1 border rounded-[1px] transition-colors font-mono cursor-pointer ${
+                            className={`text-[12px] px-2.5 py-1 border rounded-[1px] transition-colors font-mono cursor-pointer ${
                               manualTimingPreset === preset
                                 ? 'border-line-strong bg-surface-hover text-ink'
                                 : 'border-line text-ink-3 hover:text-ink-2'
@@ -1179,7 +1179,7 @@ export default function SocialHubView({
 
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-line-subtle">
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1 font-mono">
+                        <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1 font-mono">
                           Status
                         </label>
                         <select
@@ -1195,7 +1195,7 @@ export default function SocialHubView({
                       </div>
 
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest text-ink-2 mb-1 font-mono">
+                        <label className="block text-[11px] uppercase tracking-widest text-ink-2 mb-1 font-mono">
                           Tags
                         </label>
                         <input
@@ -1203,7 +1203,7 @@ export default function SocialHubView({
                           value={manualTags}
                           onChange={(e) => setManualTags(e.target.value)}
                           placeholder="#broadcast #design"
-                          className="w-full bg-surface-raised border border-line text-xs text-ink px-2 py-1.5 rounded-[1px] focus:outline-none focus:border-line-strong font-mono text-[11px]"
+                          className="w-full bg-surface-raised border border-line text-xs text-ink px-2 py-1.5 rounded-[1px] focus:outline-none focus:border-line-strong font-mono text-[12px]"
                         />
                       </div>
                     </div>
@@ -1212,10 +1212,10 @@ export default function SocialHubView({
                   {/* Live Dispatch Preview Card */}
                   <div className="border border-line p-4 bg-surface-raised space-y-3">
                     <div className="flex items-center justify-between border-b border-line-subtle pb-2">
-                      <span className="text-[10px] uppercase tracking-widest text-ink-2 font-mono">
+                      <span className="text-[11px] uppercase tracking-widest text-ink-2 font-mono">
                         Live Preview Card
                       </span>
-                      <span className="text-[10px] font-mono text-ok">
+                      <span className="text-[11px] font-mono text-ok">
                         {manualTimingPreset === 'Custom Date & Time' ? `${manualDate} ${manualTime}` : manualTimingPreset}
                       </span>
                     </div>
@@ -1224,12 +1224,12 @@ export default function SocialHubView({
                       <div className="flex flex-wrap gap-1">
                         {manualPlatforms.length > 0 ? (
                           manualPlatforms.map(p => (
-                            <span key={p} className="text-[9px] font-mono uppercase px-1.5 py-0.5 bg-surface border border-line text-ink">
+                            <span key={p} className="text-[10px] font-mono uppercase px-1.5 py-0.5 bg-surface border border-line text-ink">
                               {p}
                             </span>
                           ))
                         ) : (
-                          <span className="text-[10px] text-amber-400 font-mono">Select at least 1 platform</span>
+                          <span className="text-[11px] text-amber-400 font-mono">Select at least 1 platform</span>
                         )}
                       </div>
 
@@ -1244,7 +1244,7 @@ export default function SocialHubView({
                       {/* Attachments preview snippet */}
                       {manualAttachments.length > 0 && (
                         <div className="flex items-center space-x-2 pt-1">
-                          <span className="text-[10px] text-ink-3 font-mono">
+                          <span className="text-[11px] text-ink-3 font-mono">
                             {manualAttachments.length} media asset{manualAttachments.length > 1 ? 's' : ''} attached
                           </span>
                         </div>
@@ -1257,7 +1257,7 @@ export default function SocialHubView({
                     <button
                       type="submit"
                       disabled={manualPlatforms.length === 0 || !manualContent.trim()}
-                      className="w-full bg-brand text-on-brand py-3 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
+                      className="w-full bg-brand text-on-brand py-3 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-40"
                     >
                       <CalendarIcon className="w-3.5 h-3.5" />
                       <span>Queue Broadcast ({manualPlatforms.length} Channels)</span>
@@ -1272,7 +1272,7 @@ export default function SocialHubView({
                           setManualAttachments([]);
                           setFormError(null);
                         }}
-                        className="text-ink-3 hover:text-ink cursor-pointer text-[11px]"
+                        className="text-ink-3 hover:text-ink cursor-pointer text-[12px]"
                       >
                         Reset Form
                       </button>
@@ -1280,7 +1280,7 @@ export default function SocialHubView({
                       <button
                         type="button"
                         onClick={() => setSchedulingView('queue')}
-                        className="text-ink-2 hover:text-ink cursor-pointer text-[11px] underline"
+                        className="text-ink-2 hover:text-ink cursor-pointer text-[12px] underline"
                       >
                         Cancel & View Queue
                       </button>
@@ -1305,10 +1305,10 @@ export default function SocialHubView({
           >
             <div className="flex items-start justify-between border-b border-line-subtle pb-4">
               <div>
-                <span className="text-[10px] uppercase tracking-widest-plus text-ink-2 block mb-1">
+                <span className="text-[11px] uppercase tracking-widest-plus text-ink-2 block mb-1">
                   SCHEDULED BROADCAST INSPECTOR
                 </span>
-                <h3 className="font-display font-bold text-xl sm:text-2xl font-light text-ink">
+                <h3 className="font-display font-semibold text-xl sm:text-2xl font-light text-ink">
                   {inspectingPost.title}
                 </h3>
               </div>
@@ -1324,22 +1324,22 @@ export default function SocialHubView({
             {/* Meta badges */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
               <div className="p-2.5 bg-surface-raised border border-line">
-                <span className="text-[9px] uppercase tracking-widest text-ink-3 block">Release Window</span>
+                <span className="text-[10px] uppercase tracking-widest text-ink-3 block">Release Window</span>
                 <span className="text-ink mt-0.5 block">{inspectingPost.scheduledTime}</span>
               </div>
               <div className="p-2.5 bg-surface-raised border border-line">
-                <span className="text-[9px] uppercase tracking-widest text-ink-3 block">Status</span>
+                <span className="text-[10px] uppercase tracking-widest text-ink-3 block">Status</span>
                 <span className="text-ok mt-0.5 block">{inspectingPost.status}</span>
               </div>
               <div className="p-2.5 bg-surface-raised border border-line col-span-2 sm:col-span-1">
-                <span className="text-[9px] uppercase tracking-widest text-ink-3 block">Author</span>
+                <span className="text-[10px] uppercase tracking-widest text-ink-3 block">Author</span>
                 <span className="text-ink mt-0.5 block">{inspectingPost.author || 'Elena Rostova'}</span>
               </div>
             </div>
 
             {/* Destination Channels Breakdown */}
             <div className="space-y-2">
-              <label className="block text-[10px] uppercase tracking-widest text-ink-2 font-medium font-mono">
+              <label className="block text-[11px] uppercase tracking-widest text-ink-2 font-medium font-mono">
                 Target Networks ({inspectingPost.platforms.length} Platforms Configured)
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1347,9 +1347,9 @@ export default function SocialHubView({
                   <div key={plat} className="p-2.5 bg-surface-raised border border-line flex items-center justify-between">
                     <div>
                       <p className="text-xs font-medium text-ink">{plat}</p>
-                      <p className="text-[10px] text-ink-3 font-mono">Synced endpoint</p>
+                      <p className="text-[11px] text-ink-3 font-mono">Synced endpoint</p>
                     </div>
-                    <span className="text-[10px] text-ok font-mono">Ready</span>
+                    <span className="text-[11px] text-ok font-mono">Ready</span>
                   </div>
                 ))}
               </div>
@@ -1357,7 +1357,7 @@ export default function SocialHubView({
 
             {/* Full Message Copy */}
             <div className="space-y-2">
-              <label className="block text-[10px] uppercase tracking-widest text-ink-2 font-medium font-mono">
+              <label className="block text-[11px] uppercase tracking-widest text-ink-2 font-medium font-mono">
                 Synchronized Post Copy
               </label>
               <div className="p-4 bg-surface-raised border border-line text-xs text-ink leading-relaxed font-light whitespace-pre-line max-h-56 overflow-y-auto">
@@ -1368,9 +1368,9 @@ export default function SocialHubView({
             {/* Tags */}
             {inspectingPost.tags && inspectingPost.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 items-center">
-                <span className="text-[10px] uppercase tracking-widest text-ink-3 font-mono">Tags:</span>
+                <span className="text-[11px] uppercase tracking-widest text-ink-3 font-mono">Tags:</span>
                 {inspectingPost.tags.map(t => (
-                  <span key={t} className="text-[10px] font-mono text-ink-2 px-2 py-0.5 bg-surface-raised border border-line rounded-[1px]">
+                  <span key={t} className="text-[11px] font-mono text-ink-2 px-2 py-0.5 bg-surface-raised border border-line rounded-[1px]">
                     {t}
                   </span>
                 ))}
@@ -1381,10 +1381,10 @@ export default function SocialHubView({
             {inspectingPost.mediaAttachments && inspectingPost.mediaAttachments.length > 0 && (
               <div className="space-y-2 pt-2 border-t border-line-subtle">
                 <div className="flex items-center justify-between">
-                  <label className="block text-[10px] uppercase tracking-widest text-ink-2 font-medium font-mono">
+                  <label className="block text-[11px] uppercase tracking-widest text-ink-2 font-medium font-mono">
                     Attached Media Assets ({inspectingPost.mediaAttachments.length})
                   </label>
-                  <span className="text-[10px] text-ink-3 font-mono">
+                  <span className="text-[11px] text-ink-3 font-mono">
                     Synchronized across selected platforms
                   </span>
                 </div>
@@ -1392,7 +1392,7 @@ export default function SocialHubView({
                   {inspectingPost.mediaAttachments.map((med) => (
                     <div
                       key={med.id}
-                      className="p-2 bg-surface-raised border border-line rounded-[9px] flex items-center space-x-3"
+                      className="p-2 bg-surface-raised border border-line rounded-[8px] flex items-center space-x-3"
                     >
                       <div className="w-12 h-12 bg-surface border border-line rounded-[1px] overflow-hidden shrink-0 flex items-center justify-center">
                         {med.type === 'image' && med.url ? (
@@ -1410,7 +1410,7 @@ export default function SocialHubView({
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-ink truncate font-medium">{med.name}</p>
-                        <div className="flex items-center space-x-2 text-[10px] text-ink-3 font-mono mt-0.5">
+                        <div className="flex items-center space-x-2 text-[11px] text-ink-3 font-mono mt-0.5">
                           <span className="uppercase">{med.type}</span>
                           {med.size && <span>• {med.size}</span>}
                         </div>
@@ -1420,7 +1420,7 @@ export default function SocialHubView({
                           href={med.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] uppercase font-mono tracking-wider text-ink-2 hover:text-ink px-2 py-1 border border-line hover:border-line-strong rounded-[1px] transition-colors"
+                          className="text-[11px] uppercase font-mono tracking-wider text-ink-2 hover:text-ink px-2 py-1 border border-line hover:border-line-strong rounded-[1px] transition-colors"
                         >
                           View
                         </a>
@@ -1459,7 +1459,7 @@ export default function SocialHubView({
                       handleDispatchNow(inspectingPost);
                       setInspectingPost(null);
                     }}
-                    className="bg-brand text-on-brand px-5 py-2 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5"
+                    className="bg-brand text-on-brand px-5 py-2 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer flex items-center space-x-1.5"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Dispatch Now</span>

@@ -8,8 +8,8 @@ type Notify = (title: string, desc: string) => void;
 const Heading = ({ title, hint, action }: { title: string; hint?: string; action?: React.ReactNode }) => (
   <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-line">
     <div>
-      <h2 className="font-display text-[14px] font-bold text-ink m-0">{title}</h2>
-      {hint && <p className="text-[12px] text-ink-3 mt-1 mb-0">{hint}</p>}
+      <h2 className="font-display text-[14px] font-semibold text-ink m-0">{title}</h2>
+      {hint && <p className="text-[13px] text-ink-3 mt-1 mb-0">{hint}</p>}
     </div>
     {action}
   </div>
@@ -71,7 +71,7 @@ export function TeamSection({ onNotify }: { onNotify?: Notify }) {
         </select>
         <button type="button" className="nx-btn primary" onClick={invite}>Invite</button>
       </div>
-      {error && <p className="text-[12px] text-danger mt-1.5 mb-0" role="alert">{error}</p>}
+      {error && <p className="text-[13px] text-danger mt-1.5 mb-0" role="alert">{error}</p>}
 
       <div className="border-t border-line mt-4">
         {team.map(m => (
@@ -166,7 +166,7 @@ export function ChannelsSection({ onNotify }: { onNotify?: Notify }) {
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-ink-3 mt-3 mb-0">Connections are simulated in this demo. A live channel needs authorization from the provider.</p>
+      <p className="text-[12px] text-ink-3 mt-3 mb-0">Connections are simulated in this demo. A live channel needs authorization from the provider.</p>
 
       {editing && (
         <NxModal
@@ -185,7 +185,7 @@ export function ChannelsSection({ onNotify }: { onNotify?: Notify }) {
           <Field label="Owner" hint="This person is responsible for the channel.">
             <select value={owner} onChange={e => setOwner(e.target.value)}>{team.map(m => <option key={m.id}>{m.name}</option>)}</select>
           </Field>
-          {error && <p className="text-[12px] text-danger m-0 mb-2" role="alert">{error}</p>}
+          {error && <p className="text-[13px] text-danger m-0 mb-2" role="alert">{error}</p>}
         </NxModal>
       )}
     </div>
@@ -247,23 +247,23 @@ export function AutomationSection({ onNotify }: { onNotify?: Notify }) {
             <button type="button" className="nx-btn sm" onClick={() => open(r)}>Edit</button>
           </div>
         ))}
-        {rules.length === 0 && <p className="text-[12px] text-ink-3 py-6 text-center m-0">No rules yet. Add one to automate a routine task.</p>}
+        {rules.length === 0 && <p className="text-[13px] text-ink-3 py-6 text-center m-0">No rules yet. Add one to automate a routine task.</p>}
       </div>
 
       <div className="nx-callout block! mt-4">
-        <div className="font-bold text-ink text-[12px] mb-2">Hand a conversation to a person when…</div>
-        <label className="flex items-center gap-2 text-[12px] py-1"><input type="checkbox" checked={handoff.onRequest} onChange={e => setHandoff({ ...handoff, onRequest: e.target.checked })} /> the customer asks for a person</label>
-        <label className="flex items-center gap-2 text-[12px] py-1 flex-wrap">
+        <div className="font-bold text-ink text-[13px] mb-2">Hand a conversation to a person when…</div>
+        <label className="flex items-center gap-2 text-[13px] py-1"><input type="checkbox" checked={handoff.onRequest} onChange={e => setHandoff({ ...handoff, onRequest: e.target.checked })} /> the customer asks for a person</label>
+        <label className="flex items-center gap-2 text-[13px] py-1 flex-wrap">
           <input type="checkbox" checked={handoff.highValue} onChange={e => setHandoff({ ...handoff, highValue: e.target.checked })} /> the deal is worth more than ₹
           <input type="number" min={0} value={handoff.threshold} disabled={!handoff.highValue} onChange={e => setHandoff({ ...handoff, threshold: e.target.value })} aria-label="Deal value" className="w-[120px]" />
         </label>
-        <label className="flex items-center gap-2 text-[12px] py-1"><input type="checkbox" checked={handoff.lowConfidence} onChange={e => setHandoff({ ...handoff, lowConfidence: e.target.checked })} /> the AI is not sure of the answer</label>
-        <div className="flex items-center gap-2 text-[12px] pt-2">Then notify
+        <label className="flex items-center gap-2 text-[13px] py-1"><input type="checkbox" checked={handoff.lowConfidence} onChange={e => setHandoff({ ...handoff, lowConfidence: e.target.checked })} /> the AI is not sure of the answer</label>
+        <div className="flex items-center gap-2 text-[13px] pt-2">Then notify
           <select value={handoff.notify} onChange={e => setHandoff({ ...handoff, notify: e.target.value })} aria-label="Notify" className="w-[150px]">
             {['Sales team', 'Admins', 'Owner'].map(o => <option key={o}>{o}</option>)}
           </select>
         </div>
-        <p className="text-[11px] text-ink-3 mt-2 mb-0">Changes here are saved as you make them.</p>
+        <p className="text-[12px] text-ink-3 mt-2 mb-0">Changes here are saved as you make them.</p>
       </div>
 
       {editing && (
@@ -284,7 +284,7 @@ export function AutomationSection({ onNotify }: { onNotify?: Notify }) {
           <Field label="Approval">
             <Chips options={['Run automatically', 'Ask me first'] as const} value={approval ? 'Ask me first' : 'Run automatically'} onChange={v => setApproval(v === 'Ask me first')} />
           </Field>
-          {error && <p className="text-[12px] text-danger m-0 mb-2" role="alert">{error}</p>}
+          {error && <p className="text-[13px] text-danger m-0 mb-2" role="alert">{error}</p>}
         </NxModal>
       )}
     </div>
@@ -333,14 +333,14 @@ export function BillingSection({ onNotify }: { onNotify?: Notify }) {
         action={<button type="button" className="nx-btn sm" onClick={() => { setPick(planId); setChanging(true); }}>Change plan</button>} />
       <div className="nx-callout block!">
         <div className="flex items-center justify-between mb-3">
-          <strong className="text-ink text-[13px]">{plan.name} plan</strong>
-          <strong className="text-ink text-[13px]">{inr(plan.price)} / month</strong>
+          <strong className="text-ink text-[14px]">{plan.name} plan</strong>
+          <strong className="text-ink text-[14px]">{inr(plan.price)} / month</strong>
         </div>
         {rows.map(r => {
           const pct = Math.min(100, Math.round((r.used / r.cap) * 100));
           return (
             <div key={r.l} className="mb-3 last:mb-0">
-              <div className="flex justify-between text-[11px] mb-1 text-ink-2"><span>{r.l}: {r.used.toLocaleString('en-IN')} / {r.cap.toLocaleString('en-IN')}</span><span>{pct}%</span></div>
+              <div className="flex justify-between text-[12px] mb-1 text-ink-2"><span>{r.l}: {r.used.toLocaleString('en-IN')} / {r.cap.toLocaleString('en-IN')}</span><span>{pct}%</span></div>
               <div className="nx-progress"><div style={{ width: `${pct}%`, background: pct >= 90 ? 'var(--error)' : pct >= 75 ? 'var(--warning)' : undefined }} /></div>
             </div>
           );
@@ -380,9 +380,9 @@ export function BillingSection({ onNotify }: { onNotify?: Notify }) {
                 <button key={p.id} type="button" role="radio" aria-checked={pick === p.id} disabled={tooSmall}
                   className={`nx-option text-left flex! justify-between! items-center! ${pick === p.id ? 'active' : ''} ${tooSmall ? 'opacity-50' : ''}`}
                   onClick={() => setPick(p.id)}>
-                  <span><strong className="block text-[13px]">{p.name}{p.id === planId ? ' (current)' : ''}</strong>
-                    <span className="text-[11px] text-ink-3 font-normal">{p.convs.toLocaleString('en-IN')} conversations · {p.replies.toLocaleString('en-IN')} AI replies · {p.seats} seats{tooSmall ? ` · you have ${team.length} members` : ''}</span></span>
-                  <strong className="text-[13px]">{inr(p.price)}</strong>
+                  <span><strong className="block text-[14px]">{p.name}{p.id === planId ? ' (current)' : ''}</strong>
+                    <span className="text-[12px] text-ink-3 font-normal">{p.convs.toLocaleString('en-IN')} conversations · {p.replies.toLocaleString('en-IN')} AI replies · {p.seats} seats{tooSmall ? ` · you have ${team.length} members` : ''}</span></span>
+                  <strong className="text-[14px]">{inr(p.price)}</strong>
                 </button>
               );
             })}
@@ -452,11 +452,11 @@ export function NotificationsSection({ onNotify }: { onNotify?: Notify }) {
 
       <div className="nx-callout block! mt-4">
         <div className="flex items-center justify-between">
-          <div><strong className="text-ink text-[12px] block">Quiet hours</strong><span className="text-[11px] text-ink-3">Hold email and WhatsApp alerts during these hours. In-app alerts still appear.</span></div>
+          <div><strong className="text-ink text-[13px] block">Quiet hours</strong><span className="text-[12px] text-ink-3">Hold email and WhatsApp alerts during these hours. In-app alerts still appear.</span></div>
           <Toggle on={prefs.quiet} label="Quiet hours" onChange={v => { setPrefs(p => ({ ...p, quiet: v })); onNotify?.(v ? 'Quiet hours on' : 'Quiet hours off', v ? `Alerts held from ${prefs.from} to ${prefs.to}.` : 'Alerts are sent at any time.'); }} />
         </div>
         {prefs.quiet && (
-          <div className="flex items-center gap-2 mt-3 text-[12px]">
+          <div className="flex items-center gap-2 mt-3 text-[13px]">
             From <input type="time" value={prefs.from} onChange={e => setPrefs(p => ({ ...p, from: e.target.value }))} aria-label="Quiet hours start" className="w-[130px]" />
             to <input type="time" value={prefs.to} onChange={e => setPrefs(p => ({ ...p, to: e.target.value }))} aria-label="Quiet hours end" className="w-[130px]" />
           </div>

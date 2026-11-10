@@ -55,8 +55,8 @@ function Recommendations({ onNavigateTo, onNotify }: Pick<Props, 'onNavigateTo' 
   };
 
   return (
-    <div className="grid gap-[15px]">
-      <p className="text-[12px] text-ink-3 m-0 max-w-[720px]">
+    <div className="grid gap-[16px]">
+      <p className="text-[13px] text-ink-3 m-0 max-w-[720px]">
         Nexora watches public sources and your own data, then proposes what to do next. Nothing runs until you approve it.
       </p>
       {visible.length === 0 && (
@@ -69,28 +69,28 @@ function Recommendations({ onNavigateTo, onNotify }: Pick<Props, 'onNavigateTo' 
           <section key={r.id} className={`nx-panel nx-pad ${st === 'Dismissed' ? 'opacity-60' : ''}`}>
             <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
               <div>
-                <h2 className="font-display text-[15px] font-bold text-ink m-0">{r.title}</h2>
-                <p className="text-[11px] text-ink-3 mt-1 mb-0">Seen {r.seen} · relevance {r.relevance.toLowerCase()}</p>
+                <h2 className="font-display text-[16px] font-semibold text-ink m-0">{r.title}</h2>
+                <p className="text-[12px] text-ink-3 mt-1 mb-0">Seen {r.seen} · relevance {r.relevance.toLowerCase()}</p>
               </div>
               {st === 'Dismissed' ? <Badge>Dismissed</Badge> : (
                 <ol className="flex items-center gap-1.5 m-0 p-0 list-none" aria-label="Progress">
                   {REC_STAGES.map((s, i) => (
-                    <li key={s.id} className={`text-[10px] font-bold px-2 py-1 rounded-[6px] ${i <= stageIdx ? 'bg-brand-soft text-brand' : 'bg-surface-raised text-ink-3'}`}>{s.label}</li>
+                    <li key={s.id} className={`text-[11px] font-bold px-2 py-1 rounded-[6px] ${i <= stageIdx ? 'bg-brand-soft text-brand' : 'bg-surface-raised text-ink-3'}`}>{s.label}</li>
                   ))}
                 </ol>
               )}
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div>
-                <div className="text-[10px] font-extrabold uppercase tracking-[1px] text-ink-3 mb-1">Observation</div>
-                <p className="text-[12px] text-ink m-0 leading-[1.6]">{r.observation}</p>
+                <div className="text-[11px] font-extrabold uppercase tracking-[1px] text-ink-3 mb-1">Observation</div>
+                <p className="text-[13px] text-ink m-0 leading-[1.6]">{r.observation}</p>
               </div>
               <div>
-                <div className="text-[10px] font-extrabold uppercase tracking-[1px] text-brand mb-1">Recommendation</div>
-                <p className="text-[12px] text-ink-2 m-0 leading-[1.6]">{r.recommendation}</p>
+                <div className="text-[11px] font-extrabold uppercase tracking-[1px] text-brand mb-1">Recommendation</div>
+                <p className="text-[13px] text-ink-2 m-0 leading-[1.6]">{r.recommendation}</p>
               </div>
             </div>
-            <details className="mt-3 text-[12px]">
+            <details className="mt-3 text-[13px]">
               <summary className="cursor-pointer text-ink-3 font-bold">Evidence ({r.evidence.length})</summary>
               <ul className="m-0 mt-1.5 pl-4 text-ink-2 leading-[1.7]">{r.evidence.map(e => <li key={e}>{e}</li>)}</ul>
             </details>
@@ -109,7 +109,7 @@ function Recommendations({ onNavigateTo, onNotify }: Pick<Props, 'onNavigateTo' 
               )}
               {st === 'Executed' && (
                 <>
-                  <span className="text-[12px] text-ok font-bold">Actioned · measuring the result</span>
+                  <span className="text-[13px] text-ok font-bold">Actioned · measuring the result</span>
                   <button type="button" className="nx-btn sm ml-auto" onClick={() => run(r.id, r.action.kind)}>{r.action.label} again →</button>
                 </>
               )}
@@ -129,7 +129,7 @@ function Recommendations({ onNavigateTo, onNotify }: Pick<Props, 'onNavigateTo' 
 
 function Competitors() {
   return (
-    <div className="grid gap-[15px]">
+    <div className="grid gap-[16px]">
       <AIInsight
         observation="Two competitors changed their offer or pricing this week."
         recommendation="Review how your consultation offer and starting price compare before your next campaign."
@@ -137,8 +137,8 @@ function Competitors() {
         freshness="Checked 2 days ago · sample data"
       />
       <div className="nx-callout block!">
-        <strong className="text-ink text-[12px]">What this shows</strong>
-        <p className="text-[12px] text-ink-2 m-0 mt-1">Only public information. Competitors’ private ad results and who searched for them cannot be seen, so they are never estimated here.</p>
+        <strong className="text-ink text-[13px]">What this shows</strong>
+        <p className="text-[13px] text-ink-2 m-0 mt-1">Only public information. Competitors’ private ad results and who searched for them cannot be seen, so they are never estimated here.</p>
       </div>
       <div className="nx-grid nx-two">
         {COMPETITORS.map(c => (
@@ -151,8 +151,8 @@ function Competitors() {
             <div className="eyebrow mb-1">Recent changes</div>
             {c.changes.map(ch => (
               <div key={ch.text} className="py-2 border-t border-line first:border-t-0">
-                <p className="text-[12px] text-ink m-0 leading-[1.55]">{ch.text}</p>
-                <p className="text-[11px] text-ink-3 mt-1 mb-0">{ch.source} · {ch.seen} · relevance {ch.relevance.toLowerCase()}</p>
+                <p className="text-[13px] text-ink m-0 leading-[1.55]">{ch.text}</p>
+                <p className="text-[12px] text-ink-3 mt-1 mb-0">{ch.source} · {ch.seen} · relevance {ch.relevance.toLowerCase()}</p>
               </div>
             ))}
           </section>
@@ -167,7 +167,7 @@ function Trends({ onNavigateTo }: Pick<Props, 'onNavigateTo'>) {
   const gsc = sources['gsc'] ?? false;
   const gaps = KEYWORDS.filter(k => k.position === null && k.change > 20);
   return (
-    <div className="grid gap-[15px]">
+    <div className="grid gap-[16px]">
       <AIInsight
         observation={`${gaps.length} rising searches have no page of yours in the results: ${gaps.map(g => `“${g.term}”`).join(', ')}.`}
         recommendation="Create one useful page or post for each. We can't promise a ranking, but covering what people ask is the reliable way to appear."
@@ -192,7 +192,7 @@ function Trends({ onNavigateTo }: Pick<Props, 'onNavigateTo'>) {
           </tbody>
         </table>
       </section>
-      <p className="text-[11px] text-ink-3 m-0">Search demand is sample data. Positions are real only after Google Search Console is connected.</p>
+      <p className="text-[12px] text-ink-3 m-0">Search demand is sample data. Positions are real only after Google Search Console is connected.</p>
     </div>
   );
 }
@@ -218,7 +218,7 @@ function Sources({ onNotify }: Pick<Props, 'onNotify'>) {
           );
         })}
       </div>
-      <p className="text-[11px] text-ink-3 mt-3 mb-0">Connecting is simulated here. A live connection needs authorization from Google.</p>
+      <p className="text-[12px] text-ink-3 mt-3 mb-0">Connecting is simulated here. A live connection needs authorization from Google.</p>
     </section>
   );
 }
@@ -226,7 +226,7 @@ function Sources({ onNotify }: Pick<Props, 'onNotify'>) {
 export default function MarketIntelligenceView({ activeSubCategory, onNavigateSub, onNavigateTo, onNotify, isFirstRun }: Props) {
   const [tab, setTab] = useState<Tab>(tabFor(activeSubCategory));
   return (
-    <div className="space-y-[15px] pb-12 animate-fadeIn text-ink">
+    <div className="space-y-[16px] pb-12 animate-fadeIn text-ink">
       <PageHeader
         eyebrow="Intelligence / Market Intelligence"
         title="Market Intelligence"

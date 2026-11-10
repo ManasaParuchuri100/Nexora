@@ -96,10 +96,10 @@ export default function AssistantView({
       {/* Header */}
       <section className="border-b border-line pb-6 flex items-baseline justify-between">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
+          <span className="text-[11px] sm:text-xs uppercase tracking-widest-plus text-ink-2 font-normal block mb-2">
             INTELLIGENT COMMAND COPILOT
           </span>
-          <h1 className="font-display font-bold text-4xl sm:text-5xl font-light text-ink tracking-tight">
+          <h1 className="font-display font-semibold text-4xl sm:text-5xl font-light text-ink tracking-tight">
             AI Assistant
           </h1>
         </div>
@@ -114,7 +114,7 @@ export default function AssistantView({
         {messages.map((m) => (
           <div key={m.id} className="pt-4 first:pt-0">
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 rounded-[9px] bg-surface-hover border border-line flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-[8px] bg-surface-hover border border-line flex items-center justify-center shrink-0 mt-0.5">
                 {m.sender === 'assistant' ? (
                   <Sparkles className="w-3.5 h-3.5 text-ink-2" />
                 ) : (
@@ -127,7 +127,7 @@ export default function AssistantView({
                   <span className="text-xs uppercase tracking-wider text-ink font-medium">
                     {m.sender === 'assistant' ? 'Nexora Copilot' : 'You'}
                   </span>
-                  <span className="text-[10px] text-ink-3 ">{m.timestamp}</span>
+                  <span className="text-[11px] text-ink-3 ">{m.timestamp}</span>
                 </div>
 
                 <div className="text-xs sm:text-sm text-ink font-light leading-relaxed whitespace-pre-wrap">
@@ -142,7 +142,7 @@ export default function AssistantView({
                         key={i}
                         type="button"
                         onClick={() => handleSendMessage(action)}
-                        className="text-[11px] font-light text-ink-2 hover:text-ink border border-line hover:border-line-strong px-2.5 py-1 transition-colors cursor-pointer"
+                        className="text-[12px] font-light text-ink-2 hover:text-ink border border-line hover:border-line-strong px-2.5 py-1 transition-colors cursor-pointer"
                       >
                         {action} &rarr;
                       </button>
@@ -179,7 +179,7 @@ export default function AssistantView({
           type="button"
           onClick={() => handleSendMessage()}
           disabled={!inputPrompt.trim() || isTyping}
-          className="bg-brand text-on-brand px-5 py-2.5 rounded-[9px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5"
+          className="bg-brand text-on-brand px-5 py-2.5 rounded-[8px] font-semibold uppercase tracking-widest text-xs hover:bg-brand-hover transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1.5"
         >
           <span>Send</span>
           <Send className="w-3 h-3" />

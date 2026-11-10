@@ -46,7 +46,7 @@ export default function CommandPalette({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
       <div 
-        className="w-full max-w-xl bg-surface-raised border border-line shadow-2xl rounded-[9px] overflow-hidden  text-xs text-ink"
+        className="w-full max-w-xl bg-surface-raised border border-line shadow-2xl rounded-[8px] overflow-hidden  text-xs text-ink"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar (Page 9 spec) */}
@@ -70,7 +70,7 @@ export default function CommandPalette({
           
           {/* ACTIONS */}
           <div className="space-y-2">
-            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
+            <span className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold block">
               ACTIONS
             </span>
             <div className="flex flex-wrap gap-2">
@@ -109,7 +109,7 @@ export default function CommandPalette({
 
           {/* LEADS */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
+            <span className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold block">
               LEADS
             </span>
             <div 
@@ -123,13 +123,13 @@ export default function CommandPalette({
                 <span className="font-semibold text-ink">Aster Labs</span>
                 <span className="text-ink-2 ml-2">· Qualified · Hot</span>
               </div>
-              <span className="text-ink-3 text-[10px]">92 score</span>
+              <span className="text-ink-3 text-[11px]">92 score</span>
             </div>
           </div>
 
           {/* CONVERSATIONS */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
+            <span className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold block">
               CONVERSATIONS
             </span>
             <div 
@@ -143,13 +143,13 @@ export default function CommandPalette({
                 <span className="font-semibold text-ink">Rahul Sharma</span>
                 <span className="text-ink-2 ml-2">· WhatsApp · 4 min ago</span>
               </div>
-              <span className="text-warn text-[10px]">Needs you</span>
+              <span className="text-warn text-[11px]">Needs you</span>
             </div>
           </div>
 
           {/* PAGES */}
           <div className="pt-3 space-y-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-ink-3 font-semibold block">
+            <span className="text-[11px] uppercase tracking-wider text-ink-3 font-semibold block">
               PAGES
             </span>
             {[
@@ -177,7 +177,7 @@ export default function CommandPalette({
                   className="w-full text-left p-2 hover:bg-surface-hover rounded cursor-pointer text-xs flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand"
                 >
                   <span className="text-ink">{page.label}</span>
-                  <span className="text-ink-3 text-[10px]">Jump to page</span>
+                  <span className="text-ink-3 text-[11px]">Jump to page</span>
                 </button>
               ))}
           </div>
@@ -185,7 +185,7 @@ export default function CommandPalette({
         </div>
 
         {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-line-subtle bg-surface text-[10px] text-ink-3 flex items-center justify-between">
+        <div className="px-4 py-2 border-t border-line-subtle bg-surface text-[11px] text-ink-3 flex items-center justify-between">
           <span>↑↓ to move</span>
           <span>↵ to open</span>
           <span>esc to close</span>

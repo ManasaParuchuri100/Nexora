@@ -530,7 +530,7 @@ export default function OverviewView({
             {isRangeMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-[12px] shadow-pop py-1.5 z-40 animate-fadeIn"
+                className="absolute right-0 top-full mt-2 w-48 bg-surface border border-line rounded-[10px] shadow-pop py-1.5 z-40 animate-fadeIn"
               >
                 {([
                   ['today', 'Today'],
@@ -552,7 +552,7 @@ export default function OverviewView({
                         setIsCalendarOpen(false);
                       }
                     }}
-                    className={`w-full min-h-0! rounded-none! text-left px-3.5 py-2 text-[13px] hover:bg-surface-hover cursor-pointer ${
+                    className={`w-full min-h-0! rounded-none! text-left px-3.5 py-2 text-[14px] hover:bg-surface-hover cursor-pointer ${
                       datePreset === id ? 'text-brand font-bold' : 'text-ink'
                     }`}
                   >
@@ -675,7 +675,7 @@ export default function OverviewView({
           {/* Metrics */}
           <div className="nx-grid nx-metrics">
             {metricCards.map(m => (
-              <button key={m.id} id={m.id} type="button" onClick={m.onClick} className="nx-panel nx-metric min-h-[121px]! rounded-[15px]!">
+              <button key={m.id} id={m.id} type="button" onClick={m.onClick} className="nx-panel nx-metric min-h-[121px]! rounded-[10px]!">
                 <div className="nx-label">{m.label}</div>
                 <div className="nx-number tabular-nums">{m.value}</div>
                 <div className={`nx-delta ${m.tone}`}>{m.delta}</div>
@@ -733,7 +733,7 @@ export default function OverviewView({
                         className="nx-channel-logo"
                         style={{ color: BRAND_COLORS[c.brand], backgroundColor: `${BRAND_COLORS[c.brand]}14` }}
                       >
-                        <ChannelLogo brand={c.brand} className="w-[15px] h-[15px]" />
+                        <ChannelLogo brand={c.brand} className="w-[16px] h-[16px]" />
                       </span>
                       <span className="nx-channel-name group-hover:text-brand">{c.name}</span>
                       <span className="nx-track">
@@ -776,14 +776,14 @@ export default function OverviewView({
                     return (
                       <div key={call.id} className="nx-row">
                         <div className="nx-alerticon">
-                          <span className="font-display font-extrabold text-[11px] leading-tight text-center">
+                          <span className="font-display font-extrabold text-[12px] leading-tight text-center">
                             {new Date(call.dueAt).toLocaleDateString('en-US', { month: 'short' })}
                             <br />
                             {new Date(call.dueAt).getDate()}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <button type="button" className="nx-inline-link text-[13px]" onClick={() => onSelectLead(l)}>
+                          <button type="button" className="nx-inline-link text-[14px]" onClick={() => onSelectLead(l)}>
                             {l.name} · {l.company}
                           </button>
                           {customCallTitle(call) && <p className="text-ink! font-semibold">{customCallTitle(call)}</p>}
@@ -795,7 +795,7 @@ export default function OverviewView({
                   })}
                 </div>
               )}
-              <button type="button" className="nx-link mt-1 text-[12px]" onClick={() => onNavigate('leads', 'follow-ups')}>
+              <button type="button" className="nx-link mt-1 text-[13px]" onClick={() => onNavigate('leads', 'follow-ups')}>
                 Open follow-ups →
               </button>
             </section>

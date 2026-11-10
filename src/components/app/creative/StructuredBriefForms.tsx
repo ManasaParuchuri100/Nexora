@@ -101,7 +101,7 @@ export default function StructuredBriefForms({
 
   return (
     <div
-      className={`border rounded-[15px] p-6 transition-colors shadow-card space-y-5 ${
+      className={`border rounded-[10px] p-6 transition-colors shadow-card space-y-5 ${
         'bg-surface border-line'
       }`}
     >
@@ -111,15 +111,15 @@ export default function StructuredBriefForms({
           'border-line'
         }`}
       >
-        <h2 className="font-display text-[15px] font-bold text-ink m-0">
+        <h2 className="font-display text-[16px] font-semibold text-ink m-0">
           {category} brief
         </h2>
 
-        <div className="flex items-center space-x-2 text-[11px] font-mono">
+        <div className="flex items-center space-x-2 text-[12px] font-mono">
           <button
             type="button"
             onClick={onLoadExample}
-            className={`px-2.5 py-0.5 rounded-[9px] border transition-colors cursor-pointer ${
+            className={`px-2.5 py-0.5 rounded-[8px] border transition-colors cursor-pointer ${
               'border-line bg-surface-raised text-ink-2 hover:bg-surface-hover'
             }`}
           >
@@ -128,7 +128,7 @@ export default function StructuredBriefForms({
           <button
             type="button"
             onClick={onClearForm}
-            className={`px-2.5 py-0.5 rounded-[9px] border transition-colors cursor-pointer ${
+            className={`px-2.5 py-0.5 rounded-[8px] border transition-colors cursor-pointer ${
               'border-line text-ink-3 hover:text-ink'
             }`}
             title="Reset to empty fields"
@@ -146,7 +146,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -160,7 +160,7 @@ export default function StructuredBriefForms({
                     emailForm: { ...emailForm, campaignType: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -174,7 +174,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -188,7 +188,7 @@ export default function StructuredBriefForms({
                     emailForm: { ...emailForm, subjectAngle: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -202,7 +202,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -218,7 +218,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="e.g. Design Directors & Studio Founders"
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -226,7 +226,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -242,7 +242,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="Exclusive invitation to experience Nexora v2.0 with zero-notification CRM..."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -250,7 +250,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -266,7 +266,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="e.g. Schedule a 15-min Private Walkthrough"
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -287,13 +287,13 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Sender persona & sign-off
                     </label>
                     <input
@@ -306,14 +306,14 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Julian Vance · Atelier Director"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Brand tone override
                     </label>
                     <input
@@ -326,7 +326,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Deliberate & Architectural"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -334,7 +334,7 @@ export default function StructuredBriefForms({
                 </div>
 
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Preheader text
                   </label>
                   <input
@@ -347,7 +347,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="e.g. Why modern studios are muting notification badges for hairline precision."
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -366,7 +366,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -380,7 +380,7 @@ export default function StructuredBriefForms({
                     socialForm: { ...socialForm, platform: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -393,7 +393,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -407,7 +407,7 @@ export default function StructuredBriefForms({
                     socialForm: { ...socialForm, format: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -421,7 +421,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -437,7 +437,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="The single captivating sentence that stops the infinite scroll..."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -445,7 +445,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -461,7 +461,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="1. Red notification badges hijack executive dopamine.\n2. Hairline layouts recover 40% working memory.\n3. Subtract the noise. Multiply the depth."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed font-mono transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed font-mono transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -482,12 +482,12 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Visual direction
                   </label>
                   <input
@@ -500,7 +500,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="e.g. Monochromatic UI specimen render on dark obsidian slate"
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -508,7 +508,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Hashtag policy
                     </label>
                     <select
@@ -519,7 +519,7 @@ export default function StructuredBriefForms({
                           socialForm: { ...socialForm, hashtagStyle: e.target.value }
                         })
                       }
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     >
@@ -530,7 +530,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Destination link / CTA
                     </label>
                     <input
@@ -543,7 +543,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. nexora.studio/atelier"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -563,7 +563,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -577,7 +577,7 @@ export default function StructuredBriefForms({
                     headlineForm: { ...headlineForm, surface: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -590,7 +590,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -604,7 +604,7 @@ export default function StructuredBriefForms({
                     headlineForm: { ...headlineForm, archetype: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -618,7 +618,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -634,7 +634,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="e.g. Nexora Atelier OS"
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -642,7 +642,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -658,7 +658,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="Replaces chaotic, badge-heavy CRM clutter with serene, hairline precision and quiet focus."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -679,12 +679,12 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Audience
                   </label>
                   <input
@@ -697,7 +697,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="e.g. High-taste studio directors, agency leads, and architects"
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -705,7 +705,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Subhead guidance
                     </label>
                     <input
@@ -718,14 +718,14 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Max 14 words with font-display font-bold styling"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Button lockup copy
                     </label>
                     <input
@@ -738,7 +738,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Experience Stillness"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -758,7 +758,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -772,7 +772,7 @@ export default function StructuredBriefForms({
                     adScriptForm: { ...adScriptForm, videoFormat: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -785,7 +785,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -799,7 +799,7 @@ export default function StructuredBriefForms({
                     adScriptForm: { ...adScriptForm, voiceoverStyle: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -813,7 +813,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -829,7 +829,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="e.g. Extreme macro tracking shot across an empty timber desk at dawn."
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -837,7 +837,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -853,7 +853,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="A laptop screen suddenly bursts with 50 blinking notification badges, red numbers, and modal popups."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -861,7 +861,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -877,7 +877,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="User taps one key. Screen fades into Nexora hairline interface. Complete calm."
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -898,12 +898,12 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Closing CTA & endcard
                   </label>
                   <input
@@ -916,7 +916,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="e.g. Make space for what matters. Reserve your atelier at nexora.studio"
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -924,7 +924,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Audio direction
                     </label>
                     <input
@@ -937,14 +937,14 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Natural room tone into warm ambient acoustic cello"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Aspect ratio
                     </label>
                     <select
@@ -955,7 +955,7 @@ export default function StructuredBriefForms({
                           adScriptForm: { ...adScriptForm, aspectRatio: e.target.value }
                         })
                       }
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     >
@@ -980,7 +980,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -996,7 +996,7 @@ export default function StructuredBriefForms({
                   })
                 }
                 placeholder="e.g. The Tyranny of the Unread Notification Badge"
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -1004,7 +1004,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -1018,7 +1018,7 @@ export default function StructuredBriefForms({
                     thoughtLeadershipForm: { ...thoughtLeadershipForm, publication: e.target.value }
                   })
                 }
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               >
@@ -1032,7 +1032,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -1048,7 +1048,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="Productivity tools should behave like quiet architecture, not carnival barkers."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -1056,7 +1056,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -1072,7 +1072,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="1. The cognitive cost of attention switching in modern workspaces.\n2. Lessons from Swiss spatial typography.\n3. Why high-output creative agencies are returning to asynchronous quietude."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed font-mono transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed font-mono transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -1093,12 +1093,12 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Pull-quote highlight
                   </label>
                   <input
@@ -1111,7 +1111,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="When software speaks in hairlines, your mind recovers the bandwidth required for contemplation."
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -1119,7 +1119,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Depth / length
                     </label>
                     <select
@@ -1130,7 +1130,7 @@ export default function StructuredBriefForms({
                           thoughtLeadershipForm: { ...thoughtLeadershipForm, depth: e.target.value }
                         })
                       }
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     >
@@ -1141,7 +1141,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Author sign-off
                     </label>
                     <input
@@ -1154,7 +1154,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Evelyn Vance · Principal Partner"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -1173,7 +1173,7 @@ export default function StructuredBriefForms({
         <div className="space-y-4">
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -1187,7 +1187,7 @@ export default function StructuredBriefForms({
                   heroBriefForm: { ...heroBriefForm, deliverable: e.target.value }
                 })
               }
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             >
@@ -1200,7 +1200,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -1216,7 +1216,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="A cantilevered dark glass workspace surface displaying Nexora's hairline CRM graph, next to handcrafted ceramic vessel and brass drafting instruments."
-              className={`w-full text-xs p-3 rounded-[9px] border focus:outline-none resize-none leading-relaxed transition-colors ${
+              className={`w-full text-xs p-3 rounded-[8px] border focus:outline-none resize-none leading-relaxed transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -1225,7 +1225,7 @@ export default function StructuredBriefForms({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -1241,7 +1241,7 @@ export default function StructuredBriefForms({
                   })
                 }
                 placeholder="Japanese Wabi-Sabi + Brutalist Typography"
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -1249,7 +1249,7 @@ export default function StructuredBriefForms({
 
             <div>
               <label
-                className={`block text-[11px] font-bold mb-1.5 ${
+                className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
               >
@@ -1265,7 +1265,7 @@ export default function StructuredBriefForms({
                   })
                 }
                 placeholder="Soft morning sunlight (4500K) through shoji screens, deep obsidian shadows"
-                className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+                className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                   'bg-surface-raised border-line text-ink focus:border-line-strong'
                 }`}
               />
@@ -1274,7 +1274,7 @@ export default function StructuredBriefForms({
 
           <div>
             <label
-              className={`block text-[11px] font-bold mb-1.5 ${
+              className={`block text-[12px] font-bold mb-1.5 ${
  'text-ink'
  }`}
             >
@@ -1290,7 +1290,7 @@ export default function StructuredBriefForms({
                 })
               }
               placeholder="Left-heavy layout with 60% negative space on right for editorial typography"
-              className={`w-full text-xs px-3 py-2 rounded-[9px] border focus:outline-none transition-colors ${
+              className={`w-full text-xs px-3 py-2 rounded-[8px] border focus:outline-none transition-colors ${
                 'bg-surface-raised border-line text-ink focus:border-line-strong'
               }`}
             />
@@ -1311,12 +1311,12 @@ export default function StructuredBriefForms({
 
             {showAdvanced && (
               <div
-                className={`mt-3 p-4 rounded-[9px] border space-y-3 ${
+                className={`mt-3 p-4 rounded-[8px] border space-y-3 ${
                   'bg-surface-raised border-line'
                 }`}
               >
                 <div>
-                  <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                  <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                     Color palette
                   </label>
                   <input
@@ -1329,7 +1329,7 @@ export default function StructuredBriefForms({
                       })
                     }
                     placeholder="Deep Forest Obsidian (#071C1A), Soft Sage (#A9BFA5), Warm Parchment (#E8E9D8)"
-                    className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                    className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                       'bg-surface border-line text-ink'
                     }`}
                   />
@@ -1337,7 +1337,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Aspect ratio
                     </label>
                     <select
@@ -1348,7 +1348,7 @@ export default function StructuredBriefForms({
                           heroBriefForm: { ...heroBriefForm, aspectRatio: e.target.value }
                         })
                       }
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     >
@@ -1360,7 +1360,7 @@ export default function StructuredBriefForms({
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Camera direction
                     </label>
                     <input
@@ -1373,7 +1373,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. 35mm lens, 15° low-angle isometric elevation"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -1382,7 +1382,7 @@ export default function StructuredBriefForms({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Material shaders
                     </label>
                     <input
@@ -1395,14 +1395,14 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. Micro-brushed titanium, matte black anodized aluminum"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className={`block text-[11px] font-bold mb-1 ${'text-ink-3'}`}>
+                    <label className={`block text-[12px] font-bold mb-1 ${'text-ink-3'}`}>
                       Additional visual constraints
                     </label>
                     <input
@@ -1415,7 +1415,7 @@ export default function StructuredBriefForms({
                         })
                       }
                       placeholder="e.g. No saturated neon lights, keep typography safe margins"
-                      className={`w-full text-xs px-2.5 py-1.5 rounded-[9px] border focus:outline-none ${
+                      className={`w-full text-xs px-2.5 py-1.5 rounded-[8px] border focus:outline-none ${
                         'bg-surface border-line text-ink'
                       }`}
                     />
@@ -1436,7 +1436,7 @@ export default function StructuredBriefForms({
         {/* Variations selector: [ 1 ] [ 3 ] [ 5 ] */}
         <div className="flex items-center space-x-2">
           <span
-            className={`text-[11px] font-bold ${
+            className={`text-[12px] font-bold ${
  'text-ink-3'
  }`}
           >

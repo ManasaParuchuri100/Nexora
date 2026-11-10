@@ -187,7 +187,7 @@ export default function FollowUpsView({
             key={m.id}
             type="button"
             onClick={m.go}
-            className={`nx-panel nx-metric min-h-[112px]! rounded-[15px]! ${(m.id === 'approval' ? approvalOnly : !special && tab === m.id) ? 'is-active' : ''}`}
+            className={`nx-panel nx-metric min-h-[112px]! rounded-[10px]! ${(m.id === 'approval' ? approvalOnly : !special && tab === m.id) ? 'is-active' : ''}`}
           >
             <div className="nx-label">{m.label}</div>
             <div className="nx-number tabular-nums">{m.value}</div>
@@ -273,10 +273,10 @@ export default function FollowUpsView({
             <div className="nx-alerticon green mx-auto mb-3">
               {approvalOnly || tab === 'done' ? <Inbox className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
             </div>
-            <div className="font-display text-[14px] font-bold text-ink">
+            <div className="font-display text-[14px] font-semibold text-ink">
               {query || owner !== 'all' || channel !== 'all' ? 'No follow-ups match these filters' : approvalOnly ? 'No drafts waiting for approval' : callsOnly ? 'No calls scheduled' : `You're all caught up`}
             </div>
-            <p className="text-[12px] text-ink-3 mt-1 mb-0 max-w-[420px] mx-auto">
+            <p className="text-[13px] text-ink-3 mt-1 mb-0 max-w-[420px] mx-auto">
               {query || owner !== 'all' || channel !== 'all'
                 ? 'Try clearing the search or filters.'
                 : approvalOnly
@@ -316,7 +316,7 @@ export default function FollowUpsView({
         )}
       </section>
 
-      <p className="text-[11px] text-ink-3 mt-4">
+      <p className="text-[12px] text-ink-3 mt-4">
         Follow-ups are scheduled Mon–Sat, 9 AM–7 PM. No reply → next attempt (hot 1 day, warm 3 days, cold 7 days), up to 3 attempts, then nurture.
       </p>
 

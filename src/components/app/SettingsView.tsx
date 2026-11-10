@@ -154,7 +154,7 @@ export default function SettingsView({
   };
 
   return (
-    <div className="space-y-[15px] pb-12 animate-fadeIn text-ink select-text">
+    <div className="space-y-[16px] pb-12 animate-fadeIn text-ink select-text">
       
       <PageHeader
         eyebrow="System / Settings"
@@ -166,7 +166,7 @@ export default function SettingsView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left-hand List of Sections (Page 35 spec) */}
-        <div className="lg:col-span-3 border border-line bg-surface-raised rounded-[9px] p-2 space-y-1">
+        <div className="lg:col-span-3 border border-line bg-surface-raised rounded-[8px] p-2 space-y-1">
           {[
             { id: 'business', label: 'Business', icon: Building2 },
             { id: 'ai', label: 'AI Knowledge', icon: Sparkles },
@@ -186,7 +186,7 @@ export default function SettingsView({
                   setActiveSection(sec.id as SettingsSection);
                   onNavigateSub(sec.id as SubCategory);
                 }}
-                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[9px] text-xs transition-colors cursor-pointer text-left ${
+                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-[8px] text-xs transition-colors cursor-pointer text-left ${
                   isActive
                     ? 'bg-surface-hover text-ink font-semibold border-l-2 border-line-strong'
                     : 'text-ink-2 hover:text-ink hover:bg-surface-hover'
@@ -200,7 +200,7 @@ export default function SettingsView({
         </div>
 
         {/* Right Settings Content */}
-        <div className="lg:col-span-9 border border-line bg-surface rounded-[9px] p-6 space-y-6">
+        <div className="lg:col-span-9 border border-line bg-surface rounded-[8px] p-6 space-y-6">
           
           {/* ========================================================
               SECTION: BUSINESS (Page 35 spec)
@@ -317,7 +317,7 @@ export default function SettingsView({
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[9px]"
+                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[8px]"
                 >
                   Save changes
                 </button>
@@ -360,11 +360,11 @@ export default function SettingsView({
                         <span className="text-ink font-bold text-xs uppercase tracking-wider">
                           Organization Documents & Knowledge Files
                         </span>
-                        <span className="text-[10px]  px-1.5 py-0.5 rounded bg-ok/15 text-ok border border-ok/30">
+                        <span className="text-[11px]  px-1.5 py-0.5 rounded bg-ok/15 text-ok border border-ok/30">
                           {orgDocs.length} linked
                         </span>
                       </div>
-                      <p className="text-[11px] text-ink-2 font-light mt-0.5">
+                      <p className="text-[12px] text-ink-2 font-light mt-0.5">
                         Brochures, rate cards, and catalogs uploaded during Step 3 onboarding or directly below.
                       </p>
                     </div>
@@ -372,7 +372,7 @@ export default function SettingsView({
                     <button
                       type="button"
                       onClick={() => orgFileInputRef.current?.click()}
-                      className="px-2.5 py-1 text-[11px]  bg-surface-hover hover:bg-surface-hover border border-emerald-400/40 hover:border-emerald-400 text-ok hover:text-ink rounded-[9px] transition-colors cursor-pointer flex items-center space-x-1 shrink-0"
+                      className="px-2.5 py-1 text-[12px]  bg-surface-hover hover:bg-surface-hover border border-emerald-400/40 hover:border-emerald-400 text-ok hover:text-ink rounded-[8px] transition-colors cursor-pointer flex items-center space-x-1 shrink-0"
                     >
                       <UploadCloud className="w-3.5 h-3.5" />
                       <span>+ Upload Files</span>
@@ -392,7 +392,7 @@ export default function SettingsView({
                       {orgDocs.map((doc) => (
                         <div
                           key={doc.id}
-                          className="p-2 bg-surface-raised border border-line rounded-[9px] flex items-center justify-between text-xs transition-colors hover:border-emerald-400/40"
+                          className="p-2 bg-surface-raised border border-line rounded-[8px] flex items-center justify-between text-xs transition-colors hover:border-emerald-400/40"
                         >
                           <div className="flex items-center space-x-2.5 min-w-0">
                             <FileText className="w-4 h-4 text-ok shrink-0" />
@@ -400,7 +400,7 @@ export default function SettingsView({
                               <p className="text-ink font-medium truncate text-xs">
                                 {doc.name}
                               </p>
-                              <div className="flex items-center space-x-2 text-[10px] text-ink-3 ">
+                              <div className="flex items-center space-x-2 text-[11px] text-ink-3 ">
                                 <span>{doc.size}</span>
                                 <span>·</span>
                                 <span className="text-ok flex items-center space-x-0.5">
@@ -424,7 +424,7 @@ export default function SettingsView({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[11px] text-ink-3 italic  py-1">
+                    <p className="text-[12px] text-ink-3 italic  py-1">
                       No organization documents uploaded yet. Click "+ Upload Files" to train the AI.
                     </p>
                   )}
@@ -455,7 +455,7 @@ export default function SettingsView({
                 </div>
 
                 {/* ┌ Test the AI ───────────────────────────────────┐ (Page 35 spec) */}
-                <div className="p-4 rounded-[9px] bg-surface-raised border border-emerald-500/35 space-y-3">
+                <div className="p-4 rounded-[8px] bg-surface-raised border border-emerald-500/35 space-y-3">
                   <div className="flex items-center space-x-2">
                     <Sparkles className="w-3.5 h-3.5 text-ok" />
                     <span className="text-xs uppercase font-semibold text-ok">
@@ -463,7 +463,7 @@ export default function SettingsView({
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-ink-2">
+                  <p className="text-[12px] text-ink-2">
                     Ask a customer question… → see the AI's instant answer live based on your business knowledge.
                   </p>
 
@@ -487,7 +487,7 @@ export default function SettingsView({
 
                   {testAnswer && (
                     <div className="p-3 bg-surface border border-ok/30 rounded text-xs text-ok leading-relaxed animate-fadeIn">
-                      <span className="text-[10px] text-ok block font-semibold mb-1">AI Output:</span>
+                      <span className="text-[11px] text-ok block font-semibold mb-1">AI Output:</span>
                       {testAnswer}
                     </div>
                   )}
@@ -499,7 +499,7 @@ export default function SettingsView({
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[9px]"
+                  className="px-4 py-2 bg-brand text-on-brand text-xs font-semibold rounded-[8px]"
                 >
                   Save changes
                 </button>
