@@ -154,6 +154,7 @@ export default function CommandPalette({
             </span>
             {[
               { label: 'Overview', category: 'overview' as const, sub: 'overview' as const },
+              { label: 'Onboarding', category: 'onboarding' as const, sub: 'default' as const },
               { label: 'Inbox', category: 'inbox' as const, sub: 'inbox' as const },
               { label: 'Leads', category: 'leads' as const, sub: 'all-leads' as const },
               { label: 'Follow-ups', category: 'leads' as const, sub: 'follow-ups' as const },

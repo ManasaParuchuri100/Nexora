@@ -8,6 +8,7 @@ import {
   Megaphone, 
   BarChart3, 
   Radar,
+  Rocket,
   Settings, 
   LogOut, 
   X,
@@ -45,6 +46,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: 'General',
     items: [
       { key: 'overview', label: 'Overview', icon: LayoutDashboard, category: 'overview', sub: 'overview', isActive: (cat) => cat === 'overview' },
+      { key: 'onboarding', label: 'Onboarding', icon: Rocket, category: 'onboarding', sub: 'default', isActive: (cat) => cat === 'onboarding' },
     ],
   },
   {
@@ -85,6 +87,8 @@ interface AppSidebarProps {
   workspaceName?: string;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
+  /** Setup progress, shown on the Onboarding item until setup is complete. */
+  setupProgress?: { done: number; total: number };
 }
 
 export default function AppSidebar({
@@ -101,7 +105,8 @@ export default function AppSidebar({
   userRole = 'Owner',
   workspaceName = `${BRAND_NAME} Workspace`,
   collapsed = false,
-  onToggleCollapsed
+  onToggleCollapsed,
+  setupProgress
 }: AppSidebarProps) {
   const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
   const [currentWorkspace, setCurrentWorkspace] = useState(workspaceName);
@@ -306,6 +311,18 @@ export default function AppSidebar({
                         aria-label={`${inboxCounts.needsYou} conversations need you`}
                       >
                         {!rail && inboxCounts.needsYou}
+                      </span>
+                    )}
+
+                    {/* Setup progress badge */}
+                    {item.key === 'onboarding' && setupProgress && setupProgress.done < setupProgress.total && (
+                      <span
+                        className={rail
+                          ? 'absolute top-[7px] right-[9px] w-2 h-2 rounded-full bg-warn'
+                          : 'bg-warn-soft text-warn rounded-[5px] min-w-5 px-1.5 py-px text-[10px] font-bold tabular-nums flex items-center justify-center shrink-0'}
+                        aria-label={`Setup ${setupProgress.done} of ${setupProgress.total} done`}
+                      >
+                        {!rail && `${setupProgress.done}/${setupProgress.total}`}
                       </span>
                     )}
 

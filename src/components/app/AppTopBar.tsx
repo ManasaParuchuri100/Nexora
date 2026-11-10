@@ -163,6 +163,7 @@ export default function AppTopBar({
     if (cat === 'leads' && sub === 'follow-ups') return 'Follow-ups';
     switch (cat) {
       case 'overview': return 'Overview';
+      case 'onboarding': return 'Onboarding';
       case 'inbox': return 'Inbox';
       case 'leads': return 'Leads';
       case 'agent': return 'Engagement Agent';

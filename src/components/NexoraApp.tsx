@@ -37,6 +37,9 @@ import { postDate } from '../data/schedule';
 import CampaignsView from './app/CampaignsView';
 import AnalyticsView from './app/AnalyticsView';
 import MarketIntelligenceView from './app/MarketIntelligenceView';
+import OnboardingView from './app/OnboardingView';
+import OnboardingFlow from './OnboardingFlow';
+import { getSetupStatus } from '../data/setup';
 import SettingsView from './app/SettingsView';
 import AssistantView from './app/AssistantView';
 import ActionModals from './app/ActionModals';
@@ -163,6 +166,9 @@ export default function NexoraApp({
       try { localStorage.setItem('nexora_sidebar_collapsed', prev ? '0' : '1'); } catch { /* storage unavailable */ }
       return !prev;
     });
+  const [isSetupOpen, setIsSetupOpen] = useState(false);
+  // Recomputed on every render, so the sidebar badge follows changes made in Settings or onboarding.
+  const setupProgress = getSetupStatus(isFirstRun);
   const lastTab = useRef<Partial<Record<NavCategory, SubCategory>>>({});
   const handleSelectNav = (category: NavCategory, subCategory?: SubCategory) => {
     if (activeModal === 'lead-details') setActiveModal(null);
@@ -391,6 +397,7 @@ export default function NexoraApp({
         workspaceName={currentUser?.workspace || `${BRAND_NAME} Workspace`}
         collapsed={sidebarCollapsed}
         onToggleCollapsed={toggleSidebar}
+        setupProgress={setupProgress}
       />
 
       {/* Main Workspace Frame */}
@@ -564,6 +571,15 @@ export default function NexoraApp({
               />
             )}
 
+            {activeCategory === 'onboarding' && (
+              <OnboardingView
+                isFirstRun={isFirstRun}
+                onNavigateTo={handleSelectNav}
+                onStartSetup={() => setIsSetupOpen(true)}
+                onNotify={showToast}
+              />
+            )}
+
             {activeCategory === 'market' && (
               <MarketIntelligenceView
                 activeSubCategory={activeSubCategory}
@@ -657,6 +673,22 @@ export default function NexoraApp({
       />
 
       {/* Command Palette (Quick Search ⌘K) */}
+      {isSetupOpen && (
+        <OnboardingFlow
+          isOpen
+          mode="setup"
+          prefillSample={!isFirstRun}
+          userName={currentUser?.name}
+          userEmail={currentUser?.email}
+          onClose={() => setIsSetupOpen(false)}
+          onOpenLogin={() => setIsSetupOpen(false)}
+          onComplete={() => {
+            setIsSetupOpen(false);
+            showToast('Setup saved', 'Nexora is active. You can change any answer later in Settings.');
+          }}
+        />
+      )}
+
       <CommandPalette
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}

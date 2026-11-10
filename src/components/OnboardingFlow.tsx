@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Eye, EyeOff, Loader2, X } from 'lucide-react';
 import { Input } from './ui';
 import { BRAND_COMPANY, BRAND_NAME, BRAND_TAGLINE } from '../config/brand';
-import { writeSaved } from './app/settings/store';
+import { readSaved, writeSaved } from './app/settings/store';
+import { SAMPLE_BUSINESS, SAMPLE_CHANNELS, SAMPLE_FAQ, markAiTested, setActivated } from '../data/setup';
 
 export interface OnboardingData {
   name: string;
@@ -37,6 +38,12 @@ interface OnboardingFlowProps {
   onClose: () => void;
   onOpenLogin: () => void;
   onComplete: (data: OnboardingData) => void;
+  /** "signup" starts with creating an account. "setup" is used inside the app and skips it. */
+  mode?: 'signup' | 'setup';
+  userName?: string;
+  userEmail?: string;
+  /** In setup mode, fill the sample business details when nothing has been saved yet. */
+  prefillSample?: boolean;
 }
 
 type Step = 'account' | 'business' | 'knowledge' | 'channels' | 'test' | 'activate';
@@ -64,30 +71,49 @@ interface Faq { id: string; question: string; answer: string; status: 'draft' | 
 const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const tokens = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
 
-export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplete }: OnboardingFlowProps) {
-  const [step, setStep] = useState<Step>('account');
+const CHANNEL_ID_BY_NAME: Record<string, string> = { WhatsApp: 'whatsapp', Instagram: 'instagram', Facebook: 'facebook', Email: 'email' };
+
+export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplete, mode = 'signup', userName = '', userEmail = '', prefillSample = false }: OnboardingFlowProps) {
+  const setup = mode === 'setup';
+  const steps = setup ? STEPS.slice(1) : STEPS;
+  // In setup mode, start from what is already saved so nothing is lost.
+  const saved = React.useMemo(() => {
+    if (!setup) return {};
+    const stored = readSaved<{ businessName: string; website: string; industry: string; location: string; whatYouSell: string; workingHours: string; toneOfVoice: string }>('nexora_settings_v1');
+    return stored.businessName ? stored : prefillSample ? { ...SAMPLE_BUSINESS } : {};
+  }, [setup, prefillSample]);
+  const [step, setStep] = useState<Step>(setup ? 'business' : 'account');
 
   // Account
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(userName);
+  const [email, setEmail] = useState(userEmail);
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [accountErr, setAccountErr] = useState<{ name?: string; email?: string; password?: string }>({});
   const [creating, setCreating] = useState(false);
 
   // Business
-  const [businessName, setBusinessName] = useState('');
-  const [website, setWebsite] = useState('');
-  const [industry, setIndustry] = useState('');
-  const [customIndustry, setCustomIndustry] = useState('');
-  const [location, setLocation] = useState('');
-  const [whatYouSell, setWhatYouSell] = useState('');
-  const [workingHours, setWorkingHours] = useState('Mon–Sat 10:00–19:00');
+  const savedIndustry = (saved as { industry?: string }).industry ?? '';
+  const knownIndustry = [...INDUSTRIES].includes(savedIndustry);
+  const [businessName, setBusinessName] = useState((saved as { businessName?: string }).businessName ?? '');
+  const [website, setWebsite] = useState((saved as { website?: string }).website ?? '');
+  const [industry, setIndustry] = useState(savedIndustry ? (knownIndustry ? savedIndustry : 'Other') : '');
+  const [customIndustry, setCustomIndustry] = useState(savedIndustry && !knownIndustry ? savedIndustry : '');
+  const [location, setLocation] = useState((saved as { location?: string }).location ?? '');
+  const [whatYouSell, setWhatYouSell] = useState((saved as { whatYouSell?: string }).whatYouSell ?? '');
+  const [workingHours, setWorkingHours] = useState((saved as { workingHours?: string }).workingHours ?? 'Mon–Sat 10:00–19:00');
   const [bizTried, setBizTried] = useState(false);
 
   // Knowledge
-  const [faqs, setFaqs] = useState<Faq[]>([]);
-  const [tone, setTone] = useState<OnboardingData['aiTone']>('Friendly');
+  const [faqs, setFaqs] = useState<Faq[]>(() => {
+    if (!setup) return [];
+    try {
+      const raw = localStorage.getItem('nexora_knowledge_v1');
+      const list = raw ? (JSON.parse(raw) as Array<{ id: string; question: string; answer: string }>) : prefillSample ? [SAMPLE_FAQ] : [];
+      return list.map(f => ({ ...f, status: 'approved' as const }));
+    } catch { return []; }
+  });
+  const [tone, setTone] = useState<OnboardingData['aiTone']>(((saved as { toneOfVoice?: string }).toneOfVoice as OnboardingData['aiTone']) ?? 'Friendly');
   const [drafting, setDrafting] = useState(false);
   const [newQ, setNewQ] = useState('');
   const [newA, setNewA] = useState('');
@@ -95,7 +121,15 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
   const [handoff, setHandoff] = useState({ customerAsksPerson: true, aiNotSure: true, dealValueAbove: true, dealValueThreshold: '50000' });
 
   // Channels
-  const [channels, setChannels] = useState<Record<string, string>>({});
+  const [channels, setChannels] = useState<Record<string, string>>(() => {
+    if (!setup) return {};
+    try {
+      const raw = localStorage.getItem('nexora_channels_v1');
+      if (!raw && prefillSample) return { ...SAMPLE_CHANNELS };
+      const list = raw ? (JSON.parse(raw) as Array<{ name: string; handle: string; status: string }>) : [];
+      return Object.fromEntries(list.filter(c => c.status === 'Connected' && CHANNEL_ID_BY_NAME[c.name]).map(c => [CHANNEL_ID_BY_NAME[c.name], c.handle]));
+    } catch { return {}; }
+  });
   const [openChannel, setOpenChannel] = useState<string | null>(null);
   const [channelInput, setChannelInput] = useState('');
 
@@ -127,11 +161,11 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
     { id: 'ready', label: 'Ready to activate', done: businessDone && knowledgeDone && channelsDone && testedDone },
   ];
   const doneCount = readiness.filter(r => r.done).length;
-  const stepIdx = STEPS.findIndex(s => s.id === step);
+  const stepIdx = steps.findIndex(s => s.id === step);
 
   const go = (id: Step) => setStep(id);
-  const next = () => setStep(STEPS[Math.min(STEPS.length - 1, stepIdx + 1)].id);
-  const back = () => setStep(STEPS[Math.max(0, stepIdx - 1)].id);
+  const next = () => setStep(steps[Math.min(steps.length - 1, stepIdx + 1)].id);
+  const back = () => setStep(steps[Math.max(0, stepIdx - 1)].id);
 
   /* ---- actions ---- */
   const createAccount = () => {
@@ -175,6 +209,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
 
   const ask = (q: string) => {
     if (!q.trim()) return;
+    markAiTested();
     const qt = tokens(q);
     let best: Faq | null = null; let bestScore = 0;
     approved.forEach(f => {
@@ -202,8 +237,9 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
         return { name: n, handle: handle ?? 'Not connected', status: handle ? 'Connected' : 'Disconnected', owner: handle ? name.trim() : '—', lastSync: handle ? 'Just now' : '—', placeholder: CHANNELS.find(c => c.name === n)?.placeholder ?? '' };
       });
       localStorage.setItem('nexora_channels_v1', JSON.stringify(list));
-      localStorage.setItem('nexora_team_v1', JSON.stringify([{ id: 't1', name: name.trim(), email: email.trim().toLowerCase(), role: 'Owner' }]));
+      if (!setup) localStorage.setItem('nexora_team_v1', JSON.stringify([{ id: 't1', name: name.trim(), email: email.trim().toLowerCase(), role: 'Owner' }]));
     } catch { /* storage unavailable */ }
+    setActivated(true);
     onComplete({
       name: name.trim(), email: email.trim().toLowerCase(), password,
       businessName: businessName.trim(), website: website.trim(), industry: industryValue, location: location.trim(), whatYouSell: whatYouSell.trim(),
@@ -235,7 +271,7 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
           <span className="text-[9px] tracking-[2px] text-ink-3 uppercase mt-0.5">{BRAND_TAGLINE}</span>
         </div>
         <div className="flex items-center gap-3">
-          <button type="button" className="nx-inline-link" onClick={onOpenLogin}>Already have an account? Log in</button>
+          {!setup && <button type="button" className="nx-inline-link" onClick={onOpenLogin}>Already have an account? Log in</button>}
           <button type="button" className="nx-iconbtn" onClick={onClose} aria-label="Close setup"><X className="w-4 h-4" /></button>
         </div>
       </header>
@@ -243,11 +279,11 @@ export default function OnboardingFlow({ isOpen, onClose, onOpenLogin, onComplet
       <div className="max-w-[1080px] mx-auto px-5 pb-16 grid gap-[15px] lg:grid-cols-[minmax(0,1fr)_300px] items-start">
         <main>
           <ol className="flex flex-wrap items-center gap-x-1 gap-y-2 mb-[18px] p-0 list-none" aria-label="Setup steps">
-            {STEPS.map((s, i) => (
+            {steps.map((s, i) => (
               <li key={s.id} className="flex items-center">
                 <span className={`w-[24px] h-[24px] rounded-full grid place-items-center text-[11px] font-bold border mr-2 ${i === stepIdx ? 'bg-brand text-on-brand border-brand' : i < stepIdx ? 'bg-brand-soft text-brand border-brand-soft' : 'bg-surface text-ink-3 border-line'}`}>{i < stepIdx ? '✓' : i + 1}</span>
                 <span className={`text-[12px] font-semibold ${i === stepIdx ? 'text-ink' : 'text-ink-3'}`}>{s.label}</span>
-                {i < STEPS.length - 1 && <span className="w-5 h-px bg-line mx-2" />}
+                {i < steps.length - 1 && <span className="w-5 h-px bg-line mx-2" />}
               </li>
             ))}
           </ol>

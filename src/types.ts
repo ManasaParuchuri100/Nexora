@@ -21,6 +21,7 @@ export interface StepItem {
 // Navigation structure for authenticated Tecavy Marketing OS
 export type NavCategory = 
   | 'overview'
+  | 'onboarding'
   | 'inbox'
   | 'engage' // backwards-compatible alias for inbox
   | 'leads'

@@ -1,5 +1,6 @@
 import { PageHeader } from '../ui';
 import { readSaved, writeSaved } from './settings/store';
+import { markAiTested } from '../../data/setup';
 import { AutomationSection, BillingSection, ChannelsSection, NotificationsSection, TeamSection } from './settings/SettingsSections';
 import React, { useState } from 'react';
 import { 
@@ -137,6 +138,7 @@ export default function SettingsView({
   // Test the AI sandbox handler (Page 35 spec)
   const handleTestAi = () => {
     if (!testQuestion.trim()) return;
+    markAiTested();
     setIsTesting(true);
     setTimeout(() => {
       setTestAnswer(
