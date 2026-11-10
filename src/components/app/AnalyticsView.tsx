@@ -132,8 +132,8 @@ function Overview({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?
   };
 
   return (
-    <div className="grid gap-[16px]">
-      <div className="nx-grid nx-metrics" style={{ gridTemplateColumns: 'repeat(5, minmax(0,1fr))' }}>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px]">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
         {d.kpis.map(k => {
           const action = click[k.id];
           const Tag: any = action ? 'button' : 'div';
@@ -192,7 +192,7 @@ function LeadsTab({ d, onGo }: { d: AnalyticsData; onGo: (cat: NavCategory, sub?
   const biggestLoss = [...d.lost].sort((a, b) => b.count - a.count)[0];
   const lostTotal = d.lost.reduce((a, l) => a + l.count, 0);
   return (
-    <div className="grid gap-[16px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px]">
       <AIInsight
         observation={`${biggestLoss.reason} is the top reason for lost leads (${biggestLoss.count} of ${lostTotal}).`}
         recommendation={biggestLoss.reason === 'Price' ? 'Share a clear price range earlier in the conversation and review the pricing answers in AI knowledge.' : 'Review the follow-up cadence for these leads.'}
@@ -222,7 +222,7 @@ function ChannelsTab({ d }: { d: AnalyticsData }) {
   const best = [...d.sources].sort((a, b) => b.conv - a.conv)[0];
   const most = [...d.sources].sort((a, b) => b.leads - a.leads)[0];
   return (
-    <div className="grid gap-[16px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px]">
       <AIInsight
         observation={`${most.name} brings the most qualified leads (${[...d.sources].sort((a, b) => b.qualified - a.qualified)[0].qualified}); ${best.name} converts best at ${best.conv}%.`}
         recommendation={`Keep investing in ${most.name} and test what ${best.name} does differently.`}

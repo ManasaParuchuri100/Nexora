@@ -1357,7 +1357,7 @@ Audio: Solo cello harmonics and tactile room tone
         /* CREATE EXPERIENCE */
         <div className="space-y-4">
           {/* Top Control Bar: Mode Toggle + Compact Brand Context */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex gap-1.5 shrink-0">
               <button type="button" onClick={() => setCreateMode('quick')}
                 className={`nx-tab inline-flex items-center gap-1.5 ${createMode === 'quick' ? 'active' : ''}`}>
@@ -1386,7 +1386,7 @@ Audio: Solo cello harmonics and tactile room tone
               </label>
             )}
 
-            <div className="flex-1 sm:max-w-md w-full">
+            <div className="w-full lg:w-auto lg:flex-1 lg:max-w-md min-w-0">
               <BrandContextBanner
                 context={brandContext}
                 onUpdateContext={setBrandContext}

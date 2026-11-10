@@ -1666,3 +1666,9 @@ table td { padding-top: 15px !important; padding-bottom: 15px !important; }
   border-radius: 10px;
   background: var(--accent-subtle);
 }
+
+/* Small screens: stacked layouts never push the page wider than the viewport */
+@media (max-width: 767px) {
+  .nx-insight { flex-direction: column; gap: 10px; }
+  .nx-grid.nx-two, .nx-grid.nx-thirds { grid-template-columns: minmax(0, 1fr); }
+}

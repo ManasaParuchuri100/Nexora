@@ -113,7 +113,7 @@ export default function CategoryNav({
 
   return (
     <div
-      className={`border rounded-[10px] p-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
+      className={`border rounded-[10px] p-2 flex flex-wrap items-center justify-between gap-2.5 transition-colors ${
         'bg-surface border-line'
       }`}
     >
@@ -166,7 +166,7 @@ export default function CategoryNav({
         <button
           type="button"
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className={`px-3 py-1.5 rounded-[8px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[210px] transition-colors cursor-pointer ${
+          className={`px-3 py-1.5 rounded-[8px] border text-xs font-mono flex items-center justify-between space-x-2 min-w-[180px] transition-colors cursor-pointer ${
             'bg-surface-raised border-line text-ink hover:border-brand'
           }`}
         >
