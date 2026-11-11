@@ -244,7 +244,17 @@ export default function ContentCalendar({
         <p className="text-[13px] text-ink-3 mt-3 mb-0">No posts match. Click “+” on any upcoming day to schedule one.</p>
       )}
       {unplaced > 0 && (
-        <p className="text-[12px] text-ink-3 mt-2 mb-0">{unplaced} post{unplaced > 1 ? 's have' : ' has'} no exact date and only appear in the Queue.</p>
+        <div className="mt-4 border border-line rounded-[10px] p-4">
+          <div className="text-[13px] font-medium text-ink mb-1">Needs a date ({unplaced})</div>
+          <p className="text-[12px] text-ink-3 m-0 mb-3">These posts have no exact date, so they are not on the calendar. Pick a date for each.</p>
+          <div className="grid gap-1.5">
+            {posts.filter(p => !postDate(p)).map(p => (
+              <button key={p.id} type="button" onClick={() => setOpenPost(p)} className="text-left rounded-[8px]! border border-line px-3 py-2 min-h-0! hover:bg-surface-hover text-[13px] text-ink">
+                {p.title} <span className="text-ink-3">· {p.scheduledTime}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Day list */}
@@ -306,7 +316,7 @@ function PostDialog({
   onSave: (post: ScheduledPost, label: string) => void;
   onDelete?: () => void;
 }) {
-  const at = postDate(post) as Date;
+  const at = postDate(post) ?? (() => { const d = new Date(Date.now() + 86400000); d.setHours(9, 0, 0, 0); return d; })();
   const locked = post.status === 'Dispatched';
   const [date, setDate] = useState(isoDay(at));
   const [time, setTime] = useState(`${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`);

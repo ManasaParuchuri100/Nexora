@@ -338,7 +338,7 @@ export default function NexoraApp({
 
   const handleDeleteScheduledPost = (id: string) => {
     setScheduledPosts(prev => prev.filter(p => p.id !== id));
-    showToast('Broadcast Removed', 'The scheduled broadcast has been canceled and removed from the queue.');
+    showToast('Broadcast Removed', 'The scheduled broadcast has been canceled and removed from the calendar.');
   };
 
   const handleUpdateScheduledPost = (updated: ScheduledPost) => {
@@ -523,7 +523,7 @@ export default function NexoraApp({
                 {contentTabFor(activeSubCategory) === 'schedule' && (
                   <SocialHubView
                     activeSubCategory={
-                      activeSubCategory === 'connect' || activeSubCategory === 'ai-guided-creation' || activeSubCategory === 'manual-scheduling'
+                      activeSubCategory === 'connect' || activeSubCategory === 'ai-guided-creation'
                         ? activeSubCategory
                         : 'calendar'
                     }

@@ -119,7 +119,7 @@ export default function CampaignBlueprintView({
     if (key === 'content') onNavigateToModule?.('creative-lab', 'create');
     else if (key === 'leads') onNavigateToModule?.('leads', 'lead-automation');
     else if (key === 'social') onNavigateToModule?.('social-hub', 'connect');
-    else if (key === 'schedule') onNavigateToModule?.('social-hub', 'manual-scheduling');
+    else if (key === 'schedule') onNavigateToModule?.('social-hub', 'calendar');
     else if (key === 'launch') onStartCampaign?.();
   };
 

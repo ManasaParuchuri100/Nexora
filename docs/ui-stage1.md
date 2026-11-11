@@ -72,7 +72,7 @@ State is unchanged: `activeCategory` plus `activeSubCategory`. The sidebar is a 
 | Inbox | `inbox` (alias `engage`) | inbox, waiting-human, and the saved filters |
 | Leads | `leads` | all-leads, pipeline, follow-ups |
 | Campaigns | `campaigns` | campaign-list, create, plan |
-| Content | `content` | create, schedule (calendar, queue, write with AI, connected accounts), library |
+| Content | `content` | create, schedule (calendar, write with AI, connected accounts), library |
 | Engagement Agent | `agent` | none |
 | Market Intelligence | `market` | recommendations, competitors, trends, sources |
 | Analytics | `analytics` | overview, leads, channels, activity-log |
