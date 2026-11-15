@@ -23,7 +23,7 @@ import {
 import { StatMetric, Lead, Campaign, TrendingTopic, NavCategory, SubCategory } from '../../types';
 import { useInboxCounts, getTopPricingConversation } from '../../data/conversations';
 import { useFollowUpCounts, useFollowUps, useNow, getUpcomingCalls, formatDue, customCallTitle } from '../../data/followUps';
-import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
+import { FollowUpModals, AnyFollowUpModal, CallChip, NxModal } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
 import DateRangeCalendarModal, { DateRangeSelection } from './DateRangeCalendarModal';
 import { 
@@ -95,6 +95,13 @@ function getDayGroup(timestamp: number): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
+const CAPABILITIES: Array<{ n: string; title: string; body: string; go: [NavCategory, SubCategory] }> = [
+  { n: '01', title: 'Organic discovery', body: 'Keywords, SEO, local visibility and GEO research', go: ['market', 'trends'] },
+  { n: '02', title: 'Paid acquisition', body: 'Ad insights, campaign-quality experiments', go: ['campaigns', 'campaign-list'] },
+  { n: '03', title: 'Owned / outbound', body: 'Website, forms, CRM, messages and referrals', go: ['leads', 'all-leads'] },
+  { n: '04', title: 'Engagement / conversion', body: 'AI responses, qualification, follow-up and handoff', go: ['agent', 'default'] },
+];
+
 export default function OverviewView({
   leads,
   onNavigate,
@@ -118,6 +125,7 @@ export default function OverviewView({
   const [showRecommendation, setShowRecommendation] = useState(true);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
+  const [showSourceInfo, setShowSourceInfo] = useState(false);
   const [customRange, setCustomRange] = useState<DateRangeSelection>(getDefaultCustomRange);
 
   // First name greeting
@@ -454,14 +462,30 @@ export default function OverviewView({
     ['Won', stats.wonLeads],
   ];
 
-  // Lead volume and qualification rate by source
-  const channels: Array<{ brand: ChannelBrand; name: string; share: number; qualified: number }> = [
+  // Where enquiries came from (acquisition source), split so the parts add up to the new leads shown above
+  const ORIGIN_SHARES: Array<[string, number]> = [
+    ['Paid acquisition', 0.46],
+    ['Organic search', 0.24],
+    ['Organic social', 0.12],
+    ['Referral', 0.08],
+    ['Direct / unknown', 0.10],
+  ];
+  const origins = (() => {
+    const raw = ORIGIN_SHARES.map(([, w]) => w * stats.newLeads);
+    const counts = raw.map(Math.floor);
+    let rest = stats.newLeads - counts.reduce((a, b) => a + b, 0);
+    raw.map((r, i) => ({ i, f: r - Math.floor(r) })).sort((a, b) => b.f - a.f).forEach(({ i }) => { if (rest > 0) { counts[i]++; rest--; } });
+    return ORIGIN_SHARES.map(([name], i) => ({ name, count: counts[i] }));
+  })();
+  const maxOrigin = Math.max(1, ...origins.map(o => o.count));
+
+  // Capture method (how the enquiry reached you), shown in the explainer
+  const captureMethods: Array<{ brand: ChannelBrand; name: string; share: number; qualified: number }> = [
     { brand: 'whatsapp', name: 'WhatsApp', share: 48, qualified: 43 },
     { brand: 'instagram', name: 'Instagram', share: 31, qualified: 30 },
-    { brand: 'website', name: 'Website', share: 14, qualified: 22 },
+    { brand: 'website', name: 'Website form', share: 14, qualified: 22 },
     { brand: 'linkedin', name: 'LinkedIn', share: 7, qualified: 45 },
   ];
-  const maxShare = Math.max(...channels.map(c => c.share));
 
   const deltaText = (d: { value: string; trend: 'up' | 'down' }) =>
     `${d.trend === 'up' ? '↑' : '↓'} ${d.value} ${stats.periodText}`;
@@ -496,7 +520,7 @@ export default function OverviewView({
       label: 'Follow-ups due',
       value: followUpCounts.open,
       delta: followUpCounts.overdue > 0 ? `${followUpCounts.overdue} overdue` : 'All on track',
-      tone: '',
+      tone: followUpCounts.overdue > 0 ? 'down' : '',
       onClick: () => onNavigate('leads', 'follow-ups'),
     },
   ];
@@ -673,6 +697,10 @@ export default function OverviewView({
           )}
 
           {/* Metrics */}
+          <div className="mt-2 mb-[-4px]">
+            <h2 className="text-[16px] font-semibold text-ink m-0">Performance</h2>
+            <p className="text-[12px] text-ink-3 mt-1 mb-0">{rangeLabel}, compared with the previous period. Green is up, red needs attention.</p>
+          </div>
           <div className="nx-grid nx-metrics">
             {metricCards.map(m => (
               <button key={m.id} id={m.id} type="button" onClick={m.onClick} className="nx-panel nx-metric min-h-[121px]! rounded-[10px]!">
@@ -712,43 +740,33 @@ export default function OverviewView({
               </div>
             </section>
 
-            <section className="nx-panel nx-pad">
+            <section className="nx-panel nx-pad flex flex-col">
               <div className="nx-sectionhead">
                 <div>
-                  <h2>Channels</h2>
-                  <p>Lead volume and qualification rate by source.</p>
+                  <h2>Where enquiries originated</h2>
+                  <p>Source and capture cannot be counted as separate leads.</p>
                 </div>
               </div>
-              <div className="grid gap-[14px]">
-                {channels.map(c => {
-                  const count = Math.max(1, Math.round((stats.newLeads * c.share) / 100));
-                  return (
-                    <button
-                      key={c.brand}
-                      type="button"
-                      onClick={() => onNavigate('leads', 'all-leads')}
-                      className="nx-channelrow group"
-                    >
-                      <span
-                        className="nx-channel-logo"
-                        style={{ color: BRAND_COLORS[c.brand], backgroundColor: `${BRAND_COLORS[c.brand]}14` }}
-                      >
-                        <ChannelLogo brand={c.brand} className="w-[16px] h-[16px]" />
-                      </span>
-                      <span className="nx-channel-name group-hover:text-brand">{c.name}</span>
-                      <span className="nx-track">
-                        <span
-                          className="block h-full rounded-[10px]"
-                          style={{ width: `${Math.round((c.share / maxShare) * 100)}%`, backgroundColor: BRAND_COLORS[c.brand] }}
-                        />
-                      </span>
-                      <b className="tabular-nums text-right">{count}</b>
-                      <span className={`nx-tag justify-center ${c.qualified >= 40 ? 'green' : c.qualified >= 28 ? 'amber' : ''}`}>
-                        {c.qualified}% qualified
-                      </span>
-                    </button>
-                  );
-                })}
+              <p className="text-[12px] text-ink-3 m-0 mb-3">Acquisition source: for example, a paid ad may result in a website form or a WhatsApp message.</p>
+              <div className="grid gap-[2px]">
+                {origins.map(o => (
+                  <button
+                    key={o.name}
+                    type="button"
+                    onClick={() => onNavigate('leads', 'all-leads')}
+                    className="grid grid-cols-[130px_minmax(0,1fr)_36px] items-center gap-4 py-[7px] bg-transparent border-0 text-left cursor-pointer min-h-0! group"
+                    aria-label={`${o.name}: ${o.count} enquiries`}
+                  >
+                    <span className="text-[14px] text-ink group-hover:text-brand transition-colors truncate">{o.name}</span>
+                    <span className="h-[8px] rounded-full bg-surface-raised overflow-hidden" aria-hidden="true">
+                      <span className="block h-full rounded-full bg-brand" style={{ width: `${Math.max(3, Math.round((o.count / maxOrigin) * 100))}%` }} />
+                    </span>
+                    <b className="tabular-nums text-right text-[14px] text-ink font-semibold">{o.count}</b>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-auto pt-4 border-t border-line mt-4">
+                <button type="button" className="nx-link" onClick={() => setShowSourceInfo(true)}>Source versus capture method →</button>
               </div>
             </section>
           </div>
@@ -831,6 +849,61 @@ export default function OverviewView({
           </div>
           <FollowUpModals modal={fuModal} leads={leads} onClose={() => setFuModal(null)} setModal={setFuModal} onNotify={onNotify} />
         </div>
+      )}
+
+      {/* The four lead engines, as connected capabilities */}
+      <section className="mt-10" aria-labelledby="capabilities-heading">
+        <h2 id="capabilities-heading" className="text-[18px] font-semibold text-ink m-0 mb-4">Four connected capabilities, not four lead databases</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {CAPABILITIES.map(c => (
+            <button
+              key={c.n}
+              type="button"
+              onClick={() => onNavigate(c.go[0], c.go[1])}
+              className="nx-panel p-5 text-left flex flex-col min-h-[170px] hover:border-line-strong transition-colors cursor-pointer"
+            >
+              <span className="text-[11px] font-semibold tracking-[0.12em] uppercase text-ink-3">{c.n} · Capability</span>
+              <span className="text-[16px] font-semibold text-ink mt-3">{c.title}</span>
+              <span className="text-[13px] text-ink-2 leading-[1.55] mt-2">{c.body}</span>
+              <span className="mt-auto pt-4 text-[14px] font-semibold text-brand">Explore →</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {showSourceInfo && (
+        <NxModal
+          title="Source versus capture method"
+          subtitle="Two different questions about the same enquiry. Count each enquiry once."
+          onClose={() => setShowSourceInfo(false)}
+          width={600}
+          footer={<button type="button" className="nx-btn primary" onClick={() => setShowSourceInfo(false)}>Done</button>}
+        >
+          <div className="grid gap-3 sm:grid-cols-2 mb-4">
+            <div className="rounded-[10px] border border-line p-4">
+              <div className="text-[12px] font-semibold text-brand mb-1">Acquisition source</div>
+              <p className="text-[13px] text-ink-2 m-0 leading-[1.55]">Where the person came from: a paid ad, a search result, a social post, a referral.</p>
+            </div>
+            <div className="rounded-[10px] border border-line p-4">
+              <div className="text-[12px] font-semibold text-brand mb-1">Capture method</div>
+              <p className="text-[13px] text-ink-2 m-0 leading-[1.55]">How they reached you: a WhatsApp message, a website form, an Instagram message, a call.</p>
+            </div>
+          </div>
+          <p className="text-[13px] text-ink-2 leading-[1.55] mt-0">One enquiry has one of each. A paid ad (source) can end as a WhatsApp message (capture). If you count both, the same person is counted twice.</p>
+          <div className="eyebrow mb-1">Capture method, this period</div>
+          <div className="border-t border-line">
+            {captureMethods.map(c => (
+              <div key={c.brand} className="flex items-center gap-3 py-2.5 border-b border-line text-[13px]">
+                <span className="nx-channel-logo" style={{ color: BRAND_COLORS[c.brand], backgroundColor: `${BRAND_COLORS[c.brand]}14` }}>
+                  <ChannelLogo brand={c.brand} className="w-[16px] h-[16px]" />
+                </span>
+                <span className="flex-1 text-ink font-medium">{c.name}</span>
+                <span className="text-ink-2 tabular-nums">{Math.max(1, Math.round((stats.newLeads * c.share) / 100))} enquiries</span>
+                <span className="text-ink-3 tabular-nums w-[96px] text-right">{c.qualified}% qualified</span>
+              </div>
+            ))}
+          </div>
+        </NxModal>
       )}
 
       {/* Custom date range popover */}
