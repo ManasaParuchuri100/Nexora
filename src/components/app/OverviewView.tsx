@@ -772,7 +772,7 @@ export default function OverviewView({
           </div>
 
           {/* Upcoming calls (whole team) + next best actions */}
-          <div className="nx-grid nx-two">
+          <div className="nx-grid grid-cols-1 lg:grid-cols-2">
             <section className="nx-panel nx-pad">
               <div className="nx-sectionhead">
                 <div>
