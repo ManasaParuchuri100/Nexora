@@ -798,17 +798,20 @@ export default function LeadsView({
         subtitle={topTab === 'leads' ? "Manage every enquiry through one consistent pipeline." : "Recover conversations without sending unwanted messages."}
         actions={
           <div className="flex items-center gap-3">
-            <SegmentedControl<'leads' | 'follow-ups'>
-              options={[
-                { id: 'leads', label: 'Leads', count: leads.length },
-                { id: 'follow-ups', label: 'Follow-ups', count: followUpCounts.open }
-              ]}
-              value={topTab}
-              onChange={(val) => {
-                setTopTab(val);
-                onNavigateSub(val === 'follow-ups' ? 'follow-ups' : 'all-leads');
-              }}
-            />
+            <div className="flex items-center gap-5 text-[13px]" role="tablist" aria-label="Leads sections">
+              {([['leads', 'Leads', leads.length], ['follow-ups', 'Follow-ups', followUpCounts.open]] as const).map(([id, label, count]) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={topTab === id}
+                  onClick={() => { setTopTab(id); onNavigateSub(id === 'follow-ups' ? 'follow-ups' : 'all-leads'); }}
+                  className={`min-h-0! p-0! bg-transparent! border-0! rounded-none! cursor-pointer ${topTab === id ? 'text-ink font-semibold' : 'text-ink-3 font-medium hover:text-ink'}`}
+                >
+                  {label} <span className="text-ink-3 font-normal tabular-nums ml-0.5">{count}</span>
+                </button>
+              ))}
+            </div>
 
             <Button
               variant="primary"
@@ -868,7 +871,7 @@ export default function LeadsView({
             
             {/* Saved Views as Underline Tabs */}
             <div className="flex items-center gap-3 min-w-0 text-xs">
-            <div className="inline-flex items-center gap-1 p-1 rounded-[10px] bg-surface-raised border border-line-subtle overflow-x-auto scrollbar-none max-w-full">
+            <div className="inline-flex items-center gap-5 overflow-x-auto scrollbar-none max-w-full">
 
               {/* Built-in Views */}
               {[
@@ -909,16 +912,14 @@ export default function LeadsView({
                     key={tab.id}
                     type="button"
                     onClick={() => handleSelectView(tab.id)}
-                    className={`px-3 py-1.5 min-h-0! rounded-[7px]! text-[13px] cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none ${
+                    className={`p-0! py-1! min-h-0! bg-transparent! border-0! rounded-none! border-b-2! text-[13px] cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none ${
                       isActive
-                        ? 'bg-surface text-ink font-semibold shadow-xs'
-                        : 'bg-transparent text-ink-3 font-medium hover:text-ink'
+                        ? 'border-b-brand! text-ink font-semibold'
+                        : 'border-b-transparent! text-ink-3 font-medium hover:text-ink'
                     }`}
                   >
                     <span>{tab.label}</span>
-                    <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
-                      isActive ? 'bg-brand-soft text-brand' : 'bg-surface-raised text-ink-3'
-                    }`}>
+                    <span className="text-xs tabular-nums font-normal text-ink-3">
                       {tab.count}
                     </span>
                   </button>
@@ -968,8 +969,8 @@ export default function LeadsView({
                 return (
                   <div
                     key={sv.id}
-                    className={`group/view flex items-center gap-1 px-3 py-1.5 rounded-[7px] transition-colors ${
-                      isActive ? 'bg-surface text-ink font-semibold shadow-xs' : 'text-ink-3 hover:text-ink'
+                    className={`group/view flex items-center gap-1 py-1 border-b-2 transition-colors ${
+                      isActive ? 'border-brand text-ink font-semibold' : 'border-transparent text-ink-3 hover:text-ink'
                     }`}
                   >
                     <button
@@ -978,9 +979,7 @@ export default function LeadsView({
                       className="text-[13px] font-medium cursor-pointer min-h-0! flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none"
                     >
                       <span>{sv.name}</span>
-                      <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
-                        isActive ? 'bg-brand-soft text-brand' : 'bg-surface-raised text-ink-3'
-                      }`}>
+                      <span className="text-xs tabular-nums font-normal text-ink-3">
                         {count}
                       </span>
                     </button>
@@ -1045,30 +1044,20 @@ export default function LeadsView({
 
             {/* View Switcher: Table / Board SegmentedControl */}
             <div className="shrink-0 self-start sm:self-auto pb-1">
-              <SegmentedControl<'table' | 'board'>
-                options={[
-                  { 
-                    id: 'table', 
-                    label: (
-                      <span className="flex items-center gap-1.5">
-                        <List className="w-3.5 h-3.5" />
-                        Table
-                      </span>
-                    ) 
-                  },
-                  { 
-                    id: 'board', 
-                    label: (
-                      <span className="flex items-center gap-1.5">
-                        <LayoutGrid className="w-3.5 h-3.5" />
-                        Board
-                      </span>
-                    ) 
-                  }
-                ]}
-                value={viewLayout}
-                onChange={setViewLayout}
-              />
+              <div className="flex items-center gap-4 text-[13px]">
+                {([['table', 'Table', List], ['board', 'Board', LayoutGrid]] as const).map(([id, label, Icon]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={viewLayout === id}
+                    onClick={() => setViewLayout(id)}
+                    className={`min-h-0! p-0! bg-transparent! border-0! rounded-none! inline-flex items-center gap-1.5 cursor-pointer ${viewLayout === id ? 'text-brand font-semibold' : 'text-ink-3 font-medium hover:text-ink'}`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1086,7 +1075,7 @@ export default function LeadsView({
                     placeholder="Search leads..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="text-[13px] px-2.5 py-2 pl-9 pr-7 rounded-lg border border-line-subtle bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-brand w-48 sm:w-72 transition-all"
+                    className="text-[13px] px-2.5 py-2 pl-9 pr-7 rounded-none! border-0! border-b! border-b-line-subtle! bg-transparent! text-ink placeholder-ink-3 focus:outline-none focus:border-b-brand! w-48 sm:w-72 transition-all"
                   />
                   <Search className="w-4 h-4 text-ink-3 absolute left-3 top-[11px] pointer-events-none" />
                   {search && (
@@ -1107,16 +1096,16 @@ export default function LeadsView({
                     ref={filterBtnRef}
                     type="button"
                     onClick={() => setIsFilterPopoverOpen(prev => !prev)}
-                    className={`min-h-8! h-8 px-2.5 text-xs font-medium rounded-lg border cursor-pointer inline-flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                    className={`min-h-8! h-8 px-2.5 text-[13px] font-medium rounded-lg border-0! cursor-pointer inline-flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
                       activeFilterCount > 0
-                        ? 'bg-brand-soft text-brand border-brand/30 font-semibold'
-                        : 'bg-surface text-ink border-line hover:bg-surface-hover'
+                        ? 'bg-transparent text-brand font-semibold'
+                        : 'bg-transparent text-ink-2 hover:bg-surface-hover'
                     }`}
                   >
                     <Filter className="w-3.5 h-3.5" />
                     <span>Filter</span>
                     {activeFilterCount > 0 && (
-                      <span className="text-xs tabular-nums px-1.5 py-0.2 rounded-full bg-brand text-on-brand font-bold">
+                      <span className="text-xs tabular-nums font-bold text-brand">
                         {activeFilterCount}
                       </span>
                     )}
@@ -1222,10 +1211,10 @@ export default function LeadsView({
                   type="button"
                   id="leads-custom-date-btn"
                   onClick={() => setIsCalendarModalOpen(prev => !prev)}
-                  className={`min-h-8! h-8 px-2.5 text-xs font-medium rounded-lg border cursor-pointer inline-flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                  className={`min-h-8! h-8 px-2.5 text-[13px] font-medium rounded-lg border-0! cursor-pointer inline-flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
                     isCustomDateActive
-                      ? 'bg-brand-soft text-brand border-brand/30 font-semibold'
-                      : 'bg-surface text-ink border-line hover:bg-surface-hover'
+                      ? 'bg-transparent text-brand font-semibold'
+                      : 'bg-transparent text-ink-2 hover:bg-surface-hover'
                   }`}
                   title="Select start and end date on calendar and sort leads"
                 >
@@ -1254,7 +1243,7 @@ export default function LeadsView({
               <div className="flex items-center gap-3">
                 <Button
                   size="sm"
-                  variant="secondary"
+                  variant="ghost"
                   leadingIcon={<Download className="w-3.5 h-3.5" />}
                   onClick={handleExportCSV}
                   title="Export filtered leads to CSV"
@@ -1460,10 +1449,10 @@ export default function LeadsView({
               Real <table> with sticky header, sortable columns, accessibility
              ======================================================== */}
           {viewLayout === 'table' ? (
-            <div className="border border-line-subtle rounded-xl overflow-hidden bg-surface">
+            <div className="border-t border-line-subtle bg-transparent">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-surface border-b border-line-subtle z-10 text-ink-3 uppercase text-[11px] font-medium tracking-[0.06em]">
+                  <thead className="sticky top-0 bg-canvas border-b border-line-subtle z-10 text-ink-3 uppercase text-[11px] font-medium tracking-[0.06em]">
                     <tr>
                       {/* Selection checkbox header */}
                       <th scope="col" className="px-3 py-3 w-10 text-center">
@@ -1682,9 +1671,10 @@ export default function LeadsView({
 
                             {/* Stage: Badge */}
                             <td className="px-3 py-3">
-                              <Badge tone={tone}>
+                              <span className="inline-flex items-center gap-2 text-[13px] text-ink-2">
+                                <span className={`w-1.5 h-1.5 rounded-full ${{ success: 'bg-ok', danger: 'bg-danger', brand: 'bg-brand', info: 'bg-info', warning: 'bg-warn', neutral: 'bg-ink-3', hot: 'bg-hot' }[tone] || 'bg-ink-3'}`} />
                                 {leadStage}
-                              </Badge>
+                              </span>
                             </td>
 
                             {/* Score & Temperature */}
@@ -1728,10 +1718,8 @@ export default function LeadsView({
                                     ? `Today · ${new Date(nextTask.dueAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
                                     : formatRelative(nextTask.dueAt);
                                   return (
-                                    <span title={nextTask.title}>
-                                      <Badge tone={chipTone}>
-                                        {chipLabel}
-                                      </Badge>
+                                    <span title={nextTask.title} className={`text-[13px] ${chipTone === 'danger' ? 'text-danger font-medium' : chipTone === 'warning' ? 'text-warn font-medium' : 'text-ink-2'}`}>
+                                      {chipLabel}
                                     </span>
                                   );
                                 })()
@@ -1769,8 +1757,7 @@ export default function LeadsView({
                               <div className="flex items-center gap-1.5 min-w-0">
                                 {lead.assignee?.name ? (
                                   <>
-                                    <Avatar name={lead.assignee.name} size="sm" />
-                                    <span className="text-xs font-medium text-ink truncate">
+                                    <span className="text-[13px] text-ink truncate">
                                       {lead.assignee.name}
                                     </span>
                                   </>
@@ -1780,9 +1767,8 @@ export default function LeadsView({
                                   </span>
                                 )}
                                 {lead.handlingMode === 'AI' && (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-surface-raised border border-line-subtle text-ink-3 text-[11px] font-semibold" title="AI handling active">
-                                    <Bot className="w-3 h-3 text-brand" />
-                                    <span>AI</span>
+                                  <span title="AI handling active" aria-label="AI handling active" className="inline-flex text-brand">
+                                    <Bot className="w-3.5 h-3.5" />
                                   </span>
                                 )}
                               </div>
