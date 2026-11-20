@@ -438,7 +438,7 @@ export default function NexoraApp({
               <div className={
                 isInbox
                   ? "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-5 pb-4 lg:pb-5 flex-1 min-h-0 flex flex-col overflow-y-auto"
-                  : "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-8 pb-24"
+                  : "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 lg:pt-6 pb-24"
               }>
             {/* 1. OVERVIEW */}
             {activeCategory === 'overview' && (

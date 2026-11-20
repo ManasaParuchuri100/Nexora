@@ -864,13 +864,11 @@ export default function LeadsView({
         <div className="space-y-4">
           
           {/* Row 2: Saved Views Underline Tabs & Table/Board Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line-subtle pb-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             
             {/* Saved Views as Underline Tabs */}
-            <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto scrollbar-none text-xs">
-              <span className="text-xs font-semibold uppercase tracking-wider text-ink-3">
-                Views:
-              </span>
+            <div className="flex items-center gap-3 min-w-0 text-xs">
+            <div className="inline-flex items-center gap-1 p-1 rounded-[10px] bg-surface-raised border border-line-subtle overflow-x-auto scrollbar-none max-w-full">
 
               {/* Built-in Views */}
               {[
@@ -911,10 +909,10 @@ export default function LeadsView({
                     key={tab.id}
                     type="button"
                     onClick={() => handleSelectView(tab.id)}
-                    className={`pb-2.5 pt-1 text-xs font-medium cursor-pointer transition-colors border-b-2 flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none ${
+                    className={`px-3 py-1.5 min-h-0! rounded-[7px]! text-[13px] cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none ${
                       isActive
-                        ? 'border-brand text-brand font-semibold'
-                        : 'border-transparent text-ink-3 hover:text-ink'
+                        ? 'bg-surface text-ink font-semibold shadow-xs'
+                        : 'bg-transparent text-ink-3 font-medium hover:text-ink'
                     }`}
                   >
                     <span>{tab.label}</span>
@@ -970,14 +968,14 @@ export default function LeadsView({
                 return (
                   <div
                     key={sv.id}
-                    className={`group/view flex items-center gap-1 pb-2.5 pt-1 border-b-2 transition-colors ${
-                      isActive ? 'border-brand text-brand font-semibold' : 'border-transparent text-ink-3 hover:text-ink'
+                    className={`group/view flex items-center gap-1 px-3 py-1.5 rounded-[7px] transition-colors ${
+                      isActive ? 'bg-surface text-ink font-semibold shadow-xs' : 'text-ink-3 hover:text-ink'
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() => handleSelectView(sv.name)}
-                      className="text-xs font-medium cursor-pointer flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none"
+                      className="text-[13px] font-medium cursor-pointer min-h-0! flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none"
                     >
                       <span>{sv.name}</span>
                       <span className={`text-xs tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
@@ -992,7 +990,7 @@ export default function LeadsView({
                         setEditingViewId(sv.id);
                         setEditingViewName(sv.name);
                       }}
-                      className="opacity-0 group-hover/view:opacity-100 p-0.5 hover:text-ink cursor-pointer text-ink-3 transition-opacity"
+                      className="opacity-0 group-hover/view:opacity-100 min-h-0! p-0.5 hover:text-ink cursor-pointer text-ink-3 transition-opacity"
                       title="Rename view"
                       aria-label={`Rename ${sv.name} view`}
                     >
@@ -1001,7 +999,7 @@ export default function LeadsView({
                     <button
                       type="button"
                       onClick={() => handleDeleteSavedView(sv.id, sv.name)}
-                      className="opacity-0 group-hover/view:opacity-100 p-0.5 hover:text-danger cursor-pointer text-ink-3 transition-opacity"
+                      className="opacity-0 group-hover/view:opacity-100 min-h-0! p-0.5 hover:text-danger cursor-pointer text-ink-3 transition-opacity"
                       title="Delete view"
                       aria-label={`Delete ${sv.name} view`}
                     >
@@ -1011,9 +1009,10 @@ export default function LeadsView({
                 );
               })}
 
+            </div>
               {/* "+ Save view" / inline input */}
               {isAddingView ? (
-                <div className="flex items-center gap-1.5 pb-2">
+                <div className="flex items-center gap-1.5 px-1">
                   <input
                     type="text"
                     value={newViewName}
@@ -1037,7 +1036,7 @@ export default function LeadsView({
                 <button
                   type="button"
                   onClick={() => setIsAddingView(true)}
-                  className="text-xs text-brand hover:underline font-medium pb-2.5 pt-1 cursor-pointer whitespace-nowrap"
+                  className="text-[13px] text-brand hover:underline font-medium px-2 py-1.5 min-h-0! cursor-pointer whitespace-nowrap"
                 >
                   + Save view
                 </button>
@@ -1075,7 +1074,7 @@ export default function LeadsView({
 
           {/* Row 3: Filter Bar (Search, Filter Popover, Custom Date, Active Chips, Export CSV) */}
           <div className="space-y-2.5">
-            <div className="flex flex-wrap items-center justify-between gap-2.5 p-2.5 rounded-xl border border-line-subtle bg-surface shadow-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
               
               <div className="flex flex-wrap items-center gap-2 relative">
                 
@@ -1087,9 +1086,9 @@ export default function LeadsView({
                     placeholder="Search leads..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="text-xs px-2.5 py-1.5 pl-8 pr-7 rounded-lg border border-line bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-brand w-48 sm:w-60 transition-all"
+                    className="text-[13px] px-2.5 py-2 pl-9 pr-7 rounded-lg border border-line-subtle bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-brand w-48 sm:w-72 transition-all"
                   />
-                  <Search className="w-3.5 h-3.5 text-ink-3 absolute left-2.5 top-2.5 pointer-events-none" />
+                  <Search className="w-4 h-4 text-ink-3 absolute left-3 top-[11px] pointer-events-none" />
                   {search && (
                     <button
                       type="button"
@@ -1461,10 +1460,10 @@ export default function LeadsView({
               Real <table> with sticky header, sortable columns, accessibility
              ======================================================== */}
           {viewLayout === 'table' ? (
-            <div className="border border-line rounded-xl overflow-hidden bg-surface shadow-card">
+            <div className="border border-line-subtle rounded-xl overflow-hidden bg-surface">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="sticky top-0 bg-surface-raised border-b border-line z-10 text-ink-3 uppercase text-xs font-semibold tracking-wider">
+                  <thead className="sticky top-0 bg-surface border-b border-line-subtle z-10 text-ink-3 uppercase text-[11px] font-medium tracking-[0.06em]">
                     <tr>
                       {/* Selection checkbox header */}
                       <th scope="col" className="px-3 py-3 w-10 text-center">
@@ -1487,7 +1486,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('lead')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Lead</span>
                           {renderSortIcon('lead')}
@@ -1499,7 +1498,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('stage')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Stage</span>
                           {renderSortIcon('stage')}
@@ -1511,7 +1510,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('score')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Score</span>
                           {renderSortIcon('score')}
@@ -1523,7 +1522,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('followup')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Follow-up</span>
                           {renderSortIcon('followup')}
@@ -1535,7 +1534,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('value')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Value</span>
                           {renderSortIcon('value')}
@@ -1547,7 +1546,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('owner')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Owner</span>
                           {renderSortIcon('owner')}
@@ -1559,7 +1558,7 @@ export default function LeadsView({
                         <button
                           type="button"
                           onClick={() => handleSort('activity')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-semibold uppercase text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
                           <span>Activity</span>
                           {renderSortIcon('activity')}
@@ -1665,7 +1664,7 @@ export default function LeadsView({
                               <div className="flex items-center gap-3">
                                 <Avatar name={lead.company || lead.name} size="md" />
                                 <div className="min-w-0">
-                                  <p className="font-bold text-ink truncate text-[14px] leading-tight m-0">
+                                  <p className="font-semibold text-ink truncate text-[14px] leading-tight m-0">
                                     {lead.company || lead.name}
                                   </p>
                                   {hasSeparateContactName ? (
@@ -1691,12 +1690,13 @@ export default function LeadsView({
                             {/* Score & Temperature */}
                             <td className="px-3 py-3">
                               <div className="flex items-center gap-2">
-                                <Badge 
-                                  tone={leadTemp === 'HOT' ? 'hot' : leadTemp === 'WARM' ? 'warning' : 'neutral'}
-                                  className="font-mono font-bold"
-                                >
-                                  {lead.score}
-                                </Badge>
+                                <span className="w-6 font-semibold tabular-nums text-ink text-[13px]">{lead.score}</span>
+                                <span className="w-12 h-1.5 rounded-full bg-surface-raised overflow-hidden shrink-0" aria-hidden="true">
+                                  <span
+                                    className={`block h-full rounded-full ${leadTemp === 'HOT' ? 'bg-hot' : leadTemp === 'WARM' ? 'bg-warn' : 'bg-ink-3'}`}
+                                    style={{ width: `${Math.max(4, Math.min(100, lead.score))}%` }}
+                                  />
+                                </span>
                                 {leadTemp === 'HOT' && (
                                   <span className="inline-flex items-center gap-1 text-hot font-medium text-xs">
                                     <Flame className="w-3.5 h-3.5" />
