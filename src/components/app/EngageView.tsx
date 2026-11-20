@@ -28,7 +28,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Lead, SubCategory } from '../../types';
-import { ConversationItem, useConversations } from '../../data/conversations';
+import { ConversationItem, useConversations, handlerOf } from '../../data/conversations';
 import { useFollowUps, getBucket, formatDue, customCallTitle } from '../../data/followUps';
 import { FollowUpModals, AnyFollowUpModal, CallChip } from './followups/FollowUpKit';
 import { BRAND_NAME } from '../../config/brand';
@@ -247,37 +247,41 @@ export default function EngageView({
     if (!trimmed && attachedFiles.length === 0) return;
 
     const textToSend = trimmed || (attachedFiles.length > 0 ? `Sent attachment: ${attachedFiles.map(f => f.name).join(', ')}` : '');
+    const isNote = composerMode === 'note';
 
     setConversations((prev) =>
       prev.map((c) => {
-        if (c.id === currentConvo?.id) {
-          return {
-            ...c,
-            status: 'waiting_on_customer',
-            waitingForHuman: false,
-            askedForPricing: false,
-            snippet: textToSend,
-            unread: false,
-            messages: [
-              ...c.messages,
-              {
-                id: `m-${Date.now()}`,
-                sender: 'agent',
-                senderName: 'You',
-                text: textToSend,
-                time: 'Just now'
-              }
-            ]
-          };
-        }
-        return c;
+        if (c.id !== currentConvo?.id) return c;
+        const message = {
+          id: `m-${Date.now()}`,
+          sender: 'agent' as const,
+          senderName: 'You',
+          text: textToSend,
+          time: 'Just now',
+          ...(isNote ? { note: true } : {})
+        };
+        // An internal note never reaches the customer and never changes who is in control.
+        if (isNote) return { ...c, messages: [...c.messages, message] };
+        // A real reply means a person is now talking: AI pauses until it is handed back.
+        return {
+          ...c,
+          status: 'waiting_on_customer',
+          humanControl: true,
+          waitingForHuman: false,
+          askedForPricing: false,
+          snippet: textToSend,
+          unread: false,
+          messages: [...c.messages, message]
+        };
       })
     );
 
     setReplyInput('');
     setAttachedFiles([]);
     if (onNotify) {
-      onNotify('Reply Dispatched', `Message sent to ${currentConvo?.name || 'customer'}.`);
+      if (isNote) onNotify('Note saved', 'Internal note added. The customer cannot see it.');
+      else if (currentConvo && handlerOf(currentConvo) !== 'human') onNotify('Reply sent', `AI is now paused on this conversation. Use "Hand back to AI" when you are done.`);
+      else onNotify('Reply sent', `Message sent to ${currentConvo?.name || 'customer'}.`);
     }
   };
 
@@ -311,19 +315,30 @@ export default function EngageView({
 
   // Actions
   const handleTakeover = () => {
-    setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, aiAlert: undefined } : c));
-    if (onNotify) onNotify('Human Takeover', 'AI paused. You now have full manual control.');
+    setConversations(prev => prev.map(c => {
+      if (c.id !== currentConvo?.id) return c;
+      const last = c.messages.filter(m => !m.note).slice(-1)[0];
+      return {
+        ...c,
+        humanControl: true,
+        assignedTo: 'You',
+        // If the customer spoke last you still owe a reply; otherwise you are waiting on them.
+        status: last?.sender === 'customer' ? 'needs_you' : 'waiting_on_customer'
+      };
+    }));
+    if (onNotify) onNotify('You are in control', 'AI is paused on this conversation. Reply below, or hand it back to AI when you are done.');
   };
 
   const handleResumeAI = () => {
     setConversations(prev => prev.map(c => c.id === currentConvo?.id ? {
       ...c,
       status: 'ai_handling',
+      humanControl: false,
       aiAlert: undefined,
       waitingForHuman: false,
       askedForPricing: false
     } : c));
-    if (onNotify) onNotify('AI Resumed', `${BRAND_NAME} autonomous AI resumed handling.`);
+    if (onNotify) onNotify('Handed back to AI', `${BRAND_NAME} AI is replying to this customer again.`);
   };
 
   const handleMarkResolved = () => {
@@ -339,7 +354,7 @@ export default function EngageView({
   const handleAssign = (member: string) => {
     setConversations(prev => prev.map(c => c.id === currentConvo?.id ? { ...c, assignedTo: member } : c));
     setShowAssignMenu(false);
-    if (onNotify) onNotify('Assigned', `Conversation assigned to ${member}.`);
+    if (onNotify) onNotify('Assigned', `Assigned to ${member}. Assigning does not change who replies: AI stays as it is until someone takes over.`);
   };
 
   const handleSnooze = (period: string) => {
@@ -651,11 +666,8 @@ export default function EngageView({
               const isSelected = convo.id === currentConvo?.id;
               const ChannelIcon = getChannelIcon(convo.channel);
               const lastMsg = convo.messages[convo.messages.length - 1];
-              const tagLabel = convo.status === 'ai_handling' || lastMsg?.sender === 'ai' 
-                ? 'AI' 
-                : convo.status === 'waiting_on_customer' || lastMsg?.sender === 'agent'
-                ? 'You'
-                : null;
+              const handler = handlerOf(convo);
+              const tagLabel = handler === 'ai' ? 'AI' : handler === 'human' ? 'You' : handler === 'paused' ? 'AI paused' : null;
 
               const statusTitle = convo.status === 'needs_you' 
                 ? 'Needs human attention' 
@@ -737,7 +749,7 @@ export default function EngageView({
                       </Badge>
                     )}
                     {tagLabel && (
-                      <Badge tone={tagLabel === 'AI' ? 'info' : 'neutral'} size="sm">
+                      <Badge tone={tagLabel === 'AI' ? 'info' : tagLabel === 'AI paused' ? 'warning' : 'neutral'} size="sm">
                         {tagLabel}
                       </Badge>
                     )}
@@ -930,26 +942,48 @@ export default function EngageView({
               </div>
             </div>
 
-            {/* AI Paused Banner: Calm info style with Sparkles */}
-            {currentConvo.aiAlert?.isPaused && currentConvo.status === 'needs_you' && (
-              <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0">
-                <b>Human requested · AI paused</b>
-                <div className="mt-1">
-                  {currentConvo.aiAlert.reason || 'The customer needs a person before this thread can continue.'}
-                </div>
-                <div className="flex items-center gap-2 mt-[9px] flex-wrap">
-                  <Button variant="primary" size="sm" onClick={handleTakeover}>
-                    Take over
-                  </Button>
-                  <Button variant="secondary" size="sm" onClick={() => setShowAssignMenu(true)}>
-                    Assign
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleResumeAI}>
-                    Let AI continue
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* Who is replying: one banner, three clear states */}
+            {(() => {
+              const handler = handlerOf(currentConvo);
+              if (handler === 'paused') {
+                return (
+                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0">
+                    <b>AI paused · a person is needed</b>
+                    <div className="mt-1">
+                      {currentConvo.aiAlert?.reason || 'The customer needs a person before this thread can continue.'} Nobody is replying yet. Assigned to {currentConvo.assignedTo}.
+                    </div>
+                    <div className="flex items-center gap-2 mt-[9px] flex-wrap">
+                      <Button variant="primary" size="sm" onClick={handleTakeover}>
+                        Take over
+                      </Button>
+                      <Button variant="secondary" size="sm" onClick={() => setShowAssignMenu(true)}>
+                        Assign
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleResumeAI}>
+                        Let AI continue
+                      </Button>
+                    </div>
+                  </div>
+                );
+              }
+              if (handler === 'ai') {
+                return (
+                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                    <div><b>AI is replying</b> to this customer automatically. Sending a reply or taking over pauses it.</div>
+                    <Button variant="secondary" size="sm" onClick={handleTakeover}>Take over</Button>
+                  </div>
+                );
+              }
+              if (handler === 'human') {
+                return (
+                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                    <div><b>You are in control</b> · AI is paused here and will not reply until you hand it back.</div>
+                    <Button variant="secondary" size="sm" onClick={handleResumeAI}>Hand back to AI</Button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             {/* Messages Stream */}
             <div className="flex-1 overflow-y-auto px-[28px] py-[26px] space-y-[22px] nx-messages">
@@ -986,7 +1020,8 @@ export default function EngageView({
                       )}
 
                       <div className={`space-y-1 max-w-[80%] ${isAgent ? 'items-end' : 'items-start'}`}>
-                        <div className={`nx-bubble ${isAgent || isAI ? 'mine' : ''}`}>
+                        <div className={`nx-bubble ${isAgent || isAI ? 'mine' : ''} ${m.note ? 'border border-dashed border-warn/60 bg-warn/10! text-ink!' : ''}`}>
+                          {m.note && <b className="block text-[11px] uppercase tracking-wider text-warn mb-1">Internal note · not sent</b>}
                           <p className="whitespace-pre-wrap m-0 leading-[1.6]">{m.text}</p>
                           <small>
                             {isAI ? `✧ ${BRAND_NAME} AI` : m.senderName} · {m.time}
@@ -994,7 +1029,7 @@ export default function EngageView({
                         </div>
 
                         {/* Delivery ticks on your messages */}
-                        {isAgent && (
+                        {isAgent && !m.note && (
                           <div className="flex items-center justify-end gap-1 px-1 text-xs text-ink-3">
                             <span>Delivered</span>
                             <CheckCheck className="w-3.5 h-3.5 text-brand" />
@@ -1123,7 +1158,7 @@ export default function EngageView({
                     </button>
 
                     <span className="text-xs text-ink-3 hidden sm:inline">
-                      {composerMode === 'reply' ? `Replying via ${currentConvo.channel}` : 'Internal team note'}
+                      {composerMode === 'note' ? 'Internal note · customer cannot see it' : handlerOf(currentConvo) === 'human' ? `Replying via ${currentConvo.channel}` : `Replying via ${currentConvo.channel} · pauses AI`}
                     </span>
                   </div>
 

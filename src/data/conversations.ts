@@ -34,6 +34,8 @@ export interface ConversationItem {
     senderName: string;
     text: string;
     time: string;
+    /** Internal team note: never sent to the customer. */
+    note?: boolean;
   }>;
   assignedTo: string;
   leadReferenceId?: string;
@@ -44,6 +46,18 @@ export interface ConversationItem {
   askedForPricing?: boolean;
   readyToBookCall?: boolean;
   waitingForHuman?: boolean;
+  /** True once a person has taken over: the AI stays paused until it is handed back. */
+  humanControl?: boolean;
+}
+
+/** Who is replying to this customer right now. */
+export type ThreadHandler = 'ai' | 'human' | 'paused' | 'closed';
+export function handlerOf(c: ConversationItem): ThreadHandler {
+  if (c.status === 'closed') return 'closed';
+  if (c.humanControl) return 'human';
+  if (c.status === 'needs_you' || c.aiAlert?.isPaused) return 'paused';
+  if (c.status === 'ai_handling') return 'ai';
+  return 'human';
 }
 
 export function createInitialConversations(): ConversationItem[] {
