@@ -131,6 +131,7 @@ export default function EngageView({
   const [replyInput, setReplyInput] = useState('');
   const [composerMode, setComposerMode] = useState<'reply' | 'note'>('reply');
   // The composer can fold down to one line so short screens keep room for the conversation.
+  const [bannerOpen, setBannerOpen] = useState(() => typeof window === 'undefined' || window.innerHeight >= 760);
   const [composerOpen, setComposerOpen] = useState(() => typeof window === 'undefined' || window.innerHeight >= 760);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: string }>>([]);
 
@@ -951,21 +952,44 @@ export default function EngageView({
               if (handler === 'paused') {
                 return (
                   <div className="nx-handoff px-5 py-2 text-[12px] animate-fadeIn shrink-0">
-                    <b>AI paused · a person is needed</b>
-                    <div className="mt-1">
-                      {currentConvo.aiAlert?.reason || 'The customer needs a person before this thread can continue.'} Nobody is replying yet. Assigned to {currentConvo.assignedTo}.
+                    <div className="flex items-center justify-between gap-3">
+                      <b>AI paused · a person is needed</b>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {!bannerOpen && (
+                          <Button variant="primary" size="sm" onClick={handleTakeover}>
+                            Take over
+                          </Button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setBannerOpen(o => !o)}
+                          aria-expanded={bannerOpen}
+                          aria-label={bannerOpen ? 'Collapse details' : 'Expand details'}
+                          title={bannerOpen ? 'Collapse' : 'Expand'}
+                          className="min-h-0! p-1 rounded-lg text-ink-3 hover:text-ink cursor-pointer"
+                        >
+                          {bannerOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                      <Button variant="primary" size="sm" onClick={handleTakeover}>
-                        Take over
-                      </Button>
-                      <Button variant="secondary" size="sm" onClick={() => setShowAssignMenu(true)}>
-                        Assign
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={handleResumeAI}>
-                        Let AI continue
-                      </Button>
-                    </div>
+                    {bannerOpen && (
+                      <>
+                        <div className="mt-1">
+                          {currentConvo.aiAlert?.reason || 'The customer needs a person before this thread can continue.'} Nobody is replying yet. Assigned to {currentConvo.assignedTo}.
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <Button variant="primary" size="sm" onClick={handleTakeover}>
+                            Take over
+                          </Button>
+                          <Button variant="secondary" size="sm" onClick={() => setShowAssignMenu(true)}>
+                            Assign
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={handleResumeAI}>
+                            Let AI continue
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 );
               }
