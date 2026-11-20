@@ -6,7 +6,8 @@ import {
   AlertTriangle, 
   Bot, 
   UserCheck, 
-  ChevronDown, 
+  ChevronDown,
+  ChevronUp,
   ChevronLeft,
   Check, 
   CheckCheck,
@@ -129,6 +130,8 @@ export default function EngageView({
   // Composer states
   const [replyInput, setReplyInput] = useState('');
   const [composerMode, setComposerMode] = useState<'reply' | 'note'>('reply');
+  // The composer can fold down to one line so short screens keep room for the conversation.
+  const [composerOpen, setComposerOpen] = useState(() => typeof window === 'undefined' || window.innerHeight >= 760);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ name: string; size: string }>>([]);
 
   // Menus
@@ -1050,7 +1053,20 @@ export default function EngageView({
 
             {/* Composer */}
             <div className="px-4 py-3 border-t border-line-subtle bg-surface space-y-2 shrink-0">
-              
+              {!composerOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(true)}
+                  aria-expanded={false}
+                  className="w-full min-h-0! flex items-center justify-between gap-3 rounded-xl border border-line bg-surface hover:bg-surface-hover px-3 py-2.5 text-left cursor-pointer text-[13px] text-ink-3"
+                >
+                  <span className="truncate">
+                    {replyInput.trim() ? `Draft: ${replyInput.trim()}` : `Reply to ${currentConvo.name}…`}
+                  </span>
+                  <ChevronUp className="w-4 h-4 shrink-0" />
+                </button>
+              ) : (
+              <>
               {/* Context-Aware Suggestion Chips Toolbar */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
                 <span className="text-[12px] text-ink-3 shrink-0 font-bold">
@@ -1083,6 +1099,16 @@ export default function EngageView({
                 >
                   <Sparkles className="w-3.5 h-3.5 text-brand" />
                   <span>Proposal Overview</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setComposerOpen(false)}
+                  aria-label="Collapse composer"
+                  title="Collapse composer"
+                  className="ml-auto min-h-0! p-1.5 rounded-lg text-ink-3 hover:text-ink hover:bg-surface-hover cursor-pointer shrink-0"
+                >
+                  <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1173,7 +1199,8 @@ export default function EngageView({
                   </Button>
                 </div>
               </div>
-
+              </>
+              )}
             </div>
           </>
         ) : (
