@@ -1665,23 +1665,13 @@ export default function LeadsView({
                             {/* Score & Temperature */}
                             <td className="px-6 py-[18px]">
                               <div className="flex items-center gap-2">
-                                <span className="w-6 font-semibold tabular-nums text-ink text-[13px]">{lead.score}</span>
-                                {leadTemp === 'HOT' && (
-                                  <span className="inline-flex items-center gap-1 text-hot font-medium text-xs">
-                                    <Flame className="w-3.5 h-3.5" />
-                                    <span>Hot</span>
-                                  </span>
-                                )}
-                                {leadTemp === 'WARM' && (
-                                  <span className="inline-flex items-center gap-1 text-warn font-medium text-xs">
-                                    <span>Warm</span>
-                                  </span>
-                                )}
-                                {leadTemp === 'COLD' && (
-                                  <span className="text-ink-3 text-xs">
-                                    Cold
-                                  </span>
-                                )}
+                                <span
+                                  className={`font-semibold tabular-nums text-[14px] ${leadTemp === 'HOT' ? 'text-hot' : leadTemp === 'WARM' ? 'text-warn' : 'text-ink-3'}`}
+                                  title={`${leadTemp === 'HOT' ? 'Hot' : leadTemp === 'WARM' ? 'Warm' : 'Cold'} lead`}
+                                  aria-label={`Score ${lead.score}, ${leadTemp === 'HOT' ? 'hot' : leadTemp === 'WARM' ? 'warm' : 'cold'}`}
+                                >
+                                  {lead.score}
+                                </span>
                               </div>
                             </td>
 
