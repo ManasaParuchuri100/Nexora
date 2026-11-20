@@ -1449,13 +1449,13 @@ export default function LeadsView({
               Real <table> with sticky header, sortable columns, accessibility
              ======================================================== */}
           {viewLayout === 'table' ? (
-            <div className="border-t border-line-subtle bg-transparent">
+            <div className="border-t border-line-subtle bg-transparent -mx-3">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className="sticky top-0 bg-canvas border-b border-line-subtle z-10 text-ink-3 uppercase text-[11px] font-medium tracking-[0.06em]">
                     <tr>
                       {/* Selection checkbox header */}
-                      <th scope="col" className="px-6 py-[18px] w-10 text-center">
+                      <th scope="col" className="py-[18px] pl-3 pr-2 w-10 text-left">
                         <button
                           type="button"
                           onClick={toggleSelectAllPage}
@@ -1533,7 +1533,7 @@ export default function LeadsView({
                       </th>
 
                       {/* Deal value (Right-aligned) */}
-                      <th scope="col" aria-sort={getAriaSort('value')} className="px-6 py-[18px] text-right">
+                      <th scope="col" aria-sort={getAriaSort('value')} className="py-[18px] pl-6 pr-3 text-right">
                         <button
                           type="button"
                           onClick={() => handleSort('value')}
@@ -1543,7 +1543,6 @@ export default function LeadsView({
                           {renderSortIcon('value')}
                         </button>
                       </th>
-                      <th scope="col" className="w-[72px]"><span className="sr-only">Actions</span></th>
 
                       
 
@@ -1555,7 +1554,7 @@ export default function LeadsView({
                     {isLoading ? (
                       Array.from({ length: 6 }).map((_, idx) => (
                         <tr key={`skel-${idx}`} className="animate-pulse">
-                          <td className="px-6 py-[18px] text-center"><div className="w-4 h-4 bg-surface-raised rounded mx-auto" /></td>
+                          <td className="py-[18px] pl-3 pr-2 text-left"><div className="w-4 h-4 bg-surface-raised rounded mx-auto" /></td>
                           <td className="px-6 py-[18px]"><div className="h-4 w-32 bg-surface-raised rounded mb-1" /><div className="h-3 w-20 bg-surface-raised rounded" /></td>
                           <td className="px-6 py-[18px]"><div className="h-5 w-16 bg-surface-raised rounded-full" /></td>
                           <td className="px-6 py-[18px]"><div className="h-5 w-16 bg-surface-raised rounded" /></td>
@@ -1566,7 +1565,7 @@ export default function LeadsView({
                       ))
                     ) : paginatedLeads.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-ink-3">
+                        <td colSpan={6} className="p-8 text-center text-ink-3">
                           {leads.length === 0 ? (
                             <EmptyState
                               icon={<Users className="w-6 h-6 text-brand" />}
@@ -1618,7 +1617,7 @@ export default function LeadsView({
                             }`}
                           >
                             {/* Checkbox */}
-                            <td className="px-6 py-[18px] text-center">
+                            <td className="py-[18px] pl-3 pr-2 text-left">
                               <button
                                 type="button"
                                 aria-label={`Select ${lead.name || lead.company}`}
@@ -1634,7 +1633,7 @@ export default function LeadsView({
                             </td>
 
                             {/* Lead: Avatar + Company, Name below (No contact name fallback) */}
-                            <td className="px-6 py-[18px] min-w-[260px]">
+                            <td className="px-6 py-[18px] min-w-[260px] relative">
                               <div className="flex items-center gap-3">
                                 <Avatar name={lead.company || lead.name} size="md" />
                                 <div className="min-w-0">
@@ -1651,6 +1650,42 @@ export default function LeadsView({
                                     </p>
                                   )}
                                 </div>
+                              </div>
+                            
+                              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (onNavigateInbox) onNavigateInbox(lead);
+                                    else onNavigateSub('inbox');
+                                  }}
+                                  className="text-xs text-ink-2 hover:text-brand font-medium inline-flex items-center gap-1 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none"
+                                  title="Reply in Inbox"
+                                >
+                                  <MessageCircle className="w-4 h-4" />
+                                  <span className="sr-only">Reply</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    addFollowUp({
+                                      leadId: lead.id,
+                                      title: `Follow up with ${lead.name || lead.company}`,
+                                      kind: 'task',
+                                      owner: lead.assignee?.name || 'You',
+                                      dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                                      source: 'manual'
+                                    });
+                                    if (onNotify) onNotify('Follow-up Added', `Scheduled follow-up for ${lead.company || lead.name}.`);
+                                  }}
+                                  className="text-xs text-ink-2 hover:text-brand font-medium inline-flex items-center gap-1 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none"
+                                  title="Add follow-up task"
+                                >
+                                  <Clock className="w-4 h-4" />
+                                  <span className="sr-only">Follow-up</span>
+                                </button>
                               </div>
                             </td>
 
@@ -1742,47 +1777,11 @@ export default function LeadsView({
                             </td>
 
                             {/* Deal Value: Right-aligned formatINR */}
-                            <td className="px-6 py-[18px] text-right font-medium text-ink tabular-nums">
+                            <td className="py-[18px] pl-6 pr-3 text-right font-medium text-ink tabular-nums">
                               {lead.amount ? formatINR(lead.amount) : (lead.value || '—')}
                             </td>
 
-                            <td className="px-6 py-[18px] text-right">
-                              <div className="flex items-center justify-end gap-3 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (onNavigateInbox) onNavigateInbox(lead);
-                                    else onNavigateSub('inbox');
-                                  }}
-                                  className="text-xs text-ink-2 hover:text-brand font-medium inline-flex items-center gap-1 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none"
-                                  title="Reply in Inbox"
-                                >
-                                  <MessageCircle className="w-4 h-4" />
-                                  <span className="sr-only">Reply</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    addFollowUp({
-                                      leadId: lead.id,
-                                      title: `Follow up with ${lead.name || lead.company}`,
-                                      kind: 'task',
-                                      owner: lead.assignee?.name || 'You',
-                                      dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-                                      source: 'manual'
-                                    });
-                                    if (onNotify) onNotify('Follow-up Added', `Scheduled follow-up for ${lead.company || lead.name}.`);
-                                  }}
-                                  className="text-xs text-ink-2 hover:text-brand font-medium inline-flex items-center gap-1 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none"
-                                  title="Add follow-up task"
-                                >
-                                  <Clock className="w-4 h-4" />
-                                  <span className="sr-only">Follow-up</span>
-                                </button>
-                              </div>
-                            </td>
+                            
 
                             
                           </tr>
