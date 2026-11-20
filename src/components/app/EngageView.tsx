@@ -124,7 +124,7 @@ export default function EngageView({
 
   // Selected conversation
   const [selectedConvoId, setSelectedConvoId] = useState<string>('convo-rahul');
-  const [showLeadPanel, setShowLeadPanel] = useState(true);
+  const [showLeadPanel, setShowLeadPanel] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1536);
 
   // Composer states
   const [replyInput, setReplyInput] = useState('');
@@ -483,18 +483,18 @@ export default function EngageView({
     specialFilter === 'ready-to-book' ? 'Ready to book a call' : '';
 
   return (
-    <div className="flex-1 min-h-[560px] flex flex-row gap-[16px] text-ink select-text">
+    <div className="flex-1 min-h-[560px] flex flex-row gap-[16px] text-ink select-text relative">
       
       {/* =========================================================================
           PANEL 1: CONVERSATION LIST (LEFT)
           ========================================================================= */}
-      <div className={`nx-panel w-full md:w-[288px] shrink-0 overflow-hidden flex flex-col h-full ${
+      <div className={`nx-panel w-full md:w-[296px] xl:w-[316px] shrink-0 overflow-hidden flex flex-col h-full ${
         mobileView === 'list' ? 'flex' : 'hidden md:flex'
       }`}>
         
         {/* Top Header: Tabs */}
         <div className="p-[18px] border-b border-line space-y-3">
-          <div className="flex items-center gap-[5px] flex-wrap">
+          <div className="flex items-center gap-0 flex-nowrap -mx-1">
             {[
               { id: 'needs_you', label: 'Needs you', count: tabCounts.needs_you },
               { id: 'all', label: 'All', count: tabCounts.all },
@@ -508,7 +508,7 @@ export default function EngageView({
                   setActiveTab(tab.id as InboxFilterTab);
                   setSpecialFilter('all');
                 }}
-                className={`min-h-0! rounded-[6px]! py-2 px-3 flex items-center gap-1.5 transition-colors cursor-pointer text-[14px] font-bold focus-visible:outline-none ${
+                className={`min-h-0! rounded-[6px]! py-2 px-2 flex items-center gap-1 transition-colors cursor-pointer text-[13px] font-bold focus-visible:outline-none ${
                   activeTab === tab.id && specialFilter === 'all'
                     ? 'bg-brand-soft text-brand'
                     : 'bg-transparent text-ink-3 hover:text-ink'
@@ -1155,8 +1155,8 @@ export default function EngageView({
           PANEL 3: PROSPECT DETAILS (RIGHT)
           ========================================================================= */}
       {showLeadPanel && currentConvo && (
-        <div className={`nx-panel w-full md:w-[288px] shrink-0 flex flex-col h-full overflow-y-auto ${
-          mobileView === 'details' ? 'flex' : 'hidden lg:flex'
+        <div className={`nx-panel w-full md:w-[300px] shrink-0 flex flex-col h-full overflow-y-auto md:max-2xl:absolute md:max-2xl:right-0 md:max-2xl:top-0 md:max-2xl:z-20 md:max-2xl:shadow-pop ${
+          mobileView === 'details' ? 'flex' : 'hidden md:flex'
         }`}>
           
           {/* Header */}
