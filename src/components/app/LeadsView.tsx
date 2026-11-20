@@ -1455,7 +1455,7 @@ export default function LeadsView({
                   <thead className="sticky top-0 bg-canvas border-b border-line-subtle z-10 text-ink-3 uppercase text-[11px] font-medium tracking-[0.06em]">
                     <tr>
                       {/* Selection checkbox header */}
-                      <th scope="col" className="px-[18px] py-3.5 w-10 text-center">
+                      <th scope="col" className="px-6 py-[18px] w-10 text-center">
                         <button
                           type="button"
                           onClick={toggleSelectAllPage}
@@ -1471,7 +1471,7 @@ export default function LeadsView({
                       </th>
 
                       {/* Lead (Avatar + company, name below) */}
-                      <th scope="col" aria-sort={getAriaSort('lead')} className="px-[18px] py-3.5">
+                      <th scope="col" aria-sort={getAriaSort('lead')} className="px-6 py-[18px]">
                         <button
                           type="button"
                           onClick={() => handleSort('lead')}
@@ -1483,7 +1483,7 @@ export default function LeadsView({
                       </th>
 
                       {/* Stage (Badge) */}
-                      <th scope="col" aria-sort={getAriaSort('stage')} className="px-[18px] py-3.5">
+                      <th scope="col" aria-sort={getAriaSort('stage')} className="px-6 py-[18px]">
                         <button
                           type="button"
                           onClick={() => handleSort('stage')}
@@ -1495,7 +1495,7 @@ export default function LeadsView({
                       </th>
 
                       {/* Score & Temperature */}
-                      <th scope="col" aria-sort={getAriaSort('score')} className="px-[18px] py-3.5">
+                      <th scope="col" aria-sort={getAriaSort('score')} className="px-6 py-[18px]">
                         <button
                           type="button"
                           onClick={() => handleSort('score')}
@@ -1507,7 +1507,7 @@ export default function LeadsView({
                       </th>
 
                       {/* Next follow-up column */}
-                      <th scope="col" aria-sort={getAriaSort('followup')} className="px-[18px] py-3.5">
+                      <th scope="col" aria-sort={getAriaSort('followup')} className="px-6 py-[18px]">
                         <button
                           type="button"
                           onClick={() => handleSort('followup')}
@@ -1518,20 +1518,10 @@ export default function LeadsView({
                         </button>
                       </th>
 
-                      {/* Deal value (Right-aligned) */}
-                      <th scope="col" aria-sort={getAriaSort('value')} className="px-[18px] py-3.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleSort('value')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
-                        >
-                          <span>Value</span>
-                          {renderSortIcon('value')}
-                        </button>
-                      </th>
+                      
 
                       {/* Owner */}
-                      <th scope="col" aria-sort={getAriaSort('owner')} className="px-[18px] py-3.5">
+                      <th scope="col" aria-sort={getAriaSort('owner')} className="px-6 py-[18px]">
                         <button
                           type="button"
                           onClick={() => handleSort('owner')}
@@ -1542,17 +1532,20 @@ export default function LeadsView({
                         </button>
                       </th>
 
-                      {/* Last activity */}
-                      <th scope="col" aria-sort={getAriaSort('activity')} className="px-[18px] py-3.5">
+                      {/* Deal value (Right-aligned) */}
+                      <th scope="col" aria-sort={getAriaSort('value')} className="px-6 py-[18px] text-right">
                         <button
                           type="button"
-                          onClick={() => handleSort('activity')}
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                          onClick={() => handleSort('value')}
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap hover:text-ink cursor-pointer font-medium uppercase text-[11px] ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                         >
-                          <span>Activity</span>
-                          {renderSortIcon('activity')}
+                          <span>Value</span>
+                          {renderSortIcon('value')}
                         </button>
                       </th>
+                      <th scope="col" className="w-[72px]"><span className="sr-only">Actions</span></th>
+
+                      
 
                       
                     </tr>
@@ -1562,19 +1555,18 @@ export default function LeadsView({
                     {isLoading ? (
                       Array.from({ length: 6 }).map((_, idx) => (
                         <tr key={`skel-${idx}`} className="animate-pulse">
-                          <td className="px-[18px] py-3.5 text-center"><div className="w-4 h-4 bg-surface-raised rounded mx-auto" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-4 w-32 bg-surface-raised rounded mb-1" /><div className="h-3 w-20 bg-surface-raised rounded" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-5 w-16 bg-surface-raised rounded-full" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-5 w-16 bg-surface-raised rounded" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-5 w-24 bg-surface-raised rounded-full" /></td>
-                          <td className="px-[18px] py-3.5 text-right"><div className="h-4 w-16 bg-surface-raised rounded ml-auto" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-4 w-20 bg-surface-raised rounded" /></td>
-                          <td className="px-[18px] py-3.5"><div className="h-4 w-24 bg-surface-raised rounded" /></td>
+                          <td className="px-6 py-[18px] text-center"><div className="w-4 h-4 bg-surface-raised rounded mx-auto" /></td>
+                          <td className="px-6 py-[18px]"><div className="h-4 w-32 bg-surface-raised rounded mb-1" /><div className="h-3 w-20 bg-surface-raised rounded" /></td>
+                          <td className="px-6 py-[18px]"><div className="h-5 w-16 bg-surface-raised rounded-full" /></td>
+                          <td className="px-6 py-[18px]"><div className="h-5 w-16 bg-surface-raised rounded" /></td>
+                          <td className="px-6 py-[18px]"><div className="h-5 w-24 bg-surface-raised rounded-full" /></td>
+                          <td className="px-6 py-[18px] text-right"><div className="h-4 w-16 bg-surface-raised rounded ml-auto" /></td>
+                          <td className="px-6 py-[18px]"><div className="h-4 w-20 bg-surface-raised rounded" /></td>
                         </tr>
                       ))
                     ) : paginatedLeads.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="p-8 text-center text-ink-3">
+                        <td colSpan={7} className="p-8 text-center text-ink-3">
                           {leads.length === 0 ? (
                             <EmptyState
                               icon={<Users className="w-6 h-6 text-brand" />}
@@ -1626,7 +1618,7 @@ export default function LeadsView({
                             }`}
                           >
                             {/* Checkbox */}
-                            <td className="px-[18px] py-3.5 text-center">
+                            <td className="px-6 py-[18px] text-center">
                               <button
                                 type="button"
                                 aria-label={`Select ${lead.name || lead.company}`}
@@ -1642,7 +1634,7 @@ export default function LeadsView({
                             </td>
 
                             {/* Lead: Avatar + Company, Name below (No contact name fallback) */}
-                            <td className="px-[18px] py-3.5 max-w-[220px]">
+                            <td className="px-6 py-[18px] min-w-[260px]">
                               <div className="flex items-center gap-3">
                                 <Avatar name={lead.company || lead.name} size="md" />
                                 <div className="min-w-0">
@@ -1650,8 +1642,8 @@ export default function LeadsView({
                                     {lead.company || lead.name}
                                   </p>
                                   {hasSeparateContactName ? (
-                                    <p className="text-[11px] text-ink-3 truncate leading-tight mt-0.5 mb-0">
-                                      {lead.name}
+                                    <p className="text-[12px] text-ink-3 truncate leading-tight mt-1 mb-0">
+                                      {lead.name} · {formatRelative(lead.lastActivityAt || lead.createdAt)}
                                     </p>
                                   ) : (
                                     <p className="text-xs text-ink-3 italic">
@@ -1663,7 +1655,7 @@ export default function LeadsView({
                             </td>
 
                             {/* Stage: Badge */}
-                            <td className="px-[18px] py-3.5">
+                            <td className="px-6 py-[18px]">
                               <span className="inline-flex items-center gap-2 text-[13px] text-ink-2">
                                 <span className={`w-1.5 h-1.5 rounded-full ${{ success: 'bg-ok', danger: 'bg-danger', brand: 'bg-brand', info: 'bg-info', warning: 'bg-warn', neutral: 'bg-ink-3', hot: 'bg-hot' }[tone] || 'bg-ink-3'}`} />
                                 {leadStage}
@@ -1671,15 +1663,9 @@ export default function LeadsView({
                             </td>
 
                             {/* Score & Temperature */}
-                            <td className="px-[18px] py-3.5">
+                            <td className="px-6 py-[18px]">
                               <div className="flex items-center gap-2">
                                 <span className="w-6 font-semibold tabular-nums text-ink text-[13px]">{lead.score}</span>
-                                <span className="w-10 h-1.5 rounded-full bg-surface-raised overflow-hidden shrink-0" aria-hidden="true">
-                                  <span
-                                    className={`block h-full rounded-full ${leadTemp === 'HOT' ? 'bg-hot' : leadTemp === 'WARM' ? 'bg-warn' : 'bg-ink-3'}`}
-                                    style={{ width: `${Math.max(4, Math.min(100, lead.score))}%` }}
-                                  />
-                                </span>
                                 {leadTemp === 'HOT' && (
                                   <span className="inline-flex items-center gap-1 text-hot font-medium text-xs">
                                     <Flame className="w-3.5 h-3.5" />
@@ -1700,7 +1686,7 @@ export default function LeadsView({
                             </td>
 
                             {/* Next follow-up */}
-                            <td className="px-[18px] py-3.5">
+                            <td className="px-6 py-[18px]">
                               {nextTask ? (
                                 (() => {
                                   const bucket = getBucket(nextTask);
@@ -1741,13 +1727,10 @@ export default function LeadsView({
                               )}
                             </td>
 
-                            {/* Deal Value: Right-aligned formatINR */}
-                            <td className="px-[18px] py-3.5 text-right font-medium text-ink tabular-nums">
-                              {lead.amount ? formatINR(lead.amount) : (lead.value || '—')}
-                            </td>
+                            
 
                             {/* Owner: Assignee name + Avatar or Unassigned, Bot badge when handlingMode === 'AI' */}
-                            <td className="px-[18px] py-3.5">
+                            <td className="px-6 py-[18px]">
                               <div className="flex items-center gap-1.5 min-w-0">
                                 {lead.assignee?.name ? (
                                   <>
@@ -1768,14 +1751,13 @@ export default function LeadsView({
                               </div>
                             </td>
 
-                            {/* Last Activity: channel icon + relative time */}
-                            <td className="px-[18px] py-3.5 text-xs text-ink-2 min-w-[170px]">
-                              <div className="flex items-center justify-between gap-6" onClick={undefined}>
-                                <div className="flex items-center gap-1.5 whitespace-nowrap">
-                                  {renderChannelIcon(lead.source)}
-                                  <span>{formatRelative(lead.lastActivityAt || lead.createdAt)}</span>
-                                </div>
-                                <div className="flex items-center justify-end gap-3 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                            {/* Deal Value: Right-aligned formatINR */}
+                            <td className="px-6 py-[18px] text-right font-medium text-ink tabular-nums">
+                              {lead.amount ? formatINR(lead.amount) : (lead.value || '—')}
+                            </td>
+
+                            <td className="px-6 py-[18px] text-right">
+                              <div className="flex items-center justify-end gap-3 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -1810,8 +1792,9 @@ export default function LeadsView({
                                   <span className="sr-only">Follow-up</span>
                                 </button>
                               </div>
-                              </div>
                             </td>
+
+                            
                           </tr>
                         );
                       })
