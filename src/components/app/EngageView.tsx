@@ -799,7 +799,7 @@ export default function EngageView({
         {currentConvo ? (
           <>
             {/* Conversation Header */}
-            <div className="px-6 py-[20px] border-b border-line flex items-center justify-between gap-3 shrink-0 bg-surface">
+            <div className="px-5 py-3 border-b border-line flex items-center justify-between gap-3 shrink-0 bg-surface">
               <div className="flex items-center gap-2.5 min-w-0">
                 {/* Mobile back button */}
                 <button
@@ -947,12 +947,12 @@ export default function EngageView({
               const handler = handlerOf(currentConvo);
               if (handler === 'paused') {
                 return (
-                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0">
+                  <div className="nx-handoff px-5 py-2 text-[12px] animate-fadeIn shrink-0">
                     <b>AI paused · a person is needed</b>
                     <div className="mt-1">
                       {currentConvo.aiAlert?.reason || 'The customer needs a person before this thread can continue.'} Nobody is replying yet. Assigned to {currentConvo.assignedTo}.
                     </div>
-                    <div className="flex items-center gap-2 mt-[9px] flex-wrap">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <Button variant="primary" size="sm" onClick={handleTakeover}>
                         Take over
                       </Button>
@@ -968,7 +968,7 @@ export default function EngageView({
               }
               if (handler === 'ai') {
                 return (
-                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="nx-handoff px-5 py-2 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
                     <div><b>AI is replying</b> to this customer automatically. Sending a reply or taking over pauses it.</div>
                     <Button variant="secondary" size="sm" onClick={handleTakeover}>Take over</Button>
                   </div>
@@ -976,7 +976,7 @@ export default function EngageView({
               }
               if (handler === 'human') {
                 return (
-                  <div className="nx-handoff px-[19px] py-3 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="nx-handoff px-5 py-2 text-[12px] animate-fadeIn shrink-0 flex items-center justify-between gap-3 flex-wrap">
                     <div><b>You are in control</b> · AI is paused here and will not reply until you hand it back.</div>
                     <Button variant="secondary" size="sm" onClick={handleResumeAI}>Hand back to AI</Button>
                   </div>
@@ -986,7 +986,7 @@ export default function EngageView({
             })()}
 
             {/* Messages Stream */}
-            <div className="flex-1 overflow-y-auto px-[28px] py-[26px] space-y-[22px] nx-messages">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 nx-messages">
               {currentConvo.messages.map((m, index) => {
                 const prevMsg = currentConvo.messages[index - 1];
                 const currentDay = getMessageDateGroup(m.time);
@@ -1049,7 +1049,7 @@ export default function EngageView({
             </div>
 
             {/* Composer */}
-            <div className="px-5 py-4 border-t border-line-subtle bg-surface space-y-2.5 shrink-0">
+            <div className="px-4 py-3 border-t border-line-subtle bg-surface space-y-2 shrink-0">
               
               {/* Context-Aware Suggestion Chips Toolbar */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">

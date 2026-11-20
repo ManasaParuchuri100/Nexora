@@ -47,7 +47,6 @@ import CommandPalette from './app/CommandPalette';
 import SettingsModal from './app/SettingsModal';
 import LeadIntelligenceWorkspace from './app/leads/LeadIntelligenceWorkspace';
 import AgentView from './app/AgentView';
-import { PageHeader } from './ui';
 import { UserSession } from './AuthModal';
 import { BRAND_NAME } from '../config/brand';
 import { setGlobalConversations, useConversations } from '../data/conversations';
@@ -438,7 +437,7 @@ export default function NexoraApp({
               
               <div className={
                 isInbox
-                  ? "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-8 pb-6 lg:pb-8 flex-1 min-h-0 flex flex-col overflow-y-auto"
+                  ? "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-5 pb-4 lg:pb-5 flex-1 min-h-0 flex flex-col overflow-y-auto"
                   : "max-w-[1430px] w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-8 pb-24"
               }>
             {/* 1. OVERVIEW */}
@@ -460,17 +459,15 @@ export default function NexoraApp({
             {/* 2. INBOX (Views, Conversation) */}
             {(activeCategory === 'inbox' || activeCategory === 'engage') && (
               <>
-              <PageHeader
-                eyebrow="Workspace / Inbox"
-                title="Inbox"
-                subtitle="One conversation, one lead record, one clear owner."
-                className="shrink-0 mb-[18px]!"
-                actions={
-                  <button type="button" className="nx-btn" onClick={() => handleSelectNav('settings', 'channels')}>
-                    Manage channels
-                  </button>
-                }
-              />
+              <div className="shrink-0 flex items-center justify-between gap-4 mb-3">
+                <div className="min-w-0 flex items-baseline gap-3 flex-wrap">
+                  <h1 className="text-[22px] leading-[1.25] font-semibold tracking-[-0.02em] text-ink m-0">Inbox</h1>
+                  <p className="text-[13px] text-ink-3 m-0 hidden sm:block">One conversation, one lead record, one clear owner.</p>
+                </div>
+                <button type="button" className="nx-btn sm" onClick={() => handleSelectNav('settings', 'channels')}>
+                  Manage channels
+                </button>
+              </div>
               <EngageView
                 activeSubCategory={activeSubCategory}
                 leads={leads}
